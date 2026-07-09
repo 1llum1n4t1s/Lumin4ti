@@ -26,11 +26,23 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
         return all.TryGetValue(propertyName, out var value) ? value : null;
     }
 
-    private static async Task<Dictionary<string, bool>?> LoadAsync(ICommandExecutor executor)
+    /// <summary>
+    /// キャッシュを介さず Get-MMAgent を今この場で実行して 1 プロパティの現在値を読む。
+    /// SetStateAsync の失敗後に「本当に目的の状態に達していないか」を判定するために使う
+    /// (起動時キャッシュは古い可能性があるため冪等判定にはフレッシュ値が要る)。
+    /// </summary>
+    public async Task<bool?> ReadFreshAsync(string propertyName, CancellationToken ct = default)
+    {
+        var all = await LoadAsync(executor, ct);
+        return all is not null && all.TryGetValue(propertyName, out var value) ? value : null;
+    }
+
+    private static async Task<Dictionary<string, bool>?> LoadAsync(ICommandExecutor executor, CancellationToken ct = default)
     {
         var result = await executor.RunAsync(
             "powershell.exe",
-            "-NoProfile -NonInteractive -Command \"Get-MMAgent | ConvertTo-Json -Compress\"");
+            "-NoProfile -NonInteractive -Command \"Get-MMAgent | ConvertTo-Json -Compress\"",
+            ct);
         if (!result.Success || string.IsNullOrWhiteSpace(result.StandardOutput))
         {
             return null;
@@ -100,11 +112,36 @@ public sealed class MmAgentFeatureToggle(
             return MaintenanceActionResult.Ok($"  - {propertyName} を{(on ? "有効化" : "無効化")}しました");
         }
 
+        // cmdlet が失敗しても、目的の状態に既に一致していれば成功扱い (冪等)。
+        // 例: OperationAPI は前提機能のプリフェッチが無効だと「この要求はサポートされていません」で
+        // 失敗するが、既定で無効なら OFF 目標は既に達成済み。フレッシュ値で確認する。
+        var current = await stateProvider.ReadFreshAsync(propertyName, ct);
+        if (current == on)
+        {
+            LoggerBootstrap.Log.Info($"{Id}: 既に{(on ? "有効" : "無効")} (cmdlet は失敗したが目標状態に一致)");
+            return MaintenanceActionResult.Ok($"  - {propertyName} は既に{(on ? "有効" : "無効")}です");
+        }
+
         var reason = result.StandardError.Split('\n', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim() ?? string.Empty;
         LoggerBootstrap.Log.Error($"{Id}: {cmdlet} (exit={result.ExitCode}): {reason}");
         return MaintenanceActionResult.Fail(
-            $"{cmdlet} が失敗しました{(reason.Length > 0 ? $": {reason}" : string.Empty)}" +
-            " (SysMain サービスが停止していると設定できない項目があります)");
+            $"{cmdlet} が失敗しました{(reason.Length > 0 ? $": {reason}" : string.Empty)}{FailureHint()}");
+    }
+
+    /// <summary>
+    /// 失敗理由に添える実態に即したヒント。SysMain 稼働中でも機能間の依存で失敗しうるため、
+    /// OperationAPI は前提機能 (アプリ起動プリフェッチ) への依存を明示する
+    /// (MS ドキュメント: OperationAPI は Windows のプリフェッチ機構を公開する = プリフェッチが土台)。
+    /// </summary>
+    private string FailureHint()
+    {
+        if (propertyName.Equals("OperationAPI", StringComparison.OrdinalIgnoreCase))
+        {
+            return " (Operation Recorder API はアプリ起動プリフェッチが有効なときのみ切り替えられます。" +
+                "先に「アプリ起動プリフェッチ」を ON にするか、SysMain サービスが起動しているか確認してください)";
+        }
+
+        return " (SysMain サービスの状態や MMAgent 機能間の依存により切り替えできないことがあります)";
     }
 
     /// <summary>MMAgent の全機能トグルを生成する (カタログの並び順)。状態取得は共有プロバイダ 1 回に集約。</summary>
