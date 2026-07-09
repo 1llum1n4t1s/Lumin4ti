@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Lumin4ti.Core/Lumin4ti.Core.csproj" />
+    <Project Path="src/Lumin4ti.Tests/Lumin4ti.Tests.csproj" />
+    <Project Path="src/Lumin4ti.UI/Lumin4ti.UI.csproj" />
+  </Folder>
+</Solution>

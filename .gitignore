@@ -1,0 +1,14 @@
+[Bb]in/
+[Oo]bj/
+*.user
+.vs/
+.vscode/
+.serena/
+*.log
+*.tmp
+
+# ローカル実行時に生成される設定・ログ(実機の %APPDATA% 等を模して置いた場合の保険)
+settings.json
+logs/
+
+local-release/

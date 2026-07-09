@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>Lumin4ti.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MSTest" Version="4.3.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Lumin4ti.Core\Lumin4ti.Core.csproj" />
+  </ItemGroup>
+
+</Project>

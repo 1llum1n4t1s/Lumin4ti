@@ -1,0 +1,151 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="avares://Lumin4ti.UI/Resources/Locales/en_US.axaml"/>
+  </ResourceDictionary.MergedDictionaries>
+
+  <!-- ===== Tabs ===== -->
+  <x:String x:Key="Text.Tab.Update" xml:space="preserve">नवीकरणम् &amp; सुरक्षा</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">परिष्करणम् &amp; संस्करणम्</x:String>
+  <x:String x:Key="Text.Tab.Performance" xml:space="preserve">कार्यक्षमता</x:String>
+  <x:String x:Key="Text.Tab.System" xml:space="preserve">तन्त्रम्</x:String>
+  <x:String x:Key="Text.Tab.Organize" xml:space="preserve">व्यवस्थापनम्</x:String>
+  <x:String x:Key="Text.Tab.Version" xml:space="preserve">विषये</x:String>
+
+  <!-- ===== Notes / buttons ===== -->
+  <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* प्रभावाय PC-पुनःप्रारम्भः आवश्यकः</x:String>
+  <x:String x:Key="Text.Note.LongRunning" xml:space="preserve">* चालनाय कतिपयनिमेषाः लगेयुः</x:String>
+  <x:String x:Key="Text.Note.AffectsExplorer" xml:space="preserve">* परिवर्तने Explorer स्वयमेव पुनःप्रारभते</x:String>
+  <x:String x:Key="Text.Button.Run" xml:space="preserve">चालय</x:String>
+  <x:String x:Key="Text.Button.Cancel" xml:space="preserve">निरस्तं कुरु</x:String>
+
+  <!-- ===== About / version pane ===== -->
+  <x:String x:Key="Text.Version.Subtitle" xml:space="preserve">यथेच्छं Windows-अनुकूलनार्थम् उपकरणम्</x:String>
+  <x:String x:Key="Text.Version.VersionLabel" xml:space="preserve">संस्करणम्:</x:String>
+  <x:String x:Key="Text.Version.CheckUpdate" xml:space="preserve">नवीकरणानि परीक्षय</x:String>
+  <x:String x:Key="Text.Version.ShowSkipped" xml:space="preserve">त्यक्तं नवीकरणं पुनः दर्शय</x:String>
+  <x:String x:Key="Text.Version.CheckOnStartup" xml:space="preserve">प्रारम्भे स्वयमेव नवीकरणानि परीक्षय</x:String>
+  <x:String x:Key="Text.Version.LanguageHeader" xml:space="preserve">भाषा</x:String>
+  <x:String x:Key="Text.Version.LanguageHint" xml:space="preserve">प्रदर्शनभाषां वृणु।</x:String>
+  <x:String x:Key="Text.Version.FoldersHeader" xml:space="preserve">संपुटाः</x:String>
+  <x:String x:Key="Text.Version.OpenLogs" xml:space="preserve">अभिलेखसंपुटम् उद्घाटय</x:String>
+  <x:String x:Key="Text.Version.OpenSettings" xml:space="preserve">विन्याससंपुटम् उद्घाटय</x:String>
+
+  <!-- ===== Category titles / captions ===== -->
+  <x:String x:Key="Text.Category.Update" xml:space="preserve">नवीकरणम् &amp; सुरक्षा</x:String>
+  <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">अनुप्रयोगान् Windows Defender च नवीकुरु, स्वस्थसुरक्षाविन्यासान् च प्रत्यानय।</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">परिष्करणम् &amp; संस्करणम्</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">चक्रस्थानं पुनः प्राप्नुहि, भग्नपञ्जीकरणानि परिष्कुरु संस्कुरु वा।</x:String>
+  <x:String x:Key="Text.Category.Performance" xml:space="preserve">कार्यक्षमता</x:String>
+  <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">स्मृतिं, प्रक्रियाः, रेखाङ्कनं च अनुकूलय। प्रायः स्विचाः ON = अनुकूलनं प्रयोजय, OFF = Windows-प्रामाणिकस्थितिं प्रत्यानय (केवलं MMAgent-वस्तूनि ON = तत् वैशिष्ट्यं सक्रियं कुर्वन्ति; अनुशंसितमूल्याय प्रत्येकं वर्णनं पश्य)।</x:String>
+  <x:String x:Key="Text.Category.System" xml:space="preserve">तन्त्रम्</x:String>
+  <x:String x:Key="Text.Category.System.Caption" xml:space="preserve">शक्तिः, आदानं, कालः इत्यादीन् Windows-विन्यासान् समायोजय। स्विचाः ON = प्रयोजय, OFF = Windows-प्रामाणिकस्थितिं प्रत्यानय।</x:String>
+  <x:String x:Key="Text.Category.Organize" xml:space="preserve">व्यवस्थापनम्</x:String>
+  <x:String x:Key="Text.Category.Organize.Caption" xml:space="preserve">पिन्, पर्यावरणचराः, अन्यानि च सुव्यवस्थितक्रमे विन्यस्य।</x:String>
+
+  <!-- ===== Status / result messages ({0} = item name) ===== -->
+  <x:String x:Key="Text.Status.Running" xml:space="preserve">{0} चलति…</x:String>
+  <x:String x:Key="Text.Status.RunningLong" xml:space="preserve">{0} चलति… (कतिपयनिमेषाः लगेयुः)</x:String>
+  <x:String x:Key="Text.Status.TogglingOn" xml:space="preserve">{0} ON क्रियते…</x:String>
+  <x:String x:Key="Text.Status.TogglingOff" xml:space="preserve">{0} OFF क्रियते…</x:String>
+  <x:String x:Key="Text.Status.Completed" xml:space="preserve">{0} समाप्तम्</x:String>
+  <x:String x:Key="Text.Status.Failed" xml:space="preserve">{0} विफलम् (अभिलेखं परीक्षय)</x:String>
+  <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">{0} ON कृतम्</x:String>
+  <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">{0} OFF कृतम्</x:String>
+  <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">{0} परिवर्तयितुं न शक्तम् (अभिलेखं परीक्षय)</x:String>
+  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">निरस्तम्</x:String>
+  <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ समाप्तम्</x:String>
+  <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ विफलम्</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer पुनःप्रारब्धम्</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Explorer पुनःप्रारम्भयितुं न शक्तम् (कृपया स्वहस्तेन पुनःप्रारभस्व)</x:String>
+  <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">स्थितिं पठितुं न शक्तम् (व्यवस्थापकाधिकाराः न सन्ति, अथवा अस्मिन् PC वैशिष्ट्यम् अनुपलब्धम्। Debug-प्रारम्भाः उन्नताः न भवन्ति, अतः सामान्यप्रारम्भं प्रयत्नस्व)।</x:String>
+
+  <!-- ===== Actions: Update &amp; Security ===== -->
+  <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">स्थापितान् अनुप्रयोगान् समूहशः नवीकुरु (winget)</x:String>
+  <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">winget-संकुलप्रबन्धकेन सर्वान् स्थापितान् अनुप्रयोगान् नवीनतमसंस्करणेभ्यः उन्नयति। यदि बहवः अनुप्रयोगाः नवीकरणम् अपेक्षन्ते, तर्हि अवचयनं स्थापनं च कालं गृह्णीयात्। चालमानानाम् अनुप्रयोगानां निष्पादनसञ्चिकाः अवरुद्धाः स्युः नवीकरणे च विफलेयुः, परं अन्ये निरन्तरं चलन्ति, सफलता/विफलता-विवरणं च दर्श्यते।</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Defender-परिभाषासञ्चिकाः पुनः आनय</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Windows Defender-स्य विषाणुपरिभाषाः गतिशीलहस्ताक्षराणि च एकवारं लोपयति, ततः नवीनतमानि पुनः अवचिनोति। मिथ्याशोधनं नवीकरणदोषान् वा जनयतः परिभाषाभ्रष्टतायाः प्रामाणिकं पुनर्नवीकरणम्; चालने वास्तविककालसुरक्षा निरन्तरं कार्यं करोति।</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">Defender-विन्यासान् प्रत्यानय (अपवर्जनानि &amp; मुख्यविकल्पाः)</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Windows Defender-मध्ये पञ्जीकृतान् सर्वान् अपवर्जनपथान्, प्रक्रियाः, विस्तारान् च अपनयति, वास्तविककाल-मेघसुरक्षादीन् मुख्यविकल्पान् च तेषां प्रामाणिकस्थितिं प्रत्यानयति। दुष्टक्रमः पुरातनसाफ्ट्वेयरं वा योजितवत् अपवर्जनानि (स्कैन-अन्धस्थलानि) परिमार्ष्टि। साभिप्रायाणि अपवर्जनानि अपि अपनीयन्ते, अतः आवश्यकानि पश्चात् पुनः योजय।</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">Windows Security-अनुप्रयोगं प्रत्यानय</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Desc" xml:space="preserve">यदा Windows Security-अनुप्रयोगः न उद्घाट्यते, भग्नः प्रतीयते, वस्तूनि वा लुप्तानि, तदा तम् आदिस्थितिं प्रत्यानयति पुनः पञ्जीकरोति च। Defender-स्य सुरक्षास्थितिं परिभाषासञ्चिकाः वा एतत् न प्रभावयति।</x:String>
+
+  <!-- ===== Actions: Cleanup &amp; Repair ===== -->
+  <x:String x:Key="Text.Action.wu-component-cleanup.Label" xml:space="preserve">Windows Update-गृहीतं स्थानम् अपनय</x:String>
+  <x:String x:Key="Text.Action.wu-component-cleanup.Desc" xml:space="preserve">घटकभण्डारे (WinSxS-संपुटे) सञ्चितानि अतिक्रान्तनवीकरणपीढ्यः शाश्वतम् अपनयति, अनेकGB-चक्रस्थानं च पुनः प्राप्नोति। अनन्तरं प्रयुक्तनवीकरणानि विस्थापयितुं न शक्यसे (प्रायः न समस्या)। कतिपयनिमेषाः यावत् दशकनिमेषाः यावत् कालं गृह्णाति।</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Label" xml:space="preserve">भग्नतन्त्रसंपुटनामानि संस्कुरु</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">shell32.dll पुनः पञ्जीकृत्य, तन्त्रसंपुटनामानि (यथा Downloads) आङ्ग्लभाषायां प्रदर्श्यन्ते इत्यादिकं प्रदर्शनभ्रष्टतां संस्करोति।</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">तन्त्रफलक-प्रतीकनिधिं प्रत्यानय</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">सूचनाक्षेत्रस्य (तन्त्रफलकस्य) प्रतीकनिधिं परिमार्ष्टि। विस्थापितानाम् अनुप्रयोगानां प्रतीकानि गुप्तप्रतीकक्षेत्रे तिष्ठन्ति इति स्थितीः निवारयति। तव फलक-प्रदर्शन/गोपन-अनुकूलनम् एकवारं प्रत्यानीयते।</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">भग्नप्रारम्भप्रविष्टीः अपनय</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">यासां निष्पादनसञ्चिका न अस्ति ताः प्रारम्भप्रविष्टीः (वर्तमानप्रयोक्तुः) तत्संबद्धानाथप्रविष्टिभिः सह अपनयति।</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">Open-with-तः अविद्यमानान् अनुप्रयोगान् अपनय</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">यासां निष्पादनसञ्चिका न अस्ति तान् अनुप्रयोगान् Open-with-प्रत्याशिसूचीतः Applications-पञ्जीकरणाच्च अपनयति।</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Label" xml:space="preserve">Event Viewer-अभिलेखान् सर्वान् लोपय</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Desc" xml:space="preserve">अभिलेखभण्डारक्षेत्रं (प्रायः कतिपयशतMB) मोचयितुं Event Viewer-मध्ये सञ्चितान् सर्वमार्गाणाम् अभिलेखान् लोपयति। पूर्वसमस्यानिवारणसूचना अपि नश्यति, अतः सद्यःसमस्यां अन्वेषयन् एतत् मा चालय। कतिचन संरक्षिततन्त्राभिलेखाः त्यज्यन्ते।</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">Microsoft Store-निधिं परिमार्ष्टु</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">WSReset-द्वारा Microsoft Store-निधिं प्रत्यानयति। Store न उद्घाट्यते, अवचयनानि न प्रगच्छन्ति, अथवा पुनः पुनः “try again” दोषाः इति प्रामाणिकसमाधानम्। अनुप्रयोगाः खातासूचना च न अपनीयन्ते। समाप्तौ Store-अनुप्रयोगः स्वयमेव उद्घाटेत्।</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">SSD TRIM रिक्तस्थानसंहतिश्च</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">SSD-लेखनकार्यक्षमतां पालयितुं रिक्तस्थानं च संहन्तुं सर्वेषु खण्डेषु SSD-प्रति TRIM-सूचनां (/L) रिक्तस्थानसंहतिं (/X) च चालयति। चालकसंरचनानुसारं निमेषाः यावत् दशकनिमेषाः यावत् कालं गृह्णीयात्। चालने PC निरन्तरं प्रयोक्तुं शक्नोषि।</x:String>
+
+  <!-- ===== Actions: Performance ===== -->
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Memory Compression</x:String>
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Desc" xml:space="preserve">स्मृतौ न्यूनायां चक्रे स्थानान्तरणात् पूर्वं RAM-स्थपृष्ठानि संपीड्य, प्रभाविक्षमतां वर्धयति। स्वल्पCPU-भारस्य विनिमये swap-सम्बद्धमन्दतां SSD-लेखनं च न्यूनीकरोति। अनुशंसा: ON (Windows-प्रामाणिकस्थितिः अपि ON)।</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Label" xml:space="preserve">Page Combining</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Desc" xml:space="preserve">समानविषयकानि स्मृतिपृष्ठानि एकत्र मेलयति, द्विरुक्तिं च अपनयति। समानप्रकारकान् बहून् अनुप्रयोगान् चालयन् स्मृतिं रक्षति। अनुशंसा: ON (केषुचित् संस्करणेषु प्रामाणिकस्थितिः OFF)।</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Label" xml:space="preserve">Operation Recorder API</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Desc" xml:space="preserve">SysMain (पूर्वं Superfetch) आचरणं लेखितुं पुनश्चालयितुं च बाह्योपकरणेभ्यः API। सामान्यप्रयोगे न प्रयुक्तं, बेञ्चमार्किङ्ग-कार्यक्षमताविश्लेषणोपकरणेभ्यः उद्दिष्टम्। अनुशंसा: OFF (Windows-प्रामाणिकस्थितिः अपि OFF)।</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Label" xml:space="preserve">अनुप्रयोगप्रारम्भ-पूर्वानयनम्</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Desc" xml:space="preserve">पुनः पुनः प्रयुक्तानाम् अनुप्रयोगानां आरोपितसञ्चिकाः शिक्षित्वा, प्रारम्भं द्रुतीकर्तुं ताः प्रारम्भे पूर्वम् आनयति (Prefetch)। SSD-मध्ये अपि प्रारम्भप्रतीक्षां न्यूनीकर्तुं साहाय्यं करोति। अनुशंसा: ON (Windows-प्रामाणिकस्थितिः अपि ON)।</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Label" xml:space="preserve">UWP-अनुप्रयोग-पूर्वप्रारम्भः</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Desc" xml:space="preserve">शीघ्रं प्रयोक्तुं शक्यान् Store (UWP)-अनुप्रयोगान् पूर्वानुमाय, त्वं उद्घाटयितुं पूर्वमेव तान् पृष्ठभूमौ प्रारभते। द्रुततरम् इव अनुभूयते परं पूर्वमेव स्मृतिं व्ययति, अतः स्मृतिरक्षणे प्राधान्ये OFF अनुशंस्यते।</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Label" xml:space="preserve">Kernel paging-विन्यासं प्रामाणिकस्थितिं प्रत्यानय</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Desc" xml:space="preserve">अनुकूलनोपकरणाः प्रायः लिखन्ति DisablePagingExecutive (kernel-कोडं सर्वदा RAM-मध्ये धारयन् विन्यासः) लोपयति, Windows-प्रामाणिक-paging-आचरणं च प्रत्यानयति। आधुनिकWindows-मध्ये अस्य विन्यासस्य अल्पः एव लाभः, स्मृतिं च व्यर्थीकर्तुं शक्नोति। यत्र न विन्यस्तं तेषु PC-षु किमपि न करोति।</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Label" xml:space="preserve">VBS / HVCI निष्क्रियं कुरु (1–2 GB स्मृतिरक्षा)</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">सर्वदा आरक्षितं ~1–2 GB स्मृतिं मोचयितुं Virtualization-Based Security (VBS) Hypervisor-Enforced Code Integrity (HVCI) च निष्क्रियं करोति। एतत् सुरक्षया सह विनिमयः; यदि Hyper-V, WSL2, Windows Sandbox, Docker Desktop, Credential Guard वा प्रयुङ्क्षे तर्हि OFF (प्रामाणिकस्थितौ) एव त्यज।</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">SvcHost-प्रक्रियाः संहन्तुं (विभाजनं दमय)</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">प्रामाणिकतया Windows svchost.exe प्रतिवैशिष्ट्यं विभक्तं प्रारभते (3.5 GB-अधिकRAM-युक्तेषु PC-षु)। एतत् ON करणं विभाजनसीमां परमीकरोति, समूहीकरणीयसेवाः च अल्पप्रक्रियासु संहन्ति, प्रक्रियासंख्यां स्मृतिप्रयोगं च (दशकात् शताधिकMB यावत्) न्यूनीकरोति। सुरक्षासीमारूपेण गण्यमानाः सेवाः (DiagTrack, Dnscache इत्यादयः) न संहन्यन्ते। OFF सीमाम् अपनयति प्रामाणिकविभाजनं च प्रत्यानयति।</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">UWP-पृष्ठभूमिचालनं समूहशः निष्क्रियं कुरु (200–500 MB रक्षा)</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">सर्वेषां Store (UWP)-अनुप्रयोगानां पृष्ठभूमिचालनं युगपत् “सर्वदा निष्क्रियम्” इति विन्यस्यति, अतः त्वं पिधाय अनन्तरं ते पृष्ठभूमौ चलितुं विरमन्ति। निवासं न्यूनीकृत्य प्रायः 200–500 MB स्मृतिं रक्षितुं शक्नोषि। यैः अनुप्रयोगैः सूचनाः जीवन्तखण्डाः वा अपेक्ष्यन्ते, तान् OFF कुरु अथवा विन्यासेषु पृथक् “सर्वदा सक्रियम्” इति परिवर्तय।</x:String>
+  <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">Windows Recall निष्क्रियं कुरु</x:String>
+  <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">AI-अन्वेषणार्थं समयान्तरे पटलचित्राणि लेखयन् Recall-वैशिष्ट्यं निष्क्रियं करोति (Click-to-do, अर्थान्वेषणादीनि अन्यानि AI-वैशिष्ट्यानि रक्ष्यन्ते)। लेखनप्रक्रियायाः स्मृति/चक्रव्ययं गोपनीयताचिन्तां च न्यूनीकरोति। केवलं Windows 11 24H2 + Copilot+ PC-षु उपलब्धम्; असमर्थितेषु PC-षु स्थितिं पठितुं परिवर्तयितुं वा न शक्यते।</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">Power throttling निष्क्रियं कुरु</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Desc" xml:space="preserve">शक्तिरक्षणार्थं पृष्ठभूमिप्रक्रियाणां CPU-गतिं स्वयमेव न्यूनीकुर्वत् Power Throttling निष्क्रियं करोति। लेखनं, संकेतनं, निर्माणं च इत्यादिपृष्ठभूमिकार्याणां मन्दतां निवारयति। सर्वदा पूर्णकार्यक्षमतायां चलनात्, वहनीयसंगणकेषु विद्युद्व्ययः वर्धते। OFF प्रामाणिकशक्तिरक्षणाचरणं प्रत्यानयति।</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Label" xml:space="preserve">MPO निष्क्रियं कुरु (Multi-Plane Overlay)</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Desc" xml:space="preserve">GPU बहुतलानि सम्मिश्रयति यत्र तत् Multi-Plane Overlay (MPO) निष्क्रियं करोति (OverlayTestMode=5)। चालकानुसारं MPO पटलस्फुरणं, क्षणिककृष्णतां, दृश्यस्खलनं च जनयितुं शक्नोति; तेषु लक्षणेषु प्रामाणिकसमाधानम्। यदि न सन्ति, तर्हि OFF (प्रामाणिकस्थितौ) त्यजनम् उचितम्।</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Label" xml:space="preserve">श्रव्यसंसाधनप्राथमिकतां वर्धय</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Desc" xml:space="preserve">गुरुभारे श्रव्यस्खलनानि स्फोटांश्च न्यूनीकर्तुं Multimedia Class Scheduler-स्य Playback/Capture-कार्याणां प्राथमिकतां परममूल्यं (6) यावत् वर्धयति। OFF प्राथमिकताविन्यासम् अपनयति Windows-प्रामाणिकस्थितिं च प्रत्यानयति।</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Label" xml:space="preserve">Remote Desktop-म् 60 FPS कुरु</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Desc" xml:space="preserve">Remote Desktop-संयोजनानां रेखाङ्कनचौकटान्तरं (DWMFRAMEINTERVAL=15) ह्रस्वीकरोति, प्रामाणिक~30 FPS-तः प्रायः 60 FPS यावत् वर्धयति च। संयोज्यमानपक्षरूपेण अस्मै PC-अये एतत् प्रयुज्यते। पट्टचौड्यव्ययः वर्धते। OFF प्रामाणिकचौकटदरं प्रत्यानयति।</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Label" xml:space="preserve">प्रारम्भानुप्रयोगचालनविलम्बम् अपनय</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Desc" xml:space="preserve">Windows-अनेन विपटलरेखाङ्कनं प्राथमीकर्तुं, प्रवेशानन्तरं प्रारम्भानुप्रयोगान् कतिपयात् द्वादशसेकण्ड्पर्यन्तं विलम्बयन्तं यन्त्रं (निष्क्रियप्रतीक्षा + विलम्बकालमापकम्) निष्क्रियं करोति। स्थायीसाधनानि सद्यः प्रयोक्तुं इच्छतः उपयुक्तम्। प्रवेशानन्तरक्षणः किञ्चित् गुरुतरः इव अनुभूयेत। OFF प्रामाणिकविलम्बाचरणं प्रत्यानयति।</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Label" xml:space="preserve">NVIDIA GPU-व्यवधानवितरणम् अनुकूलय</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Desc" xml:space="preserve">पूर्वानुकूलनोपकरणाः NVIDIA GPU-अये अलिखन् यत् MSI-व्यवधानसीमां (MessageNumberLimit) लोपयति, व्यवधानसंचालनं च प्रामाणिकवितरिताचरणं प्रत्यानयति। यदि एतत् मूल्यं तिष्ठति, तर्हि GPU-व्यवधानानि CPU core 0-मध्ये संहन्यन्ते क्रीडासु च स्खलनं जनयितुं शक्नुवन्ति। NVIDIA GPU-रहितेषु PC-षु किमपि न परिवर्तयति।</x:String>
+
+  <!-- ===== Actions: System ===== -->
+  <x:String x:Key="Text.Action.power-plan-setup.Label" xml:space="preserve">शक्तियोजनां / शक्तिविधिं अनुशंसितविन्यासे स्थापय</x:String>
+  <x:String x:Key="Text.Action.power-plan-setup.Desc" xml:space="preserve">“Balanced”-आधारे शक्तियोजनां पुनर्विन्यस्यति, शक्तिविधिं च “Best performance” इति स्थापयति (AC-वहनीयशक्तिद्वयेऽपि)। अपि च लिखति: प्रदर्शननिवृत्तिः = AC-मध्ये 180 निमेषाः / वहनीयशक्तौ 30 निमेषाः, निद्रा = कदापि न, शक्तिकुञ्चिका = shut down, आवरणपिधानं = किमपि न (तानि गुप्तवस्तूनि च अगोपयति)। विद्यमानशक्तियोजनानुकूलनानि प्रामाणिकस्थितिं प्रत्यानयन्ति, अतः यदि अनुकूलितयोजनां प्रयुङ्क्षे तर्हि सावधानो भव।</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Label" xml:space="preserve">Hibernation निष्क्रियं कुरु</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Desc" xml:space="preserve">Hibernation निष्क्रियं करोति, तन्त्रचक्रे सर्वदा आरक्षितं hiberfil.sys (भौतिकस्मृतेः दशकप्रतिशतम् = अनेकGB) लोपयति च। समकालं Fast Startup निष्क्रियं भवति, अतः प्रारम्भः मन्दतरः स्यात्। वहनीयसंगणके यदि hibernation प्रयुङ्क्षे तर्हि OFF (प्रामाणिकस्थितौ) त्यज।</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Label" xml:space="preserve">Mouse acceleration निष्क्रियं कुरु (Enhance pointer precision)</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Desc" xml:space="preserve">मूषकं यावद्द्रुतं चालयसि तदनुसारं सूचकगमनं परिवर्तते इति “Enhance pointer precision”-म् (mouse acceleration) निष्क्रियं करोति, हस्त-सूचकगमनं च 1:1 स्थिरीकरोति। FPS इत्यादिक्रीडासु aim स्थिरीकर्तुं प्रामाणिकविन्यासः। OFF Windows-प्रामाणिकस्थितिं (acceleration सक्रियम्) प्रत्यानयति। प्रभावाय पुनःप्रवेशः अपेक्ष्येत।</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Label" xml:space="preserve">Sticky Keys इत्यादिसुगम्यताद्रुतकुञ्चिकाः निष्क्रियाः कुरु</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Desc" xml:space="preserve">Shift-म् पञ्चवारं नुदति सति Sticky Keys सक्रियं भवति इत्यादिकाः, यदृच्छया सुगम्यतावैशिष्ट्यानि प्रवर्तयन्तीः द्रुतकुञ्चिकाः (Sticky Keys / Toggle Keys / Filter Keys) निष्क्रियाः करोति। क्रीडासु Shift-म् पुनः पुनः नुदतः संवादः उदेति व्याघातं च जनयति इति दुर्घटनाः निवारयति। OFF Windows-प्रामाणिकस्थितिं (द्रुतकुञ्चिकाः सक्रियाः) प्रत्यानयति।</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Label" xml:space="preserve">मेनु-प्रदर्शनविलम्बं ह्रस्वीकुरु</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Desc" xml:space="preserve">दक्षिणनुदनमेनवः Start-मेनूपमेनवश्च उद्घाटनात् पूर्वं प्रतीक्षां प्रामाणिक400 ms-तः 0 यावत् ह्रस्वीकरोति, UI च द्रुततरम् इव अनुभावयति। OFF प्रामाणिक400 ms प्रत्यानयति। प्रभावाय पुनःप्रवेशः (अथवा Explorer-पुनःप्रारम्भः) अपेक्ष्यते।</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Label" xml:space="preserve">संपुटदृश्यप्रतिरूपं General इति स्थिरीकुरु</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Desc" xml:space="preserve">संपुटविषयेभ्यः प्रदर्शनशैलीं (Pictures / Music / Documents इत्यादि) स्वयंशोधनं Explorer-म् प्रतिबध्नाति, सर्वान् संपुटान् च General Items इति एकीकरोति। बहुसञ्चिकायुक्तेषु संपुटेषु स्वयंशोधनजनितं मन्दप्रदर्शनं (हरितप्रगतिपट्टिकां) निवारयति। OFF स्वयंशोधनं प्रत्यानयति।</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Label" xml:space="preserve">CEIP / प्रतिपुष्टिसूचनाः निष्क्रियाः कुरु</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Desc" xml:space="preserve">Customer Experience Improvement Program (CEIP, यत् Microsoft-प्रति प्रयोगदत्तांशं प्रेषयति) “Windows-विषये प्रतिपुष्टिं दातुं” सूचनाश्च निष्क्रियाः करोति। प्रेषणस्य पृष्ठभूमिभारस्य गोपनीयतायाश्च कृते प्रामाणिकविन्यासः। OFF नीतीः अपनयति प्रामाणिकस्थितिं च प्रत्यानयति।</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Label" xml:space="preserve">Game Bar / Game DVR-विन्यासान् प्रामाणिकस्थितिं प्रत्यानय</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Desc" xml:space="preserve">पूर्वानुकूलनोपकरणाः रजिस्ट्री-परिवर्तनानि वा अलिखन् Game Bar / Game DVR (क्रीडालेखन)-निष्क्रियविन्यासान् लोपयति, Windows-प्रामाणिकाचरणं च प्रत्यानयति। “Win+G न प्रतिकरोति” अथवा “क्रीडाः ग्रहीतुं न शक्यन्ते” इत्यादिलक्षणेषु प्रभावी।</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Label" xml:space="preserve">NVMe-देशीयचालकस्य बलात्सक्रियीकरणं प्रत्यानय</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Desc" xml:space="preserve">Windows-स्य प्रायोगिकNVMe-देशीयचालकं बलात् सक्रियीकुर्वत् FeatureManagement-अधिलेखनं लोपयति, भण्डारणचालकं च OS-प्रामाणिकनिर्णयं प्रत्यानयति। यदि एतत् अधिलेखनं तिष्ठति, तर्हि केषुचित् परिवेशेषु नीलपटलं (PAGE_FAULT_IN_NONPAGED_AREA) जनयितुं शक्नोति। अधिलेखनरहितेषु PC-षु किमपि न परिवर्तयति।</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Label" xml:space="preserve">कालसमन्वयसेवकं जापानीNTP इति स्थापय</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">कालसमन्वयशुद्धिं स्थैर्यं च वर्धयितुं, Windows-स्य कालसमन्वयलक्ष्यं प्रामाणिकtime.windows.com-तः जापानीसार्वजनिकNTP-सेवकं (ntp.jst.mfeed.ad.jp) प्रति परिवर्तयति। सद्यः प्रयोक्तुं अनन्तरं Windows Time-सेवां पुनःप्रारभते।</x:String>
+
+  <!-- ===== Actions: Organize ===== -->
+  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">Quick Access-पिन् क्रमीकुरु</x:String>
+  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Quick Access-मध्ये पिन्कृतान् संपुटान् नाम्ना आरोहक्रमे क्रमीकरोति (चालनात् पूर्वं jump-सूचीं प्रतिलिपीकरोति)।</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Path-पर्यावरणचरं क्रमीकुरु</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">प्रयोक्तृ-तन्त्र-Path-पर्यावरणचरयोः प्रविष्टीः द्विरुक्तिरहिताः कृत्वा आरोहक्रमे क्रमीकरोति।</x:String>
+</ResourceDictionary>

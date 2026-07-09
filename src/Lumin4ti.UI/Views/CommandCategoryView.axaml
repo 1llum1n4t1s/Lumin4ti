@@ -1,0 +1,75 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Lumin4ti.UI.ViewModels"
+             x:Class="Lumin4ti.UI.Views.CommandCategoryView"
+             x:DataType="vm:CommandCategoryViewModel">
+
+  <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="8,0">
+    <TextBlock Grid.Row="0" Classes="h1" Text="{Binding Title}" />
+    <TextBlock Grid.Row="1" Classes="caption" TextWrapping="Wrap" Margin="0,0,0,12"
+               Text="{Binding Caption}" />
+
+    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+      <ItemsControl ItemsSource="{Binding Items}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:CommandItemViewModel">
+            <Border Background="{DynamicResource Brush.Container}"
+                    BorderBrush="{DynamicResource Brush.Border}"
+                    BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,0,0,8">
+              <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                <StackPanel Grid.Row="0" Grid.Column="0" Spacing="2" VerticalAlignment="Center" Margin="0,0,12,0">
+                  <TextBlock Text="{Binding Label}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding Description}" Classes="caption" TextWrapping="Wrap" />
+                  <TextBlock Text="{DynamicResource Text.Note.RequiresReboot}" FontSize="12" Foreground="#FF3B30"
+                             IsVisible="{Binding RequiresReboot}" TextWrapping="Wrap" />
+                  <TextBlock Text="{DynamicResource Text.Note.LongRunning}" FontSize="12" Foreground="{DynamicResource Brush.FG2}"
+                             IsVisible="{Binding IsLongRunning}" TextWrapping="Wrap" />
+                  <TextBlock Text="{DynamicResource Text.Note.AffectsExplorer}" FontSize="12" Foreground="{DynamicResource Brush.FG2}"
+                             IsVisible="{Binding AffectsExplorer}" TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                  <ProgressBar IsIndeterminate="True" Width="60" IsVisible="{Binding IsRunning}" />
+                  <!--  実行ボタン型  -->
+                  <Button Content="{DynamicResource Text.Button.Run}" Command="{Binding RunCommand}" IsVisible="{Binding IsAction}" />
+                  <!--  実行中のキャンセルボタン (長時間コマンド用)  -->
+                  <Button Content="{DynamicResource Text.Button.Cancel}" Command="{Binding CancelCommand}" IsVisible="{Binding CanCancel}" />
+                  <!--  ON/OFF トグル型 (ON = 最適化適用 / OFF = Windows 既定)。実行中・状態不明時は操作不可  -->
+                  <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding IsToggle}" VerticalAlignment="Center">
+                    <ToggleSwitch IsChecked="{Binding IsChecked}" IsEnabled="{Binding CanToggle}"
+                                  OnContent="ON" OffContent="OFF" />
+                  </StackPanel>
+                </StackPanel>
+                <!--  実行中のライブ出力 (直近数行)  -->
+                <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,0"
+                        Background="{DynamicResource Brush.Window}" CornerRadius="6" Padding="10,6"
+                        IsVisible="{Binding ProgressText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                  <TextBlock Text="{Binding ProgressText}" FontSize="12" TextWrapping="Wrap"
+                             FontFamily="Cascadia Mono, Consolas, monospace"
+                             Foreground="{DynamicResource Brush.FG2}" />
+                </Border>
+                <!--  実行結果 (成功=通常色 / 失敗=赤)  -->
+                <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,0"
+                        Background="{DynamicResource Brush.Window}" CornerRadius="6" Padding="10,6"
+                        IsVisible="{Binding ResultText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                  <SelectableTextBlock Text="{Binding ResultText}" FontSize="12" TextWrapping="Wrap"
+                                       FontFamily="Cascadia Mono, Consolas, monospace"
+                                       Foreground="{DynamicResource Brush.FG1}"
+                                       Classes.error="{Binding LastRunFailed}">
+                    <SelectableTextBlock.Styles>
+                      <Style Selector="SelectableTextBlock.error">
+                        <Setter Property="Foreground" Value="#FF3B30" />
+                      </Style>
+                    </SelectableTextBlock.Styles>
+                  </SelectableTextBlock>
+                </Border>
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+
+    <TextBlock Grid.Row="3" Text="{Binding StatusText}" Classes="caption" Margin="0,8,0,0"
+               IsVisible="{Binding StatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+  </Grid>
+</UserControl>

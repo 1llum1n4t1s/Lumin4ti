@@ -1,0 +1,151 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="avares://Lumin4ti.UI/Resources/Locales/en_US.axaml"/>
+  </ResourceDictionary.MergedDictionaries>
+
+  <!-- ===== Tabs ===== -->
+  <x:String x:Key="Text.Tab.Update" xml:space="preserve">更新與安全性</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">清理與修復</x:String>
+  <x:String x:Key="Text.Tab.Performance" xml:space="preserve">效能</x:String>
+  <x:String x:Key="Text.Tab.System" xml:space="preserve">系統</x:String>
+  <x:String x:Key="Text.Tab.Organize" xml:space="preserve">整理</x:String>
+  <x:String x:Key="Text.Tab.Version" xml:space="preserve">關於</x:String>
+
+  <!-- ===== Notes / buttons ===== -->
+  <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* 需要重新啟動電腦才會生效</x:String>
+  <x:String x:Key="Text.Note.LongRunning" xml:space="preserve">* 執行可能需要幾分鐘</x:String>
+  <x:String x:Key="Text.Note.AffectsExplorer" xml:space="preserve">* 變更時 Explorer 會自動重新啟動</x:String>
+  <x:String x:Key="Text.Button.Run" xml:space="preserve">執行</x:String>
+  <x:String x:Key="Text.Button.Cancel" xml:space="preserve">取消</x:String>
+
+  <!-- ===== About / version pane ===== -->
+  <x:String x:Key="Text.Version.Subtitle" xml:space="preserve">一款依你的喜好自訂 Windows 的工具</x:String>
+  <x:String x:Key="Text.Version.VersionLabel" xml:space="preserve">版本：</x:String>
+  <x:String x:Key="Text.Version.CheckUpdate" xml:space="preserve">檢查更新</x:String>
+  <x:String x:Key="Text.Version.ShowSkipped" xml:space="preserve">重新顯示已略過的更新</x:String>
+  <x:String x:Key="Text.Version.CheckOnStartup" xml:space="preserve">啟動時自動檢查更新</x:String>
+  <x:String x:Key="Text.Version.LanguageHeader" xml:space="preserve">語言</x:String>
+  <x:String x:Key="Text.Version.LanguageHint" xml:space="preserve">選擇顯示語言。</x:String>
+  <x:String x:Key="Text.Version.FoldersHeader" xml:space="preserve">資料夾</x:String>
+  <x:String x:Key="Text.Version.OpenLogs" xml:space="preserve">開啟記錄檔資料夾</x:String>
+  <x:String x:Key="Text.Version.OpenSettings" xml:space="preserve">開啟設定資料夾</x:String>
+
+  <!-- ===== Category titles / captions ===== -->
+  <x:String x:Key="Text.Category.Update" xml:space="preserve">更新與安全性</x:String>
+  <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">更新應用程式與 Windows Defender，並還原正常的安全性設定。</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">清理與修復</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">回收磁碟空間，清理或修復損毀的登錄項目。</x:String>
+  <x:String x:Key="Text.Category.Performance" xml:space="preserve">效能</x:String>
+  <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">最佳化記憶體、處理程序與繪製。開關一般為 ON = 套用最佳化，OFF = 還原為 Windows 預設（僅 MMAgent 項目為 ON = 啟用該功能；建議值請參閱各項說明）。</x:String>
+  <x:String x:Key="Text.Category.System" xml:space="preserve">系統</x:String>
+  <x:String x:Key="Text.Category.System.Caption" xml:space="preserve">調整電源、輸入、時間等 Windows 設定。開關為 ON = 套用，OFF = 還原為 Windows 預設。</x:String>
+  <x:String x:Key="Text.Category.Organize" xml:space="preserve">整理</x:String>
+  <x:String x:Key="Text.Category.Organize.Caption" xml:space="preserve">將釘選項目、環境變數等整理成整齊的順序。</x:String>
+
+  <!-- ===== Status / result messages ({0} = item name) ===== -->
+  <x:String x:Key="Text.Status.Running" xml:space="preserve">正在執行 {0}…</x:String>
+  <x:String x:Key="Text.Status.RunningLong" xml:space="preserve">正在執行 {0}…（可能需要幾分鐘）</x:String>
+  <x:String x:Key="Text.Status.TogglingOn" xml:space="preserve">正在開啟 {0}…</x:String>
+  <x:String x:Key="Text.Status.TogglingOff" xml:space="preserve">正在關閉 {0}…</x:String>
+  <x:String x:Key="Text.Status.Completed" xml:space="preserve">{0} 已完成</x:String>
+  <x:String x:Key="Text.Status.Failed" xml:space="preserve">{0} 失敗（請查看記錄檔）</x:String>
+  <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">已開啟 {0}</x:String>
+  <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">已關閉 {0}</x:String>
+  <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">切換 {0} 失敗（請查看記錄檔）</x:String>
+  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">已取消</x:String>
+  <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ 已完成</x:String>
+  <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ 失敗</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - 已重新啟動 Explorer</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - 重新啟動 Explorer 失敗（請手動重新啟動）</x:String>
+  <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">無法讀取狀態（沒有系統管理員權限，或此電腦不支援該功能。偵錯啟動不會提升權限，請嘗試正常啟動）。</x:String>
+
+  <!-- ===== Actions: Update &amp; Security ===== -->
+  <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">大量更新已安裝的應用程式（winget）</x:String>
+  <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">使用 winget 套件管理員將所有已安裝的應用程式升級到最新版本。若需要更新的應用程式較多，下載與安裝可能需要一段時間。正在執行的應用程式可能因執行檔遭鎖定而更新失敗，但其餘會繼續更新，並顯示成功/失敗的明細。</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">重新取得 Defender 定義檔</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">先刪除一次 Windows Defender 的病毒定義與動態簽章，然後重新下載最新版本。用於修復因定義損毀導致誤判或更新錯誤的標準重新整理作業；執行期間即時保護仍持續運作。</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">重設 Defender 設定（排除項目與主要選項）</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">移除 Windows Defender 中登錄的所有排除路徑、處理程序與副檔名，並將即時保護、雲端保護等主要選項還原為預設值。清除惡意程式或舊軟體可能加入的排除項目（掃描盲點）。刻意加入的排除項目也會被移除，因此之後請重新加入所需項目。</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">重設 Windows 安全性應用程式</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Desc" xml:space="preserve">當 Windows 安全性應用程式無法開啟、顯示異常或缺少項目時，將其重設為初始狀態並重新註冊。不會影響 Defender 的保護狀態或定義檔。</x:String>
+
+  <!-- ===== Actions: Cleanup &amp; Repair ===== -->
+  <x:String x:Key="Text.Action.wu-component-cleanup.Label" xml:space="preserve">清除 Windows Update 佔用的空間</x:String>
+  <x:String x:Key="Text.Action.wu-component-cleanup.Desc" xml:space="preserve">永久移除元件存放區（WinSxS 資料夾）中累積的已被取代的舊更新版本，回收數 GB 磁碟空間。執行後將無法再解除安裝已套用的更新（通常無妨）。需要幾分鐘到數十分鐘。</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Label" xml:space="preserve">修復損毀的系統資料夾名稱</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">透過重新註冊 shell32.dll，修復系統資料夾名稱（例如下載）顯示為英文等顯示異常。</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">重設系統匣圖示快取</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">清除通知區域（系統匣）的圖示快取。解決已解除安裝應用程式的圖示殘留在隱藏圖示區域的問題。你的系統匣顯示/隱藏自訂會被重設一次。</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">移除損毀的啟動項目</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">移除執行檔已不存在的啟動項目（目前使用者），以及對應的孤立項目。</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">從「開啟方式」中移除不存在的應用程式</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">從「開啟方式」候選清單與 Applications 登錄中移除執行檔已不存在的應用程式。</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Label" xml:space="preserve">刪除所有事件檢視器記錄檔</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Desc" xml:space="preserve">刪除事件檢視器中累積的所有通道記錄檔，釋放記錄檔儲存區域（通常數百 MB）。過去的疑難排解資訊也會遺失，因此調查近期問題時請勿執行。部分受保護的系統記錄檔會被略過。</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">清除 Microsoft Store 快取</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">使用 WSReset 重設 Microsoft Store 快取。用於 Store 無法開啟、下載沒有進度或反覆出現「重試」錯誤的標準修復方法。應用程式與帳戶資訊不會被移除。完成後 Store 應用程式可能會自動開啟。</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">SSD TRIM 與可用空間整合</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">對所有磁碟區執行向 SSD 傳送 TRIM 通知（/L）與可用空間整合（/X），以維持 SSD 寫入效能並整理可用空間的破碎情形。視磁碟配置而定，可能需要幾分鐘到數十分鐘。執行期間可繼續使用電腦。</x:String>
+
+  <!-- ===== Actions: Performance ===== -->
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">記憶體壓縮</x:String>
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Desc" xml:space="preserve">在記憶體不足時，先將 RAM 中的分頁壓縮再換出到磁碟，藉此提高有效容量。以少量 CPU 負載為代價，減少換頁造成的卡頓與 SSD 寫入。建議：ON（Windows 預設也是 ON）。</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Label" xml:space="preserve">分頁合併</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Desc" xml:space="preserve">將內容相同的記憶體分頁合併為一個，消除重複。執行多個同類應用程式時可節省記憶體。建議：ON（部分版本預設 OFF）。</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Label" xml:space="preserve">Operation Recorder API</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Desc" xml:space="preserve">供外部工具記錄並重播 SysMain（原 Superfetch）行為的 API。針對基準測試與效能分析工具，一般使用中不會用到。建議：OFF（Windows 預設也是 OFF）。</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Label" xml:space="preserve">應用程式啟動預先擷取</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Desc" xml:space="preserve">學習常用應用程式載入的檔案，並在啟動時預先擷取以加快啟動速度（Prefetch）。即使在 SSD 上也有助於減少啟動等待。建議：ON（Windows 預設也是 ON）。</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Label" xml:space="preserve">UWP 應用程式預先啟動</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Desc" xml:space="preserve">預測即將使用的 Store（UWP）應用程式，並在你開啟之前於背景預先啟動。感覺更快，但會提前消耗記憶體，因此若以節省記憶體為優先，建議 OFF。</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Label" xml:space="preserve">將核心分頁設定重設為預設</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Desc" xml:space="preserve">刪除最佳化工具常寫入的 DisablePagingExecutive（使核心程式碼始終常駐於 RAM 的設定），還原為 Windows 預設的分頁行為。此設定在現代 Windows 上益處甚微，還可能浪費記憶體。在未設定此項的電腦上不執行任何操作。</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Label" xml:space="preserve">停用 VBS / HVCI（節省 1–2 GB 記憶體）</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">停用以虛擬化為基礎的安全性（VBS）與 Hypervisor 強制的程式碼完整性（HVCI），釋放始終保留的約 1–2 GB 記憶體。這是與安全性的取捨；若你使用 Hyper-V、WSL2、Windows Sandbox、Docker Desktop 或 Credential Guard，請保持 OFF（預設）。</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">合併 SvcHost 處理程序（抑制分割）</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">預設情況下，Windows 會依功能分割啟動 svchost.exe（在 RAM 超過 3.5 GB 的電腦上）。將此項設為 ON 會把分割門檻提到最大，將可分組的服務合併到較少的處理程序中，藉此減少處理程序數量與記憶體使用量（數十到一百多 MB）。被視為安全性界限的服務（DiagTrack、Dnscache 等）不會被合併。OFF 會移除門檻並還原為預設分割。</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">大量關閉 UWP 背景執行（節省 200–500 MB）</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">一次將所有 Store（UWP）應用程式的背景執行設為「永遠關閉」，使其在關閉後不再於背景執行。減少常駐可節省約 200–500 MB 記憶體。對於需要通知或動態磚的應用程式，請將此項設為 OFF，或在設定中逐一改為「永遠開啟」。</x:String>
+  <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">停用 Windows Recall</x:String>
+  <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">停用定期記錄螢幕快照以供 AI 搜尋的 Recall 功能（Click-to-do、語意搜尋等其他 AI 功能予以保留）。減少記錄處理程序的記憶體/磁碟消耗及隱私顧慮。僅在 Windows 11 24H2 + Copilot+ 電腦上可用；在不支援的電腦上無法讀取狀態，也無法切換。</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">停用電源節流</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Desc" xml:space="preserve">停用為省電而自動降低背景處理程序 CPU 時脈的 Power Throttling。防止錄製、編碼、建置等背景工作變慢。由於始終以全效能執行，筆記型電腦的電池消耗會增加。OFF 會還原為預設的省電行為。</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Label" xml:space="preserve">停用 MPO（Multi-Plane Overlay）</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Desc" xml:space="preserve">停用由 GPU 合成多個平面的 Multi-Plane Overlay（MPO）（OverlayTestMode=5）。視驅動程式而定，MPO 可能造成螢幕閃爍、瞬間黑畫面與影片頓挫；出現這些症狀時的標準修復方法。若沒有這些症狀，保持 OFF（預設）即可。</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Label" xml:space="preserve">提高音訊處理優先順序</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Desc" xml:space="preserve">將 Multimedia Class Scheduler 的播放/擷取工作優先順序提升到最高值（6），以減少高負載下的音訊掉格與爆音。OFF 會移除優先順序設定並還原為 Windows 預設。</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Label" xml:space="preserve">將遠端桌面設為 60 FPS</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Desc" xml:space="preserve">縮短遠端桌面連線的繪製畫面間隔（DWMFRAMEINTERVAL=15），將預設的約 30 FPS 提升到約 60 FPS。此設定適用於作為被連線一方的本機。頻寬使用量會增加。OFF 會還原為預設畫面更新率。</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Label" xml:space="preserve">移除啟動應用程式的啟動延遲</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Desc" xml:space="preserve">停用為讓 Windows 優先繪製桌面而在登入後將啟動應用程式延遲數秒到十幾秒的機制（閒置等待 + 延遲計時器）。當你想立即開始使用常駐工具時很有用。登入後的那一刻可能會感覺稍重。OFF 會還原為預設的延遲行為。</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Label" xml:space="preserve">最佳化 NVIDIA GPU 中斷分配</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Desc" xml:space="preserve">刪除過去的最佳化工具寫入 NVIDIA GPU 的 MSI 中斷限制（MessageNumberLimit），將中斷處理還原為預設的分散行為。若該值殘留，GPU 中斷會集中到 CPU 核心 0，可能造成遊戲頓挫。在沒有 NVIDIA GPU 的電腦上不做任何變更。</x:String>
+
+  <!-- ===== Actions: System ===== -->
+  <x:String x:Key="Text.Action.power-plan-setup.Label" xml:space="preserve">將電源計劃/電源模式設為建議設定</x:String>
+  <x:String x:Key="Text.Action.power-plan-setup.Desc" xml:space="preserve">以「平衡」為基礎重新設定電源計劃，並將電源模式設為「最佳效能」（交流電與電池皆然）。同時寫入：關閉顯示器 = 交流電 180 分鐘 / 電池 30 分鐘，睡眠 = 永不，電源按鈕 = 關機，闔上上蓋 = 不採取動作（並取消隱藏這些被隱藏的項目）。現有的電源計劃自訂會還原為預設，因此若你使用自訂計劃請留意。</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Label" xml:space="preserve">停用休眠</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Desc" xml:space="preserve">停用休眠並刪除始終保留在系統磁碟機上的 hiberfil.sys（實體記憶體的百分之幾十 = 數 GB）。同時會停用快速啟動，因此啟動可能變慢。若你在筆記型電腦上使用休眠，請保持 OFF（預設）。</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Label" xml:space="preserve">停用滑鼠加速（增強指標精確度）</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Desc" xml:space="preserve">停用「增強指標精確度」（滑鼠加速）——即游標移動距離會隨滑鼠移動速度改變——將手部與游標的移動固定為 1:1。這是在 FPS 等遊戲中穩定瞄準的標準設定。OFF 會還原為 Windows 預設（加速開啟）。可能需要重新登入才會生效。</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Label" xml:space="preserve">停用相黏鍵等協助工具快速鍵</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Desc" xml:space="preserve">停用會意外觸發協助工具的快速鍵，例如按 Shift 五次會開啟相黏鍵（相黏鍵 / 切換鍵 / 篩選鍵）。防止在遊戲中反覆按 Shift 而彈出對話方塊並中斷操作的意外。OFF 會還原為 Windows 預設（啟用快速鍵）。</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Label" xml:space="preserve">縮短功能表顯示延遲</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Desc" xml:space="preserve">將滑鼠右鍵功能表與開始功能表子功能表開啟前的等待時間從預設 400 毫秒縮短為 0，使介面感覺更靈敏。OFF 會還原為預設 400 毫秒。需要重新登入（或重新啟動 Explorer）才會生效。</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Label" xml:space="preserve">將資料夾檢視範本固定為「一般」</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Desc" xml:space="preserve">阻止 Explorer 依資料夾內容自動偵測顯示樣式（圖片 / 音樂 / 文件等），並將所有資料夾統一為「一般項目」。解決檔案較多的資料夾因自動偵測造成的顯示緩慢（綠色進度列）問題。OFF 會還原為自動偵測。</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Label" xml:space="preserve">停用 CEIP / 意見反應通知</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Desc" xml:space="preserve">停用客戶經驗改進計劃（CEIP，會向 Microsoft 傳送使用資料）與「請對 Windows 提供意見反應」通知。同時兼顧傳送帶來的背景負載與隱私的標準設定。OFF 會移除原則並還原為預設。</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Label" xml:space="preserve">將 Game Bar / Game DVR 設定重設為預設</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Desc" xml:space="preserve">刪除過去的最佳化工具或登錄調整寫入的 Game Bar / Game DVR（遊戲錄製）停用設定，還原為 Windows 預設行為。對於「Win+G 無回應」或「無法擷取遊戲」等症狀有效。</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Label" xml:space="preserve">復原強制啟用 NVMe 原生驅動程式</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Desc" xml:space="preserve">刪除強制啟用 Windows 實驗性 NVMe 原生驅動程式的 FeatureManagement 覆寫設定，將儲存驅動程式還原為由作業系統預設決定。若該覆寫殘留，在某些環境中可能造成藍色畫面（PAGE_FAULT_IN_NONPAGED_AREA）。在沒有該覆寫的電腦上不做任何變更。</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Label" xml:space="preserve">將時間同步伺服器設為日本 NTP</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">將 Windows 的時間同步目標從預設的 time.windows.com 變更為日本公用 NTP 伺服器（ntp.jst.mfeed.ad.jp），以提高時間同步的準確度與穩定性。之後會重新啟動 Windows Time 服務以立即套用。</x:String>
+
+  <!-- ===== Actions: Organize ===== -->
+  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">排序 Quick Access 釘選項目</x:String>
+  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">將釘選到 Quick Access 的資料夾依名稱遞增排序（執行前會備份跳躍清單）。</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">排序 Path 環境變數</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">將使用者與系統 Path 環境變數的項目去除重複並依遞增排序。</x:String>
+</ResourceDictionary>

@@ -1,0 +1,151 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="avares://Lumin4ti.UI/Resources/Locales/en_US.axaml"/>
+  </ResourceDictionary.MergedDictionaries>
+
+  <!-- ===== Tabs ===== -->
+  <x:String x:Key="Text.Tab.Update" xml:space="preserve">Aggiornamento &amp; Sicurezza</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Pulizia &amp; Riparazione</x:String>
+  <x:String x:Key="Text.Tab.Performance" xml:space="preserve">Prestazioni</x:String>
+  <x:String x:Key="Text.Tab.System" xml:space="preserve">Sistema</x:String>
+  <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Organizza</x:String>
+  <x:String x:Key="Text.Tab.Version" xml:space="preserve">Informazioni</x:String>
+
+  <!-- ===== Notes / buttons ===== -->
+  <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* Richiede il riavvio del PC per avere effetto</x:String>
+  <x:String x:Key="Text.Note.LongRunning" xml:space="preserve">* Può richiedere alcuni minuti</x:String>
+  <x:String x:Key="Text.Note.AffectsExplorer" xml:space="preserve">* Esplora file si riavvia automaticamente quando si modifica</x:String>
+  <x:String x:Key="Text.Button.Run" xml:space="preserve">Esegui</x:String>
+  <x:String x:Key="Text.Button.Cancel" xml:space="preserve">Annulla</x:String>
+
+  <!-- ===== About / version pane ===== -->
+  <x:String x:Key="Text.Version.Subtitle" xml:space="preserve">Uno strumento per personalizzare Windows come preferisci</x:String>
+  <x:String x:Key="Text.Version.VersionLabel" xml:space="preserve">Versione:</x:String>
+  <x:String x:Key="Text.Version.CheckUpdate" xml:space="preserve">Verifica aggiornamenti</x:String>
+  <x:String x:Key="Text.Version.ShowSkipped" xml:space="preserve">Mostra di nuovo l'aggiornamento ignorato</x:String>
+  <x:String x:Key="Text.Version.CheckOnStartup" xml:space="preserve">Verifica automaticamente gli aggiornamenti all'avvio</x:String>
+  <x:String x:Key="Text.Version.LanguageHeader" xml:space="preserve">Lingua</x:String>
+  <x:String x:Key="Text.Version.LanguageHint" xml:space="preserve">Scegli la lingua di visualizzazione.</x:String>
+  <x:String x:Key="Text.Version.FoldersHeader" xml:space="preserve">Cartelle</x:String>
+  <x:String x:Key="Text.Version.OpenLogs" xml:space="preserve">Apri la cartella dei log</x:String>
+  <x:String x:Key="Text.Version.OpenSettings" xml:space="preserve">Apri la cartella delle impostazioni</x:String>
+
+  <!-- ===== Category titles / captions ===== -->
+  <x:String x:Key="Text.Category.Update" xml:space="preserve">Aggiornamento &amp; Sicurezza</x:String>
+  <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">Aggiorna le app e Windows Defender e ripristina impostazioni di sicurezza integre.</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Pulizia &amp; Riparazione</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Recupera spazio su disco e pulisci o ripara le registrazioni danneggiate.</x:String>
+  <x:String x:Key="Text.Category.Performance" xml:space="preserve">Prestazioni</x:String>
+  <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">Ottimizza memoria, processi e rendering. Gli interruttori indicano generalmente ON = applica l'ottimizzazione, OFF = ripristina l'impostazione predefinita di Windows (solo gli elementi MMAgent usano ON = abilita quella funzione; vedi ogni descrizione per il valore consigliato).</x:String>
+  <x:String x:Key="Text.Category.System" xml:space="preserve">Sistema</x:String>
+  <x:String x:Key="Text.Category.System.Caption" xml:space="preserve">Regola le impostazioni di Windows come alimentazione, input e ora. Gli interruttori indicano ON = applica, OFF = ripristina l'impostazione predefinita di Windows.</x:String>
+  <x:String x:Key="Text.Category.Organize" xml:space="preserve">Organizza</x:String>
+  <x:String x:Key="Text.Category.Organize.Caption" xml:space="preserve">Riordina elementi aggiunti, variabili d'ambiente e altro in un ordine pulito.</x:String>
+
+  <!-- ===== Status / result messages ({0} = item name) ===== -->
+  <x:String x:Key="Text.Status.Running" xml:space="preserve">Esecuzione di {0}…</x:String>
+  <x:String x:Key="Text.Status.RunningLong" xml:space="preserve">Esecuzione di {0}… (può richiedere alcuni minuti)</x:String>
+  <x:String x:Key="Text.Status.TogglingOn" xml:space="preserve">Attivazione di {0}…</x:String>
+  <x:String x:Key="Text.Status.TogglingOff" xml:space="preserve">Disattivazione di {0}…</x:String>
+  <x:String x:Key="Text.Status.Completed" xml:space="preserve">{0} completato</x:String>
+  <x:String x:Key="Text.Status.Failed" xml:space="preserve">{0} non riuscito (controlla il log)</x:String>
+  <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">{0} attivato</x:String>
+  <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">{0} disattivato</x:String>
+  <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">Impossibile commutare {0} (controlla il log)</x:String>
+  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Annullato</x:String>
+  <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ Completato</x:String>
+  <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ Non riuscito</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Esplora file riavviato</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Riavvio di Esplora file non riuscito (riavvialo manualmente)</x:String>
+  <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Impossibile leggere lo stato (nessun diritto di amministratore, oppure la funzione non è disponibile su questo PC. Gli avvii in modalità debug non sono con privilegi elevati, quindi prova un avvio normale).</x:String>
+
+  <!-- ===== Actions: Update &amp; Security ===== -->
+  <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Aggiorna in blocco le app installate (winget)</x:String>
+  <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">Usa il gestore di pacchetti winget per aggiornare tutte le app installate alle versioni più recenti. Se molte app devono essere aggiornate, il download e l'installazione possono richiedere del tempo. Le app in esecuzione potrebbero avere gli eseguibili bloccati e non riuscire ad aggiornarsi, ma le altre proseguono e viene mostrato un riepilogo di successi/errori.</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Recupera di nuovo i file delle definizioni di Defender</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Elimina una volta le definizioni dei virus e le firme dinamiche di Windows Defender, quindi riscarica le più recenti. Un aggiornamento standard in caso di definizioni danneggiate che causano falsi rilevamenti o errori di aggiornamento; la protezione in tempo reale resta attiva durante l'operazione.</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">Ripristina le impostazioni di Defender (esclusioni &amp; opzioni principali)</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Rimuove tutti i percorsi, i processi e le estensioni di esclusione registrati in Windows Defender e ripristina le opzioni principali come la protezione in tempo reale e cloud ai valori predefiniti. Elimina le esclusioni (punti ciechi della scansione) che malware o vecchio software potrebbero aver aggiunto. Vengono rimosse anche le esclusioni intenzionali, quindi riaggiungi quelle che ti servono in seguito.</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">Ripristina l'app Sicurezza di Windows</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Desc" xml:space="preserve">Ripristina l'app Sicurezza di Windows allo stato iniziale e la registra di nuovo quando non si apre, appare danneggiata o presenta elementi mancanti. Non influisce sullo stato di protezione né sui file delle definizioni di Defender.</x:String>
+
+  <!-- ===== Actions: Cleanup &amp; Repair ===== -->
+  <x:String x:Key="Text.Action.wu-component-cleanup.Label" xml:space="preserve">Rimuovi lo spazio usato da Windows Update</x:String>
+  <x:String x:Key="Text.Action.wu-component-cleanup.Desc" xml:space="preserve">Rimuove definitivamente le generazioni di aggiornamenti sostituite accumulate nell'archivio componenti (cartella WinSxS) per recuperare diversi GB di spazio su disco. Dopo questa operazione non è più possibile disinstallare gli aggiornamenti applicati (di solito non è un problema). Richiede da diversi minuti a decine di minuti.</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Label" xml:space="preserve">Ripara i nomi delle cartelle di sistema danneggiati</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">Ripara i problemi di visualizzazione come i nomi delle cartelle di sistema (es. Download) mostrati in inglese, registrando di nuovo shell32.dll.</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">Ripristina la cache delle icone dell'area di notifica</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">Svuota la cache delle icone dell'area di notifica (barra delle applicazioni). Risolve i casi in cui le icone di app disinstallate rimangono nell'area delle icone nascoste. La tua personalizzazione di mostra/nascondi icone viene ripristinata una volta.</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">Rimuovi le voci di avvio danneggiate</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">Rimuove le voci di avvio (utente corrente) il cui eseguibile non esiste più, insieme alle corrispondenti voci orfane.</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">Rimuovi le app inesistenti da «Apri con»</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">Rimuove le app il cui eseguibile non esiste più dall'elenco dei candidati «Apri con» e dalla registrazione Applications.</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Label" xml:space="preserve">Elimina tutti i log del Visualizzatore eventi</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Desc" xml:space="preserve">Elimina i log di tutti i canali accumulati nel Visualizzatore eventi per liberare l'area di archiviazione dei log (di solito diverse centinaia di MB). Vanno perse anche le informazioni di risoluzione dei problemi passate, quindi non eseguirlo mentre stai indagando su un problema recente. Alcuni log di sistema protetti vengono ignorati.</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">Svuota la cache di Microsoft Store</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">Ripristina la cache di Microsoft Store con WSReset. Una soluzione standard quando lo Store non si apre, i download non avanzano o si ripetono errori «riprova». App e informazioni sull'account non vengono rimosse. L'app Store può aprirsi automaticamente al termine.</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">TRIM dell'SSD e consolidamento dello spazio libero</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">Esegue una notifica TRIM all'SSD (/L) e un consolidamento dello spazio libero (/X) su tutti i volumi per mantenere le prestazioni di scrittura dell'SSD e deframmentare lo spazio libero. A seconda del layout dell'unità può richiedere da alcuni minuti a decine di minuti. Puoi continuare a usare il PC durante l'operazione.</x:String>
+
+  <!-- ===== Actions: Performance ===== -->
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Compressione della memoria</x:String>
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Desc" xml:space="preserve">Comprime le pagine nella RAM prima di scaricarle su disco quando la memoria è scarsa, aumentando la capacità effettiva. In cambio di un lieve carico sulla CPU riduce i rallentamenti legati al file di paging e le scritture sull'SSD. Consigliato: ON (anche l'impostazione predefinita di Windows è ON).</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Label" xml:space="preserve">Combinazione delle pagine</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Desc" xml:space="preserve">Unisce in una sola le pagine di memoria con contenuto identico, eliminando i duplicati. Risparmia memoria quando si eseguono molte app dello stesso tipo. Consigliato: ON (OFF per impostazione predefinita su alcune edizioni).</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Label" xml:space="preserve">Operation Recorder API</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Desc" xml:space="preserve">Un'API che consente a strumenti esterni di registrare e riprodurre il comportamento di SysMain (in passato Superfetch). Pensata per strumenti di benchmark e analisi delle prestazioni, non usata nell'uso normale. Consigliato: OFF (anche l'impostazione predefinita di Windows è OFF).</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Label" xml:space="preserve">Precaricamento dell'avvio delle applicazioni</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Desc" xml:space="preserve">Apprende i file che le app usate di frequente caricano e li precarica all'avvio per accelerare l'avvio (Prefetch). Aiuta a ridurre l'attesa all'avvio anche sugli SSD. Consigliato: ON (anche l'impostazione predefinita di Windows è ON).</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Label" xml:space="preserve">Preavvio delle app UWP</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Desc" xml:space="preserve">Prevede le app dello Store (UWP) che probabilmente verranno usate a breve e le avvia in background prima che tu le apra. Sembra più veloce ma consuma memoria in anticipo, quindi è consigliato OFF se dai priorità al risparmio di memoria.</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Label" xml:space="preserve">Ripristina l'impostazione di paging del kernel ai valori predefiniti</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Desc" xml:space="preserve">Elimina DisablePagingExecutive (un'impostazione che mantiene il codice del kernel sempre nella RAM), che gli strumenti di ottimizzazione spesso scrivono, e ripristina il comportamento di paging predefinito di Windows. Questa impostazione porta pochi vantaggi su Windows moderno e può sprecare memoria. Non fa nulla sui PC in cui non è impostata.</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Label" xml:space="preserve">Disabilita VBS / HVCI (risparmia 1–2 GB di memoria)</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">Disabilita la sicurezza basata sulla virtualizzazione (VBS) e l'integrità del codice imposta dall'hypervisor (HVCI) per liberare i ~1–2 GB di memoria riservati in modo permanente. È un compromesso con la sicurezza; lascialo su OFF (predefinito) se usi Hyper-V, WSL2, Windows Sandbox, Docker Desktop o Credential Guard.</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">Consolida i processi SvcHost (sopprimi la suddivisione)</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">Per impostazione predefinita Windows avvia svchost.exe suddiviso per funzione (sui PC con più di 3,5 GB di RAM). Attivare questa opzione massimizza la soglia di suddivisione e consolida i servizi raggruppabili in meno processi, riducendo il numero di processi e l'uso della memoria (da decine a oltre cento MB). I servizi trattati come confini di sicurezza (DiagTrack, Dnscache, ecc.) non vengono consolidati. OFF rimuove la soglia e ripristina la suddivisione predefinita.</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">Disabilita in blocco l'esecuzione in background delle UWP (risparmia 200–500 MB)</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">Imposta in un colpo solo l'esecuzione in background di tutte le app dello Store (UWP) su «Sempre disattivato», così smettono di funzionare in background dopo la chiusura. Ridurre la residenza può risparmiare circa 200–500 MB di memoria. Per le app che necessitano di notifiche o riquadri animati, disattiva questa opzione (OFF) o impostale singolarmente su «Sempre attivato» nelle Impostazioni.</x:String>
+  <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">Disabilita Windows Recall</x:String>
+  <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">Disabilita la funzione Recall, che registra periodicamente istantanee dello schermo per la ricerca tramite IA (altre funzioni IA come Click-to-do e la ricerca semantica vengono mantenute). Riduce il consumo di memoria/disco del processo di registrazione e le preoccupazioni sulla privacy. Disponibile solo sui PC Windows 11 24H2 + Copilot+; sui PC non supportati lo stato non può essere letto né commutato.</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">Disabilita la limitazione dell'alimentazione</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Desc" xml:space="preserve">Disabilita la limitazione dell'alimentazione (Power Throttling), che riduce automaticamente la frequenza della CPU dei processi in background per risparmiare energia. Impedisce il rallentamento di attività in background come registrazione, codifica e compilazione. Poiché si opera sempre a piene prestazioni, sui portatili aumenta il consumo della batteria. OFF ripristina il comportamento di risparmio energetico predefinito.</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Label" xml:space="preserve">Disabilita MPO (Multi-Plane Overlay)</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Desc" xml:space="preserve">Disabilita il Multi-Plane Overlay (MPO), in cui la GPU compone più piani (OverlayTestMode=5). A seconda del driver, MPO può causare sfarfallio dello schermo, schermate nere momentanee e scatti nei video; una soluzione standard quando presenti questi sintomi. In caso contrario, va bene lasciarlo su OFF (predefinito).</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Label" xml:space="preserve">Aumenta la priorità dell'elaborazione audio</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Desc" xml:space="preserve">Aumenta la priorità delle attività di riproduzione/acquisizione del Multimedia Class Scheduler al valore più alto (6) per ridurre le interruzioni e i crepitii dell'audio sotto carico elevato. OFF rimuove l'impostazione di priorità e ripristina il valore predefinito di Windows.</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Label" xml:space="preserve">Porta il Desktop remoto a 60 FPS</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Desc" xml:space="preserve">Riduce l'intervallo tra i fotogrammi di disegno delle connessioni Desktop remoto (DWMFRAMEINTERVAL=15), portandolo da ~30 FPS predefiniti a circa 60 FPS. Questo si applica a questo PC come lato a cui ci si connette. L'uso della banda aumenta. OFF ripristina la frequenza dei fotogrammi predefinita.</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Label" xml:space="preserve">Rimuovi il ritardo di avvio delle app di avvio automatico</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Desc" xml:space="preserve">Disabilita il meccanismo che ritarda le app di avvio automatico di alcuni fino a una decina di secondi dopo l'accesso, così che Windows possa dare priorità al disegno del desktop (attesa di inattività + timer di ritardo). Utile quando vuoi iniziare subito a usare gli strumenti residenti. Il momento subito dopo l'accesso potrebbe risultare un po' più pesante. OFF ripristina il comportamento di ritardo predefinito.</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Label" xml:space="preserve">Ottimizza la distribuzione degli interrupt della GPU NVIDIA</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Desc" xml:space="preserve">Elimina il limite degli interrupt MSI (MessageNumberLimit) che i precedenti strumenti di ottimizzazione hanno scritto sulla GPU NVIDIA, ripristinando la gestione degli interrupt al comportamento distribuito predefinito. Se questo valore permane, gli interrupt della GPU si concentrano sul core 0 della CPU e possono causare scatti nei giochi. Non cambia nulla sui PC senza GPU NVIDIA.</x:String>
+
+  <!-- ===== Actions: System ===== -->
+  <x:String x:Key="Text.Action.power-plan-setup.Label" xml:space="preserve">Imposta combinazione per il risparmio di energia / modalità alimentazione sulla configurazione consigliata</x:String>
+  <x:String x:Key="Text.Action.power-plan-setup.Desc" xml:space="preserve">Riconfigura la combinazione per il risparmio di energia sulla base «Bilanciato» e imposta la modalità alimentazione su «Prestazioni ottimali» (sia con alimentazione a rete sia a batteria). Scrive inoltre: spegnimento dello schermo = 180 min a rete / 30 min a batteria, sospensione = mai, pulsante di alimentazione = arresta, chiusura del coperchio = nessuna operazione (e rende visibili questi elementi nascosti). Le personalizzazioni esistenti della combinazione tornano ai valori predefiniti, quindi fai attenzione se usi una combinazione personalizzata.</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Label" xml:space="preserve">Disabilita la sospensione</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Desc" xml:space="preserve">Disabilita la sospensione ed elimina hiberfil.sys, sempre riservato sull'unità di sistema (decine di percento della memoria fisica = diversi GB). L'avvio rapido viene disabilitato contemporaneamente, quindi l'avvio potrebbe diventare più lento. Lascialo su OFF (predefinito) se usi la sospensione su un portatile.</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Label" xml:space="preserve">Disabilita l'accelerazione del mouse (Aumenta precisione puntatore)</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Desc" xml:space="preserve">Disabilita «Aumenta precisione puntatore» (accelerazione del mouse), in cui la distanza percorsa dal cursore cambia in base alla velocità con cui muovi il mouse, fissando il movimento della mano e del cursore in rapporto 1:1. Un'impostazione standard per stabilizzare la mira nei giochi come gli FPS. OFF ripristina il valore predefinito di Windows (accelerazione attiva). Potrebbe essere necessario riaccedere perché abbia effetto.</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Label" xml:space="preserve">Disabilita i tasti di scelta rapida di accessibilità come i tasti permanenti (Sticky Keys)</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Desc" xml:space="preserve">Disabilita i tasti di scelta rapida che attivano accidentalmente le funzioni di accessibilità, come l'attivazione dei tasti permanenti (Sticky Keys) premendo cinque volte Maiusc (Sticky Keys / tasti di alternanza / tasti filtro). Previene gli incidenti in cui premere ripetutamente Maiusc nei giochi apre una finestra di dialogo e ti interrompe. OFF ripristina il valore predefinito di Windows (tasti di scelta rapida abilitati).</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Label" xml:space="preserve">Riduci il ritardo di visualizzazione dei menu</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Desc" xml:space="preserve">Riduce l'attesa prima che si aprano i menu del clic destro e i sottomenu del menu Start, dai 400 ms predefiniti a 0, rendendo l'interfaccia più reattiva. OFF ripristina i 400 ms predefiniti. È necessario riaccedere (o riavviare Esplora file) perché abbia effetto.</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Label" xml:space="preserve">Fissa il modello di visualizzazione delle cartelle su Generale</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Desc" xml:space="preserve">Impedisce a Esplora file di rilevare automaticamente uno stile di visualizzazione (Immagini / Musica / Documenti, ecc.) dal contenuto della cartella e uniforma tutte le cartelle su Elementi generali. Risolve la visualizzazione lenta (la barra di avanzamento verde) dovuta al rilevamento automatico nelle cartelle con molti file. OFF ripristina il rilevamento automatico.</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Label" xml:space="preserve">Disabilita CEIP / notifiche di feedback</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Desc" xml:space="preserve">Disabilita il Programma Analisi utilizzo software (CEIP, che invia dati di utilizzo a Microsoft) e le notifiche «Invia commenti su Windows». Un'impostazione standard sia per il carico in background dell'invio sia per la privacy. OFF rimuove i criteri e ripristina il valore predefinito.</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Label" xml:space="preserve">Ripristina le impostazioni di Game Bar / Game DVR ai valori predefiniti</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Desc" xml:space="preserve">Elimina le impostazioni di disabilitazione di Game Bar / Game DVR (registrazione dei giochi) scritte da precedenti strumenti di ottimizzazione o modifiche al registro, ripristinando il comportamento predefinito di Windows. Efficace per sintomi come «Win+G non risponde» o «impossibile catturare i giochi».</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Label" xml:space="preserve">Annulla l'abilitazione forzata del driver nativo NVMe</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Desc" xml:space="preserve">Elimina l'override FeatureManagement che forza l'abilitazione del driver nativo NVMe sperimentale di Windows, riportando la scelta del driver di archiviazione alla decisione predefinita del sistema operativo. Se questo override permane, può causare una schermata blu (PAGE_FAULT_IN_NONPAGED_AREA) in alcuni ambienti. Non cambia nulla sui PC privi dell'override.</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Label" xml:space="preserve">Imposta il server di sincronizzazione dell'ora su un NTP giapponese</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">Cambia la destinazione di sincronizzazione dell'ora di Windows dal predefinito time.windows.com a un server NTP pubblico giapponese (ntp.jst.mfeed.ad.jp) per migliorare la precisione e la stabilità della sincronizzazione dell'ora. Successivamente riavvia il servizio Ora di Windows per l'applicazione immediata.</x:String>
+
+  <!-- ===== Actions: Organize ===== -->
+  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">Ordina gli elementi aggiunti ad Accesso rapido</x:String>
+  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Ordina le cartelle aggiunte ad Accesso rapido in ordine crescente per nome (esegue il backup della jump list prima dell'esecuzione).</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Ordina la variabile d'ambiente Path</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Rimuove i duplicati e ordina in ordine crescente le voci delle variabili d'ambiente Path utente e di sistema.</x:String>
+</ResourceDictionary>

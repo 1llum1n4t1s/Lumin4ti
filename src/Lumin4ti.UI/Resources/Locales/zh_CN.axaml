@@ -1,0 +1,151 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="avares://Lumin4ti.UI/Resources/Locales/en_US.axaml"/>
+  </ResourceDictionary.MergedDictionaries>
+
+  <!-- ===== Tabs ===== -->
+  <x:String x:Key="Text.Tab.Update" xml:space="preserve">更新与安全</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">清理与修复</x:String>
+  <x:String x:Key="Text.Tab.Performance" xml:space="preserve">性能</x:String>
+  <x:String x:Key="Text.Tab.System" xml:space="preserve">系统</x:String>
+  <x:String x:Key="Text.Tab.Organize" xml:space="preserve">整理</x:String>
+  <x:String x:Key="Text.Tab.Version" xml:space="preserve">关于</x:String>
+
+  <!-- ===== Notes / buttons ===== -->
+  <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* 需要重启电脑才能生效</x:String>
+  <x:String x:Key="Text.Note.LongRunning" xml:space="preserve">* 运行可能需要几分钟</x:String>
+  <x:String x:Key="Text.Note.AffectsExplorer" xml:space="preserve">* 更改时 Explorer 会自动重启</x:String>
+  <x:String x:Key="Text.Button.Run" xml:space="preserve">运行</x:String>
+  <x:String x:Key="Text.Button.Cancel" xml:space="preserve">取消</x:String>
+
+  <!-- ===== About / version pane ===== -->
+  <x:String x:Key="Text.Version.Subtitle" xml:space="preserve">一款按你的喜好自定义 Windows 的工具</x:String>
+  <x:String x:Key="Text.Version.VersionLabel" xml:space="preserve">版本：</x:String>
+  <x:String x:Key="Text.Version.CheckUpdate" xml:space="preserve">检查更新</x:String>
+  <x:String x:Key="Text.Version.ShowSkipped" xml:space="preserve">重新显示已跳过的更新</x:String>
+  <x:String x:Key="Text.Version.CheckOnStartup" xml:space="preserve">启动时自动检查更新</x:String>
+  <x:String x:Key="Text.Version.LanguageHeader" xml:space="preserve">语言</x:String>
+  <x:String x:Key="Text.Version.LanguageHint" xml:space="preserve">选择显示语言。</x:String>
+  <x:String x:Key="Text.Version.FoldersHeader" xml:space="preserve">文件夹</x:String>
+  <x:String x:Key="Text.Version.OpenLogs" xml:space="preserve">打开日志文件夹</x:String>
+  <x:String x:Key="Text.Version.OpenSettings" xml:space="preserve">打开设置文件夹</x:String>
+
+  <!-- ===== Category titles / captions ===== -->
+  <x:String x:Key="Text.Category.Update" xml:space="preserve">更新与安全</x:String>
+  <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">更新应用和 Windows Defender，并恢复正常的安全设置。</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">清理与修复</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">回收磁盘空间，清理或修复损坏的注册项。</x:String>
+  <x:String x:Key="Text.Category.Performance" xml:space="preserve">性能</x:String>
+  <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">优化内存、进程和渲染。开关一般为 ON = 应用优化，OFF = 还原为 Windows 默认（仅 MMAgent 项目为 ON = 启用该功能；推荐值请参见各项说明）。</x:String>
+  <x:String x:Key="Text.Category.System" xml:space="preserve">系统</x:String>
+  <x:String x:Key="Text.Category.System.Caption" xml:space="preserve">调整电源、输入、时间等 Windows 设置。开关为 ON = 应用，OFF = 还原为 Windows 默认。</x:String>
+  <x:String x:Key="Text.Category.Organize" xml:space="preserve">整理</x:String>
+  <x:String x:Key="Text.Category.Organize.Caption" xml:space="preserve">将固定项、环境变量等整理为整齐的顺序。</x:String>
+
+  <!-- ===== Status / result messages ({0} = item name) ===== -->
+  <x:String x:Key="Text.Status.Running" xml:space="preserve">正在运行 {0}…</x:String>
+  <x:String x:Key="Text.Status.RunningLong" xml:space="preserve">正在运行 {0}…（可能需要几分钟）</x:String>
+  <x:String x:Key="Text.Status.TogglingOn" xml:space="preserve">正在开启 {0}…</x:String>
+  <x:String x:Key="Text.Status.TogglingOff" xml:space="preserve">正在关闭 {0}…</x:String>
+  <x:String x:Key="Text.Status.Completed" xml:space="preserve">{0} 已完成</x:String>
+  <x:String x:Key="Text.Status.Failed" xml:space="preserve">{0} 失败（请查看日志）</x:String>
+  <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">已开启 {0}</x:String>
+  <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">已关闭 {0}</x:String>
+  <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">切换 {0} 失败（请查看日志）</x:String>
+  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">已取消</x:String>
+  <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ 已完成</x:String>
+  <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ 失败</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - 已重启 Explorer</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - 重启 Explorer 失败（请手动重启）</x:String>
+  <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">无法读取状态（没有管理员权限，或此电脑不支持该功能。调试启动不会提权，请尝试正常启动）。</x:String>
+
+  <!-- ===== Actions: Update &amp; Security ===== -->
+  <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">批量更新已安装的应用（winget）</x:String>
+  <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">使用 winget 包管理器将所有已安装的应用升级到最新版本。如果需要更新的应用较多，下载和安装可能需要一段时间。正在运行的应用可能因可执行文件被锁定而更新失败，但其余应用会继续更新，并显示成功/失败的明细。</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">重新获取 Defender 定义文件</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">先删除一次 Windows Defender 的病毒定义和动态签名，然后重新下载最新版本。用于修复因定义损坏导致的误报或更新错误的标准刷新操作；运行期间实时保护仍持续工作。</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">重置 Defender 设置（排除项与主要选项）</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">删除 Windows Defender 中注册的所有排除路径、进程和扩展名，并将实时保护、云保护等主要选项恢复为默认值。清除恶意软件或旧软件可能添加的排除项（扫描盲区）。有意添加的排除项也会被删除，因此之后请重新添加所需项。</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">重置 Windows 安全应用</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Desc" xml:space="preserve">当 Windows 安全应用无法打开、显示异常或缺少项目时，将其重置为初始状态并重新注册。不会影响 Defender 的保护状态或定义文件。</x:String>
+
+  <!-- ===== Actions: Cleanup &amp; Repair ===== -->
+  <x:String x:Key="Text.Action.wu-component-cleanup.Label" xml:space="preserve">清除 Windows Update 占用的空间</x:String>
+  <x:String x:Key="Text.Action.wu-component-cleanup.Desc" xml:space="preserve">永久删除组件存储（WinSxS 文件夹）中累积的已被取代的旧更新版本，回收数 GB 磁盘空间。执行后将无法再卸载已应用的更新（通常无碍）。需要几分钟到几十分钟。</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Label" xml:space="preserve">修复损坏的系统文件夹名称</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">通过重新注册 shell32.dll，修复系统文件夹名称（例如下载）显示为英文等显示异常。</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">重置系统托盘图标缓存</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">清除通知区域（系统托盘）的图标缓存。解决已卸载应用的图标残留在隐藏图标区域的问题。你的托盘显示/隐藏自定义会被重置一次。</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">删除损坏的启动项</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">删除可执行文件已不存在的启动项（当前用户），以及对应的孤立条目。</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">从“打开方式”中删除不存在的应用</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">从“打开方式”候选列表和 Applications 注册中删除可执行文件已不存在的应用。</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Label" xml:space="preserve">删除所有事件查看器日志</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Desc" xml:space="preserve">删除事件查看器中累积的所有通道的日志，释放日志存储区域（通常数百 MB）。过去的故障排查信息也会丢失，因此在调查近期问题时请勿运行。部分受保护的系统日志会被跳过。</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">清除 Microsoft Store 缓存</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">使用 WSReset 重置 Microsoft Store 缓存。用于 Store 无法打开、下载无进展或反复出现“重试”错误的标准修复方法。应用和账户信息不会被删除。完成后 Store 应用可能会自动打开。</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">SSD TRIM 与可用空间整合</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">对所有卷执行向 SSD 发送 TRIM 通知（/L）和可用空间整合（/X），以保持 SSD 写入性能并整理可用空间碎片。视驱动器布局而定，可能需要几分钟到几十分钟。运行期间可继续使用电脑。</x:String>
+
+  <!-- ===== Actions: Performance ===== -->
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">内存压缩</x:String>
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Desc" xml:space="preserve">在内存不足时，将 RAM 中的页面压缩后再换出到磁盘，从而提高有效容量。以少量 CPU 负载为代价，减少换页导致的卡顿和 SSD 写入。推荐：ON（Windows 默认也是 ON）。</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Label" xml:space="preserve">页面合并</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Desc" xml:space="preserve">将内容相同的内存页面合并为一个，消除重复。运行多个同类应用时可节省内存。推荐：ON（部分版本默认 OFF）。</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Label" xml:space="preserve">Operation Recorder API</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Desc" xml:space="preserve">供外部工具记录和回放 SysMain（原 Superfetch）行为的 API。面向基准测试和性能分析工具，日常使用中不会用到。推荐：OFF（Windows 默认也是 OFF）。</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Label" xml:space="preserve">应用程序启动预取</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Desc" xml:space="preserve">学习常用应用加载的文件，并在启动时预先取入以加快启动速度（Prefetch）。即使在 SSD 上也有助于减少启动等待。推荐：ON（Windows 默认也是 ON）。</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Label" xml:space="preserve">UWP 应用预启动</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Desc" xml:space="preserve">预测即将使用的 Store（UWP）应用，并在你打开之前在后台预先启动。感觉更快，但会提前消耗内存，因此若优先节省内存，推荐 OFF。</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Label" xml:space="preserve">将内核分页设置重置为默认</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Desc" xml:space="preserve">删除优化工具常写入的 DisablePagingExecutive（使内核代码始终驻留在 RAM 中的设置），还原为 Windows 默认的分页行为。该设置在现代 Windows 上益处甚微，还可能浪费内存。在未设置该项的电脑上不执行任何操作。</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Label" xml:space="preserve">禁用 VBS / HVCI（节省 1–2 GB 内存）</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">禁用基于虚拟化的安全（VBS）和虚拟机监控程序强制代码完整性（HVCI），释放始终预留的约 1–2 GB 内存。这是与安全性的权衡；如果你使用 Hyper-V、WSL2、Windows Sandbox、Docker Desktop 或 Credential Guard，请保持 OFF（默认）。</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">合并 SvcHost 进程（抑制拆分）</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">默认情况下，Windows 会按功能拆分启动 svchost.exe（在 RAM 超过 3.5 GB 的电脑上）。将此项设为 ON 会把拆分阈值提到最大，将可分组的服务合并到更少的进程中，从而减少进程数量和内存占用（数十到一百多 MB）。被视为安全边界的服务（DiagTrack、Dnscache 等）不会被合并。OFF 会移除阈值并还原为默认拆分。</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">批量关闭 UWP 后台运行（节省 200–500 MB）</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">一次性将所有 Store（UWP）应用的后台运行设为“始终关闭”，使其在关闭后不再在后台运行。减少驻留可节省约 200–500 MB 内存。对于需要通知或动态磁贴的应用，请将此项设为 OFF，或在设置中逐个改为“始终开启”。</x:String>
+  <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">禁用 Windows Recall</x:String>
+  <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">禁用定期记录屏幕快照以供 AI 搜索的 Recall 功能（Click-to-do、语义搜索等其他 AI 功能予以保留）。减少记录进程的内存/磁盘占用及隐私顾虑。仅在 Windows 11 24H2 + Copilot+ 电脑上可用；在不受支持的电脑上无法读取状态，也无法切换。</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">禁用电源限制</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Desc" xml:space="preserve">禁用为省电而自动降低后台进程 CPU 频率的 Power Throttling。防止录制、编码、编译等后台工作变慢。由于始终以全性能运行，笔记本电脑的电池消耗会增加。OFF 会还原为默认的省电行为。</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Label" xml:space="preserve">禁用 MPO（Multi-Plane Overlay）</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Desc" xml:space="preserve">禁用由 GPU 合成多个平面的 Multi-Plane Overlay（MPO）（OverlayTestMode=5）。视驱动而定，MPO 可能导致屏幕闪烁、瞬间黑屏和视频卡顿；出现这些症状时的标准修复方法。若没有这些症状，保持 OFF（默认）即可。</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Label" xml:space="preserve">提高音频处理优先级</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Desc" xml:space="preserve">将 Multimedia Class Scheduler 的播放/捕获任务优先级提升到最高值（6），以减少高负载下的音频掉帧和爆音。OFF 会移除优先级设置并还原为 Windows 默认。</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Label" xml:space="preserve">将远程桌面设为 60 FPS</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Desc" xml:space="preserve">缩短远程桌面连接的绘制帧间隔（DWMFRAMEINTERVAL=15），将默认的约 30 FPS 提升到约 60 FPS。此设置适用于作为被连接一方的本机。带宽占用会增加。OFF 会还原为默认帧率。</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Label" xml:space="preserve">移除启动应用的启动延迟</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Desc" xml:space="preserve">禁用为让 Windows 优先绘制桌面而在登录后将启动应用延迟数秒到十几秒的机制（空闲等待 + 延迟计时器）。当你想立即开始使用常驻工具时很有用。登录后的那一刻可能会感觉稍重。OFF 会还原为默认的延迟行为。</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Label" xml:space="preserve">优化 NVIDIA GPU 中断分配</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Desc" xml:space="preserve">删除过去的优化工具写入 NVIDIA GPU 的 MSI 中断限制（MessageNumberLimit），将中断处理还原为默认的分散行为。若该值残留，GPU 中断会集中到 CPU 核心 0，可能导致游戏卡顿。在没有 NVIDIA GPU 的电脑上不做任何更改。</x:String>
+
+  <!-- ===== Actions: System ===== -->
+  <x:String x:Key="Text.Action.power-plan-setup.Label" xml:space="preserve">将电源计划/电源模式设为推荐配置</x:String>
+  <x:String x:Key="Text.Action.power-plan-setup.Desc" xml:space="preserve">以“平衡”为基础重新配置电源计划，并将电源模式设为“最佳性能”（交流电和电池均如此）。同时写入：关闭显示器 = 交流电 180 分钟 / 电池 30 分钟，睡眠 = 从不，电源按钮 = 关机，合上盖子 = 不采取任何操作（并取消隐藏这些被隐藏的项目）。现有的电源计划自定义会还原为默认，因此若你使用自定义计划请注意。</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Label" xml:space="preserve">禁用休眠</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Desc" xml:space="preserve">禁用休眠并删除始终预留在系统驱动器上的 hiberfil.sys（物理内存的百分之几十 = 数 GB）。同时会禁用快速启动，因此启动可能变慢。若你在笔记本电脑上使用休眠，请保持 OFF（默认）。</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Label" xml:space="preserve">禁用鼠标加速（提高指针精确度）</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Desc" xml:space="preserve">禁用“提高指针精确度”（鼠标加速）——即光标移动距离会随鼠标移动速度变化——将手部与光标的移动固定为 1:1。这是在 FPS 等游戏中稳定瞄准的标准设置。OFF 会还原为 Windows 默认（加速开启）。可能需要重新登录才能生效。</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Label" xml:space="preserve">禁用粘滞键等辅助功能热键</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Desc" xml:space="preserve">禁用会意外触发辅助功能的热键，例如按 Shift 五次会开启粘滞键（粘滞键 / 切换键 / 筛选键）。防止在游戏中反复按 Shift 弹出对话框并打断操作的意外。OFF 会还原为 Windows 默认（启用热键）。</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Label" xml:space="preserve">缩短菜单显示延迟</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Desc" xml:space="preserve">将右键菜单和开始菜单子菜单打开前的等待时间从默认 400 毫秒缩短为 0，使界面感觉更灵敏。OFF 会还原为默认 400 毫秒。需要重新登录（或重启 Explorer）才能生效。</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Label" xml:space="preserve">将文件夹视图模板固定为“常规”</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Desc" xml:space="preserve">阻止 Explorer 根据文件夹内容自动检测显示样式（图片 / 音乐 / 文档等），并将所有文件夹统一为“常规项目”。解决文件较多的文件夹因自动检测导致的显示缓慢（绿色进度条）问题。OFF 会还原为自动检测。</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Label" xml:space="preserve">禁用 CEIP / 反馈通知</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Desc" xml:space="preserve">禁用客户体验改善计划（CEIP，会向 Microsoft 发送使用数据）和“请对 Windows 提供反馈”通知。同时兼顾发送带来的后台负载和隐私的标准设置。OFF 会移除策略并还原为默认。</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Label" xml:space="preserve">将 Game Bar / Game DVR 设置重置为默认</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Desc" xml:space="preserve">删除过去的优化工具或注册表调整写入的 Game Bar / Game DVR（游戏录制）禁用设置，还原为 Windows 默认行为。对于“Win+G 无响应”或“无法捕获游戏”等症状有效。</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Label" xml:space="preserve">撤销强制启用 NVMe 原生驱动</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Desc" xml:space="preserve">删除强制启用 Windows 实验性 NVMe 原生驱动的 FeatureManagement 覆盖设置，将存储驱动还原为由操作系统默认决定。若该覆盖残留，在某些环境中可能导致蓝屏（PAGE_FAULT_IN_NONPAGED_AREA）。在没有该覆盖的电脑上不做任何更改。</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Label" xml:space="preserve">将时间同步服务器设为日本 NTP</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">将 Windows 的时间同步目标从默认的 time.windows.com 更改为日本公共 NTP 服务器（ntp.jst.mfeed.ad.jp），以提高时间同步的准确性和稳定性。之后会重启 Windows Time 服务以立即应用。</x:String>
+
+  <!-- ===== Actions: Organize ===== -->
+  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">排序 Quick Access 固定项</x:String>
+  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">将固定到 Quick Access 的文件夹按名称升序排序（运行前会备份跳转列表）。</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">排序 Path 环境变量</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">对用户和系统 Path 环境变量的条目去重并按升序排序。</x:String>
+</ResourceDictionary>

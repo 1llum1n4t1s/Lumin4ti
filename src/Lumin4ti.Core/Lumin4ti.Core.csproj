@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Lumin4ti.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SuperLightLogger" Version="1.0.9" />
+    <!-- EventLogSession (イベントログの列挙・クリアを wevtutil なしで行う) 用 -->
+    <PackageReference Include="System.Diagnostics.EventLog" Version="10.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Lumin4ti.Tests" />
+  </ItemGroup>
+
+</Project>

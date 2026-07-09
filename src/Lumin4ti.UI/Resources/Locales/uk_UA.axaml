@@ -1,0 +1,151 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="avares://Lumin4ti.UI/Resources/Locales/en_US.axaml"/>
+  </ResourceDictionary.MergedDictionaries>
+
+  <!-- ===== Tabs ===== -->
+  <x:String x:Key="Text.Tab.Update" xml:space="preserve">Оновлення та безпека</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Очищення та відновлення</x:String>
+  <x:String x:Key="Text.Tab.Performance" xml:space="preserve">Продуктивність</x:String>
+  <x:String x:Key="Text.Tab.System" xml:space="preserve">Система</x:String>
+  <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Упорядкування</x:String>
+  <x:String x:Key="Text.Tab.Version" xml:space="preserve">Про програму</x:String>
+
+  <!-- ===== Notes / buttons ===== -->
+  <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* Для застосування потрібне перезавантаження ПК</x:String>
+  <x:String x:Key="Text.Note.LongRunning" xml:space="preserve">* Виконання може зайняти кілька хвилин</x:String>
+  <x:String x:Key="Text.Note.AffectsExplorer" xml:space="preserve">* Під час зміни Explorer перезапускається автоматично</x:String>
+  <x:String x:Key="Text.Button.Run" xml:space="preserve">Виконати</x:String>
+  <x:String x:Key="Text.Button.Cancel" xml:space="preserve">Скасувати</x:String>
+
+  <!-- ===== About / version pane ===== -->
+  <x:String x:Key="Text.Version.Subtitle" xml:space="preserve">Інструмент для налаштування Windows під ваші вподобання</x:String>
+  <x:String x:Key="Text.Version.VersionLabel" xml:space="preserve">Версія:</x:String>
+  <x:String x:Key="Text.Version.CheckUpdate" xml:space="preserve">Перевірити оновлення</x:String>
+  <x:String x:Key="Text.Version.ShowSkipped" xml:space="preserve">Знову показати пропущене оновлення</x:String>
+  <x:String x:Key="Text.Version.CheckOnStartup" xml:space="preserve">Автоматично перевіряти оновлення під час запуску</x:String>
+  <x:String x:Key="Text.Version.LanguageHeader" xml:space="preserve">Мова</x:String>
+  <x:String x:Key="Text.Version.LanguageHint" xml:space="preserve">Виберіть мову інтерфейсу.</x:String>
+  <x:String x:Key="Text.Version.FoldersHeader" xml:space="preserve">Папки</x:String>
+  <x:String x:Key="Text.Version.OpenLogs" xml:space="preserve">Відкрити папку журналів</x:String>
+  <x:String x:Key="Text.Version.OpenSettings" xml:space="preserve">Відкрити папку налаштувань</x:String>
+
+  <!-- ===== Category titles / captions ===== -->
+  <x:String x:Key="Text.Category.Update" xml:space="preserve">Оновлення та безпека</x:String>
+  <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">Оновлення застосунків і Windows Defender, а також відновлення коректних налаштувань безпеки.</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Очищення та відновлення</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Звільнення місця на диску та очищення або відновлення пошкоджених реєстрацій.</x:String>
+  <x:String x:Key="Text.Category.Performance" xml:space="preserve">Продуктивність</x:String>
+  <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">Оптимізація памʼяті, процесів і відтворення. Зазвичай перемикачі: УВІМК = застосувати оптимізацію, ВИМК = повернути значення Windows за замовчуванням (лише пункти MMAgent використовують УВІМК = увімкнути цю функцію; рекомендоване значення див. в описі кожного пункту).</x:String>
+  <x:String x:Key="Text.Category.System" xml:space="preserve">Система</x:String>
+  <x:String x:Key="Text.Category.System.Caption" xml:space="preserve">Налаштування параметрів Windows, таких як живлення, введення та час. Перемикачі: УВІМК = застосувати, ВИМК = повернути значення Windows за замовчуванням.</x:String>
+  <x:String x:Key="Text.Category.Organize" xml:space="preserve">Упорядкування</x:String>
+  <x:String x:Key="Text.Category.Organize.Caption" xml:space="preserve">Упорядкування закріплених елементів, змінних середовища тощо.</x:String>
+
+  <!-- ===== Status / result messages ({0} = item name) ===== -->
+  <x:String x:Key="Text.Status.Running" xml:space="preserve">Виконується {0}…</x:String>
+  <x:String x:Key="Text.Status.RunningLong" xml:space="preserve">Виконується {0}… (може зайняти кілька хвилин)</x:String>
+  <x:String x:Key="Text.Status.TogglingOn" xml:space="preserve">Увімкнення {0}…</x:String>
+  <x:String x:Key="Text.Status.TogglingOff" xml:space="preserve">Вимкнення {0}…</x:String>
+  <x:String x:Key="Text.Status.Completed" xml:space="preserve">{0}: завершено</x:String>
+  <x:String x:Key="Text.Status.Failed" xml:space="preserve">{0}: помилка (перевірте журнал)</x:String>
+  <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">{0}: увімкнено</x:String>
+  <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">{0}: вимкнено</x:String>
+  <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">Не вдалося перемкнути {0} (перевірте журнал)</x:String>
+  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Скасовано</x:String>
+  <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ Завершено</x:String>
+  <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ Помилка</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer перезапущено</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Не вдалося перезапустити Explorer (перезапустіть його вручну)</x:String>
+  <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Не вдалося прочитати стан (немає прав адміністратора або функція недоступна на цьому ПК. Запуск у режимі налагодження виконується без підвищення прав, тож спробуйте звичайний запуск).</x:String>
+
+  <!-- ===== Actions: Update &amp; Security ===== -->
+  <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Масове оновлення встановлених застосунків (winget)</x:String>
+  <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">Використовує менеджер пакетів winget для оновлення всіх встановлених застосунків до останніх версій. Якщо оновлень багато, завантаження та встановлення можуть зайняти час. Виконувані файли запущених застосунків можуть бути заблоковані, і їхнє оновлення завершиться помилкою, але решта продовжить оновлюватися, а після завершення відображається зведення успіхів і невдач.</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Повторно завантажити файли визначень Defender</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Одноразово видаляє вірусні визначення та динамічні сигнатури Windows Defender, а потім повторно завантажує їхні останні версії. Стандартний спосіб оновлення в разі пошкодження визначень, що спричиняє хибні спрацювання або помилки оновлення; захист у реальному часі продовжує працювати під час виконання.</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">Скинути налаштування Defender (винятки та основні параметри)</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Видаляє всі шляхи, процеси та розширення, додані до винятків Windows Defender, і відновлює основні параметри, такі як захист у реальному часі та хмарний захист, до значень за замовчуванням. Очищає винятки (сліпі зони сканування), які могли додати шкідливі програми або застаріле ПЗ. Навмисно додані винятки також видаляються, тож за потреби додайте їх знову.</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">Скинути застосунок «Безпека Windows»</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Desc" xml:space="preserve">Скидає застосунок «Безпека Windows» до початкового стану та повторно реєструє його, якщо він не відкривається, виглядає пошкодженим або в ньому відсутні елементи. Не впливає на стан захисту Defender і файли визначень.</x:String>
+
+  <!-- ===== Actions: Cleanup &amp; Repair ===== -->
+  <x:String x:Key="Text.Action.wu-component-cleanup.Label" xml:space="preserve">Звільнити місце, зайняте Windows Update</x:String>
+  <x:String x:Key="Text.Action.wu-component-cleanup.Desc" xml:space="preserve">Безповоротно видаляє замінені версії оновлень, накопичені у сховищі компонентів (папка WinSxS), звільняючи кілька GB дискового простору. Після цього вже не можна видалити застосовані оновлення (зазвичай це не проблема). Займає від кількох до десятків хвилин.</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Label" xml:space="preserve">Виправити неправильні імена системних папок</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">Виправляє спотворення відображення, наприклад коли імена системних папок (як-от «Завантаження») показуються англійською, шляхом повторної реєстрації shell32.dll.</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">Скинути кеш значків системного трея</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">Очищає кеш значків області сповіщень (системного трея). Усуває випадки, коли значки видалених застосунків залишаються в області прихованих значків. Ваше налаштування показу/приховування значків трея буде скинуто один раз.</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">Видалити непрацездатні елементи автозавантаження</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">Видаляє елементи автозавантаження (поточного користувача), виконуваний файл яких більше не існує, разом із відповідними осиротілими записами.</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">Видалити неіснуючі застосунки з «Відкрити за допомогою»</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">Видаляє застосунки, виконуваний файл яких більше не існує, зі списку варіантів «Відкрити за допомогою» та з реєстрації Applications.</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Label" xml:space="preserve">Видалити всі журнали засобу перегляду подій</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Desc" xml:space="preserve">Видаляє журнали всіх каналів, накопичені в засобі перегляду подій, щоб звільнити область зберігання журналів (зазвичай кілька сотень MB). Разом із цим також втрачається минула діагностична інформація, тож не запускайте це під час розслідування нещодавньої проблеми. Деякі захищені системні журнали пропускаються.</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">Очистити кеш Microsoft Store</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">Скидає кеш Microsoft Store за допомогою WSReset. Стандартне рішення, коли Store не відкривається, завантаження не просуваються або повторюються помилки «повторіть спробу». Застосунки та дані облікового запису не видаляються. Після завершення застосунок Store може відкритися автоматично.</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">TRIM для SSD і обʼєднання вільного простору</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">Виконує сповіщення TRIM для SSD (/L) та обʼєднання вільного простору (/X) на всіх томах для підтримання продуктивності запису SSD і дефрагментації вільного місця. Залежно від структури диска це може зайняти від кількох до десятків хвилин. Під час виконання можна продовжувати користуватися ПК.</x:String>
+
+  <!-- ===== Actions: Performance ===== -->
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Стиснення памʼяті</x:String>
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Desc" xml:space="preserve">Стискає сторінки в RAM перед вивантаженням на диск за браку памʼяті, збільшуючи ефективний обсяг. Ціною незначного навантаження на CPU зменшує сповільнення, повʼязані з підкачуванням, і скорочує обсяг запису на SSD. Рекомендовано: УВІМК (у Windows за замовчуванням також УВІМК).</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Label" xml:space="preserve">Обʼєднання сторінок</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Desc" xml:space="preserve">Обʼєднує сторінки памʼяті з однаковим вмістом в одну, усуваючи дублювання. Заощаджує памʼять під час запуску багатьох однотипних застосунків. Рекомендовано: УВІМК (у деяких редакціях за замовчуванням ВИМК).</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Label" xml:space="preserve">API запису операцій</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Desc" xml:space="preserve">API для зовнішніх інструментів, що дає змогу записувати та відтворювати поведінку SysMain (колишня назва — Superfetch). Призначений для інструментів тестування та аналізу продуктивності, у звичайному використанні не застосовується. Рекомендовано: ВИМК (у Windows за замовчуванням також ВИМК).</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Label" xml:space="preserve">Попереднє завантаження запуску застосунків</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Desc" xml:space="preserve">Вивчає файли, які завантажують часто використовувані застосунки, і заздалегідь завантажує їх під час запуску для пришвидшення відкриття (Prefetch). Допомагає скоротити очікування запуску навіть на SSD. Рекомендовано: УВІМК (у Windows за замовчуванням також УВІМК).</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Label" xml:space="preserve">Попередній запуск застосунків UWP</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Desc" xml:space="preserve">Прогнозує застосунки Store (UWP), які невдовзі можуть знадобитися, і запускає їх у фоні до того, як ви їх відкриєте. Відчувається швидше, але заздалегідь витрачає памʼять, тож якщо для вас у пріоритеті заощадження памʼяті, рекомендовано ВИМК.</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Label" xml:space="preserve">Скинути параметр підкачування ядра до значення за замовчуванням</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Desc" xml:space="preserve">Видаляє DisablePagingExecutive (параметр, який постійно тримає код ядра в RAM), що його часто записують інструменти оптимізації, і повертає поведінку підкачування Windows за замовчуванням. У сучасній Windows цей параметр дає мало користі й може марно витрачати памʼять. На ПК, де його не задано, нічого не робить.</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Label" xml:space="preserve">Вимкнути VBS / HVCI (заощадження 1–2 GB памʼяті)</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">Вимикає безпеку на основі віртуалізації (VBS) і цілісність коду, забезпечувану гіпервізором (HVCI), щоб звільнити ~1–2 GB памʼяті, зарезервованої постійно. Це компроміс із безпекою; залиште ВИМК (за замовчуванням), якщо використовуєте Hyper-V, WSL2, Windows Sandbox, Docker Desktop або Credential Guard.</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">Обʼєднати процеси SvcHost (придушити розділення)</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">За замовчуванням Windows запускає svchost.exe з розділенням за функціями (на ПК з понад 3,5 GB RAM). Увімкнення цього максимально підвищує поріг розділення й обʼєднує груповані служби в меншу кількість процесів, скорочуючи кількість процесів і використання памʼяті (від десятків до сотні з лишком MB). Служби, які вважаються межами безпеки (DiagTrack, Dnscache тощо), не обʼєднуються. ВИМК прибирає поріг і повертає розділення за замовчуванням.</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">Масово вимкнути фонове виконання UWP (заощадження 200–500 MB)</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">Одночасно встановлює фонове виконання всіх застосунків Store (UWP) у «Завжди вимкнено», щоб після закриття вони припиняли працювати у фоні. Зниження резидентності може заощадити близько 200–500 MB памʼяті. Для застосунків, яким потрібні сповіщення або живі плитки, вимкніть цей пункт (ВИМК) або змініть їх окремо на «Завжди увімкнено» в параметрах.</x:String>
+  <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">Вимкнути Windows Recall</x:String>
+  <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">Вимикає функцію Recall, яка періодично записує знімки екрана для ШІ-пошуку (інші функції ШІ, такі як Click-to-do та семантичний пошук, зберігаються). Зменшує споживання памʼяті/диска процесом запису та зменшує занепокоєння щодо конфіденційності. Доступно лише на ПК з Windows 11 24H2 + Copilot+; на непідтримуваних ПК стан прочитати не можна й перемкнути його неможливо.</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">Вимкнути регулювання потужності</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Desc" xml:space="preserve">Вимикає Power Throttling, що автоматично знижує тактову частоту CPU для фонових процесів заради заощадження енергії. Запобігає сповільненню фонових завдань, таких як запис, кодування та збирання. Оскільки система постійно працює на повній продуктивності, на ноутбуках зростає розряд батареї. ВИМК повертає енергоощадну поведінку за замовчуванням.</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Label" xml:space="preserve">Вимкнути MPO (Multi-Plane Overlay)</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Desc" xml:space="preserve">Вимикає Multi-Plane Overlay (MPO), за якого GPU компонує кілька площин (OverlayTestMode=5). Залежно від драйвера MPO може спричиняти мерехтіння екрана, короткочасні затемнення та ривки відео; стандартне рішення за таких симптомів. Якщо їх немає, залишити ВИМК (за замовчуванням) припустимо.</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Label" xml:space="preserve">Підвищити пріоритет обробки звуку</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Desc" xml:space="preserve">Підвищує пріоритет завдань відтворення/захоплення планувальника класів мультимедіа до максимального значення (6), щоб зменшити випадання та клацання звуку за високого навантаження. ВИМК прибирає налаштування пріоритету й повертає значення Windows за замовчуванням.</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Label" xml:space="preserve">Зробити віддалений робочий стіл 60 FPS</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Desc" xml:space="preserve">Скорочує інтервал кадрів відтворення для підключень до віддаленого робочого столу (DWMFRAMEINTERVAL=15), підвищуючи частоту з ~30 FPS за замовчуванням приблизно до 60 FPS. Застосовується до цього ПК як сторони, до якої підключаються. Використання пропускної здатності зростає. ВИМК повертає частоту кадрів за замовчуванням.</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Label" xml:space="preserve">Прибрати затримку запуску застосунків автозавантаження</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Desc" xml:space="preserve">Вимикає механізм, що затримує застосунки автозавантаження на кілька–десяток секунд після входу, щоб Windows пріоритетно відтворювала робочий стіл (очікування простою + таймер затримки). Корисно, коли потрібно одразу почати користуватися резидентними інструментами. Момент одразу після входу може відчуватися трохи важчим. ВИМК повертає поведінку затримки за замовчуванням.</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Label" xml:space="preserve">Оптимізувати розподіл переривань GPU NVIDIA</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Desc" xml:space="preserve">Видаляє обмеження переривань MSI (MessageNumberLimit), записане для GPU NVIDIA минулими інструментами оптимізації, повертаючи обробку переривань до розподіленої поведінки за замовчуванням. Якщо це значення залишається, переривання GPU концентруються на ядрі CPU 0 і можуть спричиняти ривки в іграх. На ПК без GPU NVIDIA нічого не змінює.</x:String>
+
+  <!-- ===== Actions: System ===== -->
+  <x:String x:Key="Text.Action.power-plan-setup.Label" xml:space="preserve">Задати рекомендовану схему живлення / режим живлення</x:String>
+  <x:String x:Key="Text.Action.power-plan-setup.Desc" xml:space="preserve">Переналаштовує схему живлення на базі «Збалансованої» та встановлює режим живлення «Найкраща продуктивність» (як від мережі, так і від батареї). Також задає: вимкнення дисплея = 180 хв від мережі / 30 хв від батареї, сон = ніколи, кнопка живлення = завершення роботи, закриття кришки = не робити нічого (і показує ці раніше приховані пункти). Наявні налаштування схеми живлення повертаються до значень за замовчуванням, тож будьте обережні, якщо використовуєте власну схему.</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Label" xml:space="preserve">Вимкнути режим глибокого сну</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Desc" xml:space="preserve">Вимикає режим глибокого сну та видаляє hiberfil.sys, що постійно резервується на системному диску (десятки відсотків від обсягу фізичної памʼяті = кілька GB). Одночасно вимикається швидкий запуск, тож увімкнення може стати повільнішим. Залиште ВИМК (за замовчуванням), якщо користуєтеся режимом глибокого сну на ноутбуці.</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Label" xml:space="preserve">Вимкнути прискорення миші (Підвищена точність указівника)</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Desc" xml:space="preserve">Вимикає «Підвищену точність установлення указівника» (прискорення миші), за якого переміщення курсору залежить від швидкості руху миші, фіксуючи рух руки та курсору у співвідношенні 1:1. Стандартне налаштування для стабілізації прицілювання в іграх, наприклад FPS. ВИМК повертає значення Windows за замовчуванням (прискорення увімкнено). Для застосування може знадобитися повторний вхід.</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Label" xml:space="preserve">Вимкнути гарячі клавіші спец. можливостей, як-от Sticky Keys</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Desc" xml:space="preserve">Вимикає гарячі клавіші, що випадково вмикають функції спеціальних можливостей, наприклад увімкнення Sticky Keys під час пʼятикратного натискання Shift (Sticky Keys / Toggle Keys / Filter Keys). Запобігає випадкам, коли повторне натискання Shift в іграх викликає діалог і перериває вас. ВИМК повертає значення Windows за замовчуванням (гарячі клавіші увімкнено).</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Label" xml:space="preserve">Скоротити затримку відображення меню</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Desc" xml:space="preserve">Скорочує очікування перед відкриттям контекстних меню та підменю меню «Пуск» із 400 мс за замовчуванням до 0, роблячи інтерфейс більш чутливим. ВИМК повертає 400 мс за замовчуванням. Для застосування потрібен повторний вхід (або перезапуск Explorer).</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Label" xml:space="preserve">Зафіксувати шаблон вигляду папок як «Загальні»</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Desc" xml:space="preserve">Забороняє Explorer автоматично визначати стиль відображення (Зображення / Музика / Документи тощо) за вмістом папки та приводить усі папки до «Загальних елементів». Усуває повільне відображення (зелена смуга прогресу) через автовизначення в папках із великою кількістю файлів. ВИМК повертає автовизначення.</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Label" xml:space="preserve">Вимкнути CEIP / сповіщення про відгуки</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Desc" xml:space="preserve">Вимикає програму покращення якості ПЗ (CEIP, що надсилає дані про використання до Microsoft) та сповіщення «Залиште відгук про Windows». Стандартне налаштування як для зниження фонового навантаження від надсилання, так і для конфіденційності. ВИМК видаляє політики й повертає значення за замовчуванням.</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Label" xml:space="preserve">Скинути налаштування Game Bar / Game DVR до значень за замовчуванням</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Desc" xml:space="preserve">Видаляє налаштування вимкнення Game Bar / Game DVR (запис ігор), записані минулими інструментами оптимізації або правками реєстру, повертаючи поведінку Windows за замовчуванням. Допомагає за симптомів на кшталт «Win+G не реагує» або «не вдається записати гру».</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Label" xml:space="preserve">Скасувати примусове ввімкнення вбудованого драйвера NVMe</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Desc" xml:space="preserve">Видаляє перевизначення FeatureManagement, що примусово вмикає експериментальний вбудований драйвер NVMe від Windows, повертаючи вибір драйвера сховища до рішення ОС за замовчуванням. Якщо це перевизначення залишається, у деяких середовищах воно може спричиняти синій екран (PAGE_FAULT_IN_NONPAGED_AREA). На ПК без цього перевизначення нічого не змінює.</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Label" xml:space="preserve">Задати японський NTP-сервер синхронізації часу</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">Змінює ціль синхронізації часу Windows зі стандартного time.windows.com на японський публічний NTP-сервер (ntp.jst.mfeed.ad.jp) для підвищення точності та стабільності синхронізації часу. Потім перезапускає службу часу Windows для негайного застосування.</x:String>
+
+  <!-- ===== Actions: Organize ===== -->
+  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">Упорядкувати закріплені елементи Quick Access</x:String>
+  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Сортує папки, закріплені в Quick Access, за зростанням імен (перед запуском створює резервну копію списку переходів).</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Упорядкувати змінну середовища Path</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Видаляє дублікати та сортує за зростанням записи користувацької та системної змінних середовища Path.</x:String>
+</ResourceDictionary>

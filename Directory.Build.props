@@ -1,0 +1,14 @@
+<Project>
+
+  <PropertyGroup>
+    <!-- Windows 専用アプリ。UWP パッケージ列挙 (WinRT PackageManager) を使うため
+         RealTimeTranslator と同じ Windows SDK 付き TFM を指定する。 -->
+    <TargetFramework>net10.0-windows10.0.20348.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- リリースバージョン。更新は /vava スキル経由のみ (手動で上げない)。 -->
+    <Version>1.0.1</Version>
+  </PropertyGroup>
+
+</Project>

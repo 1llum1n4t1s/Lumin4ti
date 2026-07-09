@@ -1,0 +1,151 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="avares://Lumin4ti.UI/Resources/Locales/en_US.axaml"/>
+  </ResourceDictionary.MergedDictionaries>
+
+  <!-- ===== Tabs ===== -->
+  <x:String x:Key="Text.Tab.Update" xml:space="preserve">Pembaruan &amp; Keamanan</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Pembersihan &amp; Perbaikan</x:String>
+  <x:String x:Key="Text.Tab.Performance" xml:space="preserve">Performa</x:String>
+  <x:String x:Key="Text.Tab.System" xml:space="preserve">Sistem</x:String>
+  <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Rapikan</x:String>
+  <x:String x:Key="Text.Tab.Version" xml:space="preserve">Tentang</x:String>
+
+  <!-- ===== Notes / buttons ===== -->
+  <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* Perlu memulai ulang PC agar berlaku</x:String>
+  <x:String x:Key="Text.Note.LongRunning" xml:space="preserve">* Mungkin butuh beberapa menit untuk berjalan</x:String>
+  <x:String x:Key="Text.Note.AffectsExplorer" xml:space="preserve">* Explorer dimulai ulang otomatis saat diubah</x:String>
+  <x:String x:Key="Text.Button.Run" xml:space="preserve">Jalankan</x:String>
+  <x:String x:Key="Text.Button.Cancel" xml:space="preserve">Batal</x:String>
+
+  <!-- ===== About / version pane ===== -->
+  <x:String x:Key="Text.Version.Subtitle" xml:space="preserve">Alat untuk menyesuaikan Windows sesuai selera Anda</x:String>
+  <x:String x:Key="Text.Version.VersionLabel" xml:space="preserve">Versi:</x:String>
+  <x:String x:Key="Text.Version.CheckUpdate" xml:space="preserve">Periksa pembaruan</x:String>
+  <x:String x:Key="Text.Version.ShowSkipped" xml:space="preserve">Tampilkan lagi pembaruan yang dilewati</x:String>
+  <x:String x:Key="Text.Version.CheckOnStartup" xml:space="preserve">Periksa pembaruan otomatis saat mulai</x:String>
+  <x:String x:Key="Text.Version.LanguageHeader" xml:space="preserve">Bahasa</x:String>
+  <x:String x:Key="Text.Version.LanguageHint" xml:space="preserve">Pilih bahasa tampilan.</x:String>
+  <x:String x:Key="Text.Version.FoldersHeader" xml:space="preserve">Folder</x:String>
+  <x:String x:Key="Text.Version.OpenLogs" xml:space="preserve">Buka folder log</x:String>
+  <x:String x:Key="Text.Version.OpenSettings" xml:space="preserve">Buka folder pengaturan</x:String>
+
+  <!-- ===== Category titles / captions ===== -->
+  <x:String x:Key="Text.Category.Update" xml:space="preserve">Pembaruan &amp; Keamanan</x:String>
+  <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">Perbarui aplikasi dan Windows Defender, serta pulihkan pengaturan keamanan yang sehat.</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Pembersihan &amp; Perbaikan</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Bebaskan ruang disk dan bersihkan atau perbaiki registrasi yang rusak.</x:String>
+  <x:String x:Key="Text.Category.Performance" xml:space="preserve">Performa</x:String>
+  <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">Optimalkan memori, proses, dan rendering. Umumnya sakelar ON = terapkan optimasi, OFF = kembali ke bawaan Windows (hanya item MMAgent yang memakai ON = aktifkan fitur tersebut; lihat tiap deskripsi untuk nilai yang disarankan).</x:String>
+  <x:String x:Key="Text.Category.System" xml:space="preserve">Sistem</x:String>
+  <x:String x:Key="Text.Category.System.Caption" xml:space="preserve">Sesuaikan pengaturan Windows seperti daya, masukan, dan waktu. Sakelar ON = terapkan, OFF = kembali ke bawaan Windows.</x:String>
+  <x:String x:Key="Text.Category.Organize" xml:space="preserve">Rapikan</x:String>
+  <x:String x:Key="Text.Category.Organize.Caption" xml:space="preserve">Rapikan pin, variabel lingkungan, dan lainnya ke urutan yang tertata.</x:String>
+
+  <!-- ===== Status / result messages ({0} = item name) ===== -->
+  <x:String x:Key="Text.Status.Running" xml:space="preserve">Menjalankan {0}…</x:String>
+  <x:String x:Key="Text.Status.RunningLong" xml:space="preserve">Menjalankan {0}… (mungkin butuh beberapa menit)</x:String>
+  <x:String x:Key="Text.Status.TogglingOn" xml:space="preserve">Mengaktifkan {0}…</x:String>
+  <x:String x:Key="Text.Status.TogglingOff" xml:space="preserve">Menonaktifkan {0}…</x:String>
+  <x:String x:Key="Text.Status.Completed" xml:space="preserve">{0} selesai</x:String>
+  <x:String x:Key="Text.Status.Failed" xml:space="preserve">{0} gagal (periksa log)</x:String>
+  <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">{0} diaktifkan</x:String>
+  <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">{0} dinonaktifkan</x:String>
+  <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">Gagal mengalihkan {0} (periksa log)</x:String>
+  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Dibatalkan</x:String>
+  <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ Selesai</x:String>
+  <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ Gagal</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer dimulai ulang</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Gagal memulai ulang Explorer (silakan mulai ulang secara manual)</x:String>
+  <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Tidak dapat membaca status (tanpa hak admin, atau fitur tidak tersedia di PC ini. Peluncuran mode debug tidak dijalankan dengan hak elevasi, jadi coba peluncuran normal).</x:String>
+
+  <!-- ===== Actions: Update &amp; Security ===== -->
+  <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Perbarui aplikasi terpasang sekaligus (winget)</x:String>
+  <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">Menggunakan pengelola paket winget untuk memperbarui semua aplikasi terpasang ke versi terbaru. Jika banyak aplikasi yang perlu diperbarui, pengunduhan dan pemasangan bisa memakan waktu. Aplikasi yang sedang berjalan mungkin file eksekusinya terkunci dan gagal diperbarui, tetapi yang lain tetap berlanjut dan rincian berhasil/gagal ditampilkan.</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Unduh ulang file definisi Defender</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Menghapus sekali definisi virus dan tanda tangan dinamis Windows Defender, lalu mengunduh ulang yang terbaru. Penyegaran standar untuk kerusakan definisi yang menyebabkan deteksi palsu atau kesalahan pembaruan; perlindungan waktu nyata tetap berjalan selama proses berlangsung.</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">Setel ulang pengaturan Defender (pengecualian &amp; opsi utama)</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Menghapus semua jalur, proses, dan ekstensi pengecualian yang terdaftar di Windows Defender dan memulihkan opsi utama seperti perlindungan waktu nyata dan cloud ke bawaannya. Membersihkan pengecualian (titik buta pemindaian) yang mungkin ditambahkan oleh malware atau perangkat lunak lama. Pengecualian yang disengaja juga dihapus, jadi tambahkan kembali yang Anda perlukan setelahnya.</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">Setel ulang aplikasi Keamanan Windows</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Desc" xml:space="preserve">Menyetel ulang aplikasi Keamanan Windows ke keadaan awal dan mendaftarkannya kembali saat aplikasi tidak mau terbuka, tampak rusak, atau ada item yang hilang. Tidak memengaruhi status perlindungan Defender maupun file definisi.</x:String>
+
+  <!-- ===== Actions: Cleanup &amp; Repair ===== -->
+  <x:String x:Key="Text.Action.wu-component-cleanup.Label" xml:space="preserve">Hapus ruang yang dipakai Windows Update</x:String>
+  <x:String x:Key="Text.Action.wu-component-cleanup.Desc" xml:space="preserve">Menghapus permanen generasi pembaruan lama yang digantikan yang menumpuk di penyimpanan komponen (folder WinSxS) untuk membebaskan beberapa GB ruang disk. Setelah ini Anda tidak dapat lagi mencopot pemasangan pembaruan yang telah diterapkan (biasanya bukan masalah). Butuh beberapa menit hingga puluhan menit.</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Label" xml:space="preserve">Perbaiki nama folder sistem yang rusak</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">Memperbaiki kerusakan tampilan seperti nama folder sistem (mis. Downloads) yang tampil dalam bahasa Inggris, dengan mendaftarkan ulang shell32.dll.</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">Setel ulang cache ikon system tray</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">Membersihkan cache ikon area notifikasi (system tray). Mengatasi kasus di mana ikon aplikasi yang telah dicopot tetap tertinggal di area ikon tersembunyi. Penyesuaian tampilkan/sembunyikan ikon tray Anda disetel ulang satu kali.</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">Hapus entri startup yang rusak</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">Menghapus entri startup (pengguna saat ini) yang file eksekusinya sudah tidak ada, beserta entri yatim yang terkait.</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">Hapus aplikasi tidak ada dari Buka dengan</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">Menghapus aplikasi yang file eksekusinya sudah tidak ada dari daftar kandidat Buka dengan dan registrasi Applications.</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Label" xml:space="preserve">Hapus semua log Event Viewer</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Desc" xml:space="preserve">Menghapus log dari semua saluran yang menumpuk di Event Viewer untuk membebaskan area penyimpanan log (biasanya beberapa ratus MB). Informasi pemecahan masalah sebelumnya juga hilang, jadi jangan jalankan ini saat sedang menyelidiki masalah yang baru terjadi. Beberapa log sistem yang dilindungi dilewati.</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">Bersihkan cache Microsoft Store</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">Menyetel ulang cache Microsoft Store dengan WSReset. Solusi standar untuk Store yang tidak mau terbuka, unduhan yang tidak berjalan, atau kesalahan “coba lagi” yang berulang. Aplikasi dan info akun tidak dihapus. Aplikasi Store mungkin terbuka otomatis setelah selesai.</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">TRIM SSD dan konsolidasi ruang kosong</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">Menjalankan notifikasi TRIM ke SSD (/L) dan konsolidasi ruang kosong (/X) pada semua volume untuk menjaga performa tulis SSD dan mendefragmentasi ruang kosong. Tergantung tata letak drive, bisa butuh beberapa menit hingga puluhan menit. Anda dapat terus memakai PC selama proses berlangsung.</x:String>
+
+  <!-- ===== Actions: Performance ===== -->
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Kompresi Memori</x:String>
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Desc" xml:space="preserve">Mengompresi halaman di RAM sebelum menukarnya ke disk saat memori menipis, sehingga menambah kapasitas efektif. Dengan sedikit beban CPU sebagai gantinya, ini mengurangi perlambatan terkait swap dan penulisan ke SSD. Disarankan: ON (bawaan Windows juga ON).</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Label" xml:space="preserve">Penggabungan Halaman</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Desc" xml:space="preserve">Menggabungkan halaman memori berisi konten identik menjadi satu, menghilangkan duplikasi. Menghemat memori saat menjalankan banyak aplikasi sejenis. Disarankan: ON (OFF secara bawaan pada sebagian edisi).</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Label" xml:space="preserve">Operation Recorder API</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Desc" xml:space="preserve">Sebuah API bagi alat eksternal untuk merekam dan memutar ulang perilaku SysMain (dahulu Superfetch). Ditujukan untuk alat benchmarking dan analisis performa, tidak dipakai dalam penggunaan normal. Disarankan: OFF (bawaan Windows juga OFF).</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Label" xml:space="preserve">Prefetch peluncuran aplikasi</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Desc" xml:space="preserve">Mempelajari file yang dimuat aplikasi yang sering dipakai dan memuatnya lebih dulu saat startup untuk mempercepat peluncuran (Prefetch). Membantu mengurangi waktu tunggu peluncuran bahkan pada SSD. Disarankan: ON (bawaan Windows juga ON).</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Label" xml:space="preserve">Pra-peluncuran aplikasi UWP</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Desc" xml:space="preserve">Memprediksi aplikasi Store (UWP) yang mungkin segera dipakai dan meluncurkannya di latar belakang sebelum Anda membukanya. Terasa lebih cepat tetapi mengonsumsi memori lebih awal, jadi OFF disarankan bila Anda mengutamakan penghematan memori.</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Label" xml:space="preserve">Setel ulang pengaturan paging kernel ke bawaan</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Desc" xml:space="preserve">Menghapus DisablePagingExecutive (pengaturan yang menjaga kode kernel selalu di RAM), yang sering ditulis oleh alat optimasi, dan mengembalikannya ke perilaku paging bawaan Windows. Pengaturan ini kurang bermanfaat pada Windows modern dan dapat memboroskan memori. Tidak melakukan apa pun pada PC yang tidak menyetelnya.</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Label" xml:space="preserve">Nonaktifkan VBS / HVCI (hemat 1–2 GB memori)</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">Menonaktifkan keamanan berbasis virtualisasi (VBS) dan integritas kode yang ditegakkan hypervisor (HVCI) untuk membebaskan ~1–2 GB memori yang dicadangkan setiap saat. Ini adalah trade-off dengan keamanan; biarkan OFF (bawaan) bila Anda memakai Hyper-V, WSL2, Windows Sandbox, Docker Desktop, atau Credential Guard.</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">Konsolidasikan proses SvcHost (tekan pemisahan)</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">Secara bawaan Windows memulai svchost.exe terpisah per fitur (pada PC dengan RAM lebih dari 3,5 GB). Mengaktifkan ini (ON) memaksimalkan ambang pemisahan dan mengonsolidasikan layanan yang bisa dikelompokkan menjadi lebih sedikit proses, sehingga mengurangi jumlah proses dan penggunaan memori (puluhan hingga lebih dari seratus MB). Layanan yang diperlakukan sebagai batas keamanan (DiagTrack, Dnscache, dll.) tidak dikonsolidasikan. OFF menghapus ambang dan kembali ke pemisahan bawaan.</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">Matikan eksekusi latar belakang UWP sekaligus (hemat 200–500 MB)</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">Menyetel eksekusi latar belakang semua aplikasi Store (UWP) ke “Selalu nonaktif” sekaligus, sehingga aplikasi berhenti berjalan di latar belakang setelah Anda menutupnya. Mengurangi residensi dapat menghemat sekitar 200–500 MB memori. Untuk aplikasi yang memerlukan notifikasi atau live tile, matikan ini (OFF) atau ubah masing-masing ke “Selalu aktif” di Pengaturan.</x:String>
+  <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">Nonaktifkan Windows Recall</x:String>
+  <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">Menonaktifkan fitur Recall, yang secara berkala merekam cuplikan layar untuk pencarian AI (fitur AI lain seperti Click-to-do dan pencarian semantik tetap dipertahankan). Mengurangi konsumsi memori/disk proses perekaman dan kekhawatiran privasi. Hanya tersedia pada PC Windows 11 24H2 + Copilot+; pada PC yang tidak didukung status tidak dapat dibaca dan tidak dapat dialihkan.</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">Nonaktifkan power throttling</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Desc" xml:space="preserve">Menonaktifkan Power Throttling, yang otomatis menurunkan clock CPU proses latar belakang untuk menghemat daya. Mencegah pekerjaan latar belakang seperti perekaman, encoding, dan build menjadi lambat. Karena berjalan pada performa penuh setiap saat, pengurasan baterai meningkat pada laptop. OFF kembali ke perilaku hemat daya bawaan.</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Label" xml:space="preserve">Nonaktifkan MPO (Multi-Plane Overlay)</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Desc" xml:space="preserve">Menonaktifkan Multi-Plane Overlay (MPO), tempat GPU menyusun beberapa plane (OverlayTestMode=5). Tergantung driver, MPO dapat menyebabkan layar berkedip, layar hitam sesaat, dan video tersendat; solusi standar bila Anda mengalami gejala tersebut. Jika tidak, membiarkannya OFF (bawaan) tidak masalah.</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Label" xml:space="preserve">Naikkan prioritas pemrosesan audio</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Desc" xml:space="preserve">Menaikkan prioritas tugas Playback/Capture pada Multimedia Class Scheduler ke nilai tertinggi (6) untuk mengurangi audio putus dan letupan saat beban berat. OFF menghapus pengaturan prioritas dan kembali ke bawaan Windows.</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Label" xml:space="preserve">Jadikan Remote Desktop 60 FPS</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Desc" xml:space="preserve">Memperpendek interval frame penggambaran koneksi Remote Desktop (DWMFRAMEINTERVAL=15), menaikkannya dari ~30 FPS bawaan menjadi sekitar 60 FPS. Ini berlaku untuk PC ini sebagai pihak yang dikoneksi. Penggunaan bandwidth meningkat. OFF kembali ke laju frame bawaan.</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Label" xml:space="preserve">Hapus penundaan peluncuran aplikasi startup</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Desc" xml:space="preserve">Menonaktifkan mekanisme yang menunda aplikasi startup beberapa hingga belasan detik setelah logon agar Windows dapat memprioritaskan penggambaran desktop (tunggu idle + timer penundaan). Berguna saat Anda ingin langsung memakai alat residen. Sesaat setelah logon mungkin terasa sedikit lebih berat. OFF kembali ke perilaku penundaan bawaan.</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Label" xml:space="preserve">Optimalkan distribusi interupsi GPU NVIDIA</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Desc" xml:space="preserve">Menghapus batas interupsi MSI (MessageNumberLimit) yang ditulis alat optimasi terdahulu ke GPU NVIDIA, mengembalikan penanganan interupsi ke perilaku terdistribusi bawaan. Jika nilai ini tetap ada, interupsi GPU terkonsentrasi pada inti CPU 0 dan dapat menyebabkan stutter dalam game. Tidak mengubah apa pun pada PC tanpa GPU NVIDIA.</x:String>
+
+  <!-- ===== Actions: System ===== -->
+  <x:String x:Key="Text.Action.power-plan-setup.Label" xml:space="preserve">Setel paket daya / mode daya ke konfigurasi yang disarankan</x:String>
+  <x:String x:Key="Text.Action.power-plan-setup.Desc" xml:space="preserve">Mengonfigurasi ulang paket daya di atas dasar “Seimbang” dan menyetel mode daya ke “Performa terbaik” (baik AC maupun baterai). Juga menulis: matikan layar = 180 mnt pada AC / 30 mnt pada baterai, tidur = tidak pernah, tombol daya = matikan, menutup tutup laptop = tidak melakukan apa pun (serta menampilkan kembali item-item tersembunyi itu). Penyesuaian paket daya yang sudah ada kembali ke bawaan, jadi hati-hati bila Anda memakai paket kustom.</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Label" xml:space="preserve">Nonaktifkan hibernasi</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Desc" xml:space="preserve">Menonaktifkan hibernasi dan menghapus hiberfil.sys, yang selalu dicadangkan pada drive sistem (puluhan persen dari memori fisik = beberapa GB). Fast Startup dinonaktifkan bersamaan, jadi startup bisa menjadi lebih lambat. Biarkan OFF (bawaan) bila Anda memakai hibernasi pada laptop.</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Label" xml:space="preserve">Nonaktifkan akselerasi mouse (Tingkatkan ketepatan penunjuk)</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Desc" xml:space="preserve">Menonaktifkan “Tingkatkan ketepatan penunjuk” (akselerasi mouse), tempat jarak tempuh kursor berubah tergantung seberapa cepat Anda menggerakkan mouse, menetapkan gerakan tangan dan kursor pada 1:1. Pengaturan standar untuk menstabilkan bidikan dalam game seperti FPS. OFF kembali ke bawaan Windows (akselerasi aktif). Mungkin perlu masuk kembali agar berlaku.</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Label" xml:space="preserve">Nonaktifkan pintasan aksesibilitas seperti Sticky Keys</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Desc" xml:space="preserve">Menonaktifkan pintasan yang secara tidak sengaja memicu fitur aksesibilitas, seperti Sticky Keys yang aktif saat Anda menekan Shift lima kali (Sticky Keys / Toggle Keys / Filter Keys). Mencegah kejadian di mana menekan Shift berulang kali dalam game memunculkan dialog dan mengganggu Anda. OFF kembali ke bawaan Windows (pintasan aktif).</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Label" xml:space="preserve">Perpendek penundaan tampilnya menu</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Desc" xml:space="preserve">Memperpendek waktu tunggu sebelum menu klik kanan dan submenu menu Start terbuka dari 400 ms bawaan menjadi 0, membuat UI terasa lebih responsif. OFF kembali ke 400 ms bawaan. Perlu masuk kembali (atau memulai ulang Explorer) agar berlaku.</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Label" xml:space="preserve">Tetapkan templat tampilan folder ke Umum</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Desc" xml:space="preserve">Menghentikan Explorer mendeteksi otomatis gaya tampilan (Gambar / Musik / Dokumen, dll.) dari isi folder dan menyeragamkan semua folder ke Item Umum. Mengatasi tampilan lambat (bilah progres hijau) akibat deteksi otomatis pada folder berisi banyak file. OFF kembali ke deteksi otomatis.</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Label" xml:space="preserve">Nonaktifkan notifikasi CEIP / umpan balik</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Desc" xml:space="preserve">Menonaktifkan Program Peningkatan Pengalaman Pelanggan (CEIP, yang mengirim data penggunaan ke Microsoft) dan notifikasi “Berikan umpan balik tentang Windows”. Pengaturan standar baik untuk beban latar belakang pengiriman maupun privasi. OFF menghapus kebijakan dan kembali ke bawaan.</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Label" xml:space="preserve">Setel ulang pengaturan Game Bar / Game DVR ke bawaan</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Desc" xml:space="preserve">Menghapus pengaturan penonaktifan Game Bar / Game DVR (perekaman game) yang ditulis alat optimasi terdahulu atau tweak registry, mengembalikannya ke perilaku bawaan Windows. Efektif untuk gejala seperti “Win+G tidak merespons” atau “tidak bisa menangkap game”.</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Label" xml:space="preserve">Batalkan pengaktifan paksa driver native NVMe</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Desc" xml:space="preserve">Menghapus penggantian FeatureManagement yang memaksa mengaktifkan driver native NVMe eksperimental Windows, mengembalikan driver penyimpanan ke keputusan bawaan OS. Jika penggantian ini tetap ada, dapat menyebabkan layar biru (PAGE_FAULT_IN_NONPAGED_AREA) pada sebagian lingkungan. Tidak mengubah apa pun pada PC tanpa penggantian tersebut.</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Label" xml:space="preserve">Setel server sinkronisasi waktu ke NTP Jepang</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">Mengubah target sinkronisasi waktu Windows dari time.windows.com bawaan ke server NTP publik Jepang (ntp.jst.mfeed.ad.jp) untuk meningkatkan ketepatan dan kestabilan sinkronisasi waktu. Memulai ulang layanan Windows Time setelahnya agar langsung berlaku.</x:String>
+
+  <!-- ===== Actions: Organize ===== -->
+  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">Urutkan pin Quick Access</x:String>
+  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Mengurutkan folder yang disematkan ke Quick Access secara menaik berdasarkan nama (mencadangkan jump list sebelum dijalankan).</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Urutkan variabel lingkungan Path</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Menghapus duplikat dan mengurutkan secara menaik entri variabel lingkungan Path pengguna dan sistem.</x:String>
+</ResourceDictionary>

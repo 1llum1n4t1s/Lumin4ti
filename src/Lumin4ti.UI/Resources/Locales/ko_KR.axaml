@@ -1,0 +1,151 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="avares://Lumin4ti.UI/Resources/Locales/en_US.axaml"/>
+  </ResourceDictionary.MergedDictionaries>
+
+  <!-- ===== Tabs ===== -->
+  <x:String x:Key="Text.Tab.Update" xml:space="preserve">업데이트 및 보안</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">정리 및 복구</x:String>
+  <x:String x:Key="Text.Tab.Performance" xml:space="preserve">성능</x:String>
+  <x:String x:Key="Text.Tab.System" xml:space="preserve">시스템</x:String>
+  <x:String x:Key="Text.Tab.Organize" xml:space="preserve">정돈</x:String>
+  <x:String x:Key="Text.Tab.Version" xml:space="preserve">정보</x:String>
+
+  <!-- ===== Notes / buttons ===== -->
+  <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* 적용하려면 PC를 다시 시작해야 합니다</x:String>
+  <x:String x:Key="Text.Note.LongRunning" xml:space="preserve">* 실행에 몇 분 정도 걸릴 수 있습니다</x:String>
+  <x:String x:Key="Text.Note.AffectsExplorer" xml:space="preserve">* 변경 시 Explorer가 자동으로 다시 시작됩니다</x:String>
+  <x:String x:Key="Text.Button.Run" xml:space="preserve">실행</x:String>
+  <x:String x:Key="Text.Button.Cancel" xml:space="preserve">취소</x:String>
+
+  <!-- ===== About / version pane ===== -->
+  <x:String x:Key="Text.Version.Subtitle" xml:space="preserve">Windows를 원하는 대로 사용자 지정하는 도구</x:String>
+  <x:String x:Key="Text.Version.VersionLabel" xml:space="preserve">버전:</x:String>
+  <x:String x:Key="Text.Version.CheckUpdate" xml:space="preserve">업데이트 확인</x:String>
+  <x:String x:Key="Text.Version.ShowSkipped" xml:space="preserve">건너뛴 업데이트 다시 표시</x:String>
+  <x:String x:Key="Text.Version.CheckOnStartup" xml:space="preserve">시작 시 자동으로 업데이트 확인</x:String>
+  <x:String x:Key="Text.Version.LanguageHeader" xml:space="preserve">언어</x:String>
+  <x:String x:Key="Text.Version.LanguageHint" xml:space="preserve">표시 언어를 선택합니다.</x:String>
+  <x:String x:Key="Text.Version.FoldersHeader" xml:space="preserve">폴더</x:String>
+  <x:String x:Key="Text.Version.OpenLogs" xml:space="preserve">로그 폴더 열기</x:String>
+  <x:String x:Key="Text.Version.OpenSettings" xml:space="preserve">설정 폴더 열기</x:String>
+
+  <!-- ===== Category titles / captions ===== -->
+  <x:String x:Key="Text.Category.Update" xml:space="preserve">업데이트 및 보안</x:String>
+  <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">앱과 Windows Defender를 업데이트하고 정상적인 보안 설정을 복원합니다.</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">정리 및 복구</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">디스크 공간을 확보하고 손상된 등록을 정리하거나 복구합니다.</x:String>
+  <x:String x:Key="Text.Category.Performance" xml:space="preserve">성능</x:String>
+  <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">메모리, 프로세스, 렌더링을 최적화합니다. 스위치는 일반적으로 ON = 최적화 적용, OFF = Windows 기본값으로 되돌림입니다(MMAgent 항목만 ON = 해당 기능 사용이며, 권장값은 각 설명을 참조하세요).</x:String>
+  <x:String x:Key="Text.Category.System" xml:space="preserve">시스템</x:String>
+  <x:String x:Key="Text.Category.System.Caption" xml:space="preserve">전원, 입력, 시간 등 Windows 설정을 조정합니다. 스위치는 ON = 적용, OFF = Windows 기본값으로 되돌림입니다.</x:String>
+  <x:String x:Key="Text.Category.Organize" xml:space="preserve">정돈</x:String>
+  <x:String x:Key="Text.Category.Organize.Caption" xml:space="preserve">고정 항목, 환경 변수 등을 깔끔한 순서로 정렬합니다.</x:String>
+
+  <!-- ===== Status / result messages ({0} = item name) ===== -->
+  <x:String x:Key="Text.Status.Running" xml:space="preserve">{0} 실행 중…</x:String>
+  <x:String x:Key="Text.Status.RunningLong" xml:space="preserve">{0} 실행 중… (몇 분 정도 걸릴 수 있음)</x:String>
+  <x:String x:Key="Text.Status.TogglingOn" xml:space="preserve">{0} 켜는 중…</x:String>
+  <x:String x:Key="Text.Status.TogglingOff" xml:space="preserve">{0} 끄는 중…</x:String>
+  <x:String x:Key="Text.Status.Completed" xml:space="preserve">{0} 완료됨</x:String>
+  <x:String x:Key="Text.Status.Failed" xml:space="preserve">{0} 실패(로그 확인)</x:String>
+  <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">{0} 켬</x:String>
+  <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">{0} 끔</x:String>
+  <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">{0} 전환 실패(로그 확인)</x:String>
+  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">취소됨</x:String>
+  <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ 완료됨</x:String>
+  <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ 실패</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer 다시 시작됨</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Explorer 다시 시작 실패(수동으로 다시 시작하세요)</x:String>
+  <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">상태를 읽을 수 없습니다(관리자 권한이 없거나 이 PC에서 해당 기능을 사용할 수 없습니다. 디버그 실행은 권한 상승되지 않으므로 일반 실행으로 시도하세요).</x:String>
+
+  <!-- ===== Actions: Update &amp; Security ===== -->
+  <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">설치된 앱 일괄 업데이트(winget)</x:String>
+  <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">winget 패키지 관리자를 사용해 설치된 모든 앱을 최신 버전으로 업그레이드합니다. 업데이트할 앱이 많으면 다운로드와 설치에 시간이 걸릴 수 있습니다. 실행 중인 앱은 실행 파일이 잠겨 업데이트에 실패할 수 있지만, 나머지는 계속 진행되며 성공/실패 내역이 표시됩니다.</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Defender 정의 파일 다시 가져오기</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Windows Defender의 바이러스 정의와 동적 서명을 한 번 삭제한 후 최신 버전을 다시 다운로드합니다. 오탐이나 업데이트 오류를 일으키는 정의 손상을 위한 표준 새로 고침이며, 실행 중에도 실시간 보호는 계속 작동합니다.</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">Defender 설정 초기화(제외 항목 및 주요 옵션)</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Windows Defender에 등록된 모든 제외 경로, 프로세스, 확장명을 제거하고 실시간 보호, 클라우드 보호 등 주요 옵션을 기본값으로 복원합니다. 악성 코드나 오래된 소프트웨어가 추가했을 수 있는 제외 항목(검사 사각지대)을 지웁니다. 의도적으로 추가한 제외 항목도 제거되므로 필요한 항목은 이후 다시 추가하세요.</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">Windows 보안 앱 초기화</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Desc" xml:space="preserve">Windows 보안 앱이 열리지 않거나 손상되어 보이거나 항목이 누락되었을 때 초기 상태로 재설정하고 다시 등록합니다. Defender의 보호 상태나 정의 파일에는 영향을 주지 않습니다.</x:String>
+
+  <!-- ===== Actions: Cleanup &amp; Repair ===== -->
+  <x:String x:Key="Text.Action.wu-component-cleanup.Label" xml:space="preserve">Windows Update가 사용한 공간 제거</x:String>
+  <x:String x:Key="Text.Action.wu-component-cleanup.Desc" xml:space="preserve">구성 요소 저장소(WinSxS 폴더)에 쌓인 대체된 이전 업데이트 세대를 영구적으로 제거해 수 GB의 디스크 공간을 확보합니다. 실행 후에는 적용된 업데이트를 제거할 수 없게 됩니다(대개 문제되지 않음). 몇 분에서 수십 분이 걸립니다.</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Label" xml:space="preserve">손상된 시스템 폴더 이름 복구</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">시스템 폴더 이름(예: 다운로드)이 영어로 표시되는 등의 표시 손상을 shell32.dll을 다시 등록해 복구합니다.</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">시스템 트레이 아이콘 캐시 초기화</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">알림 영역(시스템 트레이)의 아이콘 캐시를 지웁니다. 제거된 앱의 아이콘이 숨겨진 아이콘 영역에 남아 있는 문제를 해결합니다. 트레이 표시/숨김 사용자 지정은 한 번 초기화됩니다.</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">손상된 시작 프로그램 항목 제거</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">실행 파일이 더 이상 존재하지 않는 시작 프로그램 항목(현재 사용자)을 해당 고아 항목과 함께 제거합니다.</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">연결 프로그램에서 존재하지 않는 앱 제거</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">실행 파일이 더 이상 존재하지 않는 앱을 연결 프로그램 후보 목록과 Applications 등록에서 제거합니다.</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Label" xml:space="preserve">이벤트 뷰어 로그 모두 삭제</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Desc" xml:space="preserve">이벤트 뷰어에 쌓인 모든 채널의 로그를 삭제해 로그 저장 영역(대개 수백 MB)을 확보합니다. 과거의 문제 해결 정보도 사라지므로 최근 문제를 조사하는 중에는 실행하지 마세요. 일부 보호된 시스템 로그는 건너뜁니다.</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">Microsoft Store 캐시 지우기</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">WSReset로 Microsoft Store 캐시를 초기화합니다. Store가 열리지 않거나 다운로드가 진행되지 않거나 “다시 시도” 오류가 반복될 때의 표준 해결 방법입니다. 앱과 계정 정보는 제거되지 않습니다. 완료되면 Store 앱이 자동으로 열릴 수 있습니다.</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">SSD TRIM 및 빈 공간 통합</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">SSD 쓰기 성능을 유지하고 빈 공간을 조각 모음하기 위해 모든 볼륨에서 SSD에 대한 TRIM 알림(/L)과 빈 공간 통합(/X)을 실행합니다. 드라이브 구성에 따라 몇 분에서 수십 분이 걸릴 수 있습니다. 실행 중에도 PC를 계속 사용할 수 있습니다.</x:String>
+
+  <!-- ===== Actions: Performance ===== -->
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">메모리 압축</x:String>
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Desc" xml:space="preserve">메모리가 부족할 때 디스크로 스왑하기 전에 RAM의 페이지를 압축해 유효 용량을 늘립니다. 약간의 CPU 부하를 대가로 스왑으로 인한 느려짐과 SSD 쓰기를 줄입니다. 권장: ON(Windows 기본값도 ON).</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Label" xml:space="preserve">페이지 결합</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Desc" xml:space="preserve">내용이 동일한 메모리 페이지를 하나로 병합해 중복을 제거합니다. 같은 종류의 앱을 여러 개 실행할 때 메모리를 절약합니다. 권장: ON(일부 에디션에서는 기본값 OFF).</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Label" xml:space="preserve">Operation Recorder API</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Desc" xml:space="preserve">외부 도구가 SysMain(이전 Superfetch)의 동작을 기록하고 재생하기 위한 API입니다. 벤치마킹 및 성능 분석 도구용이며 일반적인 사용에는 쓰이지 않습니다. 권장: OFF(Windows 기본값도 OFF).</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Label" xml:space="preserve">응용 프로그램 시작 프리페치</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Desc" xml:space="preserve">자주 사용하는 앱이 로드하는 파일을 학습해 시작 시 미리 가져와 실행 속도를 높입니다(Prefetch). SSD에서도 실행 대기를 줄이는 데 도움이 됩니다. 권장: ON(Windows 기본값도 ON).</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Label" xml:space="preserve">UWP 앱 사전 실행</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Desc" xml:space="preserve">곧 사용될 가능성이 높은 Store(UWP) 앱을 예측해 열기 전에 백그라운드에서 미리 실행합니다. 더 빠르게 느껴지지만 메모리를 미리 소비하므로 메모리 절약을 우선한다면 OFF를 권장합니다.</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Label" xml:space="preserve">커널 페이징 설정을 기본값으로 초기화</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Desc" xml:space="preserve">최적화 도구가 자주 기록하는 DisablePagingExecutive(커널 코드를 항상 RAM에 유지하는 설정)를 삭제하고 Windows 기본 페이징 동작으로 되돌립니다. 이 설정은 최신 Windows에서 이점이 거의 없고 메모리를 낭비할 수 있습니다. 설정되지 않은 PC에서는 아무 작업도 하지 않습니다.</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Label" xml:space="preserve">VBS / HVCI 비활성화(1~2 GB 메모리 절약)</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">가상화 기반 보안(VBS)과 하이퍼바이저 적용 코드 무결성(HVCI)을 비활성화해 항상 예약된 약 1~2 GB의 메모리를 확보합니다. 보안과의 절충이므로 Hyper-V, WSL2, Windows Sandbox, Docker Desktop, Credential Guard를 사용한다면 OFF(기본값)로 두세요.</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">SvcHost 프로세스 통합(분할 억제)</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">기본적으로 Windows는 기능별로 분할된 svchost.exe를 시작합니다(RAM이 3.5 GB를 초과하는 PC). 이 항목을 ON으로 하면 분할 임계값을 최대로 높여 그룹화 가능한 서비스를 더 적은 프로세스로 통합하여 프로세스 수와 메모리 사용량(수십에서 100 MB 이상)을 줄입니다. 보안 경계로 취급되는 서비스(DiagTrack, Dnscache 등)는 통합되지 않습니다. OFF는 임계값을 제거하고 기본 분할로 되돌립니다.</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">UWP 백그라운드 실행 일괄 끄기(200~500 MB 절약)</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">모든 Store(UWP) 앱의 백그라운드 실행을 한 번에 “항상 끄기”로 설정해, 닫은 후 백그라운드에서 계속 실행되지 않도록 합니다. 상주를 줄여 약 200~500 MB의 메모리를 절약할 수 있습니다. 알림이나 라이브 타일이 필요한 앱은 이 항목을 OFF로 하거나 설정에서 개별적으로 “항상 켜기”로 변경하세요.</x:String>
+  <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">Windows Recall 비활성화</x:String>
+  <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">AI 검색을 위해 주기적으로 화면 스냅샷을 기록하는 Recall 기능을 비활성화합니다(Click-to-do, 의미 검색 등 다른 AI 기능은 유지). 기록 프로세스의 메모리/디스크 소비와 개인정보 우려를 줄입니다. Windows 11 24H2 + Copilot+ PC에서만 사용할 수 있으며, 지원되지 않는 PC에서는 상태를 읽을 수 없고 전환할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">전원 제한 비활성화</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Desc" xml:space="preserve">전력을 절약하기 위해 백그라운드 프로세스의 CPU 클럭을 자동으로 낮추는 Power Throttling을 비활성화합니다. 녹화, 인코딩, 빌드 같은 백그라운드 작업이 느려지지 않도록 합니다. 항상 최대 성능으로 실행되므로 노트북에서는 배터리 소모가 늘어납니다. OFF는 기본 절전 동작으로 되돌립니다.</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Label" xml:space="preserve">MPO(Multi-Plane Overlay) 비활성화</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Desc" xml:space="preserve">GPU가 여러 평면을 합성하는 Multi-Plane Overlay(MPO)를 비활성화합니다(OverlayTestMode=5). 드라이버에 따라 MPO는 화면 깜박임, 순간 검은 화면, 영상 끊김을 일으킬 수 있으며, 그런 증상이 있을 때의 표준 해결 방법입니다. 증상이 없다면 OFF(기본값)로 두어도 괜찮습니다.</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Label" xml:space="preserve">오디오 처리 우선순위 높이기</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Desc" xml:space="preserve">부하가 높을 때 오디오 끊김과 잡음을 줄이기 위해 Multimedia Class Scheduler의 재생/캡처 작업 우선순위를 최고값(6)으로 높입니다. OFF는 우선순위 설정을 제거하고 Windows 기본값으로 되돌립니다.</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Label" xml:space="preserve">원격 데스크톱을 60 FPS로 설정</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Desc" xml:space="preserve">원격 데스크톱 연결의 그리기 프레임 간격을 단축해(DWMFRAMEINTERVAL=15) 기본 약 30 FPS에서 약 60 FPS로 높입니다. 이 설정은 연결되는 쪽인 이 PC에 적용됩니다. 대역폭 사용량이 늘어납니다. OFF는 기본 프레임 속도로 되돌립니다.</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Label" xml:space="preserve">시작 프로그램 실행 지연 제거</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Desc" xml:space="preserve">Windows가 바탕 화면 그리기를 우선하도록 로그온 후 몇 초에서 십수 초 동안 시작 프로그램을 지연시키는 방식(유휴 대기 + 지연 타이머)을 비활성화합니다. 상주 도구를 바로 사용하고 싶을 때 유용합니다. 로그온 직후에는 다소 무겁게 느껴질 수 있습니다. OFF는 기본 지연 동작으로 되돌립니다.</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Label" xml:space="preserve">NVIDIA GPU 인터럽트 분산 최적화</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Desc" xml:space="preserve">과거 최적화 도구가 NVIDIA GPU에 기록한 MSI 인터럽트 제한(MessageNumberLimit)을 삭제해 인터럽트 처리를 기본 분산 동작으로 되돌립니다. 이 값이 남아 있으면 GPU 인터럽트가 CPU 코어 0에 집중되어 게임에서 끊김을 일으킬 수 있습니다. NVIDIA GPU가 없는 PC에서는 아무것도 바뀌지 않습니다.</x:String>
+
+  <!-- ===== Actions: System ===== -->
+  <x:String x:Key="Text.Action.power-plan-setup.Label" xml:space="preserve">전원 계획/전원 모드를 권장 구성으로 설정</x:String>
+  <x:String x:Key="Text.Action.power-plan-setup.Desc" xml:space="preserve">“균형 조정” 기반으로 전원 계획을 재구성하고 전원 모드를 “최고 성능”으로 설정합니다(AC와 배터리 모두). 또한 디스플레이 끄기 = AC 180분 / 배터리 30분, 절전 = 안 함, 전원 단추 = 종료, 덮개 닫기 = 아무 작업 안 함으로 기록합니다(숨겨진 해당 항목도 표시). 기존 전원 계획 사용자 지정은 기본값으로 되돌아가므로 사용자 지정 계획을 사용한다면 주의하세요.</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Label" xml:space="preserve">최대 절전 모드 비활성화</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Desc" xml:space="preserve">최대 절전 모드를 비활성화하고 시스템 드라이브에 항상 예약되는 hiberfil.sys(물리 메모리의 수십 퍼센트 = 수 GB)를 삭제합니다. 동시에 빠른 시작이 비활성화되므로 시작이 느려질 수 있습니다. 노트북에서 최대 절전 모드를 사용한다면 OFF(기본값)로 두세요.</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Label" xml:space="preserve">마우스 가속(포인터 정확도 향상) 비활성화</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Desc" xml:space="preserve">마우스를 움직이는 속도에 따라 커서 이동 거리가 달라지는 “포인터 정확도 향상”(마우스 가속)을 비활성화해 손과 커서의 움직임을 1:1로 고정합니다. FPS 같은 게임에서 조준을 안정화하는 표준 설정입니다. OFF는 Windows 기본값(가속 켜짐)으로 되돌립니다. 적용하려면 다시 로그인해야 할 수 있습니다.</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Label" xml:space="preserve">고정 키 등 접근성 단축키 비활성화</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Desc" xml:space="preserve">Shift를 다섯 번 누르면 고정 키가 켜지는 등 접근성 기능을 실수로 트리거하는 단축키(고정 키 / 토글 키 / 필터 키)를 비활성화합니다. 게임에서 Shift를 반복해 눌러 대화 상자가 뜨고 흐름이 끊기는 사고를 방지합니다. OFF는 Windows 기본값(단축키 사용)으로 되돌립니다.</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Label" xml:space="preserve">메뉴 표시 지연 단축</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Desc" xml:space="preserve">마우스 오른쪽 클릭 메뉴와 시작 메뉴 하위 메뉴가 열리기까지의 대기 시간을 기본 400ms에서 0으로 단축해 UI를 더 빠르게 느껴지게 합니다. OFF는 기본 400ms로 되돌립니다. 적용하려면 다시 로그인(또는 Explorer 다시 시작)해야 합니다.</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Label" xml:space="preserve">폴더 보기 템플릿을 일반으로 고정</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Desc" xml:space="preserve">Explorer가 폴더 내용으로부터 표시 스타일(사진 / 음악 / 문서 등)을 자동 감지하는 것을 중지하고 모든 폴더를 일반 항목으로 통일합니다. 파일이 많은 폴더에서 자동 감지로 인한 느린 표시(녹색 진행 막대)를 해결합니다. OFF는 자동 감지로 되돌립니다.</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Label" xml:space="preserve">CEIP / 피드백 알림 비활성화</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Desc" xml:space="preserve">고객 체험 개선 프로그램(CEIP, 사용 데이터를 Microsoft에 전송)과 “Windows에 대한 의견을 보내 주세요” 알림을 비활성화합니다. 전송의 백그라운드 부하와 개인정보 모두를 위한 표준 설정입니다. OFF는 정책을 제거하고 기본값으로 되돌립니다.</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Label" xml:space="preserve">Game Bar / Game DVR 설정을 기본값으로 초기화</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Desc" xml:space="preserve">과거 최적화 도구나 레지스트리 조정으로 기록된 Game Bar / Game DVR(게임 녹화) 비활성화 설정을 삭제해 Windows 기본 동작으로 되돌립니다. “Win+G가 응답하지 않음”이나 “게임을 캡처할 수 없음” 같은 증상에 효과적입니다.</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Label" xml:space="preserve">NVMe 네이티브 드라이버 강제 사용 해제</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Desc" xml:space="preserve">Windows의 실험적 NVMe 네이티브 드라이버를 강제로 사용하는 FeatureManagement 재정의를 삭제해 스토리지 드라이버를 OS 기본 결정으로 되돌립니다. 이 재정의가 남아 있으면 일부 환경에서 블루 스크린(PAGE_FAULT_IN_NONPAGED_AREA)을 일으킬 수 있습니다. 재정의가 없는 PC에서는 아무것도 바뀌지 않습니다.</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Label" xml:space="preserve">시간 동기화 서버를 일본 NTP로 설정</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">시간 동기화 정확도와 안정성을 높이기 위해 Windows의 시간 동기화 대상을 기본 time.windows.com에서 일본 공용 NTP 서버(ntp.jst.mfeed.ad.jp)로 변경합니다. 이후 Windows Time 서비스를 다시 시작해 즉시 적용합니다.</x:String>
+
+  <!-- ===== Actions: Organize ===== -->
+  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">Quick Access 고정 항목 정렬</x:String>
+  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Quick Access에 고정된 폴더를 이름 오름차순으로 정렬합니다(실행 전 점프 목록을 백업).</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Path 환경 변수 정렬</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">사용자 및 시스템 Path 환경 변수의 항목을 중복 제거하고 오름차순으로 정렬합니다.</x:String>
+</ResourceDictionary>

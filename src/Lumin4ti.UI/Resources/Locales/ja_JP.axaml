@@ -1,0 +1,31 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!--
+    日本語はコード内の日本語マスター (各アクションの Label/Description、カテゴリ Caption、ステータス文言) を
+    フォールバックとして使うため、ここには XAML の {DynamicResource} が直接参照するシェル文言だけを持つ。
+    (Category/Status/Result/Action.* は App.Text のフォールバックで日本語になる)
+  -->
+  <x:String x:Key="Text.Tab.Update" xml:space="preserve">更新・セキュリティ</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">クリーンアップ・修復</x:String>
+  <x:String x:Key="Text.Tab.Performance" xml:space="preserve">パフォーマンス</x:String>
+  <x:String x:Key="Text.Tab.System" xml:space="preserve">システム設定</x:String>
+  <x:String x:Key="Text.Tab.Organize" xml:space="preserve">整理・ソート</x:String>
+  <x:String x:Key="Text.Tab.Version" xml:space="preserve">バージョン情報</x:String>
+
+  <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">※ 反映には PC の再起動が必要です</x:String>
+  <x:String x:Key="Text.Note.LongRunning" xml:space="preserve">※ 実行に数分かかることがあります</x:String>
+  <x:String x:Key="Text.Note.AffectsExplorer" xml:space="preserve">※ 変更時にエクスプローラーを自動再起動します</x:String>
+
+  <x:String x:Key="Text.Button.Run" xml:space="preserve">実行</x:String>
+  <x:String x:Key="Text.Button.Cancel" xml:space="preserve">中断</x:String>
+
+  <x:String x:Key="Text.Version.Subtitle" xml:space="preserve">Windows を自分好みに整えるカスタマイズツール</x:String>
+  <x:String x:Key="Text.Version.VersionLabel" xml:space="preserve">バージョン:</x:String>
+  <x:String x:Key="Text.Version.CheckUpdate" xml:space="preserve">更新を確認</x:String>
+  <x:String x:Key="Text.Version.ShowSkipped" xml:space="preserve">スキップした更新を再表示</x:String>
+  <x:String x:Key="Text.Version.CheckOnStartup" xml:space="preserve">起動時に自動で更新を確認する</x:String>
+  <x:String x:Key="Text.Version.LanguageHeader" xml:space="preserve">言語</x:String>
+  <x:String x:Key="Text.Version.LanguageHint" xml:space="preserve">表示言語を選びます。</x:String>
+  <x:String x:Key="Text.Version.FoldersHeader" xml:space="preserve">フォルダ</x:String>
+  <x:String x:Key="Text.Version.OpenLogs" xml:space="preserve">ログフォルダを開く</x:String>
+  <x:String x:Key="Text.Version.OpenSettings" xml:space="preserve">設定フォルダを開く</x:String>
+</ResourceDictionary>

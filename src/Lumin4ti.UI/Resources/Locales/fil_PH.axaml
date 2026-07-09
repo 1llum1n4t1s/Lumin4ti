@@ -1,0 +1,151 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="avares://Lumin4ti.UI/Resources/Locales/en_US.axaml"/>
+  </ResourceDictionary.MergedDictionaries>
+
+  <!-- ===== Tabs ===== -->
+  <x:String x:Key="Text.Tab.Update" xml:space="preserve">Update at Seguridad</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Paglilinis at Pag-aayos</x:String>
+  <x:String x:Key="Text.Tab.Performance" xml:space="preserve">Performance</x:String>
+  <x:String x:Key="Text.Tab.System" xml:space="preserve">System</x:String>
+  <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Ayusin</x:String>
+  <x:String x:Key="Text.Tab.Version" xml:space="preserve">Tungkol Dito</x:String>
+
+  <!-- ===== Notes / buttons ===== -->
+  <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* Kailangan i-restart ang PC para magkabisa</x:String>
+  <x:String x:Key="Text.Note.LongRunning" xml:space="preserve">* Maaaring tumagal ng ilang minuto</x:String>
+  <x:String x:Key="Text.Note.AffectsExplorer" xml:space="preserve">* Awtomatikong nire-restart ang Explorer kapag binago</x:String>
+  <x:String x:Key="Text.Button.Run" xml:space="preserve">Patakbuhin</x:String>
+  <x:String x:Key="Text.Button.Cancel" xml:space="preserve">Kanselahin</x:String>
+
+  <!-- ===== About / version pane ===== -->
+  <x:String x:Key="Text.Version.Subtitle" xml:space="preserve">Isang tool para i-customize ang Windows ayon sa gusto mo</x:String>
+  <x:String x:Key="Text.Version.VersionLabel" xml:space="preserve">Bersyon:</x:String>
+  <x:String x:Key="Text.Version.CheckUpdate" xml:space="preserve">Maghanap ng update</x:String>
+  <x:String x:Key="Text.Version.ShowSkipped" xml:space="preserve">Ipakitang muli ang na-skip na update</x:String>
+  <x:String x:Key="Text.Version.CheckOnStartup" xml:space="preserve">Awtomatikong maghanap ng update sa pagsisimula</x:String>
+  <x:String x:Key="Text.Version.LanguageHeader" xml:space="preserve">Wika</x:String>
+  <x:String x:Key="Text.Version.LanguageHint" xml:space="preserve">Piliin ang wikang ipapakita.</x:String>
+  <x:String x:Key="Text.Version.FoldersHeader" xml:space="preserve">Mga Folder</x:String>
+  <x:String x:Key="Text.Version.OpenLogs" xml:space="preserve">Buksan ang folder ng mga log</x:String>
+  <x:String x:Key="Text.Version.OpenSettings" xml:space="preserve">Buksan ang folder ng mga setting</x:String>
+
+  <!-- ===== Category titles / captions ===== -->
+  <x:String x:Key="Text.Category.Update" xml:space="preserve">Update at Seguridad</x:String>
+  <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">I-update ang mga app at Windows Defender, at ibalik ang wastong mga setting ng seguridad.</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Paglilinis at Pag-aayos</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Magbawi ng espasyo sa disk at maglinis o mag-ayos ng mga sirang rehistrasyon.</x:String>
+  <x:String x:Key="Text.Category.Performance" xml:space="preserve">Performance</x:String>
+  <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">I-optimize ang memory, mga proseso, at rendering. Karaniwan, ang mga switch ay ON = ilapat ang optimization, OFF = ibalik sa default ng Windows (ang mga item lamang ng MMAgent ang gumagamit ng ON = paganahin ang feature na iyon; tingnan ang bawat paglalarawan para sa inirerekomendang halaga).</x:String>
+  <x:String x:Key="Text.Category.System" xml:space="preserve">System</x:String>
+  <x:String x:Key="Text.Category.System.Caption" xml:space="preserve">Isaayos ang mga setting ng Windows tulad ng power, input, at oras. Ang mga switch ay ON = ilapat, OFF = ibalik sa default ng Windows.</x:String>
+  <x:String x:Key="Text.Category.Organize" xml:space="preserve">Ayusin</x:String>
+  <x:String x:Key="Text.Category.Organize.Caption" xml:space="preserve">Ayusin nang maayos ang mga pin, environment variable, at iba pa.</x:String>
+
+  <!-- ===== Status / result messages ({0} = item name) ===== -->
+  <x:String x:Key="Text.Status.Running" xml:space="preserve">Pinapatakbo ang {0}…</x:String>
+  <x:String x:Key="Text.Status.RunningLong" xml:space="preserve">Pinapatakbo ang {0}… (maaaring tumagal ng ilang minuto)</x:String>
+  <x:String x:Key="Text.Status.TogglingOn" xml:space="preserve">Ino-ON ang {0}…</x:String>
+  <x:String x:Key="Text.Status.TogglingOff" xml:space="preserve">Ino-OFF ang {0}…</x:String>
+  <x:String x:Key="Text.Status.Completed" xml:space="preserve">Natapos ang {0}</x:String>
+  <x:String x:Key="Text.Status.Failed" xml:space="preserve">Nabigo ang {0} (tingnan ang log)</x:String>
+  <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">Ni-ON ang {0}</x:String>
+  <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">Ni-OFF ang {0}</x:String>
+  <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">Nabigong i-toggle ang {0} (tingnan ang log)</x:String>
+  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Kinansela</x:String>
+  <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ Natapos</x:String>
+  <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ Nabigo</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Ni-restart ang Explorer</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Nabigong i-restart ang Explorer (pakiusap i-restart ito nang manu-mano)</x:String>
+  <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Hindi mabasa ang estado (walang admin rights, o hindi available ang feature sa PC na ito. Ang mga debug launch ay hindi elevated, kaya subukan ang normal na paglunsad).</x:String>
+
+  <!-- ===== Actions: Update &amp; Security ===== -->
+  <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">I-update nang sabay-sabay ang mga naka-install na app (winget)</x:String>
+  <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">Ginagamit ang package manager na winget para i-upgrade ang lahat ng naka-install na app sa pinakabagong bersyon. Kung maraming app ang kailangang i-update, maaaring tumagal ang pag-download at pag-install. Ang mga app na tumatakbo ay maaaring naka-lock ang executable at mabigo sa pag-update, ngunit magpapatuloy ang iba at ipapakita ang buod ng tagumpay/pagkabigo.</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Muling kunin ang mga definition file ng Defender</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Minsang binubura ang mga virus definition at dynamic signature ng Windows Defender, pagkatapos ay muling dina-download ang pinakabago. Isang karaniwang refresh para sa sirang definition na nagdudulot ng maling pagtukoy o error sa update; patuloy na gumagana ang real-time protection habang tumatakbo ito.</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">I-reset ang mga setting ng Defender (exclusions at pangunahing opsyon)</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Inaalis ang lahat ng exclusion path, proseso, at extension na nakarehistro sa Windows Defender at ibinabalik ang pangunahing opsyon tulad ng real-time at cloud protection sa mga default. Nililinis ang mga exclusion (mga blind spot sa scan) na maaaring naidagdag ng malware o lumang software. Naaalis din ang mga sinadyang exclusion, kaya idagdag muli ang mga kailangan mo pagkatapos.</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">I-reset ang Windows Security app</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Desc" xml:space="preserve">Ibinabalik ang Windows Security app sa paunang estado at muling nirerehistro ito kapag hindi ito nabubuksan, mukhang sira, o may mga nawawalang item. Hindi nito naaapektuhan ang estado ng proteksyon o mga definition file ng Defender.</x:String>
+
+  <!-- ===== Actions: Cleanup &amp; Repair ===== -->
+  <x:String x:Key="Text.Action.wu-component-cleanup.Label" xml:space="preserve">Alisin ang espasyong ginamit ng Windows Update</x:String>
+  <x:String x:Key="Text.Action.wu-component-cleanup.Desc" xml:space="preserve">Permanenteng inaalis ang mga napalitang bersyon ng update na naipon sa component store (folder na WinSxS) para magbawi ng ilang GB ng espasyo sa disk. Pagkatapos nito, hindi mo na maa-uninstall ang mga inilapat na update (kadalasang hindi problema). Tumatagal ng ilang minuto hanggang ilang sampung minuto.</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Label" xml:space="preserve">Ayusin ang mga sirang pangalan ng system folder</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">Inaayos ang pagkasira ng display tulad ng mga pangalan ng system folder (hal. Downloads) na lumalabas sa Ingles, sa pamamagitan ng muling pagrehistro ng shell32.dll.</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">I-reset ang icon cache ng system tray</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">Nililinis ang icon cache ng notification area (system tray). Nilulutas ang mga kaso kung saan nananatili ang mga icon ng na-uninstall na app sa lugar ng mga nakatagong icon. Mari-reset nang minsan ang iyong pag-customize ng pagpapakita/pagtatago ng tray.</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">Alisin ang mga sirang startup entry</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">Inaalis ang mga startup entry (kasalukuyang user) na hindi na umiiral ang executable, kasama ang mga katumbas na naiwang entry.</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">Alisin ang mga walang app sa Open-with</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">Inaalis ang mga app na hindi na umiiral ang executable mula sa listahan ng mga kandidato sa Open-with at sa rehistrasyon ng Applications.</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Label" xml:space="preserve">Burahin ang lahat ng log ng Event Viewer</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Desc" xml:space="preserve">Binubura ang mga log mula sa lahat ng channel na naipon sa Event Viewer para palayain ang lugar ng imbakan ng log (kadalasang ilang daang MB). Nawawala rin ang nakaraang impormasyon sa troubleshooting, kaya huwag itong patakbuhin habang iniimbestigahan ang isang kamakailang isyu. Nilalaktawan ang ilang protektadong system log.</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">Linisin ang cache ng Microsoft Store</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">Nire-reset ang cache ng Microsoft Store gamit ang WSReset. Isang karaniwang solusyon kapag hindi bumubukas ang Store, hindi umuusad ang mga download, o paulit-ulit ang mga error na “subukan muli”. Hindi inaalis ang mga app at impormasyon ng account. Maaaring awtomatikong bumukas ang Store app kapag tapos na.</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">SSD TRIM at pagsasama-sama ng libreng espasyo</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">Nagpapatakbo ng TRIM notification sa SSD (/L) at pagsasama-sama ng libreng espasyo (/X) sa lahat ng volume para panatilihin ang write performance ng SSD at i-defragment ang libreng espasyo. Depende sa layout ng drive, maaaring tumagal ng ilang minuto hanggang ilang sampung minuto. Maaari mong gamitin ang PC habang tumatakbo ito.</x:String>
+
+  <!-- ===== Actions: Performance ===== -->
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Memory Compression</x:String>
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Desc" xml:space="preserve">Kino-compress ang mga page sa RAM bago i-swap out sa disk kapag mababa ang memory, na nagpapataas ng epektibong kapasidad. Kapalit ng bahagyang CPU load, binabawasan nito ang pagbagal na kaugnay ng swap at ang mga write sa SSD. Inirerekomenda: ON (default ng Windows ay ON din).</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Label" xml:space="preserve">Page Combining</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Desc" xml:space="preserve">Pinagsasama sa isa ang mga memory page na magkapareho ang nilalaman, inaalis ang pagdodoble. Nakakatipid ng memory kapag maraming app na magkakauri ang tumatakbo. Inirerekomenda: ON (default OFF sa ilang edisyon).</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Label" xml:space="preserve">Operation Recorder API</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Desc" xml:space="preserve">Isang API para sa mga panlabas na tool para i-record at i-replay ang pag-uugali ng SysMain (dating Superfetch). Nakalaan para sa mga tool ng benchmarking at pagsusuri ng performance, hindi ginagamit sa normal na paggamit. Inirerekomenda: OFF (default ng Windows ay OFF din).</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Label" xml:space="preserve">Prefetching ng paglunsad ng application</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Desc" xml:space="preserve">Natututo sa mga file na kinakarga ng madalas gamiting app at maagang kinukuha ang mga ito sa pagsisimula para mapabilis ang paglunsad (Prefetch). Nakakatulong bawasan ang paghihintay sa paglunsad kahit sa SSD. Inirerekomenda: ON (default ng Windows ay ON din).</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Label" xml:space="preserve">Pre-launch ng UWP app</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Desc" xml:space="preserve">Hinuhulaan ang mga Store (UWP) app na malamang na gagamitin sa lalong madaling panahon at inilulunsad ang mga ito sa background bago mo buksan. Pakiramdam ay mas mabilis ngunit nauubos nito ang memory nang maaga, kaya inirerekomenda ang OFF kung inuuna mo ang pagtitipid ng memory.</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Label" xml:space="preserve">I-reset ang kernel paging setting sa default</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Desc" xml:space="preserve">Binubura ang DisablePagingExecutive (isang setting na palaging pinapanatili ang kernel code sa RAM), na madalas isulat ng mga optimization tool, at ibinabalik sa default na paging behavior ng Windows. Kaunti lang ang benepisyo ng setting na ito sa modernong Windows at maaaring magsayang ng memory. Walang ginagawa sa mga PC kung saan hindi ito nakatakda.</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Label" xml:space="preserve">I-disable ang VBS / HVCI (makatipid ng 1–2 GB memory)</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">Ini-disable ang Virtualization-Based Security (VBS) at Hypervisor-Enforced Code Integrity (HVCI) para palayain ang ~1–2 GB ng memory na palaging nakalaan. Ito ay isang trade-off sa seguridad; iwanang OFF (default) kung gumagamit ka ng Hyper-V, WSL2, Windows Sandbox, Docker Desktop, o Credential Guard.</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">Pagsamahin ang mga SvcHost na proseso (pigilan ang paghahati)</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">Bilang default, sinisimulan ng Windows ang svchost.exe nang nakahati kada feature (sa mga PC na may higit sa 3.5 GB RAM). Ang pag-ON nito ay pinapataas ang split threshold sa maximum at pinagsasama ang mga serbisyong maaaring i-grupo sa mas kaunting proseso, na binabawasan ang bilang ng proseso at paggamit ng memory (ilang sampu hanggang mahigit isang daang MB). Ang mga serbisyong itinuturing na security boundary (DiagTrack, Dnscache, atbp.) ay hindi pinagsasama. Ang OFF ay inaalis ang threshold at ibinabalik sa default na paghahati.</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">I-off nang sabay-sabay ang UWP background execution (makatipid ng 200–500 MB)</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">Itinatakda nang sabay-sabay ang background execution ng lahat ng Store (UWP) app sa “Palaging naka-off”, kaya titigil silang tumakbo sa background pagkatapos mong isara. Ang pagbawas ng residency ay makakatipid ng humigit-kumulang 200–500 MB ng memory. Para sa mga app na nangangailangan ng notification o live tile, i-off ito (OFF) o baguhin ang mga ito nang isa-isa sa “Palaging naka-on” sa Settings.</x:String>
+  <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">I-disable ang Windows Recall</x:String>
+  <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">Ini-disable ang Recall feature, na pana-panahong nagre-record ng mga screen snapshot para sa AI search (pinapanatili ang iba pang AI feature tulad ng Click-to-do at semantic search). Binabawasan nito ang paggamit ng memory/disk ng recording process at ang mga alalahanin sa privacy. Available lamang sa Windows 11 24H2 + Copilot+ na PC; sa mga hindi suportadong PC ay hindi mababasa ang estado at hindi ito ma-toggle.</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">I-disable ang power throttling</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Desc" xml:space="preserve">Ini-disable ang Power Throttling, na awtomatikong nagpapababa ng CPU clock ng mga background na proseso para makatipid ng kuryente. Pinipigilan ang pagbagal ng background na gawain tulad ng recording, encoding, at building. Dahil palaging tumatakbo sa buong performance, tumataas ang pagkaubos ng baterya sa mga laptop. Ang OFF ay ibinabalik sa default na power-saving behavior.</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Label" xml:space="preserve">I-disable ang MPO (Multi-Plane Overlay)</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Desc" xml:space="preserve">Ini-disable ang Multi-Plane Overlay (MPO), kung saan pinagsasama ng GPU ang maraming plane (OverlayTestMode=5). Depende sa driver, maaaring magdulot ang MPO ng pagkurap ng screen, panandaliang pag-blackout, at pautal-utal na video; isang karaniwang solusyon kapag may ganitong sintomas. Kung wala, ayos lang na iwanang OFF (default).</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Label" xml:space="preserve">Itaas ang priyoridad ng pagproseso ng audio</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Desc" xml:space="preserve">Itinataas ang priyoridad ng mga Playback/Capture task ng Multimedia Class Scheduler sa pinakamataas na halaga (6) para bawasan ang mga audio dropout at pop sa ilalim ng mabigat na load. Ang OFF ay inaalis ang priority setting at ibinabalik sa default ng Windows.</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Label" xml:space="preserve">Gawing 60 FPS ang Remote Desktop</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Desc" xml:space="preserve">Pinaiikli ang drawing frame interval ng mga koneksyon sa Remote Desktop (DWMFRAMEINTERVAL=15), na nagpapataas nito mula sa default na ~30 FPS patungo sa humigit-kumulang 60 FPS. Nalalapat ito sa PC na ito bilang panig na kinokonekta. Tumataas ang paggamit ng bandwidth. Ang OFF ay ibinabalik sa default na frame rate.</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Label" xml:space="preserve">Alisin ang delay sa paglunsad ng startup app</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Desc" xml:space="preserve">Ini-disable ang mekanismong nag-aantala sa mga startup app nang ilang segundo hanggang isang dosenang segundo pagkatapos mag-logon para mauna ng Windows ang pagguhit ng desktop (idle wait + delay timer). Kapaki-pakinabang kapag gusto mong agad gamitin ang mga resident na tool. Maaaring medyo mabigat ang pakiramdam sa mismong sandali pagkatapos mag-logon. Ang OFF ay ibinabalik sa default na delay behavior.</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Label" xml:space="preserve">I-optimize ang pamamahagi ng interrupt ng NVIDIA GPU</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Desc" xml:space="preserve">Binubura ang MSI interrupt limit (MessageNumberLimit) na isinulat ng mga nakaraang optimization tool sa NVIDIA GPU, na ibinabalik ang paghawak ng interrupt sa default na ipinamahaging pag-uugali. Kung nananatili ang halagang ito, nagtitipon ang mga GPU interrupt sa CPU core 0 at maaaring magdulot ng pautal-utal sa mga laro. Walang binabago sa mga PC na walang NVIDIA GPU.</x:String>
+
+  <!-- ===== Actions: System ===== -->
+  <x:String x:Key="Text.Action.power-plan-setup.Label" xml:space="preserve">Itakda ang power plan / power mode sa inirerekomendang configuration</x:String>
+  <x:String x:Key="Text.Action.power-plan-setup.Desc" xml:space="preserve">Muling kino-configure ang power plan sa base na “Balanced” at itinatakda ang power mode sa “Best performance” (parehong AC at baterya). Isinusulat din nito: display off = 180 min sa AC / 30 min sa baterya, sleep = never, power button = shut down, pagsara ng lid = walang gagawin (at ipinapakita ang mga nakatagong item na iyon). Ibinabalik sa default ang mga umiiral na pag-customize ng power plan, kaya mag-ingat kung gumagamit ka ng custom na plan.</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Label" xml:space="preserve">I-disable ang hibernation</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Desc" xml:space="preserve">Ini-disable ang hibernation at binubura ang hiberfil.sys, na palaging nakalaan sa system drive (ilang sampung porsyento ng pisikal na memory = ilang GB). Sabay na na-disable ang Fast Startup, kaya maaaring bumagal ang pagsisimula. Iwanang OFF (default) kung gumagamit ka ng hibernation sa laptop.</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Label" xml:space="preserve">I-disable ang mouse acceleration (Enhance pointer precision)</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Desc" xml:space="preserve">Ini-disable ang “Enhance pointer precision” (mouse acceleration), kung saan nagbabago ang biyahe ng cursor batay sa bilis ng paggalaw ng mouse, na ginagawang 1:1 ang paggalaw ng kamay at cursor. Isang karaniwang setting para patatagin ang aim sa mga laro tulad ng FPS. Ang OFF ay ibinabalik sa default ng Windows (naka-on ang acceleration). Maaaring kailanganin ang muling pag-sign in para magkabisa.</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Label" xml:space="preserve">I-disable ang mga accessibility hotkey tulad ng Sticky Keys</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Desc" xml:space="preserve">Ini-disable ang mga hotkey na hindi sinasadyang nag-a-activate ng mga accessibility feature, tulad ng pag-on ng Sticky Keys kapag pinindot mo ang Shift nang limang beses (Sticky Keys / Toggle Keys / Filter Keys). Pinipigilan ang mga aksidente kung saan ang paulit-ulit na pagpindot sa Shift sa mga laro ay naglalabas ng dialog at umaabala sa iyo. Ang OFF ay ibinabalik sa default ng Windows (naka-enable ang mga hotkey).</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Label" xml:space="preserve">Paikliin ang delay sa pagpapakita ng menu</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Desc" xml:space="preserve">Pinaiikli ang paghihintay bago bumukas ang mga right-click menu at submenu ng Start menu mula sa default na 400 ms patungo sa 0, na nagpaparamdam ng mas mabilis na UI. Ang OFF ay ibinabalik sa default na 400 ms. Kailangan ang muling pag-sign in (o pag-restart ng Explorer) para magkabisa.</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Label" xml:space="preserve">Itakda ang folder view template sa General</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Desc" xml:space="preserve">Pinipigilan ang Explorer na awtomatikong tukuyin ang display style (Pictures / Music / Documents, atbp.) mula sa nilalaman ng folder at pinag-iisa ang lahat ng folder sa General Items. Nilulutas ang mabagal na pagpapakita (ang berdeng progress bar) mula sa auto-detection sa mga folder na maraming file. Ang OFF ay ibinabalik sa auto-detection.</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Label" xml:space="preserve">I-disable ang CEIP / mga notification ng feedback</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Desc" xml:space="preserve">Ini-disable ang Customer Experience Improvement Program (CEIP, na nagpapadala ng usage data sa Microsoft) at ang mga notification na “Magbigay ng feedback tungkol sa Windows”. Isang karaniwang setting para sa background load ng pagpapadala at sa privacy. Ang OFF ay inaalis ang mga patakaran at ibinabalik sa default.</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Label" xml:space="preserve">I-reset ang mga setting ng Game Bar / Game DVR sa default</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Desc" xml:space="preserve">Binubura ang mga disable setting ng Game Bar / Game DVR (game recording) na isinulat ng mga nakaraang optimization tool o registry tweak, na ibinabalik sa default na pag-uugali ng Windows. Mabisa para sa mga sintomas tulad ng “hindi tumutugon ang Win+G” o “hindi makapag-capture ng laro”.</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Label" xml:space="preserve">Ibalik ang sapilitang pag-enable ng NVMe native driver</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Desc" xml:space="preserve">Binubura ang FeatureManagement override na sapilitang nag-e-enable ng experimental na NVMe native driver ng Windows, na ibinabalik ang storage driver sa default na desisyon ng OS. Kung nananatili ang override na ito, maaaring magdulot ito ng blue screen (PAGE_FAULT_IN_NONPAGED_AREA) sa ilang kapaligiran. Walang binabago sa mga PC na walang override.</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Label" xml:space="preserve">Itakda ang time sync server sa isang Japanese NTP</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">Binabago ang target ng time sync ng Windows mula sa default na time.windows.com patungo sa isang pampublikong Japanese NTP server (ntp.jst.mfeed.ad.jp) para mapabuti ang katumpakan at katatagan ng time sync. Nire-restart pagkatapos ang Windows Time service para agad magkabisa.</x:String>
+
+  <!-- ===== Actions: Organize ===== -->
+  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">Ayusin ang mga pin ng Quick Access</x:String>
+  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Inaayos ang mga folder na naka-pin sa Quick Access sa pataas na pagkakasunod ayon sa pangalan (nagba-backup ng jump list bago patakbuhin).</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Ayusin ang Path environment variable</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Inaalis ang mga duplicate at inaayos sa pataas na pagkakasunod ang mga entry ng user at system na Path environment variable.</x:String>
+</ResourceDictionary>

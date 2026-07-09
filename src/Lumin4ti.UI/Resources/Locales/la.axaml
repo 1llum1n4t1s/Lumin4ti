@@ -1,0 +1,151 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceInclude Source="avares://Lumin4ti.UI/Resources/Locales/en_US.axaml"/>
+  </ResourceDictionary.MergedDictionaries>
+
+  <!-- ===== Tabs ===== -->
+  <x:String x:Key="Text.Tab.Update" xml:space="preserve">Renovatio &amp; Securitas</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Purgatio &amp; Reparatio</x:String>
+  <x:String x:Key="Text.Tab.Performance" xml:space="preserve">Efficientia</x:String>
+  <x:String x:Key="Text.Tab.System" xml:space="preserve">Systema</x:String>
+  <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Ordinatio</x:String>
+  <x:String x:Key="Text.Tab.Version" xml:space="preserve">De programmate</x:String>
+
+  <!-- ===== Notes / buttons ===== -->
+  <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* Ut valeat, PC restitui debet</x:String>
+  <x:String x:Key="Text.Note.LongRunning" xml:space="preserve">* Exsecutio aliquot minuta durare potest</x:String>
+  <x:String x:Key="Text.Note.AffectsExplorer" xml:space="preserve">* Cum mutatur, Explorer sponte restituitur</x:String>
+  <x:String x:Key="Text.Button.Run" xml:space="preserve">Exsequere</x:String>
+  <x:String x:Key="Text.Button.Cancel" xml:space="preserve">Cancella</x:String>
+
+  <!-- ===== About / version pane ===== -->
+  <x:String x:Key="Text.Version.Subtitle" xml:space="preserve">Instrumentum ad Windows pro arbitrio tuo accommodandum</x:String>
+  <x:String x:Key="Text.Version.VersionLabel" xml:space="preserve">Versio:</x:String>
+  <x:String x:Key="Text.Version.CheckUpdate" xml:space="preserve">Renovationes require</x:String>
+  <x:String x:Key="Text.Version.ShowSkipped" xml:space="preserve">Renovationem omissam iterum monstra</x:String>
+  <x:String x:Key="Text.Version.CheckOnStartup" xml:space="preserve">Renovationes in initio sponte require</x:String>
+  <x:String x:Key="Text.Version.LanguageHeader" xml:space="preserve">Lingua</x:String>
+  <x:String x:Key="Text.Version.LanguageHint" xml:space="preserve">Linguam monstrationis elige.</x:String>
+  <x:String x:Key="Text.Version.FoldersHeader" xml:space="preserve">Directoria</x:String>
+  <x:String x:Key="Text.Version.OpenLogs" xml:space="preserve">Directorium actorum aperi</x:String>
+  <x:String x:Key="Text.Version.OpenSettings" xml:space="preserve">Directorium configurationis aperi</x:String>
+
+  <!-- ===== Category titles / captions ===== -->
+  <x:String x:Key="Text.Category.Update" xml:space="preserve">Renovatio &amp; Securitas</x:String>
+  <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">Applicationes et Windows Defender renova, et sanas securitatis rationes restitue.</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Purgatio &amp; Reparatio</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Spatium disci recupera et registrationes fractas purga vel repara.</x:String>
+  <x:String x:Key="Text.Category.Performance" xml:space="preserve">Efficientia</x:String>
+  <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">Memoriam, processus et depictionem optima. Plerumque interruptores ON = optimizationem applica, OFF = ad statum Windows praedefinitum reverte (sola MMAgent-elementa utuntur ON = illam facultatem activa; pro valore commendato singulas descriptiones vide).</x:String>
+  <x:String x:Key="Text.Category.System" xml:space="preserve">Systema</x:String>
+  <x:String x:Key="Text.Category.System.Caption" xml:space="preserve">Rationes Windows sicut potentiam, introitum et tempus accommoda. Interruptores ON = applica, OFF = ad statum Windows praedefinitum reverte.</x:String>
+  <x:String x:Key="Text.Category.Organize" xml:space="preserve">Ordinatio</x:String>
+  <x:String x:Key="Text.Category.Organize.Caption" xml:space="preserve">Affixa, variabiles ambitus et cetera in ordinem mundum dispone.</x:String>
+
+  <!-- ===== Status / result messages ({0} = item name) ===== -->
+  <x:String x:Key="Text.Status.Running" xml:space="preserve">{0} exsequitur…</x:String>
+  <x:String x:Key="Text.Status.RunningLong" xml:space="preserve">{0} exsequitur… (aliquot minuta durare potest)</x:String>
+  <x:String x:Key="Text.Status.TogglingOn" xml:space="preserve">{0} ad ON vertitur…</x:String>
+  <x:String x:Key="Text.Status.TogglingOff" xml:space="preserve">{0} ad OFF vertitur…</x:String>
+  <x:String x:Key="Text.Status.Completed" xml:space="preserve">{0} completum est</x:String>
+  <x:String x:Key="Text.Status.Failed" xml:space="preserve">{0} defecit (acta inspice)</x:String>
+  <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">{0} ad ON versum est</x:String>
+  <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">{0} ad OFF versum est</x:String>
+  <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">{0} verti non potuit (acta inspice)</x:String>
+  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Cancellatum</x:String>
+  <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ Completum</x:String>
+  <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ Defecit</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer restitutus est</x:String>
+  <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Explorer restitui non potuit (quaeso manu eum restitue)</x:String>
+  <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Status legi non potuit (iura administratoris desunt, aut facultas in hoc PC non praesto est. Initia Debug non exaltantur, ergo initium normale conare).</x:String>
+
+  <!-- ===== Actions: Update &amp; Security ===== -->
+  <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Applicationes installatas simul renova (winget)</x:String>
+  <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">Administro sarcinarum winget omnes applicationes installatas ad versiones novissimas provehit. Si multae applicationes renovatione egent, descensio et installatio tempus poscere possunt. Applicationes currentes exsecutabilia sua clausa habere et renovari deficere possunt, sed ceterae pergunt et divisio successus/defectus monstratur.</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Fasciculos definitionum Defender denuo pete</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Definitiones virorum et signaturas dynamicas Windows Defender semel delet, deinde novissimas denuo descendit. Renovatio usitata pro corruptione definitionum quae falsas detectiones vel errores renovationis efficit; dum currit, tutela realis temporis pergit operari.</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">Rationes Defender restitue (exclusiones &amp; optiones praecipuae)</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Omnes vias exclusionis, processus et extensiones in Windows Defender registratas removet et optiones praecipuas sicut tutelam realis temporis et nubis ad praedefinita restituit. Exclusiones (loca caeca scrutationis) quas malware vel software vetus addere potuit purgat. Exclusiones consultae quoque removentur, ergo quas indiges postea denuo adde.</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">Applicationem Windows Security restitue</x:String>
+  <x:String x:Key="Text.Action.security-app-reset.Desc" xml:space="preserve">Applicationem Windows Security ad statum initialem restituit et denuo registrat cum non aperitur, fracta videtur, aut elementis caret. Statum tutelae Defender vel fasciculos definitionum non afficit.</x:String>
+
+  <!-- ===== Actions: Cleanup &amp; Repair ===== -->
+  <x:String x:Key="Text.Action.wu-component-cleanup.Label" xml:space="preserve">Spatium a Windows Update usurpatum remove</x:String>
+  <x:String x:Key="Text.Action.wu-component-cleanup.Desc" xml:space="preserve">Generationes renovationum superatas in promptuario componentium (directorio WinSxS) congestas perpetuo removet ut aliquot GB spatii disci recuperet. Postea renovationes applicatas deinstallare non potes (plerumque non problema). Ab aliquot minutis ad decem minuta durat.</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Label" xml:space="preserve">Nomina directoriorum systematis fracta repara</x:String>
+  <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">Corruptionem monstrationis, sicut nomina directoriorum systematis (e.g. Downloads) Anglice apparentia, per shell32.dll denuo registrandam reparat.</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">Cameram iconum in area systematis (tray) restitue</x:String>
+  <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">Cameram iconum areae notificationis (systematis tray) purgat. Casus solvit ubi icones applicationum deinstallatarum in area iconum absconditarum persistunt. Accommodatio tua monstrationis/occultationis tray semel restituitur.</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">Introitus initiales fractos remove</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">Introitus initiales (usoris currentis) quorum exsecutabile iam non exsistit, una cum congruentibus introitibus orbatis, removet.</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">Applicationes non exsistentes e Aperi-cum remove</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">Applicationes quarum exsecutabile iam non exsistit e indice candidatorum Aperi-cum et e registratione Applications removet.</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Label" xml:space="preserve">Omnia acta Event Viewer dele</x:String>
+  <x:String x:Key="Text.Action.event-log-clear.Desc" xml:space="preserve">Acta ex omnibus canalibus in Event Viewer congesta delet ut aream promptuarii actorum (plerumque aliquot centum MB) liberet. Notitia praeteritae solutionis problematum quoque amittitur, ergo hoc dum problema recens investigas ne exsequaris. Nonnulla acta systematis protecta praetereuntur.</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">Cameram Microsoft Store purga</x:String>
+  <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">Cameram Microsoft Store per WSReset restituit. Remedium usitatum cum Store non aperitur, descensiones non progrediuntur, aut errores “try again” iterantur. Applicationes et notitia rationis non removentur. Peracto, applicatio Store sponte aperiri potest.</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">SSD TRIM et consolidatio spatii liberi</x:String>
+  <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">Notificationem TRIM ad SSD (/L) et consolidationem spatii liberi (/X) in omnibus voluminibus exsequitur ut efficientiam scriptionis SSD servet et spatium liberum defragmentet. Pro dispositione instrumenti ab aliquot minutis ad decem minuta durare potest. Dum currit, PC uti pergere potes.</x:String>
+
+  <!-- ===== Actions: Performance ===== -->
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Memory Compression</x:String>
+  <x:String x:Key="Text.Action.mmagent-memory-compression.Desc" xml:space="preserve">Paginas in RAM comprimit priusquam ad discum permutentur cum memoria deficit, capacitatem efficacem augens. Pro levi onere CPU tarditatem permutationis et scriptiones SSD minuit. Commendatur: ON (status Windows praedefinitus quoque ON).</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Label" xml:space="preserve">Page Combining</x:String>
+  <x:String x:Key="Text.Action.mmagent-page-combining.Desc" xml:space="preserve">Paginas memoriae contentu identico in unam coniungit, duplicationem tollens. Memoriam servat cum multae applicationes eiusdem generis currunt. Commendatur: ON (in nonnullis editionibus praedefinitum OFF).</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Label" xml:space="preserve">Operation Recorder API</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Desc" xml:space="preserve">API ut instrumenta externa mores SysMain (olim Superfetch) recordent et repetant. Instrumentis probationis et analysis efficientiae destinatum, in usu normali non adhibitum. Commendatur: OFF (status Windows praedefinitus quoque OFF).</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Label" xml:space="preserve">Praeacquisitio initii applicationum</x:String>
+  <x:String x:Key="Text.Action.mmagent-launch-prefetch.Desc" xml:space="preserve">Fasciculos quos applicationes frequenter usurpatae onerant discit et in initio eos praeacquirit ut initium acceleret (Prefetch). Etiam in SSD moram initii minuere adiuvat. Commendatur: ON (status Windows praedefinitus quoque ON).</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Label" xml:space="preserve">Praeinitium applicationum UWP</x:String>
+  <x:String x:Key="Text.Action.mmagent-prelaunch.Desc" xml:space="preserve">Applicationes Store (UWP) mox usurpandas praedicit et eas in fundo incohat priusquam eas aperias. Celerius sentitur sed memoriam ante consumit, ergo si memoriae servandae studes OFF commendatur.</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Label" xml:space="preserve">Rationem paginationis nuclei ad praedefinitam restitue</x:String>
+  <x:String x:Key="Text.Action.paging-executive-reset.Desc" xml:space="preserve">DisablePagingExecutive (rationem quae codicem nuclei semper in RAM tenet), quam instrumenta optimizationis saepe scribunt, delet et ad mores paginationis Windows praedefinitos revertit. Haec ratio in Windows moderno parum prodest et memoriam prodigere potest. In PC ubi non posita est nihil facit.</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Label" xml:space="preserve">VBS / HVCI inhabilita (1–2 GB memoriae serva)</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">Virtualization-Based Security (VBS) et Hypervisor-Enforced Code Integrity (HVCI) inhabilitat ut ~1–2 GB memoriae semper reservatae liberet. Hoc cum securitate permutatio est; OFF (praedefinitum) relinque si Hyper-V, WSL2, Windows Sandbox, Docker Desktop, vel Credential Guard usurpas.</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">Processus SvcHost consolida (divisionem coerce)</x:String>
+  <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">Ex praedefinito Windows svchost.exe per facultatem divisum incohat (in PC cum plus quam 3.5 GB RAM). Hoc ad ON vertere limen divisionis maximum facit et servitia coniungibilia in pauciores processus consolidat, numerum processuum et usum memoriae (a decem ad plus quam centum MB) minuens. Servitia ut fines securitatis habita (DiagTrack, Dnscache, etc.) non consolidantur. OFF limen tollit et ad divisionem praedefinitam revertit.</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">Exsecutionem UWP in fundo simul exstingue (200–500 MB serva)</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">Exsecutionem in fundo omnium applicationum Store (UWP) simul ad “Semper exstincta” ponit, ut postquam eas claudis in fundo currere desinant. Residentiam minuens circiter 200–500 MB memoriae servare potes. Pro applicationibus quae notificationibus vel tesseris vivis egent, hoc ad OFF verte vel eas singulatim in Configurationibus ad “Semper activa” muta.</x:String>
+  <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">Windows Recall inhabilita</x:String>
+  <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">Facultatem Recall, quae imagines pellucidas pantalli periodice ad quaestionem AI recordat, inhabilitat (aliae facultates AI sicut Click-to-do et quaestio semantica servantur). Consumptionem memoriae/disci processus recordantis et sollicitudines privatae vitae minuit. Solum in Windows 11 24H2 + Copilot+ PC praesto; in PC non sustentis status legi nec verti potest.</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">Power throttling inhabilita</x:String>
+  <x:String x:Key="Text.Action.power-throttling-off.Desc" xml:space="preserve">Power Throttling, quod frequentiam CPU processuum in fundo automatice minuit ut potentiam servet, inhabilitat. Prohibet opera in fundo sicut recordationem, codificationem et constructionem tardescere. Quia semper plena efficientia currit, in portatilibus consumptio pilae augetur. OFF ad mores praedefinitos servandae potentiae revertit.</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Label" xml:space="preserve">MPO inhabilita (Multi-Plane Overlay)</x:String>
+  <x:String x:Key="Text.Action.mpo-off.Desc" xml:space="preserve">Multi-Plane Overlay (MPO), ubi GPU plura plana componit, inhabilitat (OverlayTestMode=5). Pro depulsore, MPO tremorem pantalli, momentaneas obscurationes et haesitationem videorum efficere potest; remedium usitatum cum illa symptomata habes. Si non habes, OFF (praedefinitum) relinquere bene est.</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Label" xml:space="preserve">Prioritatem tractationis audio extolle</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Desc" xml:space="preserve">Prioritatem operum Playback/Capture Multimedia Class Scheduler ad valorem summum (6) extollit ut interruptiones audio et crepitus sub onere gravi minuat. OFF rationem prioritatis tollit et ad statum Windows praedefinitum revertit.</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Label" xml:space="preserve">Remote Desktop ad 60 FPS fac</x:String>
+  <x:String x:Key="Text.Action.rdp-framerate.Desc" xml:space="preserve">Intervallum quadri depictionis connexionum Remote Desktop (DWMFRAMEINTERVAL=15) breviat, a praedefinitis ~30 FPS ad circiter 60 FPS extollens. Hoc ad hunc PC ut latus quod connectitur pertinet. Usus latitudinis bandae augetur. OFF ad frequentiam quadrorum praedefinitam revertit.</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Label" xml:space="preserve">Moram initii applicationum initialium tolle</x:String>
+  <x:String x:Key="Text.Action.startup-speedup.Desc" xml:space="preserve">Mechanismum qui applicationes initiales aliquot ad duodecim secundas post ingressum morat ut Windows depictionem scaenae praeferre possit (mora otii + horologium morae) inhabilitat. Utile cum instrumenta residentia statim uti incipere vis. Momentum statim post ingressum paulo gravius sentiri potest. OFF ad mores morae praedefinitos revertit.</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Label" xml:space="preserve">Distributionem interruptionum NVIDIA GPU optima</x:String>
+  <x:String x:Key="Text.Action.nvidia-msi-fix.Desc" xml:space="preserve">Limen interruptionum MSI (MessageNumberLimit) quod instrumenta optimizationis praeterita ad NVIDIA GPU scripserunt delet, tractationem interruptionum ad mores distributos praedefinitos revertens. Si hic valor manet, interruptiones GPU in CPU core 0 concentrantur et haesitationem in ludis efficere possunt. In PC sine NVIDIA GPU nihil mutat.</x:String>
+
+  <!-- ===== Actions: System ===== -->
+  <x:String x:Key="Text.Action.power-plan-setup.Label" xml:space="preserve">Consilium potentiae / modum potentiae ad configurationem commendatam pone</x:String>
+  <x:String x:Key="Text.Action.power-plan-setup.Desc" xml:space="preserve">Consilium potentiae super basi “Balanced” reconfigurat et modum potentiae ad “Best performance” ponit (tam AC quam pila). Praeterea scribit: monstratio exstincta = 180 min in AC / 30 min in pila, somnus = numquam, bucca potentiae = shut down, operculo clauso = nihil fac (et illa elementa abscondita denudat). Accommodationes consilii potentiae exsistentes ad praedefinita revertunt, ergo cave si consilium proprium usurpas.</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Label" xml:space="preserve">Hibernationem inhabilita</x:String>
+  <x:String x:Key="Text.Action.hibernate-off.Desc" xml:space="preserve">Hibernationem inhabilitat et hiberfil.sys, qui in instrumento systematis semper reservatur (decem centesimae memoriae physicae = aliquot GB), delet. Fast Startup eodem tempore inhabilitatur, ergo initium tardius fieri potest. OFF (praedefinitum) relinque si hibernatione in portatili uteris.</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Label" xml:space="preserve">Accelerationem muris inhabilita (Enhance pointer precision)</x:String>
+  <x:String x:Key="Text.Action.mouse-accel-off.Desc" xml:space="preserve">“Enhance pointer precision” (accelerationem muris), ubi iter cursoris pro celeritate motus muris mutatur, inhabilitat, motum manus et cursoris 1:1 figens. Ratio usitata ad collineationem in ludis sicut FPS stabiliendam. OFF ad statum Windows praedefinitum (acceleratione activa) revertit. Ut valeat, iteratus ingressus posci potest.</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Label" xml:space="preserve">Claves calidas accessibilitatis sicut Sticky Keys inhabilita</x:String>
+  <x:String x:Key="Text.Action.sticky-keys-off.Desc" xml:space="preserve">Claves calidas quae casu facultates accessibilitatis provocant, sicut Sticky Keys activatas cum Shift quinquies premis (Sticky Keys / Toggle Keys / Filter Keys), inhabilitat. Casus prohibet ubi Shift in ludis iterum premens dialogum eicit et te interrumpit. OFF ad statum Windows praedefinitum (clavibus calidis habilitatis) revertit.</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Label" xml:space="preserve">Moram monstrationis menu breviat</x:String>
+  <x:String x:Key="Text.Action.menu-delay-zero.Desc" xml:space="preserve">Moram priusquam menu dextri ictus et submenu Start aperiantur a praedefinitis 400 ms ad 0 breviat, UI celerius sentiri faciens. OFF ad praedefinita 400 ms revertit. Ut valeat, iteratus ingressus (vel restitutio Explorer) poscitur.</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Label" xml:space="preserve">Exemplar visus directorii ad General fige</x:String>
+  <x:String x:Key="Text.Action.folder-template-general.Desc" xml:space="preserve">Explorer prohibet stilum monstrationis (Pictures / Music / Documents, etc.) ex contentu directorii automatice detegere et omnia directoria ad General Items unificat. Monstrationem tardam (virem barram progressus) ex auto-detectione in directoriis cum multis fasciculis solvit. OFF ad auto-detectionem revertit.</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Label" xml:space="preserve">CEIP / notificationes opinionis inhabilita</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Desc" xml:space="preserve">Customer Experience Improvement Program (CEIP, quod data usus ad Microsoft mittit) et notificationes “Quaeso opinionem de Windows da” inhabilitat. Ratio usitata tam pro onere in fundo mittendi quam pro privata vita. OFF consilia tollit et ad praedefinita revertit.</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Label" xml:space="preserve">Rationes Game Bar / Game DVR ad praedefinitas restitue</x:String>
+  <x:String x:Key="Text.Action.gamedvr-reset.Desc" xml:space="preserve">Rationes inhabilitationis Game Bar / Game DVR (recordationis ludorum) quas instrumenta optimizationis praeterita vel mutationes registri scripserunt delet, ad mores Windows praedefinitos revertens. Efficax pro symptomatibus sicut “Win+G non respondet” vel “ludos capere non possum”.</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Label" xml:space="preserve">Habilitationem coactam depulsoris nativi NVMe reverte</x:String>
+  <x:String x:Key="Text.Action.nvme-driver-revert.Desc" xml:space="preserve">Superscriptionem FeatureManagement quae depulsorem nativum NVMe experimentalem Windows coacte habilitat delet, depulsorem promptuarii ad decisionem OS praedefinitam revertens. Si haec superscriptio manet, in nonnullis ambitibus pantallum caeruleum (PAGE_FAULT_IN_NONPAGED_AREA) efficere potest. In PC sine superscriptione nihil mutat.</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Label" xml:space="preserve">Servitorem synchronizationis temporis ad NTP Iaponicum pone</x:String>
+  <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">Scopum synchronizationis temporis Windows a praedefinito time.windows.com ad servitorem NTP publicum Iaponicum (ntp.jst.mfeed.ad.jp) mutat ut accurationem et stabilitatem synchronizationis temporis emendet. Postea servitium Windows Time restituit ut statim valeat.</x:String>
+
+  <!-- ===== Actions: Organize ===== -->
+  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">Affixa Quick Access ordina</x:String>
+  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Directoria ad Quick Access affixa in ordinem ascendentem per nomen ordinat (indicem saltus ante exsecutionem servat).</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Variabilem ambitus Path ordina</x:String>
+  <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Introitus variabilium ambitus Path usoris et systematis deduplicat et in ordinem ascendentem ordinat.</x:String>
+</ResourceDictionary>

@@ -1,0 +1,61 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Lumin4ti.UI.ViewModels"
+             xmlns:primitives="using:Avalonia.Controls.Primitives"
+             x:Class="Lumin4ti.UI.Views.VersionView"
+             x:DataType="vm:VersionViewModel">
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="8,0">
+      <TextBlock Classes="h1" Text="{DynamicResource Text.Tab.Version}" />
+
+      <primitives:HeaderedContentControl Header="Lumin4ti">
+        <StackPanel Spacing="12">
+          <StackPanel Orientation="Horizontal" Spacing="16">
+            <Image Width="56" Height="56" VerticalAlignment="Center"
+                   RenderOptions.BitmapInterpolationMode="HighQuality"
+                   Source="avares://Lumin4ti.UI/icon/app.ico" />
+            <StackPanel VerticalAlignment="Center" Spacing="2">
+              <TextBlock Text="Lumin4ti" FontSize="20" FontWeight="Bold" />
+              <TextBlock Text="{DynamicResource Text.Version.Subtitle}" Classes="caption" TextWrapping="Wrap" />
+              <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,2,0,0">
+                <TextBlock Text="{DynamicResource Text.Version.VersionLabel}" Classes="caption" />
+                <TextBlock Text="{Binding VersionText}" Classes="caption" />
+              </StackPanel>
+            </StackPanel>
+          </StackPanel>
+
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="{DynamicResource Text.Version.CheckUpdate}" Command="{Binding CheckForUpdateCommand}" IsEnabled="{Binding !IsChecking}" />
+            <Button Content="{DynamicResource Text.Version.ShowSkipped}" Command="{Binding ClearIgnoredUpdateTagCommand}"
+                    IsVisible="{Binding HasIgnoredUpdateTag}" IsEnabled="{Binding !IsChecking}" />
+          </StackPanel>
+          <TextBlock Text="{Binding UpdateStatusText}" Classes="caption" TextWrapping="Wrap"
+                     IsVisible="{Binding UpdateStatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+          <CheckBox Content="{DynamicResource Text.Version.CheckOnStartup}" IsChecked="{Binding CheckForUpdatesOnStartup}" />
+        </StackPanel>
+      </primitives:HeaderedContentControl>
+
+      <primitives:HeaderedContentControl Header="{DynamicResource Text.Version.LanguageHeader}">
+        <StackPanel Spacing="6">
+          <TextBlock Text="{DynamicResource Text.Version.LanguageHint}" Classes="caption" TextWrapping="Wrap" />
+          <ComboBox ItemsSource="{Binding Locales}" SelectedItem="{Binding SelectedLocale}" MinWidth="240">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding Name}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </StackPanel>
+      </primitives:HeaderedContentControl>
+
+      <primitives:HeaderedContentControl Header="{DynamicResource Text.Version.FoldersHeader}">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Button Content="{DynamicResource Text.Version.OpenLogs}" Command="{Binding OpenLogsFolderCommand}" />
+          <Button Content="{DynamicResource Text.Version.OpenSettings}" Command="{Binding OpenSettingsFolderCommand}" />
+        </StackPanel>
+      </primitives:HeaderedContentControl>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>
