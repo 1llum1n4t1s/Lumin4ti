@@ -1,5 +1,6 @@
 using Avalonia;
 using Lumin4ti.Core.Services;
+using Lumin4ti.UI.Services;
 using Velopack;
 
 namespace Lumin4ti.UI;
@@ -11,7 +12,21 @@ internal static class Program
     {
         // Velopack のブートストラップを最初に走らせる
         // (--veloapp-install / --veloapp-updated 等の internal hook を捌くため、Avalonia 起動・多重起動ガードより前に必須)
-        VelopackApp.Build().Run();
+        var velopackApp = VelopackApp.Build();
+        if (OperatingSystem.IsWindows())
+        {
+            velopackApp
+                .OnAfterInstallFastCallback(_ => WindowsLegacyStartMenuShortcutMigrator.MigrateForCurrentUser())
+                .OnAfterUpdateFastCallback(_ => WindowsLegacyStartMenuShortcutMigrator.MigrateForCurrentUser());
+        }
+
+        velopackApp.Run();
+
+        // 更新フックが一時的なファイルロック等で移行できなかった場合も、通常起動時に再試行する。
+        if (OperatingSystem.IsWindows())
+        {
+            WindowsLegacyStartMenuShortcutMigrator.MigrateForCurrentUser();
+        }
 
         // HKLM への reg add / dism / regsvr32 を実行するため管理者権限が必要。
         // app.manifest は asInvoker のまま、ここで自己再起動して昇格する (詳細は app.manifest のコメント参照)。

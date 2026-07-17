@@ -108,6 +108,10 @@ public class ProcessCommandExecutor : ICommandExecutor
             await Task.WhenAll(readOut, readErr).ConfigureAwait(false);
             await process.WaitForExitAsync(executionToken).ConfigureAwait(false);
 
+            // キャンセル登録がプロセスを終了すると、出力の drain と WaitForExitAsync が
+            // 先に正常完了することがある。この場合も timeout / 呼出元キャンセルとして扱う。
+            executionToken.ThrowIfCancellationRequested();
+
             return new CommandExecutionResult(
                 process.ExitCode == 0,
                 commandLine,
