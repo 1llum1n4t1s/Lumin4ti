@@ -163,6 +163,45 @@ public sealed class MmAgentStateProviderTests
     }
 
     [TestMethod]
+    public async Task OS非対応エラー後は機能を操作不能にする()
+    {
+        var executor = new SequenceExecutor(
+            Result(success: true, output: "{\"MemoryCompression\":true}"),
+            Result(success: false, error: "Disable-MMAgent : この要求はサポートされていません。"),
+            Result(success: true, output: "{\"MemoryCompression\":true}"));
+        var provider = new MmAgentStateProvider(executor);
+        var toggle = CreateToggle(executor, provider);
+
+        Assert.AreEqual(true, await toggle.GetStateAsync());
+
+        var result = await toggle.SetStateAsync(false);
+
+        Assert.IsFalse(result.Success);
+        StringAssert.Contains(result.Detail, "操作を無効化しました");
+        Assert.IsNull(await toggle.GetStateAsync());
+        Assert.AreEqual(3, executor.CallCount, "非対応判定後に追加の状態照会を実行してはいけません");
+    }
+
+    [TestMethod]
+    public void Windows11_25H2クライアントの未対応機能だけを判定する()
+    {
+        Assert.IsTrue(MmAgentFeatureSupport.IsKnownUnsupported("OperationAPI", 26200, "Client"));
+        Assert.IsTrue(MmAgentFeatureSupport.IsKnownUnsupported("ApplicationLaunchPrefetching", 26200, "client"));
+        Assert.IsFalse(MmAgentFeatureSupport.IsKnownUnsupported("MemoryCompression", 26200, "Client"));
+        Assert.IsFalse(MmAgentFeatureSupport.IsKnownUnsupported("OperationAPI", 26100, "Client"));
+        Assert.IsFalse(MmAgentFeatureSupport.IsKnownUnsupported("OperationAPI", 26200, "Server"));
+    }
+
+    [TestMethod]
+    public void OS非対応エラーを言語とHRESULTから判定する()
+    {
+        Assert.IsTrue(MmAgentFeatureToggle.IsNotSupportedError("この要求はサポートされていません。"));
+        Assert.IsTrue(MmAgentFeatureToggle.IsNotSupportedError("The request is not supported"));
+        Assert.IsTrue(MmAgentFeatureToggle.IsNotSupportedError("HRESULT 0x80070032"));
+        Assert.IsFalse(MmAgentFeatureToggle.IsNotSupportedError("Access is denied"));
+    }
+
+    [TestMethod]
     public async Task 変更中のキャンセル後は次回取得で実状態を再確認する()
     {
         using var cts = new CancellationTokenSource();

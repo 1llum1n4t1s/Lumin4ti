@@ -17,9 +17,16 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
     private Task<Dictionary<string, bool>?>? _cacheTask;
     private readonly ConcurrentDictionary<string, StateOverride> _overrides =
         new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, byte> _unsupported =
+        new(StringComparer.OrdinalIgnoreCase);
 
     public async Task<bool?> GetAsync(string propertyName, CancellationToken ct = default)
     {
+        if (_unsupported.ContainsKey(propertyName))
+        {
+            return null;
+        }
+
         if (_overrides.TryGetValue(propertyName, out var stateOverride))
         {
             return stateOverride.IsKnown
@@ -78,6 +85,11 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
     /// </summary>
     internal void Invalidate(string propertyName) =>
         _overrides[propertyName] = new StateOverride(IsKnown: false, Value: false);
+
+    /// <summary>OS が切り替え要求を拒否した機能を、以後の操作対象から外す。</summary>
+    internal void MarkUnsupported(string propertyName) => _unsupported[propertyName] = 0;
+
+    internal bool IsUnsupported(string propertyName) => _unsupported.ContainsKey(propertyName);
 
     /// <summary>
     /// キャッシュを介さず Get-MMAgent を今この場で実行して 1 プロパティの現在値を読む。
@@ -174,10 +186,20 @@ public sealed class MmAgentFeatureToggle(
     /// <summary>Get-MMAgent のプロパティ名 = Enable/Disable-MMAgent のパラメーター名。</summary>
     internal string PropertyName => propertyName;
 
-    public Task<bool?> GetStateAsync(CancellationToken ct = default) => stateProvider.GetAsync(propertyName, ct);
+    public Task<bool?> GetStateAsync(CancellationToken ct = default) =>
+        MmAgentFeatureSupport.IsKnownUnsupportedOnCurrentWindows(propertyName) ||
+        stateProvider.IsUnsupported(propertyName)
+            ? Task.FromResult<bool?>(null)
+            : stateProvider.GetAsync(propertyName, ct);
 
     public async Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default)
     {
+        if (MmAgentFeatureSupport.IsKnownUnsupportedOnCurrentWindows(propertyName) ||
+            stateProvider.IsUnsupported(propertyName))
+        {
+            return UnsupportedResult();
+        }
+
         // 同一機能への並行 Set は完了順と実状態が逆転し得るため直列化する。
         await _setGate.WaitAsync(ct);
         try
@@ -212,6 +234,13 @@ public sealed class MmAgentFeatureToggle(
             }
 
             var reason = result.StandardError.Split('\n', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim() ?? string.Empty;
+            if (IsNotSupportedError(result.StandardError))
+            {
+                stateProvider.MarkUnsupported(propertyName);
+                LoggerBootstrap.Log.Error($"{Id}: {cmdlet} はこの Windows でサポートされていません");
+                return UnsupportedResult();
+            }
+
             LoggerBootstrap.Log.Error($"{Id}: {cmdlet} (exit={result.ExitCode}): {reason}");
             return MaintenanceActionResult.Fail(
                 $"{cmdlet} が失敗しました{(reason.Length > 0 ? $": {reason}" : string.Empty)}{FailureHint()}");
@@ -228,21 +257,17 @@ public sealed class MmAgentFeatureToggle(
         }
     }
 
-    /// <summary>
-    /// 失敗理由に添える実態に即したヒント。SysMain 稼働中でも機能間の依存で失敗しうるため、
-    /// OperationAPI は前提機能 (アプリ起動プリフェッチ) への依存を明示する
-    /// (MS ドキュメント: OperationAPI は Windows のプリフェッチ機構を公開する = プリフェッチが土台)。
-    /// </summary>
-    private string FailureHint()
-    {
-        if (propertyName.Equals("OperationAPI", StringComparison.OrdinalIgnoreCase))
-        {
-            return " (Operation Recorder API はアプリ起動プリフェッチが有効なときのみ切り替えられます。" +
-                "先に「アプリ起動プリフェッチ」を ON にするか、SysMain サービスが起動しているか確認してください)";
-        }
+    /// <summary>非対応エラー以外の失敗に、確認すべき実行環境を添える。</summary>
+    private string FailureHint() =>
+        " (SysMain サービスの状態または Windows 側の MMAgent 対応状況を確認してください)";
 
-        return " (SysMain サービスの状態や MMAgent 機能間の依存により切り替えできないことがあります)";
-    }
+    private MaintenanceActionResult UnsupportedResult() => MaintenanceActionResult.Fail(
+        $"{Label} は、このバージョンの Windows では安全に切り替えられないため操作を無効化しました。");
+
+    internal static bool IsNotSupportedError(string standardError) =>
+        standardError.Contains("0x80070032", StringComparison.OrdinalIgnoreCase) ||
+        standardError.Contains("この要求はサポートされていません", StringComparison.OrdinalIgnoreCase) ||
+        standardError.Contains("The request is not supported", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>MMAgent の全機能トグルを生成する (カタログの並び順)。状態取得は共有プロバイダ 1 回に集約。</summary>
     public static IReadOnlyList<MmAgentFeatureToggle> CreateAll(ICommandExecutor executor)
@@ -264,12 +289,12 @@ public sealed class MmAgentFeatureToggle(
                 "mmagent-operation-api",
                 "Operation Recorder API",
                 "SysMain (旧 Superfetch) の動作を外部ツールから記録・再生するための API です。ベンチマークや性能解析ツール向けの機能で、通常の利用では使われません。" +
-                "推奨は OFF (Windows 既定も OFF) です。"),
+                "Windows のバージョンによっては PowerShell からの切り替えがサポートされないため、その場合は操作できません。"),
             new(executor, provider, "ApplicationLaunchPrefetching",
                 "mmagent-launch-prefetch",
                 "アプリ起動プリフェッチ",
                 "よく使うアプリの読み込むファイルを学習し、起動時に先読みして起動を高速化する機能 (Prefetch) です。" +
-                "SSD でも起動待ちの短縮に寄与します。推奨は ON (Windows 既定も ON) です。"),
+                "SSD でも起動待ちの短縮に寄与します。通常は有効のままを推奨しますが、Windows のバージョンによっては PowerShell から切り替えられません。"),
             new(executor, provider, "ApplicationPreLaunch",
                 "mmagent-prelaunch",
                 "UWP アプリの事前起動",
@@ -277,6 +302,38 @@ public sealed class MmAgentFeatureToggle(
                 "体感は速くなりますがメモリを先取りで消費するため、メモリ節約を優先するなら OFF を推奨します。"),
         ];
     }
+}
+
+internal static class MmAgentFeatureSupport
+{
+    private const int Windows11Version25H2Build = 26200;
+
+    internal static bool IsKnownUnsupportedOnCurrentWindows(string propertyName)
+    {
+        if (!OperatingSystem.IsWindows())
+        {
+            return false;
+        }
+
+        string? installationType = null;
+        try
+        {
+            using var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+            installationType = key?.GetValue("InstallationType") as string;
+        }
+        catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException)
+        {
+            LoggerBootstrap.Log.Warn($"Windows の InstallationType を取得できませんでした: {ex.Message}");
+        }
+
+        return IsKnownUnsupported(propertyName, Environment.OSVersion.Version.Build, installationType);
+    }
+
+    internal static bool IsKnownUnsupported(string propertyName, int build, string? installationType) =>
+        build == Windows11Version25H2Build &&
+        string.Equals(installationType, "Client", StringComparison.OrdinalIgnoreCase) &&
+        (propertyName.Equals("OperationAPI", StringComparison.OrdinalIgnoreCase) ||
+         propertyName.Equals("ApplicationLaunchPrefetching", StringComparison.OrdinalIgnoreCase));
 }
 
 /// <summary>

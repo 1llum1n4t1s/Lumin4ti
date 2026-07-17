@@ -36,6 +36,7 @@
                   <!--  ON/OFF トグル型 (ON = 最適化適用 / OFF = Windows 既定)。実行中・状態不明時は操作不可  -->
                   <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding IsToggle}" VerticalAlignment="Center">
                     <ToggleSwitch IsChecked="{Binding IsChecked}" IsEnabled="{Binding CanToggle}"
+                                  IsVisible="{Binding IsStateKnown}"
                                   OnContent="ON" OffContent="OFF" />
                   </StackPanel>
                 </StackPanel>

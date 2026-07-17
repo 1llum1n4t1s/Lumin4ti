@@ -168,6 +168,7 @@ foreach ($runtime in $Runtimes) {
     }
 
     Write-Host "== vpk pack + 署名: $runtime ==" -ForegroundColor Cyan
+    # StartMenu は packAuthors 名のサブフォルダを作るため、ルート直下へ登録する。
     Invoke-Native "vpk pack ($runtime)" {
         vpk pack `
             --packId Lumin4ti `
@@ -179,7 +180,7 @@ foreach ($runtime in $Runtimes) {
             --packDir $publishDir `
             --outputDir $ArtifactsDir `
             --channel $config.Channel `
-            --shortcuts 'StartMenu,Desktop' `
+            --shortcuts 'StartMenuRoot,Desktop' `
             --signParams $SignParams
     }
 }
