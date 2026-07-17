@@ -52,8 +52,10 @@
   <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">{0} ON कृतम्</x:String>
   <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">{0} OFF कृतम्</x:String>
   <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">{0} परिवर्तयितुं न शक्तम् (अभिलेखं परीक्षय)</x:String>
-  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">निरस्तम्</x:String>
+<x:String x:Key="Text.Status.Cancelled" xml:space="preserve">निरस्तम्</x:String>
+  <x:String x:Key="Text.Status.Busy" xml:space="preserve">अन्यत् अनुरक्षणकार्यं प्रचलति। समाप्ते पुनः प्रयतस्व।</x:String>
   <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ समाप्तम्</x:String>
+  <x:String x:Key="Text.Result.Partial" xml:space="preserve">⚠ अंशतः समाप्तम्</x:String>
   <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ विफलम्</x:String>
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer पुनःप्रारब्धम्</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Explorer पुनःप्रारम्भयितुं न शक्तम् (कृपया स्वहस्तेन पुनःप्रारभस्व)</x:String>
@@ -148,4 +150,6 @@
   <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Quick Access-मध्ये पिन्कृतान् संपुटान् नाम्ना आरोहक्रमे क्रमीकरोति (चालनात् पूर्वं jump-सूचीं प्रतिलिपीकरोति)।</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Path-पर्यावरणचरं क्रमीकुरु</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">प्रयोक्तृ-तन्त्र-Path-पर्यावरणचरयोः प्रविष्टीः द्विरुक्तिरहिताः कृत्वा आरोहक्रमे क्रमीकरोति।</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Edge-पृष्ठभूमिप्रक्रियाः निष्क्रियाः कुरु (100–300 MB रक्षा)</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">नीत्या Edge-पृष्ठभूमिविधिं Startup Boost च निष्क्रियं करोति। यदि Edge दुर्लभतया उपयुज्यते तर्हि प्रायः 100–300 MB स्मृतिः मुक्ताऽस्ति। Edge आरम्भः किञ्चित् मन्दः भवेत् विस्तारसूचनाश्च न आगच्छेयुः। नीतयः निष्कास्य Edge-पूर्वनिर्धारितमूल्यानि पुनः स्थापयितुं OFF कुरु।</x:String>
 </ResourceDictionary>

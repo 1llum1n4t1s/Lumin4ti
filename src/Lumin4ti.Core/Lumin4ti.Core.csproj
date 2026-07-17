@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageReference Include="SuperLightLogger" Version="1.0.9" />
     <!-- EventLogSession (イベントログの列挙・クリアを wevtutil なしで行う) 用 -->
-    <PackageReference Include="System.Diagnostics.EventLog" Version="10.0.9" />
+    <PackageReference Include="System.Diagnostics.EventLog" Version="10.0.10" />
   </ItemGroup>
 
   <ItemGroup>

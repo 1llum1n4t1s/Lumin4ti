@@ -1,8 +1,12 @@
+using System.ComponentModel;
 using System.Diagnostics.Eventing.Reader;
+using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
 using Microsoft.Win32;
+using Microsoft.Win32.SafeHandles;
 
 namespace Lumin4ti.Core.Services.Windows.Actions;
 
@@ -11,11 +15,46 @@ namespace Lumin4ti.Core.Services.Windows.Actions;
 /// レジストリは C# で直接書き、サービス再起動のみ net コマンドを使う。
 /// </summary>
 [SupportedOSPlatform("windows")]
-public sealed class NtpConfigAction(ICommandExecutor executor) : IMaintenanceAction
+public sealed class NtpConfigAction : IMaintenanceAction
 {
-    private const string ParametersKey = @"SYSTEM\CurrentControlSet\Services\W32Time\Parameters";
-    private const string ConfigKey = @"SYSTEM\CurrentControlSet\Services\W32Time\Config";
-    private const string NtpServer = "ntp.jst.mfeed.ad.jp";
+    internal const string ParametersKey = @"SYSTEM\CurrentControlSet\Services\W32Time\Parameters";
+    internal const string ConfigKey = @"SYSTEM\CurrentControlSet\Services\W32Time\Config";
+    internal const string NtpServer = "ntp.jst.mfeed.ad.jp";
+    private const uint ScManagerConnect = 0x0001;
+    private const uint ServiceQueryStatus = 0x0004;
+    private const uint ServiceStopped = 0x00000001;
+    private const uint ServiceRunning = 0x00000004;
+    private const int ScStatusProcessInfo = 0;
+
+    private readonly ICommandExecutor _executor;
+    private readonly Func<bool> _isServiceRunning;
+    private readonly INtpConfigurationStore _configuration;
+
+    public NtpConfigAction(ICommandExecutor executor)
+        : this(
+            executor,
+            IsWindowsTimeRunning,
+            new TransactionalNtpConfigurationStore(WindowsRegistryValueAccessor.Instance))
+    {
+    }
+
+    internal NtpConfigAction(
+        ICommandExecutor executor,
+        Func<bool> isServiceRunning,
+        Action writeConfiguration)
+        : this(executor, isServiceRunning, new DelegateNtpConfigurationStore(writeConfiguration))
+    {
+    }
+
+    internal NtpConfigAction(
+        ICommandExecutor executor,
+        Func<bool> isServiceRunning,
+        INtpConfigurationStore configuration)
+    {
+        _executor = executor ?? throw new ArgumentNullException(nameof(executor));
+        _isServiceRunning = isServiceRunning ?? throw new ArgumentNullException(nameof(isServiceRunning));
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+    }
 
     public string Id => "ntp-config";
 
@@ -23,7 +62,7 @@ public sealed class NtpConfigAction(ICommandExecutor executor) : IMaintenanceAct
 
     public string Description =>
         $"Windows の時刻同期先を既定の time.windows.com から、国内の公開 NTP サーバ ({NtpServer}) に変更して時刻同期の精度と安定性を高めます。" +
-        "設定後に Windows Time サービスを再起動して即座に反映します。";
+        "Windows Time サービスが稼働中なら設定後に再起動して即座に反映し、停止中なら元の停止状態を維持します。";
 
     public CommandCategory Category => CommandCategory.System;
 
@@ -31,26 +70,253 @@ public sealed class NtpConfigAction(ICommandExecutor executor) : IMaintenanceAct
 
     public async Task<MaintenanceActionResult> ExecuteAsync(CancellationToken ct = default)
     {
-        // 停止は「起動していない」ケースがあるため失敗を無視し、開始の成否だけを見る
-        await executor.RunAsync("net.exe", "stop w32time", ct);
+        ct.ThrowIfCancellationRequested();
+        var wasRunning = _isServiceRunning();
+        var stoppedByThisAction = false;
+        ExceptionDispatchInfo? operationFailure = null;
+        CommandExecutionResult? restartResult = null;
+        Exception? restartException = null;
 
-        using (var parameters = Registry.LocalMachine.CreateSubKey(ParametersKey))
+        try
         {
-            parameters.SetValue("NtpServer", NtpServer, RegistryValueKind.String);
-            parameters.SetValue("Type", "NTP", RegistryValueKind.String);
+            if (wasRunning)
+            {
+                var stop = await _executor.RunAsync("net.exe", "stop w32time", ct);
+                if (!stop.Success)
+                {
+                    var reason = FailureReason(stop);
+                    LoggerBootstrap.Log.Error($"{Id}: w32time stop exit={stop.ExitCode}: {reason}");
+                    return MaintenanceActionResult.Fail($"w32time の停止に失敗したため NTP 設定を変更しませんでした: {reason}");
+                }
+
+                stoppedByThisAction = true;
+            }
+
+            // stop 完了直後のキャンセルでも、finally で元の稼働状態へ戻してから伝播する。
+            ct.ThrowIfCancellationRequested();
+            _configuration.Apply();
+        }
+        catch (Exception ex)
+        {
+            operationFailure = ExceptionDispatchInfo.Capture(ex);
+        }
+        finally
+        {
+            if (stoppedByThisAction)
+            {
+                try
+                {
+                    // 設定失敗や利用者キャンセル後も、元の稼働状態への補償は最後まで完了させる。
+                    restartResult = await _executor.RunAsync(
+                        "net.exe",
+                        "start w32time",
+                        CancellationToken.None);
+                }
+                catch (Exception ex)
+                {
+                    restartException = ex;
+                }
+            }
         }
 
-        using (var config = Registry.LocalMachine.CreateSubKey(ConfigKey))
+        if (restartException is not null || restartResult is { Success: false })
         {
-            config.SetValue("AnnounceFlags", 5, RegistryValueKind.DWord);
+            var reason = restartException?.Message ?? FailureReason(restartResult!);
+            LoggerBootstrap.Log.Error($"{Id}: w32time の復旧に失敗: {reason}");
+            if (operationFailure is not null)
+            {
+                throw new InvalidOperationException(
+                    $"NTP 設定中に失敗し、w32time の再起動にも失敗しました: {reason}",
+                    operationFailure.SourceException);
+            }
+
+            return MaintenanceActionResult.Fail(
+                $"NTP サーバは設定しましたが w32time の起動に失敗しました: {reason}");
         }
 
-        var start = await executor.RunAsync("net.exe", "start w32time", ct);
+        if (operationFailure is not null)
+        {
+            operationFailure.Throw();
+        }
 
-        LoggerBootstrap.Log.Info($"{Id}: w32time start exit={start.ExitCode}");
-        return start.Success
+        LoggerBootstrap.Log.Info(wasRunning
+            ? $"{Id}: NTP 設定後に w32time を再起動"
+            : $"{Id}: NTP 設定完了 (w32time は元から停止中)");
+        return wasRunning
             ? MaintenanceActionResult.Ok($"  - NTP サーバを {NtpServer} に設定し、w32time を再起動しました")
-            : MaintenanceActionResult.Fail($"NTP サーバは設定しましたが w32time の起動に失敗しました: {start.StandardError}");
+            : MaintenanceActionResult.Ok($"  - NTP サーバを {NtpServer} に設定しました (w32time は元の停止状態を維持)");
+    }
+
+    private static string FailureReason(CommandExecutionResult result) =>
+        string.IsNullOrWhiteSpace(result.StandardError)
+            ? $"exit={result.ExitCode}"
+            : result.StandardError.Trim();
+
+    private static bool IsWindowsTimeRunning()
+    {
+        using var manager = OpenSCManager(null, null, ScManagerConnect);
+        if (manager.IsInvalid)
+        {
+            throw new Win32Exception(Marshal.GetLastWin32Error(), "Service Control Manager を開けませんでした");
+        }
+
+        using var service = OpenService(manager, "w32time", ServiceQueryStatus);
+        if (service.IsInvalid)
+        {
+            throw new Win32Exception(Marshal.GetLastWin32Error(), "w32time サービスを開けませんでした");
+        }
+
+        if (!QueryServiceStatusEx(
+                service,
+                ScStatusProcessInfo,
+                out var status,
+                (uint)Marshal.SizeOf<ServiceStatusProcess>(),
+                out _))
+        {
+            throw new Win32Exception(Marshal.GetLastWin32Error(), "w32time の状態を取得できませんでした");
+        }
+
+        return status.CurrentState switch
+        {
+            ServiceStopped => false,
+            ServiceRunning => true,
+            _ => throw new InvalidOperationException(
+                $"w32time が状態遷移中のため NTP 設定を開始できません (state={status.CurrentState})"),
+        };
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct ServiceStatusProcess
+    {
+        public uint ServiceType;
+        public uint CurrentState;
+        public uint ControlsAccepted;
+        public uint Win32ExitCode;
+        public uint ServiceSpecificExitCode;
+        public uint CheckPoint;
+        public uint WaitHint;
+        public uint ProcessId;
+        public uint ServiceFlags;
+    }
+
+    private sealed class SafeServiceHandle : SafeHandleZeroOrMinusOneIsInvalid
+    {
+        public SafeServiceHandle()
+            : base(ownsHandle: true)
+        {
+        }
+
+        protected override bool ReleaseHandle() => CloseServiceHandle(handle);
+    }
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("advapi32.dll", EntryPoint = "OpenSCManagerW", ExactSpelling = true, CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern SafeServiceHandle OpenSCManager(
+        string? machineName,
+        string? databaseName,
+        uint desiredAccess);
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("advapi32.dll", EntryPoint = "OpenServiceW", ExactSpelling = true, CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern SafeServiceHandle OpenService(
+        SafeServiceHandle serviceManager,
+        string serviceName,
+        uint desiredAccess);
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("advapi32.dll", ExactSpelling = true, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool QueryServiceStatusEx(
+        SafeServiceHandle service,
+        int infoLevel,
+        out ServiceStatusProcess buffer,
+        uint bufferSize,
+        out uint bytesNeeded);
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("advapi32.dll", ExactSpelling = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool CloseServiceHandle(nint serviceHandle);
+}
+
+internal interface INtpConfigurationStore
+{
+    void Apply();
+}
+
+internal sealed class DelegateNtpConfigurationStore(Action apply) : INtpConfigurationStore
+{
+    private readonly Action _apply = apply ?? throw new ArgumentNullException(nameof(apply));
+
+    public void Apply() => _apply();
+}
+
+/// <summary>NTP の3値を一つのトランザクションとして扱い、途中失敗時は全値を開始前へ戻す。</summary>
+internal sealed class TransactionalNtpConfigurationStore(IRegistryValueAccessor registry) : INtpConfigurationStore
+{
+    private static readonly RegistryToggleSpec[] Specs =
+    [
+        new(
+            RegistryHive.LocalMachine,
+            NtpConfigAction.ParametersKey,
+            "NtpServer",
+            RegistryValueKind.String,
+            NtpConfigAction.NtpServer),
+        new(
+            RegistryHive.LocalMachine,
+            NtpConfigAction.ParametersKey,
+            "Type",
+            RegistryValueKind.String,
+            "NTP"),
+        new(
+            RegistryHive.LocalMachine,
+            NtpConfigAction.ConfigKey,
+            "AnnounceFlags",
+            RegistryValueKind.DWord,
+            5),
+    ];
+
+    private readonly IRegistryValueAccessor _registry =
+        registry ?? throw new ArgumentNullException(nameof(registry));
+
+    public void Apply()
+    {
+        var before = Specs.Select(spec => (Spec: spec, Value: _registry.Read(spec))).ToArray();
+        try
+        {
+            foreach (var spec in Specs)
+            {
+                _registry.Write(
+                    spec,
+                    RegistryValueSnapshot.FromRegistry(spec.Kind, spec.AppliedValue));
+            }
+        }
+        catch (Exception applyError)
+        {
+            var rollbackErrors = new List<Exception>();
+            foreach (var (spec, value) in before.Reverse())
+            {
+                try
+                {
+                    _registry.Write(spec, value);
+                }
+                catch (Exception rollbackError)
+                {
+                    rollbackErrors.Add(rollbackError);
+                }
+            }
+
+            if (rollbackErrors.Count > 0)
+            {
+                throw new InvalidOperationException(
+                    "NTP レジストリ設定に失敗し、開始前の値へのロールバックにも失敗しました。",
+                    new AggregateException([applyError, .. rollbackErrors]));
+            }
+
+            throw new InvalidOperationException(
+                "NTP レジストリ設定に失敗したため、開始前の値へロールバックしました。",
+                applyError);
+        }
     }
 }
 

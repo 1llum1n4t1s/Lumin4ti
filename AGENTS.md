@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Codex (ChatGPT) and other coding agents working in this repository.
 
 ## 概要
 
@@ -65,6 +65,13 @@ Komorebi/Lhamiel と同一方式。翻訳は [Resources/Locales/*.axaml](src/Lum
 ## リリース・配信 (Cloudflare R2 + ローカル署名)
 
 自動更新は **Cloudflare R2** 配信。クライアントは [UpdateService.cs](src/Lumin4ti.UI/Services/UpdateService.cs) で `SimpleWebSource(UpdateBaseUrl)` (= `https://lumin4ti.nephilim.jp`) の `releases.win.json` を見る (`UpdateBaseUrl`/`UpdateChannel` は [AppSettings.cs](src/Lumin4ti.Core/Models/AppSettings.cs) にハードコード)。GitHub Releases は使わない。
+
+### 配布契約と変更権限
+
+- 現行の配布契約は Velopack が生成する `Lumin4ti-win-Setup.exe` と、Cloudflare R2 の `releases.win.json` による自動更新である。
+- 不具合調査、全体レビュー、セキュリティレビュー、および「見つかったものを全部直してよい」という許可は、この現行契約内の修正に適用する。レビューで配布や昇格の設計リスクを発見しても、それを理由に対応スコープを配布方式の変更へ広げない。
+- MSI / MSIX 等へのインストーラー形式変更、Velopack の置換、per-user / machine-wide のインストール範囲変更、NativeAOT 等のパッケージング方式変更、更新元・channel・署名方式の変更は、ユーザーが対象を個別に明示した場合だけ実装する。明示がない場合は現行契約を維持し、設計案と影響だけを報告する。
+- `dotnet publish` によるローカル検証は通常の検証に含めてよい。`vpk pack`、署名、R2 upload、cache purge、配信確認は、リリースまたは `/vava` が明示された場合だけ実行する。
 
 - **リリースはローカル署名リリース単独** (Windows のみ配信・CI リリース workflow なし)。SimplySign (Certum クラウド署名) は Desktop 接続 + スマホトークンが要り GitHub Actions から署名できないため。
 - 実行は `pwsh scripts/release-local.ps1` (build + 署名 + R2 アップロード + キャッシュパージ + 配信確認 + 旧 nupkg 掃除を一括)。`-SkipUpload` で署名までの動作確認。**`/vava` の precheck (証明書確認) → bump → 自動実行** が [vava.config.json](vava.config.json) で配線済み。

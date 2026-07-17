@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lumin4ti.Core.Interfaces;
+using Lumin4ti.Core.Models;
 
 namespace Lumin4ti.UI.ViewModels;
 
@@ -70,6 +71,9 @@ public partial class CommandItemViewModel : ObservableObject
     [ObservableProperty]
     private bool lastRunFailed;
 
+    [ObservableProperty]
+    private bool lastRunWarning;
+
     public IAsyncRelayCommand RunCommand { get; }
 
     public IRelayCommand CancelCommand { get; }
@@ -111,6 +115,12 @@ public partial class CommandItemViewModel : ObservableObject
         _cts = null;
     }
 
+    internal void ApplyResultStatus(MaintenanceActionStatus status)
+    {
+        LastRunFailed = status == MaintenanceActionStatus.Failed;
+        LastRunWarning = status == MaintenanceActionStatus.Partial;
+    }
+
     private void Cancel()
     {
         try
@@ -146,14 +156,6 @@ public partial class CommandItemViewModel : ObservableObject
         {
             _suppressToggleWrite = false;
         }
-    }
-
-    /// <summary>切替失敗時にスイッチ表示を元へ戻す。</summary>
-    public void RevertChecked(bool value)
-    {
-        _suppressToggleWrite = true;
-        IsChecked = value;
-        _suppressToggleWrite = false;
     }
 
     partial void OnIsCheckedChanged(bool value)

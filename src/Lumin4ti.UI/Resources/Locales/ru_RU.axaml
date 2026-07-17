@@ -52,8 +52,10 @@
   <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">{0}: включено</x:String>
   <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">{0}: выключено</x:String>
   <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">Не удалось переключить {0} (проверьте журнал)</x:String>
-  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Отменено</x:String>
+<x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Отменено</x:String>
+  <x:String x:Key="Text.Status.Busy" xml:space="preserve">Выполняется другая операция обслуживания. Повторите попытку после её завершения.</x:String>
   <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ Завершено</x:String>
+  <x:String x:Key="Text.Result.Partial" xml:space="preserve">⚠ Частично выполнено</x:String>
   <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ Ошибка</x:String>
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer перезапущен</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Не удалось перезапустить Explorer (перезапустите его вручную)</x:String>
@@ -148,4 +150,6 @@
   <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Сортирует папки, закреплённые в Quick Access, по возрастанию имён (перед запуском создаёт резервную копию списка переходов).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Упорядочить переменную среды Path</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Удаляет дубликаты и сортирует по возрастанию записи пользовательской и системной переменных среды Path.</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Отключить фоновые процессы Edge (экономия 100–300 MB)</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Отключает с помощью политик фоновый режим Edge и Startup Boost. Если вы редко используете Edge, это может освободить около 100–300 MB памяти. Edge может запускаться немного медленнее, а уведомления расширений могут перестать приходить. Переведите этот параметр в положение ВЫКЛ, чтобы удалить политики и восстановить значения Edge по умолчанию.</x:String>
 </ResourceDictionary>

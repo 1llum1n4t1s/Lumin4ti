@@ -27,10 +27,14 @@ public sealed class BrokenStartupCleanupAction : IMaintenanceAction
 
     public bool IsLongRunning => false;
 
-    public Task<MaintenanceActionResult> ExecuteAsync(CancellationToken ct = default)
+    public Task<MaintenanceActionResult> ExecuteAsync(CancellationToken ct = default) =>
+        Task.Run(() => ExecuteCore(ct), ct);
+
+    private MaintenanceActionResult ExecuteCore(CancellationToken ct)
     {
+        ct.ThrowIfCancellationRequested();
         var lines = new List<string>();
-        var allNames = new List<string>();
+        var allNames = CreateStartupNameSet();
 
         using (var runKey = Registry.CurrentUser.OpenSubKey(RunKeyPath, writable: true))
         {
@@ -38,6 +42,7 @@ public sealed class BrokenStartupCleanupAction : IMaintenanceAction
             {
                 foreach (var name in runKey.GetValueNames())
                 {
+                    ct.ThrowIfCancellationRequested();
                     allNames.Add(name);
                     var command = runKey.GetValue(name)?.ToString();
                     if (string.IsNullOrWhiteSpace(command))
@@ -46,11 +51,15 @@ public sealed class BrokenStartupCleanupAction : IMaintenanceAction
                     }
 
                     var exe = StartupCommandParser.TryResolveExecutable(command);
-                    if (exe is null || File.Exists(exe))
+                    if (exe is null || !StartupCommandParser.IsConfirmedMissing(exe))
                     {
                         continue;
                     }
 
+                    ct.ThrowIfCancellationRequested();
+                    // Run と対応する StartupApproved は一組として削除し、途中キャンセルで
+                    // 新しい孤立エントリを残さない。
+                    ct.ThrowIfCancellationRequested();
                     runKey.DeleteValue(name, throwOnMissingValue: false);
                     allNames.Remove(name);
                     RemoveApprovedEntry(name);
@@ -66,7 +75,8 @@ public sealed class BrokenStartupCleanupAction : IMaintenanceAction
             {
                 foreach (var name in approvedKey.GetValueNames())
                 {
-                    if (!allNames.Contains(name, StringComparer.OrdinalIgnoreCase))
+                    ct.ThrowIfCancellationRequested();
+                    if (!allNames.Contains(name))
                     {
                         approvedKey.DeleteValue(name, throwOnMissingValue: false);
                         lines.Add($"  - 孤立削除: {name}");
@@ -81,7 +91,7 @@ public sealed class BrokenStartupCleanupAction : IMaintenanceAction
         }
 
         LoggerBootstrap.Log.Info($"{Id}: {lines.Count} 件処理");
-        return Task.FromResult(MaintenanceActionResult.Ok(lines));
+        return MaintenanceActionResult.Ok(lines);
     }
 
     private static void RemoveApprovedEntry(string name)
@@ -89,4 +99,7 @@ public sealed class BrokenStartupCleanupAction : IMaintenanceAction
         using var approvedKey = Registry.CurrentUser.OpenSubKey(ApprovedKeyPath, writable: true);
         approvedKey?.DeleteValue(name, throwOnMissingValue: false);
     }
+
+    internal static HashSet<string> CreateStartupNameSet() =>
+        new(StringComparer.OrdinalIgnoreCase);
 }

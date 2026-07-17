@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
@@ -24,6 +23,7 @@ public partial class VersionViewModel : ObservableObject
 {
     private readonly UpdateService _updateService;
     private readonly ISettingsService _settingsService;
+    private readonly MaintenanceOperationCoordinator _operationCoordinator;
     private bool _updateDialogOpen;
 
     [ObservableProperty]
@@ -64,14 +64,18 @@ public partial class VersionViewModel : ObservableObject
             SetProperty(ref _selectedLocale, value);
             App.SetLocale(value.Key);
             _settingsService.Current.Locale = value.Key;
-            _ = _settingsService.SaveAsync();
+            _ = SaveSettingsAsync();
         }
     }
 
-    public VersionViewModel(UpdateService updateService, ISettingsService settingsService)
+    public VersionViewModel(
+        UpdateService updateService,
+        ISettingsService settingsService,
+        MaintenanceOperationCoordinator operationCoordinator)
     {
         _updateService = updateService;
         _settingsService = settingsService;
+        _operationCoordinator = operationCoordinator;
         VersionText = updateService.CurrentVersion;
         CheckForUpdatesOnStartup = settingsService.Current.CheckForUpdatesOnStartup;
         IgnoredUpdateTag = settingsService.Current.IgnoreUpdateTag ?? string.Empty;
@@ -94,7 +98,7 @@ public partial class VersionViewModel : ObservableObject
     partial void OnCheckForUpdatesOnStartupChanged(bool value)
     {
         _settingsService.Current.CheckForUpdatesOnStartup = value;
-        _ = _settingsService.SaveAsync();
+        _ = SaveSettingsAsync();
     }
 
     [RelayCommand]
@@ -123,6 +127,20 @@ public partial class VersionViewModel : ObservableObject
         {
             return;
         }
+
+        if (!_operationCoordinator.TryBegin(out var operation))
+        {
+            if (manually)
+            {
+                UpdateStatusText = App.Text(
+                    "Status.Busy",
+                    "別のメンテナンス操作が実行中です。完了後にもう一度お試しください。");
+            }
+
+            return;
+        }
+
+        using var activeOperation = operation!;
 
         var owner = (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
         if (owner is null)
@@ -156,12 +174,21 @@ public partial class VersionViewModel : ObservableObject
             {
                 _settingsService.Current.IgnoreUpdateTag = tag;
                 IgnoredUpdateTag = tag ?? string.Empty;
-                _ = _settingsService.SaveAsync();
+                _ = SaveSettingsAsync();
             });
             options.ErrorOccurred += ex =>
                 LoggerBootstrap.Log.Error($"Velopack 更新失敗: {ex.GetType().Name}", ex);
 
-            await UpdateDialogWindow.ShowAsync(owner, manager, options, manualCheck: manually);
+            await UpdateDialogWindow.ShowAsync(
+                owner,
+                manager,
+                options,
+                manualCheck: manually,
+                cancellationToken: activeOperation.Token);
+        }
+        catch (OperationCanceledException) when (activeOperation.Token.IsCancellationRequested)
+        {
+            UpdateStatusText = string.Empty;
         }
         catch (Exception ex)
         {
@@ -177,21 +204,33 @@ public partial class VersionViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void OpenLogsFolder() => OpenFolder(AppPaths.LogsDirectory);
+    private Task OpenLogsFolder() => OpenFolderAsync(AppPaths.LogsDirectory);
 
     [RelayCommand]
-    private void OpenSettingsFolder() => OpenFolder(AppPaths.AppDataDirectory);
+    private Task OpenSettingsFolder() => OpenFolderAsync(AppPaths.AppDataDirectory);
 
-    private static void OpenFolder(string path)
+    private static async Task OpenFolderAsync(string path)
     {
         try
         {
             System.IO.Directory.CreateDirectory(path);
-            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+            await WindowsExplorerLauncher.OpenAsync(path);
         }
         catch (Exception ex)
         {
             LoggerBootstrap.Log.Error("フォルダを開けませんでした", ex);
+        }
+    }
+
+    private async Task SaveSettingsAsync()
+    {
+        try
+        {
+            await _settingsService.SaveAsync();
+        }
+        catch (Exception ex)
+        {
+            LoggerBootstrap.Log.Error("設定の保存に失敗しました", ex);
         }
     }
 }

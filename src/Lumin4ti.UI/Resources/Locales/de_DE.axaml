@@ -52,8 +52,10 @@
   <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">{0} auf EIN geschaltet</x:String>
   <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">{0} auf AUS geschaltet</x:String>
   <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">Umschalten von {0} fehlgeschlagen (Protokoll prüfen)</x:String>
-  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Abgebrochen</x:String>
+<x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Abgebrochen</x:String>
+  <x:String x:Key="Text.Status.Busy" xml:space="preserve">Eine andere Wartungsoperation wird ausgeführt. Versuchen Sie es nach Abschluss erneut.</x:String>
   <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ Abgeschlossen</x:String>
+  <x:String x:Key="Text.Result.Partial" xml:space="preserve">⚠ Teilweise abgeschlossen</x:String>
   <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ Fehlgeschlagen</x:String>
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer neu gestartet</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Neustart des Explorers fehlgeschlagen (bitte manuell neu starten)</x:String>
@@ -148,4 +150,6 @@
   <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Sortiert an Quick Access angeheftete Ordner in aufsteigender Reihenfolge nach Namen (sichert die Sprungliste vor der Ausführung).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Umgebungsvariable Path sortieren</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Entfernt Duplikate und sortiert die Einträge der Benutzer- und System-Path-Umgebungsvariablen in aufsteigender Reihenfolge.</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Edge-Hintergrundprozesse deaktivieren (100–300 MB sparen)</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Deaktiviert per Richtlinie den Edge-Hintergrundmodus und Startup Boost. Wenn Sie Edge selten verwenden, können dadurch etwa 100–300 MB Arbeitsspeicher frei werden. Der Start kann etwas länger dauern und Erweiterungsbenachrichtigungen können ausbleiben. AUS entfernt die Richtlinien und stellt die Edge-Standardwerte wieder her.</x:String>
 </ResourceDictionary>

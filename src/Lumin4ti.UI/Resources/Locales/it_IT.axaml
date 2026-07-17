@@ -52,8 +52,10 @@
   <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">{0} attivato</x:String>
   <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">{0} disattivato</x:String>
   <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">Impossibile commutare {0} (controlla il log)</x:String>
-  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Annullato</x:String>
+<x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Annullato</x:String>
+  <x:String x:Key="Text.Status.Busy" xml:space="preserve">È in corso un'altra operazione di manutenzione. Riprova al termine.</x:String>
   <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ Completato</x:String>
+  <x:String x:Key="Text.Result.Partial" xml:space="preserve">⚠ Completato parzialmente</x:String>
   <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ Non riuscito</x:String>
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Esplora file riavviato</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Riavvio di Esplora file non riuscito (riavvialo manualmente)</x:String>
@@ -148,4 +150,6 @@
   <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Ordina le cartelle aggiunte ad Accesso rapido in ordine crescente per nome (esegue il backup della jump list prima dell'esecuzione).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Ordina la variabile d'ambiente Path</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Rimuove i duplicati e ordina in ordine crescente le voci delle variabili d'ambiente Path utente e di sistema.</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Disabilita i processi in background di Edge (risparmia 100–300 MB)</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Disabilita tramite criteri la modalità in background di Edge e Startup Boost. Se usi raramente Edge, può liberare circa 100–300 MB di memoria. Edge potrebbe avviarsi un po’ più lentamente e le notifiche delle estensioni potrebbero interrompersi. Imposta questa opzione su OFF per rimuovere i criteri e ripristinare le impostazioni predefinite di Edge.</x:String>
 </ResourceDictionary>

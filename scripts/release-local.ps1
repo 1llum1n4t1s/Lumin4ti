@@ -22,15 +22,15 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 # ---- 定数 ----
-# Velopack (vpk) は常に最新安定版を使う (ゆろ君ルール): NuGet から実行時に最新を解決して pin する
-$VpkVersion = (Invoke-RestMethod 'https://api.nuget.org/v3-flatcontainer/vpk/index.json' -TimeoutSec 30).versions |
-    Where-Object { $_ -notmatch '-' } | Select-Object -Last 1
-if (-not $VpkVersion) { throw 'vpk の最新安定版バージョンの取得に失敗しました (NuGet API)' }
-Write-Host "vpk 最新安定版: $VpkVersion"
+# リリースの再現性を保つため、vpk はリポジトリ内で明示的に固定する。
+# 更新時は公式 NuGet の安定版を確認し、-SkipUpload で署名成果物を検証してから変更する。
+$VpkVersion = '1.2.0'
+Write-Host "vpk 固定バージョン: $VpkVersion"
 $WranglerVersion = '4.92.0'         # サプライチェーン対策でバージョン固定
 $Bucket = 'lumin4ti-updates'
 $BaseUrl = 'https://lumin4ti.nephilim.jp'
 $AccountId = '10901bfadbf1005164774a7350082985'
+$NupkgRetentionGraceDays = 30
 $SecretsPath = 'C:\Users\IMT\dev\Secret\secrets.json'
 $CertSubjectName = 'Open Source Developer Yuichiro Shinozaki'
 # /n (Subject 名) で選択: 証明書の年次更新で thumbprint が変わっても動く
@@ -50,6 +50,53 @@ function Invoke-Native {
     param([string]$Description, [scriptblock]$Block)
     & $Block
     if ($LASTEXITCODE -ne 0) { throw "$Description が失敗しました (exit $LASTEXITCODE)" }
+}
+
+function Publish-R2Object {
+    param([System.IO.FileInfo]$File)
+
+    Write-Host "  ↑ $($File.Name)"
+    Invoke-Native "R2 put ($($File.Name))" {
+        pnpm dlx "wrangler@$WranglerVersion" r2 object put "$Bucket/$($File.Name)" --file $File.FullName --remote
+    }
+}
+
+function Wait-RemoteAsset {
+    param(
+        [System.IO.FileInfo]$File,
+        [string]$BaseUrl,
+        [int]$MaxAttempts = 18
+    )
+
+    $encodedName = [uri]::EscapeDataString($File.Name)
+    $assetUrl = "$BaseUrl/$encodedName"
+    $lastReason = '応答なし'
+
+    for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
+        try {
+            $requestUrl = "${assetUrl}?_=$([Guid]::NewGuid().ToString('N'))"
+            $response = Invoke-WebRequest -Method Head -Uri $requestUrl `
+                -Headers @{ 'Cache-Control' = 'no-cache' } -TimeoutSec 30
+            $contentLengths = @($response.Headers['Content-Length'])
+            $remoteLength = if ($contentLengths.Count -eq 1) { [long]$contentLengths[0] } else { -1 }
+            if ([int]$response.StatusCode -eq 200 -and $remoteLength -eq $File.Length) {
+                Write-Host "  ✅ $($File.Name): HTTP 200 / $remoteLength bytes (attempt $attempt)"
+                return
+            }
+
+            $lastReason = "HTTP $([int]$response.StatusCode) / Content-Length=$remoteLength (期待値 $($File.Length))"
+        }
+        catch {
+            $lastReason = $_.Exception.Message
+        }
+
+        if ($attempt -lt $MaxAttempts) {
+            Write-Host "  ⚠️ $($File.Name) をまだ取得確認できません (attempt $attempt / $MaxAttempts)、5 秒待機..."
+            Start-Sleep -Seconds 5
+        }
+    }
+
+    throw "公開 asset を取得確認できないため manifest を公開しません: $($File.Name) — $lastReason"
 }
 
 # ---- 0. プリフライト ----
@@ -153,17 +200,118 @@ if ($SkipUpload) {
     return
 }
 
-# ---- 2. R2 アップロード ----
-Write-Host '== R2 アップロード ==' -ForegroundColor Cyan
-$uploaded = 0
-foreach ($f in Get-ChildItem $ArtifactsDir -File) {
-    Write-Host "  ↑ $($f.Name)"
-    Invoke-Native "R2 put ($($f.Name))" {
-        pnpm dlx "wrangler@$WranglerVersion" r2 object put "$Bucket/$($f.Name)" --file $f.FullName --remote
+# ---- 2. R2 アップロード (asset → 取得検証 → manifest commit point) ----
+$artifacts = @(Get-ChildItem $ArtifactsDir -File)
+$manifestFiles = @($artifacts | Where-Object { $_.Name -like 'releases.*.json' } | Sort-Object Name)
+if ($manifestFiles.Count -eq 0) { throw '公開 commit point となる releases.*.json が見つかりません' }
+
+$expectedManifestNames = @($Runtimes | ForEach-Object {
+    $channel = $RuntimeMatrix[$_].Channel
+    "releases.$channel.json"
+})
+foreach ($expectedManifestName in $expectedManifestNames) {
+    if ($expectedManifestName -notin $manifestFiles.Name) {
+        throw "必要な manifest が artifacts にありません: $expectedManifestName"
     }
+}
+
+$unexpectedManifests = @($manifestFiles | Where-Object { $_.Name -notin $expectedManifestNames })
+if ($unexpectedManifests.Count -gt 0) {
+    throw "対象外 channel の manifest が artifacts にあります: $($unexpectedManifests.Name -join ', ')"
+}
+
+# manifest 更新直前の世代は、経路上のキャッシュや既に更新確認を済ませたクライアントが
+# 参照している可能性があるため必ず保持する。取得に失敗した場合は cleanup 自体を止める。
+$previousReleaseAssets = @{}
+$previousManifestReadSucceeded = $true
+Write-Host '== 旧 manifest 保持対象の取得 ==' -ForegroundColor Cyan
+foreach ($manifestName in $expectedManifestNames) {
+    $manifestUrl = "$BaseUrl/$manifestName"
+    try {
+        $response = Invoke-WebRequest -Uri "${manifestUrl}?_=$([Guid]::NewGuid().ToString('N'))" `
+            -Headers @{ 'Cache-Control' = 'no-cache' } -TimeoutSec 30
+        $raw = $response.Content
+        if ($raw -is [byte[]]) { $raw = [System.Text.Encoding]::UTF8.GetString($raw) }
+        $previousManifest = $raw | ConvertFrom-Json
+        $assetsProperty = $previousManifest.PSObject.Properties['Assets']
+        if (-not $assetsProperty -or @($assetsProperty.Value).Count -eq 0) {
+            throw "Assets が空です: $manifestUrl"
+        }
+        foreach ($asset in @($assetsProperty.Value)) {
+            if ($asset.FileName) { $previousReleaseAssets[[string]$asset.FileName] = $true }
+        }
+        Write-Host "  ✅ $manifestName : $(@($assetsProperty.Value).Count) asset"
+    }
+    catch {
+        $responseProperty = $_.Exception.PSObject.Properties['Response']
+        $responseValue = if ($responseProperty) { $responseProperty.Value } else { $null }
+        $statusProperty = if ($responseValue) { $responseValue.PSObject.Properties['StatusCode'] } else { $null }
+        $statusCode = if ($statusProperty) { [int]$statusProperty.Value } else { 0 }
+        if ($statusCode -eq 404) {
+            # 初回公開か一時的な欠落かを安全に区別できない。初回は削除対象も無いため、
+            # どちらの場合も cleanup を止めるのが安全側。
+            $previousManifestReadSucceeded = $false
+            Write-Warning "旧 manifest が 404 のため、この実行では旧 nupkg を削除しません: $manifestName"
+            continue
+        }
+
+        $previousManifestReadSucceeded = $false
+        Write-Warning "旧 manifest を取得できないため、この実行では旧 nupkg を削除しません: $manifestName — $($_.Exception.Message)"
+    }
+}
+
+$preCommitFiles = @($artifacts | Where-Object { $_.Name -notlike 'releases.*.json' } | Sort-Object Name)
+if ($preCommitFiles.Count -eq 0) { throw 'manifest より先に公開する asset がありません' }
+
+$artifactByName = @{}
+foreach ($artifact in $artifacts) { $artifactByName[$artifact.Name] = $artifact }
+$referencedAssets = @{}
+foreach ($manifestFile in $manifestFiles) {
+    $manifest = Get-Content $manifestFile.FullName -Raw | ConvertFrom-Json
+    $assetsProperty = $manifest.PSObject.Properties['Assets']
+    if (-not $assetsProperty -or @($assetsProperty.Value).Count -eq 0) {
+        throw "manifest に asset がありません: $($manifestFile.Name)"
+    }
+
+    foreach ($asset in @($assetsProperty.Value)) {
+        $fileNameProperty = $asset.PSObject.Properties['FileName']
+        $fileName = if ($fileNameProperty) { [string]$fileNameProperty.Value } else { '' }
+        if ([string]::IsNullOrWhiteSpace($fileName) -or -not $artifactByName.ContainsKey($fileName)) {
+            throw "manifest がローカルに存在しない asset を参照しています: $($manifestFile.Name) → $fileName"
+        }
+
+        $assetFile = $artifactByName[$fileName]
+        $sizeProperty = $asset.PSObject.Properties['Size']
+        if ($sizeProperty -and [long]$sizeProperty.Value -ne $assetFile.Length) {
+            throw "manifest とローカル asset のサイズが一致しません: $fileName"
+        }
+
+        $referencedAssets[$fileName] = $assetFile
+    }
+}
+
+Write-Host '== R2 asset アップロード ==' -ForegroundColor Cyan
+$uploaded = 0
+foreach ($file in $preCommitFiles) {
+    Publish-R2Object $file
     $uploaded++
 }
-Write-Host "✅ R2 アップロード完了: $uploaded ファイル"
+Write-Host "✅ R2 asset アップロード完了: $uploaded ファイル"
+
+# releases.*.json が参照する不変 asset を公開 URL から取得でき、サイズも一致するまで
+# commit point は更新しない。途中失敗時は旧 manifest がそのまま有効なので更新経路を壊さない。
+Write-Host '== 公開 asset 取得検証 ==' -ForegroundColor Cyan
+foreach ($assetFile in @($referencedAssets.Values | Sort-Object Name)) {
+    Wait-RemoteAsset -File $assetFile -BaseUrl $BaseUrl
+}
+
+# SimpleWebSource が読む releases.{channel}.json を最後に公開し、ここをリリースの commit point とする。
+Write-Host '== manifest commit point 公開 ==' -ForegroundColor Cyan
+foreach ($manifestFile in $manifestFiles) {
+    Publish-R2Object $manifestFile
+    $uploaded++
+}
+Write-Host "✅ R2 全アップロード完了: $uploaded ファイル (manifest は最後に公開)"
 
 # ---- 2.5 Cloudflare エッジキャッシュのパージ ----
 # 固定名ファイル (Setup.exe / Portable.zip / RELEASES / releases.*.json / assets.*.json) は
@@ -218,10 +366,9 @@ foreach ($runtime in $Runtimes) {
     }
 }
 
-# ---- 4. 旧バージョン nupkg のクリーンアップ (Aggressive 戦略) ----
-# ローカル artifacts の manifest (= 今アップロードしたものと同一) から keep set を作り、
-# R2 上の「.nupkg かつ manifest 外」だけを削除する。固定ファイル名 (Setup.exe /
-# Portable.zip / RELEASES* / assets.*.json / releases.*.json) は対象外なので安全。
+# ---- 4. 旧バージョン nupkg のクリーンアップ ----
+# 現世代と直前世代を必ず保持し、それ以前も grace period 内は残す。manifest 取得失敗や
+# last_modified 不明の object は削除せず、更新確認済みクライアントの取得 race を避ける。
 Write-Host '== 旧 nupkg クリーンアップ ==' -ForegroundColor Cyan
 $keep = @{}
 $manifests = Get-ChildItem $ArtifactsDir -Filter 'releases.*.json'
@@ -231,17 +378,18 @@ foreach ($m in $manifests) {
         if ($asset.FileName) { $keep[$asset.FileName] = $true }
     }
 }
-Write-Host "  保持対象 nupkg: $($keep.Count) 件"
+foreach ($assetName in $previousReleaseAssets.Keys) { $keep[$assetName] = $true }
+Write-Host "  保持対象 asset (現世代 + 直前世代): $($keep.Count) 件"
 
 $api = "https://api.cloudflare.com/client/v4/accounts/$AccountId/r2/buckets/$Bucket"
 $headers = @{ Authorization = "Bearer $($env:CLOUDFLARE_API_TOKEN)" }
 
-$allKeys = [System.Collections.Generic.List[string]]::new()
+$allObjects = [System.Collections.Generic.List[object]]::new()
 $cursor = ''
 while ($true) {
     $uri = "$api/objects?per_page=1000" + $(if ($cursor) { "&cursor=$cursor" })
     $resp = Invoke-RestMethod -Uri $uri -Headers $headers -TimeoutSec 30
-    foreach ($obj in $resp.result) { $allKeys.Add($obj.key) }
+    foreach ($obj in $resp.result) { $allObjects.Add($obj) }
     $info = $resp.PSObject.Properties['result_info']
     if (-not $info -or -not $info.Value) { break }
     $truncated = $info.Value.PSObject.Properties['is_truncated']
@@ -251,12 +399,35 @@ while ($true) {
     if (-not $cursor) { break }
 }
 
-$toDelete = $allKeys | Where-Object { $_ -like '*.nupkg' -and -not $keep.ContainsKey($_) }
-if (-not $toDelete) {
+$graceCutoff = [DateTimeOffset]::UtcNow.AddDays(-$NupkgRetentionGraceDays)
+$toDelete = @()
+if ($previousManifestReadSucceeded) {
+    $toDelete = @($allObjects | Where-Object {
+        $key = [string]$_.key
+        if ($key -notlike '*.nupkg' -or $keep.ContainsKey($key)) { return $false }
+
+        $lastModifiedProperty = $_.PSObject.Properties['last_modified']
+        if (-not $lastModifiedProperty -or -not $lastModifiedProperty.Value) { return $false }
+        try {
+            $lastModified = [DateTimeOffset]$lastModifiedProperty.Value
+        }
+        catch {
+            return $false
+        }
+
+        return $lastModified -lt $graceCutoff
+    })
+}
+else {
+    Write-Warning '旧 manifest の取得に失敗したため、fail-safe で cleanup をスキップします。'
+}
+
+if ($toDelete.Count -eq 0) {
     Write-Host '  ✅ 削除対象なし'
 } else {
     $deleted = 0; $failed = 0
-    foreach ($key in $toDelete) {
+    foreach ($object in $toDelete) {
+        $key = [string]$object.key
         $encoded = [uri]::EscapeDataString($key)
         try {
             Invoke-RestMethod -Method Delete -Uri "$api/objects/$encoded" -Headers $headers -TimeoutSec 30 | Out-Null
@@ -267,7 +438,7 @@ if (-not $toDelete) {
             $failed++
         }
     }
-    Write-Host "  🧹 クリーンアップ: $deleted 削除 / $failed 失敗"
+    Write-Host "  🧹 クリーンアップ: $deleted 削除 / $failed 失敗 (保持猶予 $NupkgRetentionGraceDays 日)"
     if ($failed -gt 0 -and $deleted -eq 0) { throw '旧 nupkg の削除がすべて失敗しました。API token の権限を確認してください。' }
 }
 

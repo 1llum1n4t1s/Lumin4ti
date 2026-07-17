@@ -52,8 +52,10 @@
   <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">{0} diaktifkan</x:String>
   <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">{0} dinonaktifkan</x:String>
   <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">Gagal mengalihkan {0} (periksa log)</x:String>
-  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Dibatalkan</x:String>
+<x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Dibatalkan</x:String>
+  <x:String x:Key="Text.Status.Busy" xml:space="preserve">Operasi pemeliharaan lain sedang berjalan. Coba lagi setelah selesai.</x:String>
   <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ Selesai</x:String>
+  <x:String x:Key="Text.Result.Partial" xml:space="preserve">⚠ Selesai sebagian</x:String>
   <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ Gagal</x:String>
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer dimulai ulang</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Gagal memulai ulang Explorer (silakan mulai ulang secara manual)</x:String>
@@ -148,4 +150,6 @@
   <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Mengurutkan folder yang disematkan ke Quick Access secara menaik berdasarkan nama (mencadangkan jump list sebelum dijalankan).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Urutkan variabel lingkungan Path</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Menghapus duplikat dan mengurutkan secara menaik entri variabel lingkungan Path pengguna dan sistem.</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Nonaktifkan proses latar belakang Edge (hemat 100–300 MB)</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Menonaktifkan mode latar belakang Edge dan Startup Boost melalui kebijakan. Jika Anda jarang menggunakan Edge, tindakan ini dapat membebaskan sekitar 100–300 MB memori. Edge mungkin sedikit lebih lambat saat dibuka dan notifikasi ekstensi mungkin berhenti. Matikan opsi ini (OFF) untuk menghapus kebijakan dan memulihkan pengaturan default Edge.</x:String>
 </ResourceDictionary>

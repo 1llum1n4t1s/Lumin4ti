@@ -1,21 +1,43 @@
 using System.Runtime.Versioning;
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
-using Microsoft.Win32;
 
 namespace Lumin4ti.Core.Services.Windows.Actions;
 
 /// <summary>
 /// 仮想化ベースセキュリティ (VBS/HVCI) の無効化トグル。
-/// レジストリ 3 値は C# で直接書き、hypervisor 起動設定のみ bcdedit (外部プロセス) を使う。
-/// ON = 無効化を適用、OFF = レジストリ値を削除し bcdedit を auto に戻して Windows 既定へ。
+/// ON 前に BCD とレジストリ 3 値を退避し、OFF ではユーザーの元状態へ正確に復元する。
 /// </summary>
 [SupportedOSPlatform("windows")]
-public sealed class VirtualizationSecurityToggle(ICommandExecutor executor) : IMaintenanceToggle
+public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
 {
-    private const string DeviceGuardKey = @"SYSTEM\CurrentControlSet\Control\DeviceGuard";
-    private const string HvciKey = @"SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity";
-    private const string LsaKey = @"SYSTEM\CurrentControlSet\Control\Lsa";
+    private static readonly VirtualizationSecurityComponent[] Components =
+    [
+        VirtualizationSecurityComponent.HypervisorLaunchType,
+        VirtualizationSecurityComponent.DeviceGuard,
+        VirtualizationSecurityComponent.Hvci,
+        VirtualizationSecurityComponent.Lsa,
+    ];
+
+    private readonly IVirtualizationSecurityPlatform _platform;
+    private readonly VirtualizationSecurityBackupStore _backupStore;
+
+    public VirtualizationSecurityToggle(ICommandExecutor executor)
+        : this(
+            new WindowsVirtualizationSecurityPlatform(executor),
+            new VirtualizationSecurityBackupStore(
+                ProtectedBackupStorage.Default,
+                "vbs-hvci.json"))
+    {
+    }
+
+    internal VirtualizationSecurityToggle(
+        IVirtualizationSecurityPlatform platform,
+        VirtualizationSecurityBackupStore backupStore)
+    {
+        _platform = platform;
+        _backupStore = backupStore;
+    }
 
     public string Id => "vbs-hvci-off";
 
@@ -31,89 +53,200 @@ public sealed class VirtualizationSecurityToggle(ICommandExecutor executor) : IM
 
     public async Task<bool?> GetStateAsync(CancellationToken ct = default)
     {
-        bool registryDisabled;
-        using (var key = Registry.LocalMachine.OpenSubKey(DeviceGuardKey))
+        try
         {
-            registryDisabled = key?.GetValue("EnableVirtualizationBasedSecurity") is int value && value == 0;
-        }
+            var current = await CaptureAsync(ct);
+            if (current.IsFullyApplied)
+            {
+                return true;
+            }
 
-        // レジストリだけでなく bcdedit の hypervisorlaunchtype も確認し、両者が食い違う
-        // (=前回の適用が途中で失敗した部分適用状態) 場合は「状態不明 (null)」を返す。
-        var hypervisorOff = await GetHypervisorOffAsync(ct);
-        if (hypervisorOff is null)
+            // 適用失敗を元状態へ補償した場合は、元状態が独自構成でも OFF と判定できる。
+            var backup = _backupStore.Load();
+            if (backup is not null && current.EquivalentTo(backup))
+            {
+                return false;
+            }
+
+            // 変更対象の一部だけが適用値なら部分適用。4 項目すべてを照合して判定する。
+            return current.HasAnyAppliedComponent ? null : false;
+        }
+        catch (OperationCanceledException)
         {
-            return null; // bcdedit を読めない = 判定不能
+            throw;
         }
-
-        if (registryDisabled == hypervisorOff.Value)
+        catch (Exception ex)
         {
-            return registryDisabled; // 両者一致: true=無効化適用済み / false=既定
+            LoggerBootstrap.Log.Error($"{Id}: 状態取得に失敗しました", ex);
+            return null;
         }
-
-        return null; // 不一致 = 部分適用状態
     }
 
     public async Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default)
     {
-        var lines = new List<string>();
-
-        // hypervisor 起動種別 (bcdedit) を先に変更する。bcdedit は失敗しやすい (BitLocker 等) ため、
-        // 先に実行して失敗ならレジストリに一切触れず中断することで「レジストリだけ変わった部分適用状態」を防ぐ。
-        var bcd = await executor.RunAsync("bcdedit.exe", $"/set hypervisorlaunchtype {(on ? "off" : "auto")}", ct);
-        if (!bcd.Success)
+        try
         {
-            LoggerBootstrap.Log.Error($"{Id}: bcdedit 失敗 (exit={bcd.ExitCode}): {bcd.StandardError}");
-            return MaintenanceActionResult.Fail(
-                $"bcdedit の設定に失敗しました (exit={bcd.ExitCode})。レジストリは変更していません: {bcd.StandardError}");
+            return on ? await ApplyAsync(ct) : await RestoreAsync(ct);
         }
-
-        lines.Add($"  - hypervisorlaunchtype を {(on ? "off" : "auto")} に設定しました");
-
-        if (on)
+        catch (OperationCanceledException)
         {
-            SetDword(DeviceGuardKey, "EnableVirtualizationBasedSecurity", 0);
-            SetDword(HvciKey, "Enabled", 0);
-            SetDword(LsaKey, "LsaCfgFlags", 0);
-            lines.Add("  - VBS / HVCI / Credential Guard のレジストリ値を無効 (0) に設定しました");
+            throw;
         }
-        else
+        catch (Exception ex)
         {
-            DeleteValue(DeviceGuardKey, "EnableVirtualizationBasedSecurity");
-            DeleteValue(HvciKey, "Enabled");
-            DeleteValue(LsaKey, "LsaCfgFlags");
-            lines.Add("  - レジストリ値を削除して Windows 既定に戻しました");
+            LoggerBootstrap.Log.Error($"{Id}: {(on ? "適用" : "復元")}の準備に失敗しました", ex);
+            return MaintenanceActionResult.Fail(ex.Message);
         }
-
-        LoggerBootstrap.Log.Info($"{Id} → {(on ? "ON" : "OFF")}");
-        return MaintenanceActionResult.Ok(lines);
     }
 
-    /// <summary>bcdedit /enum {current} から hypervisorlaunchtype が Off か判定する。読めなければ null。</summary>
-    private async Task<bool?> GetHypervisorOffAsync(CancellationToken ct)
+    private async Task<MaintenanceActionResult> ApplyAsync(CancellationToken ct)
     {
-        var bcd = await executor.RunAsync("bcdedit.exe", "/enum {current}", ct);
-        if (!bcd.Success)
+        var before = await CaptureAsync(ct);
+        if (_backupStore.Load() is null)
         {
+            // 途中までの JSON を正本として読まないよう、一時ファイルを flush 後に rename する。
+            _backupStore.SaveNew(before);
+        }
+
+        var failure = await TransitionAsync(before, VirtualizationSecuritySnapshot.Applied(), ct);
+        if (failure is not null)
+        {
+            return await CreateFailureResultAsync("VBS / HVCI の無効化", failure);
+        }
+
+        LoggerBootstrap.Log.Info($"{Id} → ON");
+        return MaintenanceActionResult.Ok(
+        [
+            "  - hypervisorlaunchtype を off に設定しました",
+            "  - VBS / HVCI / Credential Guard のレジストリ値を無効 (0) に設定しました",
+            "  - ON 前の BCD・レジストリ状態をバックアップしました",
+        ]);
+    }
+
+    private async Task<MaintenanceActionResult> RestoreAsync(CancellationToken ct)
+    {
+        var original = _backupStore.Load();
+        if (original is null)
+        {
+            return MaintenanceActionResult.Fail(
+                "元状態のバックアップがないため、安全に復元できません。ON を適用した環境と同じ設定フォルダーを使用してください。");
+        }
+
+        var before = await CaptureAsync(ct);
+        var failure = await TransitionAsync(before, original, ct);
+        if (failure is not null)
+        {
+            return await CreateFailureResultAsync("VBS / HVCI の元状態への復元", failure);
+        }
+
+        _backupStore.Delete();
+        LoggerBootstrap.Log.Info($"{Id} → OFF (元状態に復元)");
+        return MaintenanceActionResult.Ok(
+        [
+            "  - hypervisorlaunchtype の存在と値を元状態へ復元しました",
+            "  - VBS / HVCI / Credential Guard の型と値を元状態へ復元しました",
+        ]);
+    }
+
+    private async Task<TransitionFailure?> TransitionAsync(
+        VirtualizationSecuritySnapshot before,
+        VirtualizationSecuritySnapshot desired,
+        CancellationToken ct)
+    {
+        var attempted = new Stack<VirtualizationSecurityComponent>();
+        try
+        {
+            foreach (var component in Components)
+            {
+                if (ComponentEquals(before, desired, component))
+                {
+                    continue;
+                }
+
+                // 書き込みが「変更後に例外」になる場合も戻せるよう、試行前に補償対象へ積む。
+                attempted.Push(component);
+                await WriteComponentAsync(component, desired, ct);
+            }
+
+            var actual = await CaptureAsync(ct);
+            if (!actual.EquivalentTo(desired))
+            {
+                throw new InvalidOperationException("変更後の実状態が目標状態と一致しません。");
+            }
+
             return null;
         }
+        catch (Exception ex)
+        {
+            var rollbackErrors = new List<string>();
+            while (attempted.TryPop(out var component))
+            {
+                try
+                {
+                    // 安全上の補償は、利用者キャンセル後も最後まで実行する。
+                    await WriteComponentAsync(component, before, CancellationToken.None);
+                }
+                catch (Exception rollbackEx)
+                {
+                    rollbackErrors.Add($"{component}: {rollbackEx.Message}");
+                }
+            }
 
-        // "hypervisorlaunchtype" と "Off"/"Auto" は bcdedit のロケール非依存な固定トークン。
-        var line = bcd.StandardOutput.Split('\n')
-            .FirstOrDefault(l => l.Contains("hypervisorlaunchtype", StringComparison.OrdinalIgnoreCase));
-
-        // 行が無い = 既定 (Auto) 扱い = Off ではない
-        return line is not null && line.Contains("Off", StringComparison.OrdinalIgnoreCase);
+            LoggerBootstrap.Log.Error($"{Id}: 変更失敗。補償エラー={rollbackErrors.Count}", ex);
+            return new TransitionFailure(ex, rollbackErrors);
+        }
     }
 
-    private static void SetDword(string keyPath, string name, int value)
+    private async Task<MaintenanceActionResult> CreateFailureResultAsync(
+        string operation,
+        TransitionFailure failure)
     {
-        using var key = Registry.LocalMachine.CreateSubKey(keyPath);
-        key.SetValue(name, value, RegistryValueKind.DWord);
+        var finalState = await GetStateAsync(CancellationToken.None);
+        var detail = $"{operation}に失敗しました: {failure.Error.Message}";
+        detail += failure.RollbackErrors.Count == 0
+            ? "\n  - 変更済み項目は開始前の状態へ補償しました"
+            : $"\n  - 補償にも失敗しました: {string.Join(" / ", failure.RollbackErrors)}";
+        detail += $"\n  - 最終状態: {DescribeState(finalState)}";
+        return MaintenanceActionResult.Fail(detail);
     }
 
-    private static void DeleteValue(string keyPath, string name)
+    private async Task<VirtualizationSecuritySnapshot> CaptureAsync(CancellationToken ct) => new()
     {
-        using var key = Registry.LocalMachine.OpenSubKey(keyPath, writable: true);
-        key?.DeleteValue(name, throwOnMissingValue: false);
+        HypervisorLaunchType = await _platform.ReadHypervisorLaunchTypeAsync(ct),
+        DeviceGuard = _platform.ReadRegistryValue(VirtualizationSecurityComponent.DeviceGuard),
+        Hvci = _platform.ReadRegistryValue(VirtualizationSecurityComponent.Hvci),
+        Lsa = _platform.ReadRegistryValue(VirtualizationSecurityComponent.Lsa),
+    };
+
+    private async Task WriteComponentAsync(
+        VirtualizationSecurityComponent component,
+        VirtualizationSecuritySnapshot snapshot,
+        CancellationToken ct)
+    {
+        if (component == VirtualizationSecurityComponent.HypervisorLaunchType)
+        {
+            await _platform.WriteHypervisorLaunchTypeAsync(snapshot.HypervisorLaunchType, ct);
+            return;
+        }
+
+        ct.ThrowIfCancellationRequested();
+        _platform.WriteRegistryValue(component, snapshot.GetRegistryValue(component));
     }
+
+    private static bool ComponentEquals(
+        VirtualizationSecuritySnapshot left,
+        VirtualizationSecuritySnapshot right,
+        VirtualizationSecurityComponent component) =>
+        component == VirtualizationSecurityComponent.HypervisorLaunchType
+            ? left.HypervisorLaunchType.EquivalentTo(right.HypervisorLaunchType)
+            : left.GetRegistryValue(component).EquivalentTo(right.GetRegistryValue(component));
+
+    private static string DescribeState(bool? state) => state switch
+    {
+        true => "ON (全項目適用済み)",
+        false => "OFF (元状態)",
+        null => "部分適用または判定不能",
+    };
+
+    private sealed record TransitionFailure(Exception Error, IReadOnlyList<string> RollbackErrors);
 }

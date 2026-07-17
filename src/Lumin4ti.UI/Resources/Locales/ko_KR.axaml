@@ -52,8 +52,10 @@
   <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">{0} 켬</x:String>
   <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">{0} 끔</x:String>
   <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">{0} 전환 실패(로그 확인)</x:String>
-  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">취소됨</x:String>
+<x:String x:Key="Text.Status.Cancelled" xml:space="preserve">취소됨</x:String>
+  <x:String x:Key="Text.Status.Busy" xml:space="preserve">다른 유지 관리 작업이 실행 중입니다. 완료된 후 다시 시도하세요.</x:String>
   <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ 완료됨</x:String>
+  <x:String x:Key="Text.Result.Partial" xml:space="preserve">⚠ 일부 완료</x:String>
   <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ 실패</x:String>
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer 다시 시작됨</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Explorer 다시 시작 실패(수동으로 다시 시작하세요)</x:String>
@@ -148,4 +150,6 @@
   <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Quick Access에 고정된 폴더를 이름 오름차순으로 정렬합니다(실행 전 점프 목록을 백업).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Path 환경 변수 정렬</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">사용자 및 시스템 Path 환경 변수의 항목을 중복 제거하고 오름차순으로 정렬합니다.</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Edge 백그라운드 프로세스 끄기(100~300 MB 절약)</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">정책으로 Edge 백그라운드 모드와 Startup Boost를 비활성화합니다. Edge를 거의 사용하지 않는다면 약 100~300 MB의 메모리를 확보할 수 있습니다. Edge 시작이 조금 느려지고 확장 프로그램 알림이 중단될 수 있습니다. OFF로 전환하면 정책을 제거하고 Edge 기본값으로 복원합니다.</x:String>
 </ResourceDictionary>

@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Runtime.Versioning;
 using System.Text.Json;
 using Lumin4ti.Core.Interfaces;
@@ -7,24 +8,76 @@ using Microsoft.Win32;
 namespace Lumin4ti.Core.Services.Windows.Actions;
 
 /// <summary>
-/// Get-MMAgent を 1 回だけ実行して全プロパティを取得・キャッシュする共有プロバイダ。
-/// 5 つの MmAgentFeatureToggle が各々 PowerShell を起動する冗長 (起動時 5 プロセス) を防ぐ。
+/// Get-MMAgent の成功結果を取得・キャッシュする共有プロバイダ。
+/// 並行取得を 1 プロセスへ集約し、失敗時だけ次回取得で再試行する。
 /// </summary>
 public sealed class MmAgentStateProvider(ICommandExecutor executor)
 {
-    private readonly Lazy<Task<Dictionary<string, bool>?>> _cache =
-        new(() => LoadAsync(executor), LazyThreadSafetyMode.ExecutionAndPublication);
+    private readonly object _cacheSync = new();
+    private Task<Dictionary<string, bool>?>? _cacheTask;
+    private readonly ConcurrentDictionary<string, StateOverride> _overrides =
+        new(StringComparer.OrdinalIgnoreCase);
 
     public async Task<bool?> GetAsync(string propertyName, CancellationToken ct = default)
     {
-        var all = await _cache.Value;
-        if (all is null)
+        if (_overrides.TryGetValue(propertyName, out var stateOverride))
         {
-            return null;
+            return stateOverride.IsKnown
+                ? stateOverride.Value
+                : await RefreshInvalidatedAsync(propertyName, ct);
         }
 
-        return all.TryGetValue(propertyName, out var value) ? value : null;
+        // 共有ロード自体は最初の呼び出しのキャンセルで汚染せず、各呼び出しは個別に待機を中断できる。
+        // 成功結果だけを保持し、プロセス失敗・不正 JSON の null・Task 例外は次回呼び出しで再試行する。
+        // 実プロセスの上限時間は ProcessCommandExecutor が保証する。
+        var all = await GetOrCreateSharedLoad().WaitAsync(ct);
+
+        // 共有ロード中に SetStateAsync が完了・中断した場合は、ロード開始時の古い値より
+        // その後の既知値または再取得要求を優先する。共有ロード失敗 (null) 時も先に確認する。
+        if (_overrides.TryGetValue(propertyName, out stateOverride))
+        {
+            return stateOverride.IsKnown
+                ? stateOverride.Value
+                : await RefreshInvalidatedAsync(propertyName, ct);
+        }
+
+        return all is not null && all.TryGetValue(propertyName, out var value) ? value : null;
     }
+
+    private Task<Dictionary<string, bool>?> GetOrCreateSharedLoad()
+    {
+        lock (_cacheSync)
+        {
+            // 完了前は同じ Task を全呼び出しで共有する。完了後も成功値は保持するが、
+            // null・fault・cancel は新しい Task へ置換して一時的な取得失敗を固定化しない。
+            var shouldRetry = _cacheTask is null ||
+                _cacheTask.IsCanceled ||
+                (_cacheTask.IsCompletedSuccessfully && _cacheTask.Result is null);
+            if (_cacheTask?.IsFaulted == true)
+            {
+                // 待機側が先にキャンセルされていた場合も、破棄する fault を未観測のまま残さない。
+                _ = _cacheTask.Exception;
+                shouldRetry = true;
+            }
+
+            if (shouldRetry)
+            {
+                _cacheTask = LoadAsync(executor);
+            }
+
+            return _cacheTask!;
+        }
+    }
+
+    /// <summary>切り替え成功後の既知値を、共有ロードを起動・待機せずスレッドセーフに反映する。</summary>
+    internal void SetKnownValue(string propertyName, bool value) =>
+        _overrides[propertyName] = new StateOverride(IsKnown: true, Value: value);
+
+    /// <summary>
+    /// キャンセル等でコマンドが適用済みか判定できない場合、古い共有値へ戻らず次回取得を強制する。
+    /// </summary>
+    internal void Invalidate(string propertyName) =>
+        _overrides[propertyName] = new StateOverride(IsKnown: false, Value: false);
 
     /// <summary>
     /// キャッシュを介さず Get-MMAgent を今この場で実行して 1 プロパティの現在値を読む。
@@ -36,6 +89,29 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
         var all = await LoadAsync(executor, ct);
         return all is not null && all.TryGetValue(propertyName, out var value) ? value : null;
     }
+
+    private async Task<bool?> RefreshInvalidatedAsync(string propertyName, CancellationToken ct)
+    {
+        var fresh = await ReadFreshAsync(propertyName, ct);
+        if (fresh is not bool value)
+        {
+            // 再取得中に別の成功した Set が既知値を置いた場合は、失敗した再取得よりそちらを優先する。
+            return _overrides.TryGetValue(propertyName, out var latest) && latest.IsKnown
+                ? latest.Value
+                : null;
+        }
+
+        // Unknown のままなら新鮮な値へ置換する。並行 Set が既知値を置いていれば上書きしない。
+        _overrides.TryUpdate(
+            propertyName,
+            new StateOverride(IsKnown: true, Value: value),
+            new StateOverride(IsKnown: false, Value: false));
+        return _overrides.TryGetValue(propertyName, out var current) && current.IsKnown
+            ? current.Value
+            : value;
+    }
+
+    private readonly record struct StateOverride(bool IsKnown, bool Value);
 
     private static async Task<Dictionary<string, bool>?> LoadAsync(ICommandExecutor executor, CancellationToken ct = default)
     {
@@ -83,6 +159,8 @@ public sealed class MmAgentFeatureToggle(
     string label,
     string description) : IMaintenanceToggle
 {
+    private readonly SemaphoreSlim _setGate = new(1, 1);
+
     public string Id => id;
 
     public string Label => label;
@@ -100,32 +178,54 @@ public sealed class MmAgentFeatureToggle(
 
     public async Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default)
     {
-        var cmdlet = on ? "Enable-MMAgent" : "Disable-MMAgent";
-        var result = await executor.RunAsync(
-            "powershell.exe",
-            $"-NoProfile -NonInteractive -Command \"{cmdlet} -{propertyName} -ErrorAction Stop\"",
-            ct);
-
-        if (result.Success)
+        // 同一機能への並行 Set は完了順と実状態が逆転し得るため直列化する。
+        await _setGate.WaitAsync(ct);
+        try
         {
-            LoggerBootstrap.Log.Info($"{Id} → {(on ? "有効" : "無効")}");
-            return MaintenanceActionResult.Ok($"  - {propertyName} を{(on ? "有効化" : "無効化")}しました");
-        }
+            var cmdlet = on ? "Enable-MMAgent" : "Disable-MMAgent";
+            var result = await executor.RunAsync(
+                "powershell.exe",
+                $"-NoProfile -NonInteractive -Command \"{cmdlet} -{propertyName} -ErrorAction Stop\"",
+                ct);
 
-        // cmdlet が失敗しても、目的の状態に既に一致していれば成功扱い (冪等)。
-        // 例: OperationAPI は前提機能のプリフェッチが無効だと「この要求はサポートされていません」で
-        // 失敗するが、既定で無効なら OFF 目標は既に達成済み。フレッシュ値で確認する。
-        var current = await stateProvider.ReadFreshAsync(propertyName, ct);
-        if (current == on)
+            if (result.Success)
+            {
+                stateProvider.SetKnownValue(propertyName, on);
+                LoggerBootstrap.Log.Info($"{Id} → {(on ? "有効" : "無効")}");
+                return MaintenanceActionResult.Ok($"  - {propertyName} を{(on ? "有効化" : "無効化")}しました");
+            }
+
+            // cmdlet が失敗しても、目的の状態に既に一致していれば成功扱い (冪等)。
+            // 例: OperationAPI は前提機能のプリフェッチが無効だと「この要求はサポートされていません」で
+            // 失敗するが、既定で無効なら OFF 目標は既に達成済み。フレッシュ値で確認する。
+            var current = await stateProvider.ReadFreshAsync(propertyName, ct);
+            if (current is bool currentValue)
+            {
+                // 目的値と違う失敗でも、確認できた実状態を以後の UI に反映して古い共有値を残さない。
+                stateProvider.SetKnownValue(propertyName, currentValue);
+            }
+
+            if (current == on)
+            {
+                LoggerBootstrap.Log.Info($"{Id}: 既に{(on ? "有効" : "無効")} (cmdlet は失敗したが目標状態に一致)");
+                return MaintenanceActionResult.Ok($"  - {propertyName} は既に{(on ? "有効" : "無効")}です");
+            }
+
+            var reason = result.StandardError.Split('\n', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim() ?? string.Empty;
+            LoggerBootstrap.Log.Error($"{Id}: {cmdlet} (exit={result.ExitCode}): {reason}");
+            return MaintenanceActionResult.Fail(
+                $"{cmdlet} が失敗しました{(reason.Length > 0 ? $": {reason}" : string.Empty)}{FailureHint()}");
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
-            LoggerBootstrap.Log.Info($"{Id}: 既に{(on ? "有効" : "無効")} (cmdlet は失敗したが目標状態に一致)");
-            return MaintenanceActionResult.Ok($"  - {propertyName} は既に{(on ? "有効" : "無効")}です");
+            // プロセス終了直前に OS 側だけ変更済みの可能性があるため、古い値を返さず次回再取得する。
+            stateProvider.Invalidate(propertyName);
+            throw;
         }
-
-        var reason = result.StandardError.Split('\n', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim() ?? string.Empty;
-        LoggerBootstrap.Log.Error($"{Id}: {cmdlet} (exit={result.ExitCode}): {reason}");
-        return MaintenanceActionResult.Fail(
-            $"{cmdlet} が失敗しました{(reason.Length > 0 ? $": {reason}" : string.Empty)}{FailureHint()}");
+        finally
+        {
+            _setGate.Release();
+        }
     }
 
     /// <summary>

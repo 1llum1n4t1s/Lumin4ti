@@ -52,8 +52,10 @@
   <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">{0} ativado</x:String>
   <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">{0} desativado</x:String>
   <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">Falha ao alternar {0} (verifique o log)</x:String>
-  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Cancelado</x:String>
+<x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Cancelado</x:String>
+  <x:String x:Key="Text.Status.Busy" xml:space="preserve">Outra operação de manutenção está em andamento. Tente novamente quando ela terminar.</x:String>
   <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ Concluído</x:String>
+  <x:String x:Key="Text.Result.Partial" xml:space="preserve">⚠ Parcialmente concluído</x:String>
   <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ Falhou</x:String>
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer reiniciado</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Falha ao reiniciar o Explorer (reinicie-o manualmente)</x:String>
@@ -148,4 +150,6 @@
   <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Ordena as pastas fixadas no Quick Access em ordem crescente por nome (faz backup da jump list antes de executar).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Ordenar a variável de ambiente Path</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Remove duplicatas e ordena em ordem crescente as entradas das variáveis de ambiente Path de usuário e de sistema.</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Desativar processos do Edge em segundo plano (economiza 100–300 MB)</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Desativa por política o modo em segundo plano do Edge e o Startup Boost. Se você raramente usa o Edge, isso pode liberar cerca de 100–300 MB de memória. O Edge pode iniciar um pouco mais devagar e as notificações das extensões podem parar. Coloque esta opção em OFF para remover as políticas e restaurar os padrões do Edge.</x:String>
 </ResourceDictionary>

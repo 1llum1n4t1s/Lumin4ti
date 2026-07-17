@@ -52,8 +52,10 @@
   <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">{0}: увімкнено</x:String>
   <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">{0}: вимкнено</x:String>
   <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">Не вдалося перемкнути {0} (перевірте журнал)</x:String>
-  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Скасовано</x:String>
+<x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Скасовано</x:String>
+  <x:String x:Key="Text.Status.Busy" xml:space="preserve">Виконується інша операція обслуговування. Повторіть спробу після її завершення.</x:String>
   <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ Завершено</x:String>
+  <x:String x:Key="Text.Result.Partial" xml:space="preserve">⚠ Частково завершено</x:String>
   <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ Помилка</x:String>
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer перезапущено</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Не вдалося перезапустити Explorer (перезапустіть його вручну)</x:String>
@@ -148,4 +150,6 @@
   <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Сортує папки, закріплені в Quick Access, за зростанням імен (перед запуском створює резервну копію списку переходів).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Упорядкувати змінну середовища Path</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Видаляє дублікати та сортує за зростанням записи користувацької та системної змінних середовища Path.</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Вимкнути фонові процеси Edge (заощадження 100–300 MB)</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Вимикає політиками фоновий режим Edge і Startup Boost. Якщо ви рідко користуєтеся Edge, це може звільнити близько 100–300 MB пам’яті. Edge може запускатися трохи повільніше, а сповіщення розширень можуть перестати надходити. Переведіть цей параметр у стан ВИМК, щоб видалити політики й відновити типові значення Edge.</x:String>
 </ResourceDictionary>

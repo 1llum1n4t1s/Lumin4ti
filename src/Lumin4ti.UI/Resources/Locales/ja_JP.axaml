@@ -28,4 +28,8 @@
   <x:String x:Key="Text.Version.FoldersHeader" xml:space="preserve">フォルダ</x:String>
   <x:String x:Key="Text.Version.OpenLogs" xml:space="preserve">ログフォルダを開く</x:String>
   <x:String x:Key="Text.Version.OpenSettings" xml:space="preserve">設定フォルダを開く</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Edge のバックグラウンド常駐を無効化 (メモリ節約 100〜300MB)</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Microsoft Edge のバックグラウンドモードと Startup Boost をポリシーで無効化します。Edge を常用しない場合は約 100〜300MB のメモリを節約できます。Edge の起動が少し遅くなり、拡張機能の通知が届かなくなる場合があります。OFF にするとポリシーを削除して Edge の既定値へ戻します。</x:String>
+  <x:String x:Key="Text.Status.Busy" xml:space="preserve">別のメンテナンス操作が実行中です。完了後にもう一度お試しください。</x:String>
+  <x:String x:Key="Text.Result.Partial" xml:space="preserve">⚠ 一部完了しました</x:String>
 </ResourceDictionary>

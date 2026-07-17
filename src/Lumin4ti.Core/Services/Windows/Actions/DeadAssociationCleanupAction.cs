@@ -40,8 +40,9 @@ public sealed class DeadAssociationCleanupAction : IMaintenanceAction
                 .Select(d => d.Trim())
                 .Where(d => d.Length > 0)
                 .ToArray();
+            var appExistenceCache = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 
-            removed += CleanOpenWithLists(lines, pathDirs, ct);
+            removed += CleanOpenWithLists(lines, pathDirs, appExistenceCache, ct);
             removed += CleanOrphanApplications(Registry.LocalMachine, @"SOFTWARE\Classes\Applications", lines, ct);
             removed += CleanOrphanApplications(Registry.CurrentUser, @"Software\Classes\Applications", lines, ct);
 
@@ -50,7 +51,11 @@ public sealed class DeadAssociationCleanupAction : IMaintenanceAction
             return MaintenanceActionResult.Ok(lines);
         }, ct);
 
-    private static int CleanOpenWithLists(List<string> lines, string[] pathDirs, CancellationToken ct)
+    private static int CleanOpenWithLists(
+        List<string> lines,
+        string[] pathDirs,
+        Dictionary<string, bool> appExistenceCache,
+        CancellationToken ct)
     {
         var removed = 0;
         using var fileExts = Registry.CurrentUser.OpenSubKey(FileExtsPath);
@@ -77,7 +82,7 @@ public sealed class DeadAssociationCleanupAction : IMaintenanceAction
                 }
 
                 var appName = owl.GetValue(slot)?.ToString();
-                if (AppExists(appName, pathDirs))
+                if (AppExists(appName, pathDirs, appExistenceCache))
                 {
                     continue;
                 }
@@ -130,7 +135,7 @@ public sealed class DeadAssociationCleanupAction : IMaintenanceAction
             ct.ThrowIfCancellationRequested();
             using var commandKey = baseKey.OpenSubKey($@"{appName}\shell\open\command");
             var exe = StartupCommandParser.TryResolveExecutable(commandKey?.GetValue(null)?.ToString() ?? string.Empty);
-            if (exe is null || File.Exists(exe))
+            if (exe is null || !StartupCommandParser.IsConfirmedMissing(exe))
             {
                 continue;
             }
@@ -151,12 +156,41 @@ public sealed class DeadAssociationCleanupAction : IMaintenanceAction
     }
 
     /// <summary>アプリ名が Applications 登録 / App Paths / PATH 上の実在する実行ファイルを指すか。</summary>
-    private static bool AppExists(string? appName, string[] pathDirs)
+    private static bool AppExists(
+        string? appName,
+        string[] pathDirs,
+        Dictionary<string, bool> appExistenceCache)
     {
         if (string.IsNullOrWhiteSpace(appName))
         {
             return false;
         }
+
+        return GetCachedAppExists(appName, appExistenceCache, Probe);
+
+        bool Probe(string name)
+        {
+            return AppExistsUncached(name, pathDirs);
+        }
+    }
+
+    internal static bool GetCachedAppExists(
+        string appName,
+        Dictionary<string, bool> cache,
+        Func<string, bool> probe)
+    {
+        if (cache.TryGetValue(appName, out var exists))
+        {
+            return exists;
+        }
+
+        exists = probe(appName);
+        cache[appName] = exists;
+        return exists;
+    }
+
+    private static bool AppExistsUncached(string appName, string[] pathDirs)
+    {
 
         foreach (var (root, basePath) in new[]
                  {
@@ -166,7 +200,7 @@ public sealed class DeadAssociationCleanupAction : IMaintenanceAction
         {
             using var commandKey = root.OpenSubKey($@"{basePath}\{appName}\shell\open\command");
             var exe = StartupCommandParser.TryResolveExecutable(commandKey?.GetValue(null)?.ToString() ?? string.Empty);
-            if (exe is not null && File.Exists(exe))
+            if (exe is not null && !StartupCommandParser.IsConfirmedMissing(exe))
             {
                 return true;
             }
@@ -182,14 +216,19 @@ public sealed class DeadAssociationCleanupAction : IMaintenanceAction
             if (appPathKey?.GetValue(null)?.ToString() is { } value)
             {
                 var exe = Environment.ExpandEnvironmentVariables(value).Trim('"');
-                if (File.Exists(exe))
+                if (!StartupCommandParser.IsConfirmedMissing(exe))
                 {
                     return true;
                 }
             }
         }
 
-        // PATH 上の実行ファイル (Get-Command 相当。pathDirs は呼び出し元で 1 回だけ計算済み)
-        return pathDirs.Any(dir => File.Exists(Path.Combine(dir, appName)));
+        // PATH 上の実行ファイル (Get-Command 相当)。一時不在の volume が一つでもあれば
+        // 「存在しない」と断定できないため、候補を保持する。
+        return pathDirs.Any(dir =>
+        {
+            var candidate = Path.Combine(dir, appName);
+            return !StartupCommandParser.IsConfirmedMissing(candidate);
+        });
     }
 }

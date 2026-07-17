@@ -52,8 +52,10 @@
   <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">{0} ad ON versum est</x:String>
   <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">{0} ad OFF versum est</x:String>
   <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">{0} verti non potuit (acta inspice)</x:String>
-  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Cancellatum</x:String>
+<x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Cancellatum</x:String>
+  <x:String x:Key="Text.Status.Busy" xml:space="preserve">Alia operatio sustentationis agitur. Postquam perfecta erit, iterum conare.</x:String>
   <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ Completum</x:String>
+  <x:String x:Key="Text.Result.Partial" xml:space="preserve">⚠ Partim completum</x:String>
   <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ Defecit</x:String>
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer restitutus est</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Explorer restitui non potuit (quaeso manu eum restitue)</x:String>
@@ -148,4 +150,6 @@
   <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Directoria ad Quick Access affixa in ordinem ascendentem per nomen ordinat (indicem saltus ante exsecutionem servat).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Variabilem ambitus Path ordina</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Introitus variabilium ambitus Path usoris et systematis deduplicat et in ordinem ascendentem ordinat.</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Processus Edge in fundo exstingue (100–300 MB serva)</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Modum Edge in fundo et Startup Boost per regulam exstinguit. Si Edge raro uteris, circiter 100–300 MB memoriae liberari possunt. Edge paulo tardius incipere potest et notificationes extensionum cessare possunt. Hoc ad OFF verte ut regulas removeas et valores Edge praedefinitos restituas.</x:String>
 </ResourceDictionary>

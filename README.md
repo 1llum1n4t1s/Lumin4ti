@@ -59,6 +59,9 @@ Windows のメンテナンス・最適化をワンクリックで行えるツー
 
 - 設定: `%APPDATA%\Lumin4ti\settings.json`
 - ログ: `%APPDATA%\Lumin4ti\logs\`
+- 管理者設定の復元用バックアップ: `%ProgramData%\Lumin4ti\backups\`（Administrators / SYSTEM のみ変更可能）
+
+クイックアクセスの並び替えバックアップは、対象 Jump List と同じユーザープロファイル内に `.lumin4tibak` として保存されます。
 
 「バージョン情報」タブのボタンからも各フォルダを開けます。
 

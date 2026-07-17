@@ -52,8 +52,10 @@
   <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">已开启 {0}</x:String>
   <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">已关闭 {0}</x:String>
   <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">切换 {0} 失败（请查看日志）</x:String>
-  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">已取消</x:String>
+<x:String x:Key="Text.Status.Cancelled" xml:space="preserve">已取消</x:String>
+  <x:String x:Key="Text.Status.Busy" xml:space="preserve">另一项维护操作正在运行。请在其完成后重试。</x:String>
   <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ 已完成</x:String>
+  <x:String x:Key="Text.Result.Partial" xml:space="preserve">⚠ 部分完成</x:String>
   <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ 失败</x:String>
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - 已重启 Explorer</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - 重启 Explorer 失败（请手动重启）</x:String>
@@ -148,4 +150,6 @@
   <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">将固定到 Quick Access 的文件夹按名称升序排序（运行前会备份跳转列表）。</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">排序 Path 环境变量</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">对用户和系统 Path 环境变量的条目去重并按升序排序。</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">禁用 Edge 后台进程（节省 100–300 MB）</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">通过策略禁用 Edge 后台模式和 Startup Boost。如果很少使用 Edge，可释放约 100–300 MB 内存。Edge 启动可能稍慢，扩展通知也可能停止。将此项设为 OFF 可删除策略并恢复 Edge 默认设置。</x:String>
 </ResourceDictionary>

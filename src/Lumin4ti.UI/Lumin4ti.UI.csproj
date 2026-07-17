@@ -14,7 +14,7 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.0" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.10" />
     <!-- Velopack 本体は Program.cs / UpdateService が直接使うため、VelopackUpdateDialog 経由の
          transitive 参照に頼らず直接参照する (バージョンは両者で 1.2.0 に一致)。 -->
     <PackageReference Include="Velopack" Version="1.2.0" />
@@ -23,6 +23,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Lumin4ti.Core\Lumin4ti.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Lumin4ti.Tests" />
   </ItemGroup>
 
   <ItemGroup>

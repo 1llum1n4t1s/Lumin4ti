@@ -1,8 +1,6 @@
 using System.Runtime.Versioning;
-using System.Text.Json;
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
-using Microsoft.Win32;
 using Windows.Management.Deployment;
 
 namespace Lumin4ti.Core.Services.Windows.Actions;
@@ -11,12 +9,29 @@ namespace Lumin4ti.Core.Services.Windows.Actions;
 /// 全 UWP アプリのバックグラウンド実行を「常にオフ」に一括設定するトグル。
 /// PowerShell (Get-AppxPackage) を使わず、WinRT の PackageManager でパッケージを列挙し、
 /// BackgroundAccessApplications 配下へ Registry API で直接書き込む。
-/// ON = 全アプリ「常にオフ」を適用、OFF = 個別設定を削除して既定 (電力最適化) に戻す。
+/// ON = 全アプリ「常にオフ」を適用、OFF = Lumin4ti が適用した値だけを元の個別設定へ戻す。
 /// </summary>
 [SupportedOSPlatform("windows10.0.17763.0")]
 public sealed class UwpBackgroundToggle : IMaintenanceToggle
 {
-    private const string BasePath = @"SOFTWARE\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications";
+    private readonly Func<IReadOnlyList<string>> _getTargetFamilyNames;
+    private readonly IUwpBackgroundSettingsStore _settings;
+    private readonly string _journalPath;
+
+    public UwpBackgroundToggle()
+        : this(GetInstalledPackageFamilyNames, new RegistryUwpBackgroundSettingsStore(), DefaultJournalPath)
+    {
+    }
+
+    internal UwpBackgroundToggle(
+        Func<IReadOnlyList<string>> getTargetFamilyNames,
+        IUwpBackgroundSettingsStore settings,
+        string journalPath)
+    {
+        _getTargetFamilyNames = getTargetFamilyNames;
+        _settings = settings;
+        _journalPath = journalPath;
+    }
 
     public string Id => "uwp-background-off";
 
@@ -30,170 +45,160 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
 
     public bool RequiresReboot => false;
 
-    public Task<bool?> GetStateAsync(CancellationToken ct = default)
-    {
-        using var baseKey = Registry.CurrentUser.OpenSubKey(BasePath);
-        if (baseKey is null)
-        {
-            return Task.FromResult<bool?>(false);
-        }
-
-        // 1 つでも「常にオフ」(Disabled=1) のアプリがあれば適用済みとみなす
-        foreach (var name in baseKey.GetSubKeyNames())
-        {
-            using var appKey = baseKey.OpenSubKey(name);
-            if (appKey?.GetValue("Disabled") is int disabled && disabled == 1)
-            {
-                return Task.FromResult<bool?>(true);
-            }
-        }
-
-        return Task.FromResult<bool?>(false);
-    }
-
-    private static string BackupPath =>
+    private static string DefaultJournalPath =>
         Path.Combine(AppPaths.AppDataDirectory, "backups", "uwp-background.json");
 
-    public Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default) =>
-        Task.Run(() =>
+    public Task<bool?> GetStateAsync(CancellationToken ct = default) =>
+        Task.Run<bool?>(() =>
         {
-            if (!on)
+            var familyNames = _getTargetFamilyNames();
+            if (familyNames.Count == 0)
             {
-                return RestoreDefaults();
+                return false;
             }
 
-            // ON 適用前に、個別設定 (「常にオン」等) を持つパッケージの状態を退避しておき、
-            // OFF でユーザーの個別設定を正確に復元できるようにする。
-            SaveSnapshot();
-
-            var packageManager = new PackageManager();
-            // Get-AppxPackage -PackageTypeFilter Main 相当: フレームワーク・リソースパッケージを除外
-            var familyNames = packageManager.FindPackagesForUser(string.Empty)
-                .Where(p => !p.IsFramework && !p.IsResourcePackage && !p.IsBundle)
-                .Select(p => p.Id.FamilyName)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToList();
-
-            using var baseKey = Registry.CurrentUser.CreateSubKey(BasePath);
-            var count = 0;
+            var currentValues = _settings.ReadMany(familyNames, ct);
             foreach (var familyName in familyNames)
             {
                 ct.ThrowIfCancellationRequested();
-                using var appKey = baseKey.CreateSubKey(familyName);
-                appKey.SetValue("Disabled", 1, RegistryValueKind.DWord);
-                appKey.SetValue("DisabledByUser", 1, RegistryValueKind.DWord);
-                count++;
-            }
-
-            LoggerBootstrap.Log.Info($"{Id}: {count} パッケージを常にオフに設定");
-            return MaintenanceActionResult.Ok($"  - 「常にオフ」設定: {count} パッケージ");
-        }, ct);
-
-    /// <summary>ON 適用前に個別設定を持つパッケージの Disabled/DisabledByUser を退避する。</summary>
-    private static void SaveSnapshot()
-    {
-        if (File.Exists(BackupPath))
-        {
-            return; // 既存バックアップ (真の元状態) を保つため上書きしない
-        }
-
-        var snapshot = new Dictionary<string, int?[]>();
-        using (var baseKey = Registry.CurrentUser.OpenSubKey(BasePath))
-        {
-            if (baseKey is not null)
-            {
-                foreach (var name in baseKey.GetSubKeyNames())
+                if (currentValues[familyName] != UwpBackgroundValues.Applied)
                 {
-                    using var appKey = baseKey.OpenSubKey(name);
-                    var disabled = appKey?.GetValue("Disabled") as int?;
-                    var byUser = appKey?.GetValue("DisabledByUser") as int?;
-                    if (disabled is not null || byUser is not null)
-                    {
-                        snapshot[name] = [disabled, byUser];
-                    }
+                    return false;
                 }
             }
+
+            return true;
+        }, ct);
+
+    public Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default) =>
+        Task.Run(() => on ? Apply(ct) : Restore(ct), ct);
+
+    private MaintenanceActionResult Apply(CancellationToken ct)
+    {
+        var load = UwpBackgroundJournalStore.Load(_journalPath);
+        if (load.Status == UwpBackgroundJournalLoadStatus.Invalid)
+        {
+            LoggerBootstrap.Log.Error($"{Id}: 復元 journal を読み取れないため適用を中止: {load.Error}");
+            return MaintenanceActionResult.Fail(
+                "復元情報が破損しているか未対応の形式です。既存の個別設定を保護するため、変更しませんでした。");
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(BackupPath)!);
-        File.WriteAllText(BackupPath, JsonSerializer.Serialize(snapshot));
-    }
+        var entries = (load.Journal?.Entries ?? [])
+            .ToDictionary(entry => entry.FamilyName!, StringComparer.OrdinalIgnoreCase);
+        var pending = new List<string>();
 
-    private MaintenanceActionResult RestoreDefaults()
-    {
-        // まず ON で書き込んだ全パッケージの Disabled/DisabledByUser を消す
-        using (var baseKey = Registry.CurrentUser.OpenSubKey(BasePath, writable: true))
+        var targetFamilyNames = _getTargetFamilyNames();
+        var currentValues = _settings.ReadMany(targetFamilyNames, ct);
+        foreach (var familyName in targetFamilyNames)
         {
-            if (baseKey is null)
+            ct.ThrowIfCancellationRequested();
+            var current = currentValues[familyName];
+            if (current == UwpBackgroundValues.Applied)
             {
-                return MaintenanceActionResult.Ok("  - 個別設定はありませんでした (既定のまま)");
+                continue;
             }
 
-            foreach (var name in baseKey.GetSubKeyNames())
-            {
-                using var appKey = baseKey.OpenSubKey(name, writable: true);
-                appKey?.DeleteValue("Disabled", throwOnMissingValue: false);
-                appKey?.DeleteValue("DisabledByUser", throwOnMissingValue: false);
-            }
+            // 外部変更で ownership を失っていた場合も、今回の明示的な ON を新しい before として記録する。
+            entries[familyName] = UwpBackgroundJournalEntry.Create(familyName, current, UwpBackgroundValues.Applied);
+            pending.Add(familyName);
         }
 
-        // 退避しておいた元の個別設定を復元する
-        var restored = RestoreSnapshot();
-
-        LoggerBootstrap.Log.Info($"{Id}: 既定に戻しました (個別設定 {restored} 件を復元)");
-        return MaintenanceActionResult.Ok(restored == 0
-            ? "  - 全パッケージの個別設定を削除して既定 (電力最適化) に戻しました"
-            : $"  - 既定に戻し、元々あった個別設定 {restored} 件を復元しました");
-    }
-
-    /// <summary>退避した個別設定を書き戻す。復元した件数を返す。</summary>
-    private static int RestoreSnapshot()
-    {
-        if (!File.Exists(BackupPath))
+        if (pending.Count == 0)
         {
-            return 0;
+            return MaintenanceActionResult.Ok("  - 対象パッケージはすべて「常にオフ」設定済みでした");
         }
 
-        Dictionary<string, int?[]>? snapshot;
+        var journal = UwpBackgroundJournal.Create(entries.Values);
         try
         {
-            snapshot = JsonSerializer.Deserialize<Dictionary<string, int?[]>>(File.ReadAllText(BackupPath));
+            // レジストリより先に journal を確定し、途中失敗でも適用済みの値を安全に戻せるようにする。
+            UwpBackgroundJournalStore.SaveAtomic(_journalPath, journal);
         }
-        catch (Exception ex) when (ex is JsonException or IOException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            return 0;
+            LoggerBootstrap.Log.Error($"{Id}: 復元 journal の保存に失敗", ex);
+            return MaintenanceActionResult.Fail(
+                "復元情報を安全に保存できなかったため、個別設定は変更しませんでした。");
+        }
+
+        _settings.WriteMany(
+            pending.Select(familyName =>
+                    new KeyValuePair<string, UwpBackgroundValues>(familyName, UwpBackgroundValues.Applied))
+                .ToArray(),
+            ct);
+
+        LoggerBootstrap.Log.Info($"{Id}: {pending.Count} パッケージを常にオフに設定");
+        return MaintenanceActionResult.Ok($"  - 「常にオフ」設定: {pending.Count} パッケージ");
+    }
+
+    private MaintenanceActionResult Restore(CancellationToken ct)
+    {
+        var load = UwpBackgroundJournalStore.Load(_journalPath);
+        if (load.Status == UwpBackgroundJournalLoadStatus.Missing)
+        {
+            return MaintenanceActionResult.Ok(
+                "  - Lumin4ti が記録した変更はありませんでした (現在の個別設定は保持しました)");
+        }
+
+        if (load.Status == UwpBackgroundJournalLoadStatus.Invalid)
+        {
+            LoggerBootstrap.Log.Error($"{Id}: 復元 journal を読み取れないため復元を中止: {load.Error}");
+            return MaintenanceActionResult.Fail(
+                "復元情報が破損しているか未対応の形式です。現在の個別設定を保護するため、変更しませんでした。");
         }
 
         var restored = 0;
-        if (snapshot is not null)
+        var conflicts = 0;
+        var journalEntries = load.Journal!.Entries!;
+        var currentValues = _settings.ReadMany(
+            journalEntries.Select(entry => entry.FamilyName!).ToArray(),
+            ct);
+        var pending = new List<KeyValuePair<string, UwpBackgroundValues>>();
+        foreach (var entry in journalEntries)
         {
-            using var baseKey = Registry.CurrentUser.CreateSubKey(BasePath);
-            foreach (var (familyName, values) in snapshot)
+            ct.ThrowIfCancellationRequested();
+            var current = currentValues[entry.FamilyName!];
+            if (current != entry.GetApplied())
             {
-                using var appKey = baseKey.CreateSubKey(familyName);
-                if (values.Length > 0 && values[0] is int disabled)
-                {
-                    appKey.SetValue("Disabled", disabled, RegistryValueKind.DWord);
-                }
-
-                if (values.Length > 1 && values[1] is int byUser)
-                {
-                    appKey.SetValue("DisabledByUser", byUser, RegistryValueKind.DWord);
-                }
-
-                restored++;
+                // ON 後のユーザー変更、新規パッケージの設定、既に戻した値には触れない。
+                conflicts++;
+                continue;
             }
+
+            pending.Add(new KeyValuePair<string, UwpBackgroundValues>(entry.FamilyName!, entry.GetBefore()));
+            restored++;
         }
 
-        try
+        _settings.WriteMany(pending, ct);
+
+        var journalDeleted = UwpBackgroundJournalStore.TryDelete(_journalPath);
+        LoggerBootstrap.Log.Info($"{Id}: 元の個別設定 {restored} 件を復元 / 外部変更 {conflicts} 件を保持");
+
+        var lines = new List<string>
         {
-            File.Delete(BackupPath);
-        }
-        catch (IOException)
+            $"  - Lumin4ti が適用した設定 {restored} 件を元に戻しました",
+        };
+        if (conflicts > 0)
         {
-            // 削除失敗は無視
+            lines.Add($"  - 適用後に変更された設定 {conflicts} 件は現在値を保持しました");
         }
 
-        return restored;
+        if (!journalDeleted)
+        {
+            lines.Add("  - 復元情報の削除に失敗しましたが、再実行しても現在値は上書きしません");
+        }
+
+        return MaintenanceActionResult.Ok(lines);
+    }
+
+    private static IReadOnlyList<string> GetInstalledPackageFamilyNames()
+    {
+        var packageManager = new PackageManager();
+        // Get-AppxPackage -PackageTypeFilter Main 相当: フレームワーク・リソースパッケージを除外
+        return packageManager.FindPackagesForUser(string.Empty)
+            .Where(package => !package.IsFramework && !package.IsResourcePackage && !package.IsBundle)
+            .Select(package => package.Id.FamilyName)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
     }
 }

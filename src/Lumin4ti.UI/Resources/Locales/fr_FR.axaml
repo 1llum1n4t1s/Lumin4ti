@@ -52,8 +52,10 @@
   <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">{0} activé</x:String>
   <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">{0} désactivé</x:String>
   <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">Échec du basculement de {0} (consultez le journal)</x:String>
-  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Annulé</x:String>
+<x:String x:Key="Text.Status.Cancelled" xml:space="preserve">Annulé</x:String>
+  <x:String x:Key="Text.Status.Busy" xml:space="preserve">Une autre opération de maintenance est en cours. Réessayez lorsqu’elle sera terminée.</x:String>
   <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ Terminé</x:String>
+  <x:String x:Key="Text.Result.Partial" xml:space="preserve">⚠ Partiellement terminé</x:String>
   <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ Échec</x:String>
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorateur redémarré</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Échec du redémarrage de l'Explorateur (veuillez le redémarrer manuellement)</x:String>
@@ -148,4 +150,6 @@
   <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Trie les dossiers épinglés à l'Accès rapide par ordre croissant de nom (sauvegarde la liste de raccourcis avant l'exécution).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Trier la variable d'environnement Path</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Déduplique et trie les entrées des variables d'environnement Path utilisateur et système par ordre croissant.</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Désactiver les processus Edge en arrière-plan (économiser 100–300 Mo)</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Désactive par stratégie le mode arrière-plan d’Edge et Startup Boost. Si vous utilisez rarement Edge, cela peut libérer environ 100–300 Mo de mémoire. Edge peut démarrer un peu plus lentement et les notifications des extensions peuvent ne plus arriver. Désactivez cette option (OFF) pour supprimer les stratégies et rétablir les paramètres par défaut d’Edge.</x:String>
 </ResourceDictionary>

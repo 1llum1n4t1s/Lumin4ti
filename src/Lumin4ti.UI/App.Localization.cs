@@ -49,6 +49,7 @@ public partial class App
     /// </summary>
     public static void SetLocale(string localeKey)
     {
+        localeKey = ResolveLocaleKey(localeKey);
         if (Current is not App app ||
             app.Resources[localeKey] is not Avalonia.Controls.ResourceDictionary targetLocale)
         {
@@ -69,6 +70,21 @@ public partial class App
         app._activeLocale = targetLocale;
         CurrentLocaleKey = localeKey;
         LocaleChanged?.Invoke();
+    }
+
+    /// <summary>保存値が未対応・廃止済みなら OS 既定、最後に英語へ正規化する。</summary>
+    internal static string ResolveLocaleKey(string? requestedLocale)
+    {
+        if (!string.IsNullOrWhiteSpace(requestedLocale) &&
+            SupportedLocales.Any(locale => locale.Key.Equals(requestedLocale, StringComparison.Ordinal)))
+        {
+            return requestedLocale;
+        }
+
+        var detected = DetectDefaultLocale();
+        return SupportedLocales.Any(locale => locale.Key.Equals(detected, StringComparison.Ordinal))
+            ? detected
+            : "en_US";
     }
 
     /// <summary>

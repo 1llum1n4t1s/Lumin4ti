@@ -47,15 +47,19 @@
                              FontFamily="Cascadia Mono, Consolas, monospace"
                              Foreground="{DynamicResource Brush.FG2}" />
                 </Border>
-                <!--  実行結果 (成功=通常色 / 失敗=赤)  -->
+                <!--  実行結果 (成功/キャンセル=通常色 / 部分成功=黄 / 失敗=赤)  -->
                 <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,0"
                         Background="{DynamicResource Brush.Window}" CornerRadius="6" Padding="10,6"
                         IsVisible="{Binding ResultText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                   <SelectableTextBlock Text="{Binding ResultText}" FontSize="12" TextWrapping="Wrap"
                                        FontFamily="Cascadia Mono, Consolas, monospace"
                                        Foreground="{DynamicResource Brush.FG1}"
-                                       Classes.error="{Binding LastRunFailed}">
+                                       Classes.error="{Binding LastRunFailed}"
+                                       Classes.warning="{Binding LastRunWarning}">
                     <SelectableTextBlock.Styles>
+                      <Style Selector="SelectableTextBlock.warning">
+                        <Setter Property="Foreground" Value="#FF9500" />
+                      </Style>
                       <Style Selector="SelectableTextBlock.error">
                         <Setter Property="Foreground" Value="#FF3B30" />
                       </Style>

@@ -52,8 +52,10 @@
   <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">已開啟 {0}</x:String>
   <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">已關閉 {0}</x:String>
   <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">切換 {0} 失敗（請查看記錄檔）</x:String>
-  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">已取消</x:String>
+<x:String x:Key="Text.Status.Cancelled" xml:space="preserve">已取消</x:String>
+  <x:String x:Key="Text.Status.Busy" xml:space="preserve">另一項維護操作正在執行。請在完成後再試一次。</x:String>
   <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ 已完成</x:String>
+  <x:String x:Key="Text.Result.Partial" xml:space="preserve">⚠ 部分完成</x:String>
   <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ 失敗</x:String>
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - 已重新啟動 Explorer</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - 重新啟動 Explorer 失敗（請手動重新啟動）</x:String>
@@ -148,4 +150,6 @@
   <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">將釘選到 Quick Access 的資料夾依名稱遞增排序（執行前會備份跳躍清單）。</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">排序 Path 環境變數</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">將使用者與系統 Path 環境變數的項目去除重複並依遞增排序。</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">停用 Edge 背景處理程序（節省 100–300 MB）</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">透過原則停用 Edge 背景模式與 Startup Boost。若很少使用 Edge，可釋放約 100–300 MB 記憶體。Edge 啟動可能稍慢，擴充功能通知也可能停止。將此項設為 OFF 可移除原則並還原 Edge 預設值。</x:String>
 </ResourceDictionary>

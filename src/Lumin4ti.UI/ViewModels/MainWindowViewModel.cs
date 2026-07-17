@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services.Windows;
+using Lumin4ti.UI.Services;
 
 namespace Lumin4ti.UI.ViewModels;
 
@@ -18,31 +19,39 @@ public class MainWindowViewModel
 
     public VersionViewModel Version { get; }
 
-    public MainWindowViewModel(MaintenanceActionCatalog catalog, VersionViewModel version)
+    public MainWindowViewModel(
+        MaintenanceActionCatalog catalog,
+        VersionViewModel version,
+        MaintenanceOperationCoordinator operationCoordinator)
     {
         Update = new CommandCategoryViewModel(
             catalog,
+            operationCoordinator,
             CommandCategory.Update,
             "更新・セキュリティ",
             "アプリと Windows Defender の更新、セキュリティ設定の健全化を行います。");
         Cleanup = new CommandCategoryViewModel(
             catalog,
+            operationCoordinator,
             CommandCategory.Cleanup,
             "クリーンアップ・修復",
             "ディスク領域の回収と、壊れた登録情報の掃除・修復を行います。");
         Performance = new CommandCategoryViewModel(
             catalog,
+            operationCoordinator,
             CommandCategory.Performance,
             "パフォーマンス",
             "メモリ・プロセス・描画まわりを最適化します。スイッチは基本 ON = 最適化を適用、OFF = Windows 既定に戻す、です" +
             "（MMAgent の各項目のみ ON = その機能を有効化 で、推奨値は各説明を参照してください）。");
         System = new CommandCategoryViewModel(
             catalog,
+            operationCoordinator,
             CommandCategory.System,
             "システム設定",
             "電源・入力・時刻などの Windows 設定を調整します。スイッチは ON = 調整を適用、OFF = Windows 既定に戻す、です。");
         Organize = new CommandCategoryViewModel(
             catalog,
+            operationCoordinator,
             CommandCategory.Organize,
             "整理・ソート",
             "ピン留めや環境変数などを整った並び順に揃えます。");

@@ -52,8 +52,10 @@
   <x:String x:Key="Text.Status.ToggledOn" xml:space="preserve">{0} ON செய்யப்பட்டது</x:String>
   <x:String x:Key="Text.Status.ToggledOff" xml:space="preserve">{0} OFF செய்யப்பட்டது</x:String>
   <x:String x:Key="Text.Status.ToggleFailed" xml:space="preserve">{0}-ஐ நிலைமாற்ற முடியவில்லை (பதிவைச் சரிபார்க்கவும்)</x:String>
-  <x:String x:Key="Text.Status.Cancelled" xml:space="preserve">ரத்துசெய்யப்பட்டது</x:String>
+<x:String x:Key="Text.Status.Cancelled" xml:space="preserve">ரத்துசெய்யப்பட்டது</x:String>
+  <x:String x:Key="Text.Status.Busy" xml:space="preserve">மற்றொரு பராமரிப்பு செயல் இயங்குகிறது. அது முடிந்ததும் மீண்டும் முயற்சிக்கவும்.</x:String>
   <x:String x:Key="Text.Result.Success" xml:space="preserve">✓ முடிந்தது</x:String>
+  <x:String x:Key="Text.Result.Partial" xml:space="preserve">⚠ பகுதியளவு முடிந்தது</x:String>
   <x:String x:Key="Text.Result.Failure" xml:space="preserve">✗ தோல்வி</x:String>
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer மறுதொடக்கம் செய்யப்பட்டது</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Explorer-ஐ மறுதொடக்கம் செய்ய முடியவில்லை (கைமுறையாக மறுதொடக்கம் செய்யவும்)</x:String>
@@ -148,4 +150,6 @@
   <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Quick Access-இல் பின் செய்யப்பட்ட கோப்புறைகளைப் பெயர் மூலம் ஏறுவரிசையில் வரிசைப்படுத்துகிறது (இயக்குவதற்கு முன் ஜம்ப் பட்டியலை காப்புப் பிரதி எடுக்கிறது).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Path சூழல் மாறியை வரிசைப்படுத்து</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">பயனர் மற்றும் கணினி Path சூழல் மாறிகளின் உள்ளீடுகளை நகல்நீக்கி ஏறுவரிசையில் வரிசைப்படுத்துகிறது.</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Edge பின்னணி செயல்களை முடக்கு (100–300 MB சேமிக்கும்)</x:String>
+  <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">கொள்கை மூலம் Edge பின்னணி முறை மற்றும் Startup Boost ஆகியவற்றை முடக்குகிறது. Edge-ஐ அரிதாகப் பயன்படுத்தினால் சுமார் 100–300 MB நினைவகத்தை விடுவிக்கலாம். Edge தொடக்கம் சற்று மெதுவாகலாம்; நீட்டிப்பு அறிவிப்புகள் வராமல் போகலாம். கொள்கைகளை நீக்கி Edge இயல்புநிலைகளை மீட்டமைக்க இதை OFF செய்யவும்.</x:String>
 </ResourceDictionary>
