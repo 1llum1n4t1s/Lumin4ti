@@ -42,6 +42,8 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
     private static readonly Guid FolderIdLocalAppData = new("F1B32785-6FBA-4FCF-9D55-7B8E7F157091");
 
     private const uint ProcessQueryLimitedInformation = 0x00001000;
+    private const uint Synchronize = 0x00100000;
+    private const uint ShellProcessAccessMask = ProcessQueryLimitedInformation | Synchronize;
     private const uint TokenAssignPrimary = 0x0001;
     private const uint TokenDuplicate = 0x0002;
     private const uint TokenImpersonate = 0x0004;
@@ -159,7 +161,7 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
             throw new InvalidOperationException("対話中 Explorer と現在のセッションが一致しません");
         }
 
-        using var shellProcess = OpenProcess(ProcessQueryLimitedInformation, inheritHandle: false, shellProcessId);
+        using var shellProcess = OpenProcess(ShellProcessAccessMask, inheritHandle: false, shellProcessId);
         if (shellProcess.IsInvalid)
         {
             throw NewWin32Exception("対話中 Explorer を開けませんでした");
@@ -221,7 +223,7 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
                     var environmentBlock = BuildEnvironmentBlock(environment);
                     var commandLine = BuildPowerShellCommandLine(powerShellPath);
 
-                    EnsureShellStillCurrent(shellWindow, shellProcessId, shellProcess);
+                    EnsureShellStillCurrent(shellProcessId, shellProcess);
                     var processResult = await StartAndWaitAsync(
                         primaryToken,
                         powerShellPath,
@@ -377,16 +379,22 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
     }
 
     private static void EnsureShellStillCurrent(
-        nint expectedWindow,
         uint expectedProcessId,
         SafeKernelHandle shellProcess)
     {
+        // プロセスハンドルは SYNCHRONIZE 付きで開く必要がある。権限不足による
+        // WAIT_FAILED を Explorer 終了と誤認せず、実際の Win32 エラーとして扱う。
+        var processWaitResult = WaitForSingleObject(shellProcess, 0);
+        if (processWaitResult == WaitFailed)
+        {
+            throw NewWin32Exception("対話中 Explorer の稼働状態を確認できませんでした");
+        }
+
         var currentWindow = GetShellWindow();
-        if (currentWindow != expectedWindow ||
+        if (processWaitResult != WaitTimeout ||
             currentWindow == nint.Zero ||
             GetWindowThreadProcessId(currentWindow, out var currentProcessId) == 0 ||
-            currentProcessId != expectedProcessId ||
-            WaitForSingleObject(shellProcess, 0) != WaitTimeout)
+            currentProcessId != expectedProcessId)
         {
             throw new InvalidOperationException("検証中に対話中 Explorer が変更または終了しました");
         }
@@ -527,6 +535,8 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
             return false;
         }
     }
+
+    internal static uint GetShellProcessAccessMask() => ShellProcessAccessMask;
 
     internal static string BuildResultPath(string localAppData, string nonce)
     {

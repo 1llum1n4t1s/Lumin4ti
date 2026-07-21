@@ -53,15 +53,125 @@ public sealed class WindowsPerMachineMigrationTests
     }
 
     [TestMethod]
-    public void MsiマーカーがあるProgramFiles配下をPerMachine版と判定する()
+    public void Hklm登録されたMsiのカスタム配置先もPerMachine版と判定できる()
     {
-        var programFiles = Path.Combine(_testRoot, "Program Files");
-        var installRoot = Path.Combine(programFiles, "ゆろち", "Lumin4ti");
+        var installRoot = Path.Combine(_testRoot, "CustomInstall", "Lumin4ti");
         Directory.CreateDirectory(Path.Combine(installRoot, "current"));
         File.WriteAllText(Path.Combine(installRoot, ".msi-installed"), string.Empty);
+        var installedExecutable = Path.Combine(installRoot, "Lumin4ti.exe");
+        File.WriteAllText(installedExecutable, string.Empty);
         var processPath = Path.Combine(installRoot, "current", "Lumin4ti.UI.exe");
 
-        Assert.IsTrue(WindowsPerMachineMigration.IsPerMachineProcessPath(processPath, programFiles));
+        Assert.IsTrue(WindowsPerMachineMigration.IsMsiProcessPath(processPath, installedExecutable));
+    }
+
+    [TestMethod]
+    public void Msi登録先と異なるフォルダのプロセスはPerMachine版と判定しない()
+    {
+        var installRoot = Path.Combine(_testRoot, "CustomInstall", "Lumin4ti");
+        var otherRoot = Path.Combine(_testRoot, "CustomInstall", "Lumin4ti-Evil");
+        Directory.CreateDirectory(installRoot);
+        Directory.CreateDirectory(Path.Combine(otherRoot, "current"));
+        File.WriteAllText(Path.Combine(installRoot, ".msi-installed"), string.Empty);
+
+        Assert.IsFalse(WindowsPerMachineMigration.IsMsiProcessPath(
+            Path.Combine(otherRoot, "current", "Lumin4ti.UI.exe"),
+            Path.Combine(installRoot, "Lumin4ti.exe")));
+    }
+
+    [TestMethod]
+    public void Msiマーカーがない登録先はPerMachine版と判定しない()
+    {
+        var installRoot = Path.Combine(_testRoot, "CustomInstall", "Lumin4ti");
+        Directory.CreateDirectory(Path.Combine(installRoot, "current"));
+
+        Assert.IsFalse(WindowsPerMachineMigration.IsMsiProcessPath(
+            Path.Combine(installRoot, "current", "Lumin4ti.UI.exe"),
+            Path.Combine(installRoot, "Lumin4ti.exe")));
+    }
+
+    [TestMethod]
+    public void Msi移行はProgramFiles配下の配置先を明示する()
+    {
+        const string msiPath = @"C:\Temp\Lumin4ti-win.msi";
+        const string programFiles = @"C:\Program Files";
+
+        var startInfo = WindowsPerMachineMigration.CreateMsiInstallStartInfo(msiPath, programFiles);
+
+        Assert.AreEqual("runas", startInfo.Verb);
+        Assert.IsTrue(startInfo.UseShellExecute);
+        CollectionAssert.AreEqual(
+            new[]
+            {
+                "/i",
+                msiPath,
+                @"VELOPACK_INSTALLDIR=C:\Program Files\Lumin4ti",
+                "/passive",
+                "/norestart",
+            },
+            startInfo.ArgumentList.ToArray());
+    }
+
+    [TestMethod]
+    public void Msi移行はドライブ直下をProgramFilesとして受け付けない()
+    {
+        Assert.ThrowsExactly<InvalidOperationException>(() =>
+            WindowsPerMachineMigration.CreateMsiInstallStartInfo(
+                @"C:\Temp\Lumin4ti-win.msi",
+                @"C:\"));
+    }
+
+    [TestMethod]
+    public void Velopackフォールバックだけなら旧PerUser版と判定しない()
+    {
+        var legacyRoot = Path.Combine(_testRoot, "LocalAppData", "Lumin4ti");
+        Directory.CreateDirectory(Path.Combine(legacyRoot, "packages"));
+        File.WriteAllText(Path.Combine(legacyRoot, "Update.exe"), string.Empty);
+
+        Assert.IsFalse(WindowsPerMachineMigration.HasLegacyInstallationArtifacts(legacyRoot));
+    }
+
+    [TestMethod]
+    public void Currentまたはルート直下の旧実行ファイルを再回収対象にする()
+    {
+        var legacyRoot = Path.Combine(_testRoot, "LocalAppData", "Lumin4ti");
+        Directory.CreateDirectory(legacyRoot);
+        File.WriteAllText(Path.Combine(legacyRoot, "Lumin4ti.UI.exe"), string.Empty);
+
+        Assert.IsTrue(WindowsPerMachineMigration.HasLegacyInstallationArtifacts(legacyRoot));
+
+        File.Delete(Path.Combine(legacyRoot, "Lumin4ti.UI.exe"));
+        Directory.CreateDirectory(Path.Combine(legacyRoot, "current"));
+
+        Assert.IsTrue(WindowsPerMachineMigration.HasLegacyInstallationArtifacts(legacyRoot));
+    }
+
+    [TestMethod]
+    public void ロック中の旧実行ファイルがあっても他の残骸は回収する()
+    {
+        var legacyRoot = Path.Combine(_testRoot, "LocalAppData", "Lumin4ti");
+        var currentDirectory = Path.Combine(legacyRoot, "current");
+        var packagesDirectory = Path.Combine(legacyRoot, "packages");
+        Directory.CreateDirectory(currentDirectory);
+        Directory.CreateDirectory(packagesDirectory);
+        var lockedExecutable = Path.Combine(currentDirectory, "Lumin4ti.UI.exe");
+        File.WriteAllText(lockedExecutable, "locked");
+        File.WriteAllText(Path.Combine(currentDirectory, "stale.dll"), "stale");
+        File.WriteAllText(Path.Combine(legacyRoot, "Lumin4ti.UI.exe"), "stale");
+        File.WriteAllText(Path.Combine(packagesDirectory, "old.nupkg"), "stale");
+
+        using (File.Open(lockedExecutable, FileMode.Open, FileAccess.Read, FileShare.None))
+        {
+            WindowsPerMachineMigration.TryDeleteTreeWithoutFollowingReparsePoints(legacyRoot);
+
+            Assert.IsTrue(File.Exists(lockedExecutable));
+            Assert.IsFalse(File.Exists(Path.Combine(currentDirectory, "stale.dll")));
+            Assert.IsFalse(File.Exists(Path.Combine(legacyRoot, "Lumin4ti.UI.exe")));
+            Assert.IsFalse(Directory.Exists(packagesDirectory));
+        }
+
+        WindowsPerMachineMigration.TryDeleteTreeWithoutFollowingReparsePoints(legacyRoot);
+        Assert.IsFalse(Directory.Exists(legacyRoot));
     }
 
     [TestMethod]

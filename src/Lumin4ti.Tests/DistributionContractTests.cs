@@ -71,7 +71,13 @@ public sealed class DistributionContractTests
         Assert.IsGreaterThan(migrationIndex, elevationIndex);
         StringAssert.Contains(migration, "ExecutableTrustVerifier.TryVerify");
         StringAssert.Contains(migration, "Lumin4ti-win.msi");
+        StringAssert.Contains(migration, "VELOPACK_INSTALLDIR=");
+        StringAssert.Contains(migration, "Environment.SpecialFolder.ProgramFiles");
+        StringAssert.Contains(migration, "HasLegacyInstallationArtifacts");
         StringAssert.Contains(migration, "TryDeleteTreeWithoutFollowingReparsePoints");
+        Assert.IsFalse(
+            migration.Contains("ProcessStartInfo(updaterPath)", StringComparison.Ordinal),
+            "ユーザー書き込み可能な旧Updaterを新しい昇格プロセスから実行してはいけません。");
     }
 
     [TestMethod]

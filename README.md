@@ -53,9 +53,9 @@ Windows のメンテナンス・最適化をワンクリックで行えるツー
 
 ## インストール
 
-署名済みPerMachine MSI ([`Lumin4ti-win.msi`](https://lumin4ti.nephilim.jp/Lumin4ti-win.msi)) をダウンロードして実行してください。Lumin4tiは保護された`Program Files`へインストールされ、以後は自動更新機能が最新版を通知します（「バージョン情報」タブから手動確認も可能）。
+署名済みPerMachine MSI ([`Lumin4ti-win.msi`](https://lumin4ti.nephilim.jp/Lumin4ti-win.msi)) をダウンロードして実行してください。Lumin4tiは保護された`C:\Program Files\Lumin4ti`へインストールされ、以後は自動更新機能が最新版を通知します（「バージョン情報」タブから手動確認も可能）。
 
-旧`%LocalAppData%\Lumin4ti`版を使用している場合は、次回起動時に署名済みMSIへの移行確認が表示されます。設定・ログ・復元用バックアップを保持したまま移行し、完了後に旧本体・Updater・パッケージキャッシュ・旧ショートカットを回収します。
+旧`%LocalAppData%\Lumin4ti`版を使用している場合は、次回起動時に署名済みMSIへの移行確認が表示されます。設定・ログ・復元用バックアップを保持したまま移行し、完了後に旧本体・Updater・パッケージキャッシュ・旧ショートカットを回収します。使用中のファイルが残った場合も、次回起動時に再回収します。
 
 ## 設定・ログの保存先
 

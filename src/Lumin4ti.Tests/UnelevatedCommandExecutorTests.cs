@@ -1,4 +1,6 @@
 using System.IO.Compression;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
 using Lumin4ti.Core.Services;
 using Lumin4ti.Core.Services.Windows.Actions;
@@ -8,6 +10,32 @@ namespace Lumin4ti.Tests;
 [TestClass]
 public sealed class UnelevatedCommandExecutorTests
 {
+    [TestMethod]
+    public void Explorerプロセスの検証ハンドルは待機権限も要求する()
+    {
+        Assert.AreEqual(0x00101000u, UnelevatedCommandExecutor.GetShellProcessAccessMask());
+    }
+
+    [TestMethod]
+    [SupportedOSPlatform("windows")]
+    public void Explorer検証用アクセスマスクで稼働中プロセスを待機確認できる()
+    {
+        var process = OpenProcess(
+            UnelevatedCommandExecutor.GetShellProcessAccessMask(),
+            inheritHandle: false,
+            checked((uint)Environment.ProcessId));
+        Assert.AreNotEqual(nint.Zero, process);
+
+        try
+        {
+            Assert.AreEqual(0x00000102u, WaitForSingleObject(process, 0));
+        }
+        finally
+        {
+            _ = CloseHandle(process);
+        }
+    }
+
     [TestMethod]
     public void 対話シェルはWindows直下のexplorerだけを許可する()
     {
@@ -110,4 +138,17 @@ public sealed class UnelevatedCommandExecutorTests
         using var reader = new StreamReader(gzip, Encoding.Unicode);
         return reader.ReadToEnd();
     }
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern nint OpenProcess(uint desiredAccess, bool inheritHandle, uint processId);
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern uint WaitForSingleObject(nint handle, uint milliseconds);
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool CloseHandle(nint handle);
 }

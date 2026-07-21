@@ -16,7 +16,6 @@ public static class WindowsPerMachineMigration
 {
     private const string AppId = "Lumin4ti";
     private const string StableExeName = "Lumin4ti.exe";
-    private const string UpdateExeName = "Update.exe";
     private const string MsiFileName = "Lumin4ti-win.msi";
     private const string ExpectedPublisher = "Open Source Developer Yuichiro Shinozaki";
     private const string CompletionArgument = "--complete-per-machine-migration";
@@ -36,15 +35,21 @@ public static class WindowsPerMachineMigration
             return null;
         }
 
+        var localAppDataDirectory = Environment.GetFolderPath(
+            Environment.SpecialFolder.LocalApplicationData);
+        var expectedLegacyRoot = Path.Combine(localAppDataDirectory, AppId);
         var legacyRoot = GetLegacyRootIfCurrentProcessIsPerUser(
             processPath,
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+            localAppDataDirectory);
         if (legacyRoot is null)
         {
-            if (IsCurrentProcessPerMachine(processPath)
-                && (args.Contains(CompletionArgument, StringComparer.Ordinal) || File.Exists(PendingFilePath)))
+            var cleanupRequired = args.Contains(CompletionArgument, StringComparer.Ordinal) ||
+                                  File.Exists(PendingFilePath) ||
+                                  HasLegacyInstallationArtifacts(expectedLegacyRoot);
+            if (cleanupRequired
+                && IsCurrentProcessPerMachine(processPath))
             {
-                await CompletePendingMigrationAsync(ct);
+                await CompletePendingMigrationAsync(expectedLegacyRoot, ct);
             }
 
             return null;
@@ -113,6 +118,7 @@ public static class WindowsPerMachineMigration
         catch (Exception ex) when (ex is
             HttpRequestException or
             IOException or
+            InvalidOperationException or
             UnauthorizedAccessException or
             Win32Exception)
         {
@@ -139,32 +145,36 @@ public static class WindowsPerMachineMigration
         return IsPathInside(normalizedProcessPath, expectedRoot) ? expectedRoot : null;
     }
 
-    internal static bool IsPerMachineProcessPath(string processPath, string programFilesDirectory)
+    internal static bool IsMsiProcessPath(string processPath, string installedExecutablePath)
     {
-        if (string.IsNullOrWhiteSpace(processPath) || string.IsNullOrWhiteSpace(programFilesDirectory))
+        if (string.IsNullOrWhiteSpace(processPath) || string.IsNullOrWhiteSpace(installedExecutablePath))
         {
             return false;
         }
 
         var normalizedProcessPath = Path.GetFullPath(processPath);
-        var normalizedProgramFiles = Path.GetFullPath(programFilesDirectory);
-        if (!IsPathInside(normalizedProcessPath, normalizedProgramFiles))
+        var normalizedInstalledExecutable = Path.GetFullPath(installedExecutablePath);
+        var installRoot = Path.GetDirectoryName(normalizedInstalledExecutable);
+        if (installRoot is null ||
+            !Path.GetFileName(normalizedInstalledExecutable).Equals(StableExeName, StringComparison.OrdinalIgnoreCase) ||
+            !IsPathInside(normalizedProcessPath, installRoot))
         {
             return false;
         }
 
-        var directory = Path.GetDirectoryName(normalizedProcessPath);
-        while (directory is not null && IsPathInside(directory, normalizedProgramFiles))
-        {
-            if (File.Exists(Path.Combine(directory, ".msi-installed")))
-            {
-                return true;
-            }
+        return File.Exists(Path.Combine(installRoot, ".msi-installed"));
+    }
 
-            directory = Path.GetDirectoryName(directory);
+    internal static bool HasLegacyInstallationArtifacts(string legacyRoot)
+    {
+        if (string.IsNullOrWhiteSpace(legacyRoot))
+        {
+            return false;
         }
 
-        return false;
+        return Directory.Exists(Path.Combine(legacyRoot, "current")) ||
+               File.Exists(Path.Combine(legacyRoot, "Lumin4ti.UI.exe")) ||
+               File.Exists(Path.Combine(legacyRoot, StableExeName));
     }
 
     internal static bool TryCleanupLegacyArtifacts(
@@ -180,30 +190,7 @@ public static class WindowsPerMachineMigration
             return false;
         }
 
-        var updaterPath = Path.Combine(legacyRoot, UpdateExeName);
-        if (File.Exists(updaterPath))
-        {
-            try
-            {
-                var startInfo = new ProcessStartInfo(updaterPath)
-                {
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                };
-                startInfo.ArgumentList.Add("--silent");
-                startInfo.ArgumentList.Add("--rootDir");
-                startInfo.ArgumentList.Add(legacyRoot);
-                startInfo.ArgumentList.Add("uninstall");
-                using var updater = Process.Start(startInfo);
-                updater?.WaitForExit(30_000);
-            }
-            catch (Exception ex) when (ex is Win32Exception or InvalidOperationException)
-            {
-                // 下の限定削除へフォールバックする。
-            }
-        }
-
-        for (var attempt = 0; attempt < 10 && Directory.Exists(legacyRoot); attempt++)
+        for (var attempt = 0; attempt < 20 && Directory.Exists(legacyRoot); attempt++)
         {
             TryDeleteTreeWithoutFollowingReparsePoints(legacyRoot);
             if (Directory.Exists(legacyRoot))
@@ -221,21 +208,28 @@ public static class WindowsPerMachineMigration
         return !Directory.Exists(legacyRoot);
     }
 
-    private static async Task CompletePendingMigrationAsync(CancellationToken ct)
+    private static async Task CompletePendingMigrationAsync(
+        string expectedLegacyRoot,
+        CancellationToken ct)
     {
         var pending = ReadPendingMigration();
         if (pending is null)
         {
-            return;
+            if (!HasLegacyInstallationArtifacts(expectedLegacyRoot))
+            {
+                return;
+            }
+
+            pending = new PendingMigration(
+                expectedLegacyRoot,
+                0,
+                FindTrustedPerMachineExecutable());
         }
 
         await WaitForLegacyProcessExitAsync(pending.ParentProcessId, ct);
-        var expectedRoot = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            AppId);
         var cleaned = TryCleanupLegacyArtifacts(
             pending.LegacyRoot,
-            expectedRoot,
+            expectedLegacyRoot,
             Environment.GetFolderPath(Environment.SpecialFolder.Programs),
             Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory));
 
@@ -244,10 +238,14 @@ public static class WindowsPerMachineMigration
             DeleteIfExists(PendingFilePath);
             RemoveCleanupRunOnce();
         }
-        else if (!string.IsNullOrWhiteSpace(pending.InstalledExecutable))
+        else
         {
-            RegisterCleanupRunOnce(pending.InstalledExecutable);
-            ShowInformation("旧インストール先の一部が使用中だったため、次回サインイン時にもう一度回収します。");
+            var installedExecutable = pending.InstalledExecutable ?? FindTrustedPerMachineExecutable();
+            if (!string.IsNullOrWhiteSpace(installedExecutable))
+            {
+                WritePendingMigration(pending.LegacyRoot, 0, installedExecutable);
+                ShowInformation("旧インストール先の一部が使用中だったため、次回起動時にもう一度回収します。");
+            }
         }
     }
 
@@ -291,6 +289,40 @@ public static class WindowsPerMachineMigration
 
     private static int InstallMsi(string msiPath)
     {
+        var startInfo = CreateMsiInstallStartInfo(
+            msiPath,
+            Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles));
+        using var process = Process.Start(startInfo)
+            ?? throw new InvalidOperationException("msiexecを起動できませんでした");
+        process.WaitForExit();
+        return process.ExitCode;
+    }
+
+    internal static ProcessStartInfo CreateMsiInstallStartInfo(
+        string msiPath,
+        string programFilesDirectory)
+    {
+        if (string.IsNullOrWhiteSpace(msiPath) || !Path.IsPathFullyQualified(msiPath))
+        {
+            throw new ArgumentException("MSIの絶対パスが必要です。", nameof(msiPath));
+        }
+
+        if (string.IsNullOrWhiteSpace(programFilesDirectory) ||
+            !Path.IsPathFullyQualified(programFilesDirectory))
+        {
+            throw new InvalidOperationException("Program Filesの場所を取得できませんでした。");
+        }
+
+        var normalizedProgramFiles = Path.GetFullPath(programFilesDirectory);
+        var programFilesRoot = Path.GetPathRoot(normalizedProgramFiles);
+        if (string.IsNullOrWhiteSpace(programFilesRoot) ||
+            normalizedProgramFiles.TrimEnd(Path.DirectorySeparatorChar)
+                .Equals(programFilesRoot.TrimEnd(Path.DirectorySeparatorChar), StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Program Filesの場所がドライブ直下を示しています。");
+        }
+
+        var installDirectory = Path.Combine(normalizedProgramFiles, AppId);
         var startInfo = new ProcessStartInfo(Path.Combine(Environment.SystemDirectory, "msiexec.exe"))
         {
             UseShellExecute = true,
@@ -298,12 +330,11 @@ public static class WindowsPerMachineMigration
         };
         startInfo.ArgumentList.Add("/i");
         startInfo.ArgumentList.Add(msiPath);
+        // /passive ではMSIのUI側既定フォルダー解決に依存せず、保護された配置先を明示する。
+        startInfo.ArgumentList.Add($"VELOPACK_INSTALLDIR={installDirectory}");
         startInfo.ArgumentList.Add("/passive");
         startInfo.ArgumentList.Add("/norestart");
-        using var process = Process.Start(startInfo)
-            ?? throw new InvalidOperationException("msiexecを起動できませんでした");
-        process.WaitForExit();
-        return process.ExitCode;
+        return startInfo;
     }
 
     private static string? FindTrustedPerMachineExecutable()
@@ -314,7 +345,6 @@ public static class WindowsPerMachineMigration
 
         var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
         candidates.Add(Path.Combine(programFiles, AppId, StableExeName));
-        candidates.Add(Path.Combine(programFiles, "ゆろち", AppId, StableExeName));
 
         return candidates.FirstOrDefault(path =>
             File.Exists(path)
@@ -447,48 +477,25 @@ public static class WindowsPerMachineMigration
                && !Path.IsPathRooted(relative);
     }
 
-    private static bool IsCurrentProcessPerMachine(string processPath) => IsPerMachineProcessPath(
-        processPath,
-        Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles));
-
-    private static void TryDeleteTreeWithoutFollowingReparsePoints(string directoryPath)
+    private static bool IsCurrentProcessPerMachine(string processPath)
     {
+        var installedExecutable = FindTrustedPerMachineExecutable();
+        return installedExecutable is not null
+               && IsMsiProcessPath(processPath, installedExecutable)
+               && ExecutableTrustVerifier.TryVerify(processPath, ExpectedPublisher, out _);
+    }
+
+    internal static void TryDeleteTreeWithoutFollowingReparsePoints(string directoryPath)
+    {
+        if (!Directory.Exists(directoryPath))
+        {
+            return;
+        }
+
+        FileAttributes directoryAttributes;
         try
         {
-            if (!Directory.Exists(directoryPath))
-            {
-                return;
-            }
-
-            var attributes = File.GetAttributes(directoryPath);
-            if ((attributes & FileAttributes.ReparsePoint) != 0)
-            {
-                Directory.Delete(directoryPath, recursive: false);
-                return;
-            }
-
-            foreach (var entry in Directory.EnumerateFileSystemEntries(directoryPath))
-            {
-                var entryAttributes = File.GetAttributes(entry);
-                if ((entryAttributes & FileAttributes.Directory) != 0)
-                {
-                    if ((entryAttributes & FileAttributes.ReparsePoint) != 0)
-                    {
-                        Directory.Delete(entry, recursive: false);
-                    }
-                    else
-                    {
-                        TryDeleteTreeWithoutFollowingReparsePoints(entry);
-                    }
-                }
-                else
-                {
-                    File.SetAttributes(entry, FileAttributes.Normal);
-                    File.Delete(entry);
-                }
-            }
-
-            Directory.Delete(directoryPath, recursive: false);
+            directoryAttributes = File.GetAttributes(directoryPath);
         }
         catch (Exception ex) when (ex is
             IOException or
@@ -496,7 +503,67 @@ public static class WindowsPerMachineMigration
             ArgumentException or
             NotSupportedException)
         {
-            // 呼び出し元が残存確認し、次回起動の再試行へ回す。
+            return;
+        }
+
+        if ((directoryAttributes & FileAttributes.ReparsePoint) != 0)
+        {
+            TryDeleteEmptyDirectory(directoryPath);
+            return;
+        }
+
+        string[] entries;
+        try
+        {
+            // 遅延列挙のハンドルを残したまま削除しないよう、先にスナップショット化する。
+            entries = Directory.GetFileSystemEntries(directoryPath);
+        }
+        catch (Exception ex) when (ex is
+            IOException or
+            UnauthorizedAccessException or
+            ArgumentException or
+            NotSupportedException)
+        {
+            return;
+        }
+
+        foreach (var entry in entries)
+        {
+            TryDeleteFileSystemEntryWithoutFollowingReparsePoints(entry);
+        }
+
+        TryDeleteEmptyDirectory(directoryPath);
+    }
+
+    private static void TryDeleteFileSystemEntryWithoutFollowingReparsePoints(string entry)
+    {
+        try
+        {
+            var attributes = File.GetAttributes(entry);
+            if ((attributes & FileAttributes.Directory) != 0)
+            {
+                if ((attributes & FileAttributes.ReparsePoint) != 0)
+                {
+                    Directory.Delete(entry, recursive: false);
+                }
+                else
+                {
+                    TryDeleteTreeWithoutFollowingReparsePoints(entry);
+                }
+
+                return;
+            }
+
+            File.SetAttributes(entry, FileAttributes.Normal);
+            File.Delete(entry);
+        }
+        catch (Exception ex) when (ex is
+            IOException or
+            UnauthorizedAccessException or
+            ArgumentException or
+            NotSupportedException)
+        {
+            // この項目だけを残し、兄弟項目の回収と次回起動での再試行を続ける。
         }
     }
 
