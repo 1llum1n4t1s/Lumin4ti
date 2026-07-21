@@ -180,16 +180,10 @@ public sealed class WindowsPerMachineMigrationTests
 
         Assert.AreEqual("runas", startInfo.Verb);
         Assert.IsTrue(startInfo.UseShellExecute);
-        CollectionAssert.AreEqual(
-            new[]
-            {
-                "/i",
-                msiPath,
-                @"VELOPACK_INSTALLDIR=C:\Program Files\Lumin4ti",
-                "/passive",
-                "/norestart",
-            },
-            startInfo.ArgumentList.ToArray());
+        Assert.AreEqual(
+            @"/i ""C:\Temp\Lumin4ti-win.msi"" VELOPACK_INSTALLDIR=""C:\Program Files\Lumin4ti"" /passive /norestart",
+            startInfo.Arguments);
+        Assert.AreEqual(0, startInfo.ArgumentList.Count);
     }
 
     [TestMethod]
@@ -212,18 +206,10 @@ public sealed class WindowsPerMachineMigrationTests
             programFiles,
             reinstallExistingProduct: true);
 
-        CollectionAssert.AreEqual(
-            new[]
-            {
-                "/i",
-                msiPath,
-                @"VELOPACK_INSTALLDIR=C:\Program Files\Lumin4ti",
-                "REINSTALL=ALL",
-                "REINSTALLMODE=vamus",
-                "/passive",
-                "/norestart",
-            },
-            startInfo.ArgumentList.ToArray());
+        Assert.AreEqual(
+            @"/i ""C:\Temp\Lumin4ti-win.msi"" VELOPACK_INSTALLDIR=""C:\Program Files\Lumin4ti"" REINSTALL=ALL REINSTALLMODE=vamus /passive /norestart",
+            startInfo.Arguments);
+        Assert.AreEqual(0, startInfo.ArgumentList.Count);
     }
 
     [TestMethod]

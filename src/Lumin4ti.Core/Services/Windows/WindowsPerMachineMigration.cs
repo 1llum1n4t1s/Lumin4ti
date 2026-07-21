@@ -566,17 +566,18 @@ public static class WindowsPerMachineMigration
             UseShellExecute = true,
             Verb = "runas",
         };
-        startInfo.ArgumentList.Add("/i");
-        startInfo.ArgumentList.Add(msiPath);
+
         // /passive ではMSIのUI側既定フォルダー解決に依存せず、保護された配置先を明示する。
-        startInfo.ArgumentList.Add($"VELOPACK_INSTALLDIR={installDirectory}");
+        // Windows Installerは空白を含む公開プロパティ値を PROPERTY="value" の形で要求する。
+        // ArgumentListでは "PROPERTY=value with spaces" と引数全体が囲まれて1639になるため、
+        // msiexec向けの生コマンドラインを明示的に組み立てる。
+        var arguments = $"/i \"{msiPath}\" VELOPACK_INSTALLDIR=\"{installDirectory}\"";
         if (reinstallExistingProduct)
         {
-            startInfo.ArgumentList.Add("REINSTALL=ALL");
-            startInfo.ArgumentList.Add("REINSTALLMODE=vamus");
+            arguments += " REINSTALL=ALL REINSTALLMODE=vamus";
         }
-        startInfo.ArgumentList.Add("/passive");
-        startInfo.ArgumentList.Add("/norestart");
+
+        startInfo.Arguments = arguments + " /passive /norestart";
         return startInfo;
     }
 
