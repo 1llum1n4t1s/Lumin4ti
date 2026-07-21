@@ -35,6 +35,12 @@ $SecretsPath = 'C:\Users\IMT\dev\Secret\secrets.json'
 $CertSubjectName = 'Open Source Developer Yuichiro Shinozaki'
 # /n (Subject 名) で選択: 証明書の年次更新で thumbprint が変わっても動く
 $SignParams = "/n `"$CertSubjectName`" /fd SHA256 /td SHA256 /tr http://time.certum.pl"
+$SignToolPath = Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Windows Kits\10\bin' `
+    -Filter 'signtool.exe' -File -Recurse -ErrorAction SilentlyContinue |
+    Where-Object { $_.DirectoryName -like '*\x64' } |
+    Sort-Object { [version]$_.Directory.Parent.Name } -Descending |
+    Select-Object -First 1 -ExpandProperty FullName
+if (-not $SignToolPath) { throw 'Windows SDK x64 signtool.exe が見つかりません' }
 
 # Lumin4ti は win-x64 のみ配信 (ARM64 配信なし)。
 $RuntimeMatrix = @{
@@ -184,6 +190,17 @@ foreach ($runtime in $Runtimes) {
             --msi `
             --instLocation PerMachine `
             --signParams $SignParams
+    }
+}
+
+# Velopack 1.2.0 の生成MSIは PerMachine 指定でも INSTALLFOLDER が TARGETDIR 直下になり、
+# Windows Installer が C:\Lumin4ti と解決する。Directory表を公式の64-bit Program Files構造へ直し、
+# 変更によって無効になったMSI本体の署名を上書きして再署名する。
+foreach ($msi in Get-ChildItem $ArtifactsDir -Filter '*.msi' -File) {
+    & (Join-Path $PSScriptRoot 'set-msi-program-files-location.ps1') -MsiPath $msi.FullName
+    Invoke-Native "Program Files固定MSIの再署名 ($($msi.Name))" {
+        & $SignToolPath sign /n $CertSubjectName /fd SHA256 /td SHA256 `
+            /tr 'http://time.certum.pl' $msi.FullName
     }
 }
 

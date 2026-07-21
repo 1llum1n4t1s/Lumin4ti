@@ -1,4 +1,5 @@
 using System.Runtime.Versioning;
+using Lumin4ti.Core.Services.Windows;
 using Velopack.Locators;
 using Velopack.Windows;
 
@@ -28,10 +29,12 @@ internal static class WindowsLegacyStartMenuShortcutMigrator
                 return;
             }
 
+            var programsDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Programs);
             _ = TryMigrate(
-                Environment.GetFolderPath(Environment.SpecialFolder.Programs),
+                programsDirectory,
                 VelopackLocator.Current.RootAppDir,
                 ReadShortcut);
+            WindowsShellChangeNotifier.RefreshStartMenu(programsDirectory);
         }
         catch (Exception)
         {

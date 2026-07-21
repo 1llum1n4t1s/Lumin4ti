@@ -18,6 +18,10 @@ public sealed class DistributionContractTests
             repositoryRoot,
             "scripts",
             "release-local.ps1"));
+        var msiLocationScript = File.ReadAllText(Path.Combine(
+            repositoryRoot,
+            "scripts",
+            "set-msi-program-files-location.ps1"));
         var readme = File.ReadAllText(Path.Combine(repositoryRoot, "README.md"));
         var appSettings = File.ReadAllText(Path.Combine(
             repositoryRoot,
@@ -30,6 +34,10 @@ public sealed class DistributionContractTests
         StringAssert.Contains(releaseScript, "vpk pack");
         StringAssert.Contains(releaseScript, "--msi");
         StringAssert.Contains(releaseScript, "--instLocation PerMachine");
+        StringAssert.Contains(releaseScript, "set-msi-program-files-location.ps1");
+        StringAssert.Contains(releaseScript, "Program Files固定MSIの再署名");
+        StringAssert.Contains(msiLocationScript, "ProgramFiles64Folder");
+        StringAssert.Contains(msiLocationScript, "'INSTALLFOLDER'");
         StringAssert.Contains(releaseScript, "Where-Object { $_.Name -notlike '*-Setup.exe' }");
         StringAssert.Contains(releaseScript, "旧PerUserインストーラ");
         StringAssert.Contains(readme, "Lumin4ti-win.msi");
