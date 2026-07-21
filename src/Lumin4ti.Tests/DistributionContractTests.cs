@@ -6,7 +6,7 @@ namespace Lumin4ti.Tests;
 public sealed class DistributionContractTests
 {
     [TestMethod]
-    public void 配布契約はVelopackのSetupExeとR2更新を維持する()
+    public void 配布契約はVelopackのPerMachineMsiとR2更新を維持する()
     {
         var repositoryRoot = FindRepositoryRoot();
         var uiProject = File.ReadAllText(Path.Combine(
@@ -28,15 +28,50 @@ public sealed class DistributionContractTests
 
         StringAssert.Contains(uiProject, "PackageReference Include=\"Velopack\"");
         StringAssert.Contains(releaseScript, "vpk pack");
-        StringAssert.Contains(readme, "Lumin4ti-win-Setup.exe");
+        StringAssert.Contains(releaseScript, "--msi");
+        StringAssert.Contains(releaseScript, "--instLocation PerMachine");
+        StringAssert.Contains(releaseScript, "Where-Object { $_.Name -notlike '*-Setup.exe' }");
+        StringAssert.Contains(releaseScript, "旧PerUserインストーラ");
+        StringAssert.Contains(readme, "Lumin4ti-win.msi");
+        Assert.IsFalse(readme.Contains("Lumin4ti-win-Setup.exe", StringComparison.OrdinalIgnoreCase));
         StringAssert.Contains(appSettings, "https://lumin4ti.nephilim.jp");
         StringAssert.Contains(appSettings, "UpdateChannel => \"win\"");
 
         Assert.IsFalse(
             releaseScript.Contains("wix build", StringComparison.OrdinalIgnoreCase) ||
-            releaseScript.Contains(".msi", StringComparison.OrdinalIgnoreCase) ||
             releaseScript.Contains(".msix", StringComparison.OrdinalIgnoreCase),
-            "配布形式の変更には個別の明示承認と、この契約テストの意図的な更新が必要です。");
+            "Velopack以外のインストーラー方式へ変更するには個別の明示承認が必要です。");
+    }
+
+    [TestMethod]
+    public void PerUser移行は通常の管理者昇格より前に実行する()
+    {
+        var repositoryRoot = FindRepositoryRoot();
+        var program = File.ReadAllText(Path.Combine(
+            repositoryRoot,
+            "src",
+            "Lumin4ti.UI",
+            "Program.cs"));
+        var migration = File.ReadAllText(Path.Combine(
+            repositoryRoot,
+            "src",
+            "Lumin4ti.Core",
+            "Services",
+            "Windows",
+            "WindowsPerMachineMigration.cs"));
+
+        var migrationIndex = program.IndexOf(
+            "WindowsPerMachineMigration.HandleStartupAsync",
+            StringComparison.Ordinal);
+        var elevationIndex = program.IndexOf(
+            "WindowsElevationHelper.IsRunningAsAdministrator",
+            StringComparison.Ordinal);
+
+        Assert.IsGreaterThanOrEqualTo(0, migrationIndex);
+        Assert.IsGreaterThan(migrationIndex, elevationIndex);
+        StringAssert.Contains(migration, "ExecutableTrustVerifier.TryVerify");
+        StringAssert.Contains(migration, "Lumin4ti-win.msi");
+        StringAssert.Contains(migration, "TryDeleteTreeWithoutFollowingReparsePoints");
     }
 
     [TestMethod]

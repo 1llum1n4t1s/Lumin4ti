@@ -9,7 +9,7 @@ public sealed class WindowsExplorerLauncherTests
     [TestMethod]
     public async Task Https対象はmediumTokenのShellExecuteへ値として渡す()
     {
-        const string target = "https://lumin4ti.nephilim.jp/Lumin4ti-win-Setup.exe?x='quoted'";
+        const string target = "https://lumin4ti.nephilim.jp/Lumin4ti-win.msi?x='quoted'";
         var executor = new RecordingExecutor();
 
         await WindowsExplorerLauncher.OpenAsync(target, executor);

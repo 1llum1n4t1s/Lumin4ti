@@ -7,7 +7,7 @@
 //   - それ以外のパス        : fetch(request) で R2 カスタムドメイン origin にそのまま委譲する
 //
 // Worker Route は「同一ゾーンの fetch() の対象にならない」仕様なので再帰ループせず、
-// 更新ファイル (*.nupkg / releases.*.json / *-Setup.exe 等) は R2 がネイティブ配信する
+// 更新ファイル (*.nupkg / releases.*.json / *.msi 等) は R2 がネイティブ配信する
 // （Range / 条件付きリクエスト / キャッシュ / Content-Type をそのまま維持）。
 import landingHtml from "./index.html";
 

@@ -68,13 +68,14 @@ Komorebi/Lhamiel と同一方式。翻訳は [Resources/Locales/*.axaml](src/Lum
 
 ### 配布契約と変更権限
 
-- 現行の配布契約は Velopack が生成する `Lumin4ti-win-Setup.exe` と、Cloudflare R2 の `releases.win.json` による自動更新である。
+- 現行の配布契約は Velopack が生成する署名済みPerMachine `Lumin4ti-win.msi` と、Cloudflare R2 の `releases.win.json` による自動更新である。PerUser `Setup.exe` は公開しない。
 - 不具合調査、全体レビュー、セキュリティレビュー、および「見つかったものを全部直してよい」という許可は、この現行契約内の修正に適用する。レビューで配布や昇格の設計リスクを発見しても、それを理由に対応スコープを配布方式の変更へ広げない。
 - MSI / MSIX 等へのインストーラー形式変更、Velopack の置換、per-user / machine-wide のインストール範囲変更、NativeAOT 等のパッケージング方式変更、更新元・channel・署名方式の変更は、ユーザーが対象を個別に明示した場合だけ実装する。明示がない場合は現行契約を維持し、設計案と影響だけを報告する。
 - `dotnet publish` によるローカル検証は通常の検証に含めてよい。`vpk pack`、署名、R2 upload、cache purge、配信確認は、リリースまたは `/vava` が明示された場合だけ実行する。
 
 - **リリースはローカル署名リリース単独** (Windows のみ配信・CI リリース workflow なし)。SimplySign (Certum クラウド署名) は Desktop 接続 + スマホトークンが要り GitHub Actions から署名できないため。
-- 実行は `pwsh scripts/release-local.ps1` (build + 署名 + R2 アップロード + キャッシュパージ + 配信確認 + 旧 nupkg 掃除を一括)。`-SkipUpload` で署名までの動作確認。**`/vava` の precheck (証明書確認) → bump → 自動実行** が [vava.config.json](vava.config.json) で配線済み。
+- 実行は `pwsh scripts/release-local.ps1` (build + PerMachine MSI生成 + 署名 + R2 アップロード + キャッシュパージ + 配信確認 + 旧 nupkg 掃除を一括)。`-SkipUpload` で署名までの動作確認。**`/vava` の precheck (証明書確認) → bump → 自動実行** が [vava.config.json](vava.config.json) で配線済み。
+- 旧`%LocalAppData%\Lumin4ti`版は、通常の自己昇格より前に[WindowsPerMachineMigration.cs](src/Lumin4ti.Core/Services/Windows/WindowsPerMachineMigration.cs)が固定URLのMSIを取得し、署名と発行元を検証してからPerMachine版へ移行する。設定・ログ・`%ProgramData%`の復元用バックアップは保持し、旧本体・Updater・キャッシュ・HKCUアンインストール登録・ユーザーショートカットだけを回収する。
 - 前提: SimplySign Desktop がログイン済み (`Cert:\CurrentUser\My` に `CN=Open Source Developer Yuichiro Shinozaki` が見える) / `<Version>` が `/vava` 済み / `C:\Users\IMT\dev\Secret\secrets.json` に `cloudflare.api_token`。
 - **ランディングページ**は [web/](web/) の Cloudflare Worker (`lumin4ti-landing`)。`lumin4ti.nephilim.jp/*` に張った Worker Route が R2 カスタムドメインより優先され、`/` と `/index.html` だけ [web/index.html](web/index.html) を返し、それ以外 (更新ファイル) は R2 へ委譲する。ページ更新は `web/` で `pnpm dlx wrangler deploy` (トークンは secrets.json から env 注入・値は露出させない)。
 - R2 バケット `lumin4ti-updates` (account `10901bfadbf1005164774a7350082985` / zone `nephilim.jp`)。`local-release/` は `.gitignore` 済み。

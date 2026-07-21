@@ -19,9 +19,20 @@ public static class ExecutableTrustVerifier
         string? filePath,
         string expectedCommonName,
         out string failureReason)
+        => TryVerify(filePath, expectedCommonName, AuthenticodeRevocationMode.CacheOnly, out failureReason);
+
+    /// <summary>
+    /// 指定した失効確認方式で、Authenticode署名と署名者Common Nameを検証する。
+    /// ネットワークから取得したインストーラーでは <see cref="AuthenticodeRevocationMode.Online"/> を使う。
+    /// </summary>
+    public static bool TryVerify(
+        string? filePath,
+        string expectedCommonName,
+        AuthenticodeRevocationMode revocationMode,
+        out string failureReason)
         => TryVerifyCore(
             filePath,
-            AuthenticodeRevocationMode.CacheOnly,
+            revocationMode,
             certificate => HasExpectedCommonName(certificate.Subject, expectedCommonName),
             out failureReason);
 

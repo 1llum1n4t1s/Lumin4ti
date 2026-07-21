@@ -1,5 +1,6 @@
 using Avalonia;
 using Lumin4ti.Core.Services;
+using Lumin4ti.Core.Services.Windows;
 using Lumin4ti.UI.Services;
 using Velopack;
 
@@ -28,6 +29,14 @@ internal static class Program
         if (OperatingSystem.IsWindows())
         {
             WindowsLegacyStartMenuShortcutMigrator.MigrateForCurrentUser();
+
+            // 旧PerUser版は、管理者実行するバイナリがユーザー書き込み可能な場所にあるため、
+            // 通常の自己昇格より先に署名済みPerMachine MSIへ移行する。
+            var migrationExitCode = WindowsPerMachineMigration.HandleStartupAsync(args).GetAwaiter().GetResult();
+            if (migrationExitCode is not null)
+            {
+                return migrationExitCode.Value;
+            }
         }
 
         // HKLM への reg add / dism / regsvr32 を実行するため管理者権限が必要。
