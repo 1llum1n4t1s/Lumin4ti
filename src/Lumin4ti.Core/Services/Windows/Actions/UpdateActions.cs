@@ -14,8 +14,11 @@ namespace Lumin4ti.Core.Services.Windows.Actions;
 public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanceAction
 {
     internal const string SourceExportArguments = "source export winget --disable-interactivity";
-    internal const string UpgradeArguments =
-        "upgrade --all --include-unknown --silent --disable-interactivity --source winget --accept-source-agreements --accept-package-agreements";
+    internal const string ListUpgradesArguments =
+        "list --upgrade-available --include-unknown --disable-interactivity --source winget --accept-source-agreements";
+
+    private const string CommonExactArguments =
+        "--exact --disable-interactivity --source winget --accept-source-agreements";
 
     private const string OfficialSourceName = "winget";
     private const string OfficialSourceArgument = "https://cdn.winget.microsoft.com/cache";
@@ -57,44 +60,222 @@ public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanc
                 "winget ソースが Microsoft 公式の既定設定と一致しないため、更新を中止しました。");
         }
 
-        // プログレスバー・スピナー行を除いた意味のある行だけをライブ表示に流す
-        var filtered = progress is null
-            ? null
-            : new MeaningfulLineProgress(progress);
-
-        var result = await executor.RunAsync(
-            "winget",
-            UpgradeArguments,
-            ct,
-            filtered);
-
-        // winget はプログレスバー行を大量に吐くため、意味のある行だけ残して末尾 15 行に要約する
-        var lines = result.StandardOutput.Split('\n')
-            .Select(l => l.TrimEnd('\r'))
-            .Where(IsMeaningfulLine)
-            .ToList();
-        var summary = string.Join(Environment.NewLine, lines.TakeLast(15).Select(l => $"  {l.Trim()}"));
-
-        if (result.Success)
+        var available = await executor.RunAsync("winget", ListUpgradesArguments, ct);
+        if (!available.Success)
         {
-            LoggerBootstrap.Log.Info($"{Id}: 完了");
-            return MaintenanceActionResult.Ok(summary);
+            LoggerBootstrap.Log.Error($"{Id}: 更新候補の取得に失敗 (exit={available.ExitCode})");
+            return MaintenanceActionResult.Fail(
+                DescribeCommandFailure("winget の更新候補を取得できませんでした", available));
         }
 
-        // 一部パッケージの失敗 (使用中の実行ファイル・インストール技術の変更等) では
-        // winget 全体が非 0 で終わるが、成功した更新はある。1 件でも成功していれば部分成功として扱う。
-        var succeeded = CountSuccessfulInstalls(lines);
+        if (!TryParsePackageTable(available.StandardOutput, out var candidates, out var tableFound))
+        {
+            LoggerBootstrap.Log.Error($"{Id}: 更新候補一覧を安全に解析できないため中止");
+            return MaintenanceActionResult.Fail(
+                "winget の更新候補一覧を安全に確認できなかったため、更新を中止しました。");
+        }
+
+        if (!tableFound)
+        {
+            LoggerBootstrap.Log.Info($"{Id}: 更新候補なし");
+            return MaintenanceActionResult.Ok("  - 更新可能なパッケージはありませんでした");
+        }
+
+        var filtered = progress is null ? null : new MeaningfulLineProgress(progress);
+        var details = new List<string>();
+        var succeeded = 0;
+        var failed = 0;
+        var skipped = 0;
+
+        for (var index = 0; index < candidates.Count; index++)
+        {
+            ct.ThrowIfCancellationRequested();
+            var candidate = candidates[index];
+            progress?.Report($"  - ({index + 1}/{candidates.Count}) {candidate.Name} [{candidate.Id}] を確認しています");
+
+            var catalog = await executor.RunAsync("winget", BuildSearchArguments(candidate.Id), ct);
+            if (!catalog.Success
+                || !TryParsePackageTable(catalog.StandardOutput, out var catalogPackages, out var catalogTableFound)
+                || !catalogTableFound
+                || catalogPackages.Count != 1
+                || !string.Equals(catalogPackages[0].Id, candidate.Id, StringComparison.Ordinal))
+            {
+                skipped++;
+                details.Add($"  - {candidate.Name} [{candidate.Id}]: 公式カタログの完全一致確認に失敗したため除外");
+                continue;
+            }
+
+            var catalogName = catalogPackages[0].Name;
+            if (!string.Equals(candidate.Name, catalogName, StringComparison.Ordinal))
+            {
+                skipped++;
+                details.Add(
+                    $"  - {candidate.Name} [{candidate.Id}]: カタログ名「{catalogName}」と一致しないため除外");
+                LoggerBootstrap.Log.Error(
+                    $"{Id}: 名前不一致の候補を除外 installed={candidate.Name}, catalog={catalogName}, package={candidate.Id}");
+                continue;
+            }
+
+            progress?.Report($"  - ({index + 1}/{candidates.Count}) {candidate.Name} を更新しています");
+            var result = await executor.RunAsync(
+                "winget",
+                BuildUpgradeArguments(candidate.Id),
+                ct,
+                filtered);
+            if (result.Success)
+            {
+                succeeded++;
+                details.Add($"  - {candidate.Name} [{candidate.Id}]: 更新完了");
+                continue;
+            }
+
+            failed++;
+            details.Add(DescribeCommandFailure(
+                $"{candidate.Name} [{candidate.Id}]: 更新失敗",
+                result));
+        }
+
+        LoggerBootstrap.Log.Info(
+            $"{Id}: 完了 (成功={succeeded}, 失敗={failed}, 安全確認で除外={skipped})");
+        details.Insert(0, $"  - 成功 {succeeded} 件 / 失敗 {failed} 件 / 安全確認で除外 {skipped} 件");
+
+        if (failed == 0 && skipped == 0)
+        {
+            return MaintenanceActionResult.Ok(details);
+        }
+
         if (succeeded > 0)
         {
-            LoggerBootstrap.Log.Info($"{Id}: 部分成功 ({succeeded} 件成功 / exit={result.ExitCode})");
-            return MaintenanceActionResult.Partial(
-                $"  - {succeeded} 件の更新に成功しました (一部のパッケージは更新できませんでした。使用中のアプリは閉じてから再実行してください)" +
-                Environment.NewLine + summary);
+            return MaintenanceActionResult.Partial(details);
         }
 
-        LoggerBootstrap.Log.Error($"{Id}: exit={result.ExitCode}");
-        return MaintenanceActionResult.Fail(summary.Length > 0 ? summary : $"winget が失敗しました (exit={result.ExitCode})");
+        return MaintenanceActionResult.Fail(string.Join(Environment.NewLine, details));
     }
+
+    internal static string BuildSearchArguments(string packageId) =>
+        $"search --id {packageId} {CommonExactArguments}";
+
+    internal static string BuildUpgradeArguments(string packageId) =>
+        $"upgrade --id {packageId} {CommonExactArguments} --silent --accept-package-agreements";
+
+    /// <summary>
+    /// winget の表形式出力から Name と ID だけを抽出する。全角文字による表示幅の差を避けるため、
+    /// ヘッダーの ID より後ろにある列数を数え、各行を右側から特定する。
+    /// 切り詰めや不正な ID を含む行は fail closed にする。
+    /// </summary>
+    internal static bool TryParsePackageTable(
+        string output,
+        out List<WingetPackage> packages,
+        out bool tableFound)
+    {
+        packages = [];
+        tableFound = false;
+        var lines = output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
+
+        for (var separatorIndex = 1; separatorIndex < lines.Length; separatorIndex++)
+        {
+            var separator = lines[separatorIndex].Trim();
+            if (separator.Length < 3 || separator.Any(character => character != '-'))
+            {
+                continue;
+            }
+
+            var headerTokens = Tokenize(lines[separatorIndex - 1]);
+            var idHeaderIndex = headerTokens.FindIndex(token => token.Value == "ID");
+            if (idHeaderIndex <= 0 || idHeaderIndex == headerTokens.Count - 1)
+            {
+                continue;
+            }
+
+            tableFound = true;
+            var columnsAfterId = headerTokens.Count - idHeaderIndex - 1;
+            for (var rowIndex = separatorIndex + 1; rowIndex < lines.Length; rowIndex++)
+            {
+                var row = lines[rowIndex];
+                var rowTokens = Tokenize(row);
+                if (rowTokens.Count <= columnsAfterId + 1)
+                {
+                    break;
+                }
+
+                var idToken = rowTokens[rowTokens.Count - columnsAfterId - 1];
+                var id = idToken.Value;
+                if (!id.Contains('.'))
+                {
+                    // 表末尾の「3 upgrades available」のような集計行はここで終了する。
+                    // 一方、シェルメタ文字を含む ID らしき値は安全側に倒して一覧全体を拒否する。
+                    if (id.Contains('…') || id.Any(character => character is ';' or '|' or '&' or '<' or '>'))
+                    {
+                        return false;
+                    }
+
+                    break;
+                }
+
+                var name = row[..idToken.Start].TrimEnd();
+                if (name.Length == 0 || name.Contains('…') || !IsSafePackageId(id))
+                {
+                    return false;
+                }
+
+                packages.Add(new WingetPackage(name, id));
+            }
+
+            return packages.Count > 0;
+        }
+
+        return true;
+    }
+
+    private static List<TextToken> Tokenize(string line)
+    {
+        var tokens = new List<TextToken>();
+        for (var index = 0; index < line.Length;)
+        {
+            while (index < line.Length && char.IsWhiteSpace(line[index]))
+            {
+                index++;
+            }
+
+            var start = index;
+            while (index < line.Length && !char.IsWhiteSpace(line[index]))
+            {
+                index++;
+            }
+
+            if (index > start)
+            {
+                tokens.Add(new TextToken(start, line[start..index]));
+            }
+        }
+
+        return tokens;
+    }
+
+    private static bool IsSafePackageId(string? packageId) =>
+        !string.IsNullOrWhiteSpace(packageId)
+        && packageId.Length <= 255
+        && packageId.Contains('.')
+        && !packageId.Contains('…')
+        && packageId.All(character => char.IsAsciiLetterOrDigit(character)
+                                          || character is '.' or '-' or '_' or '+');
+
+    private static string DescribeCommandFailure(string message, CommandExecutionResult result)
+    {
+        var output = string.IsNullOrWhiteSpace(result.StandardError)
+            ? result.StandardOutput
+            : result.StandardError;
+        var lastLine = output
+            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .LastOrDefault(IsMeaningfulLine);
+        return lastLine is null
+            ? $"  - {message} (exit={result.ExitCode})"
+            : $"  - {message} (exit={result.ExitCode}): {lastLine}";
+    }
+
+    internal sealed record WingetPackage(string Name, string Id);
+
+    private sealed record TextToken(int Start, string Value);
 
     /// <summary>winget 出力から更新に成功したパッケージ数を数える (日英両ロケール対応)。</summary>
     internal static int CountSuccessfulInstalls(IEnumerable<string> lines) =>
@@ -333,6 +514,7 @@ public sealed class DefenderSignatureUpdateAction : IMaintenanceAction
 public sealed class DefenderResetAction : IMaintenanceAction
 {
     private const string PendingBackupJson = "{\"Lumin4tiPending\":true}";
+    private const int MaximumAvailabilityOutputLength = 64 * 1024;
     private static readonly string[] BackupPropertyNames =
     [
         "ExclusionPath",
@@ -364,7 +546,8 @@ public sealed class DefenderResetAction : IMaintenanceAction
 
     public string Description =>
         "Windows Defender に登録された除外パス・除外プロセス・除外拡張子などを全て削除し、リアルタイム保護・クラウド保護などの主要オプションを既定値に戻します。" +
-        "マルウェアや過去のソフトが勝手に追加した除外設定 (スキャンの抜け穴) を一掃できます。意図的に登録した除外も消えるため、必要なものは実行後に再登録してください。";
+        "マルウェアや過去のソフトが勝手に追加した除外設定 (スキャンの抜け穴) を一掃できます。意図的に登録した除外も消えるため、必要なものは実行後に再登録してください。" +
+        "Defender サービスが完全に無効な環境では実行しません。他社製アンチウイルスによるパッシブモードでも、Defender サービスと管理 cmdlet が利用可能なら実行できます。";
 
     public CommandCategory Category => CommandCategory.Update;
 
@@ -373,6 +556,28 @@ public sealed class DefenderResetAction : IMaintenanceAction
     public async Task<MaintenanceActionResult> ExecuteAsync(CancellationToken ct = default)
     {
         ct.ThrowIfCancellationRequested();
+        var availabilityResult = await _executor.RunAsync(
+            "powershell.exe",
+            BuildAvailabilityCheckArguments(),
+            ct);
+        if (!availabilityResult.Success
+            || !TryParseAvailability(availabilityResult.StandardOutput, out var availability))
+        {
+            LoggerBootstrap.Log.Error(
+                $"{Id}: Defender 利用状態を確認できませんでした (exit={availabilityResult.ExitCode})");
+            return MaintenanceActionResult.Fail(
+                "Microsoft Defender Antivirus の利用状態を確認できないため、設定は変更しませんでした。" +
+                Environment.NewLine + DefenderCommandSupport.DescribeFailure(availabilityResult));
+        }
+
+        if (!availability.AMServiceEnabled)
+        {
+            LoggerBootstrap.Log.Info($"{Id}: Defender サービスが無効なため実行しません");
+            return MaintenanceActionResult.Fail(
+                "Microsoft Defender Antivirus のサービスが無効なため、設定をリセットできません。" +
+                "他社製アンチウイルス使用中でも Defender がパッシブモードでサービスを利用できる環境なら実行できます。");
+        }
+
         // 昇格 PowerShell にユーザー書き込み可能な AppData のパスを渡すと、再解析ポイント等で
         // 任意ファイルを上書きされ得る。ACL を固定した ProgramData 配下へファイルを先に作り、
         // PowerShell にはその既存ファイルの内容だけを更新させる。
@@ -524,6 +729,76 @@ public sealed class DefenderResetAction : IMaintenanceAction
         }
     }
 
+    internal static string BuildAvailabilityCheckArguments()
+    {
+        const string script = """
+            $ErrorActionPreference = 'Stop'
+            $ProgressPreference = 'SilentlyContinue'
+            try {
+                Import-Module Defender -ErrorAction Stop
+                $status = Get-MpComputerStatus -ErrorAction Stop
+                [ordered]@{
+                    AMServiceEnabled = [bool]$status.AMServiceEnabled
+                    AntivirusEnabled = [bool]$status.AntivirusEnabled
+                } | ConvertTo-Json -Compress
+            }
+            catch {
+                [Console]::Error.WriteLine($_.Exception.Message)
+                exit 1
+            }
+            """;
+        var encodedScript = Convert.ToBase64String(Encoding.Unicode.GetBytes(script));
+        return $"-NoProfile -NonInteractive -EncodedCommand {encodedScript}";
+    }
+
+    internal static bool TryParseAvailability(
+        string output,
+        out DefenderAvailability availability)
+    {
+        availability = new(false, false);
+        if (string.IsNullOrWhiteSpace(output) || output.Length > MaximumAvailabilityOutputLength)
+        {
+            return false;
+        }
+
+        var jsonLines = output.Split(
+                ['\r', '\n'],
+                StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(line => line.StartsWith('{'))
+            .ToArray();
+        if (jsonLines.Length != 1)
+        {
+            return false;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(jsonLines[0]);
+            var root = document.RootElement;
+            if (root.ValueKind != JsonValueKind.Object
+                || !root.TryGetProperty("AMServiceEnabled", out var serviceEnabled)
+                || serviceEnabled.ValueKind is not (JsonValueKind.True or JsonValueKind.False)
+                || !root.TryGetProperty("AntivirusEnabled", out var antivirusEnabled)
+                || antivirusEnabled.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+            {
+                return false;
+            }
+
+            availability = new(
+                serviceEnabled.GetBoolean(),
+                antivirusEnabled.GetBoolean());
+            return true;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
+    }
+
+    internal sealed record DefenderAvailability(
+        bool AMServiceEnabled,
+        bool AntivirusEnabled);
+
     internal static string BuildResetScript(string backupFile)
     {
         var backupLiteral = backupFile.Replace("'", "''", StringComparison.Ordinal);
@@ -532,6 +807,9 @@ public sealed class DefenderResetAction : IMaintenanceAction
             try {
                 Import-Module Defender -ErrorAction Stop
                 $status = Get-MpComputerStatus -ErrorAction Stop
+                if (-not [bool]$status.AMServiceEnabled) {
+                    throw 'Microsoft Defender Antivirus のサービスが無効なため、設定をリセットできません。'
+                }
                 if ($null -ne $status.IsTamperProtected -and [bool]$status.IsTamperProtected) {
                     throw 'Tamper Protection が有効なため Defender 設定を変更できません。組織管理端末では管理者へ依頼し、個人端末では Windows セキュリティの「改ざん防止」を確認してください。'
                 }
@@ -751,28 +1029,56 @@ public sealed class SecurityAppResetAction(ICommandExecutor executor) : IMainten
         }
 
         LoggerBootstrap.Log.Error($"{Id}: exit={result.ExitCode}: {result.StandardError}");
-        var failure = string.IsNullOrWhiteSpace(result.StandardError)
-            ? result.StandardOutput.Trim()
-            : result.StandardError.Trim();
+        var failure = DescribeFailure(result);
         return MaintenanceActionResult.Fail(
             $"リセットに失敗しました (exit={result.ExitCode})" +
             (failure.Length == 0 ? string.Empty : $"{Environment.NewLine}  - {failure}"));
     }
 
+    internal static string DescribeFailure(CommandExecutionResult result)
+    {
+        var lines = (result.StandardError + Environment.NewLine + result.StandardOutput)
+            .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var failure = lines.LastOrDefault(line =>
+            !line.Equals("#< CLIXML", StringComparison.OrdinalIgnoreCase)
+            && !line.StartsWith("<Objs", StringComparison.OrdinalIgnoreCase)
+            && !line.StartsWith("</Objs", StringComparison.OrdinalIgnoreCase)
+            && !line.Contains("System.Management.Automation.ProgressRecord", StringComparison.OrdinalIgnoreCase));
+        if (string.IsNullOrWhiteSpace(failure))
+        {
+            return string.Empty;
+        }
+
+        const int maximumLength = 500;
+        return failure.Length <= maximumLength ? failure : failure[..maximumLength] + "…";
+    }
+
     internal static string BuildResetScript() =>
         """
         $ErrorActionPreference = 'Stop'
+        $ProgressPreference = 'SilentlyContinue'
         try {
             $package = @(Get-AppxPackage -Name Microsoft.SecHealthUI -ErrorAction Stop)
             if ($package.Count -eq 0) {
                 throw 'Microsoft.SecHealthUI パッケージが登録されていません。Windows セキュリティを再登録してから再実行してください。'
             }
 
+            $packageFamilyName = $package[0].PackageFamilyName
             $package | Reset-AppxPackage -ErrorAction Stop
 
-            $after = @(Get-AppxPackage -Name Microsoft.SecHealthUI -ErrorAction Stop)
-            if ($after.Count -eq 0) {
-                throw 'リセット後に Microsoft.SecHealthUI パッケージを確認できませんでした。'
+            # Reset-AppxPackage の展開完了直後は、現在ユーザーの登録が一時的に
+            # Get-AppxPackage へ現れないことがある。同じ family の再登録を待って検証する。
+            $deadline = [DateTime]::UtcNow.AddSeconds(30)
+            $matchingAfter = @()
+            do {
+                $after = @(Get-AppxPackage -Name Microsoft.SecHealthUI -ErrorAction Stop)
+                $matchingAfter = @($after | Where-Object { $_.PackageFamilyName -eq $packageFamilyName })
+                if ($matchingAfter.Count -gt 0) { break }
+                Start-Sleep -Milliseconds 500
+            } while ([DateTime]::UtcNow -lt $deadline)
+
+            if ($matchingAfter.Count -eq 0) {
+                throw 'リセット後 30 秒以内に Microsoft.SecHealthUI パッケージの再登録を確認できませんでした。'
             }
 
             Write-Output '  - Windows セキュリティ アプリをリセットし、パッケージ登録を確認しました'

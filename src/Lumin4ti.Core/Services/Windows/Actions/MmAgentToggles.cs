@@ -187,15 +187,13 @@ public sealed class MmAgentFeatureToggle(
     internal string PropertyName => propertyName;
 
     public Task<bool?> GetStateAsync(CancellationToken ct = default) =>
-        MmAgentFeatureSupport.IsKnownUnsupportedOnCurrentWindows(propertyName) ||
         stateProvider.IsUnsupported(propertyName)
             ? Task.FromResult<bool?>(null)
             : stateProvider.GetAsync(propertyName, ct);
 
     public async Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default)
     {
-        if (MmAgentFeatureSupport.IsKnownUnsupportedOnCurrentWindows(propertyName) ||
-            stateProvider.IsUnsupported(propertyName))
+        if (stateProvider.IsUnsupported(propertyName))
         {
             return UnsupportedResult();
         }
@@ -302,38 +300,6 @@ public sealed class MmAgentFeatureToggle(
                 "体感は速くなりますがメモリを先取りで消費するため、メモリ節約を優先するなら OFF を推奨します。"),
         ];
     }
-}
-
-internal static class MmAgentFeatureSupport
-{
-    private const int Windows11Version25H2Build = 26200;
-
-    internal static bool IsKnownUnsupportedOnCurrentWindows(string propertyName)
-    {
-        if (!OperatingSystem.IsWindows())
-        {
-            return false;
-        }
-
-        string? installationType = null;
-        try
-        {
-            using var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
-            installationType = key?.GetValue("InstallationType") as string;
-        }
-        catch (Exception ex) when (ex is System.Security.SecurityException or UnauthorizedAccessException)
-        {
-            LoggerBootstrap.Log.Warn($"Windows の InstallationType を取得できませんでした: {ex.Message}");
-        }
-
-        return IsKnownUnsupported(propertyName, Environment.OSVersion.Version.Build, installationType);
-    }
-
-    internal static bool IsKnownUnsupported(string propertyName, int build, string? installationType) =>
-        build == Windows11Version25H2Build &&
-        string.Equals(installationType, "Client", StringComparison.OrdinalIgnoreCase) &&
-        (propertyName.Equals("OperationAPI", StringComparison.OrdinalIgnoreCase) ||
-         propertyName.Equals("ApplicationLaunchPrefetching", StringComparison.OrdinalIgnoreCase));
 }
 
 /// <summary>

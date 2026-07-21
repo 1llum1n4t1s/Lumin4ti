@@ -499,9 +499,15 @@ public sealed class PowerPlanSetupAction(ICommandExecutor executor) : IMaintenan
     public string Label => "電源プラン / 電源モードを推奨構成に設定";
 
     public string Description =>
-        "電源プランを既定の「バランス」ベースに再構成し、電源モードを「最適なパフォーマンス」(AC/バッテリー両方) に設定します。あわせて次の値を書き込みます: " +
-        "ディスプレイ消灯 = 電源接続時 180 分 / バッテリー 30 分、スリープ = なし、電源ボタン = シャットダウン、カバーを閉じたとき = 何もしない (隠し項目の表示属性も解除)。" +
-        "既存の電源プランのカスタマイズは既定値に戻るため、独自プランを使っている場合は注意してください。";
+        "次の内容をまとめて設定します。" + Environment.NewLine +
+        "・電源プラン: Windows の既定スキームを復元し、「バランス」を使用" + Environment.NewLine +
+        "・電源モード: 「最適なパフォーマンス」(電源接続時 / バッテリー時)" + Environment.NewLine +
+        "・ディスプレイ消灯: 電源接続時 180 分 / バッテリー時 30 分" + Environment.NewLine +
+        "・スリープ: 電源接続時 / バッテリー時ともに「なし」" + Environment.NewLine +
+        "・電源ボタン: 電源接続時 / バッテリー時ともに「シャットダウン」" + Environment.NewLine +
+        "・カバーを閉じたとき: 電源接続時 / バッテリー時ともに「何もしない」" + Environment.NewLine +
+        "・電源ボタンとカバーの設定項目が非表示なら、表示できる状態へ戻す" + Environment.NewLine +
+        "注意: 既定スキームの復元により、既存プランのカスタマイズや独自に追加した電源プランは削除・初期化されます。";
 
     public CommandCategory Category => CommandCategory.System;
 

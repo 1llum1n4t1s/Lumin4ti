@@ -141,16 +141,39 @@ public sealed class WingetOutputFilterTests
     {
         var executor = new RecordingExecutor(
             Success(OfficialSource),
+            Success(PackageTable(("Git", "Git.Git"))),
+            Success(PackageTable(("Git", "Git.Git"))),
             Success("Successfully installed"));
         var action = new WingetUpgradeAction(executor);
 
         var result = await action.ExecuteAsync();
 
         Assert.IsTrue(result.Success);
-        Assert.AreEqual(2, executor.Calls.Count);
+        Assert.AreEqual(4, executor.Calls.Count);
         Assert.AreEqual(WingetUpgradeAction.SourceExportArguments, executor.Calls[0].Arguments);
-        Assert.AreEqual(WingetUpgradeAction.UpgradeArguments, executor.Calls[1].Arguments);
-        StringAssert.Contains(executor.Calls[1].Arguments, "--source winget");
+        Assert.AreEqual(WingetUpgradeAction.ListUpgradesArguments, executor.Calls[1].Arguments);
+        Assert.AreEqual(WingetUpgradeAction.BuildSearchArguments("Git.Git"), executor.Calls[2].Arguments);
+        Assert.AreEqual(WingetUpgradeAction.BuildUpgradeArguments("Git.Git"), executor.Calls[3].Arguments);
+        StringAssert.Contains(executor.Calls[3].Arguments, "--id Git.Git --exact");
+        Assert.IsFalse(executor.Calls[3].Arguments.Contains("--all", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    public async Task インストール名とカタログ名が違う候補は更新しない()
+    {
+        var executor = new RecordingExecutor(
+            Success(OfficialSource),
+            Success(PackageTable(("Brave Origin", "Brave.BraveOrigin.Nightly"))),
+            Success(PackageTable(("Brave Origin Nightly", "Brave.BraveOrigin.Nightly"))));
+        var action = new WingetUpgradeAction(executor);
+
+        var result = await action.ExecuteAsync();
+
+        Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
+        Assert.AreEqual(3, executor.Calls.Count);
+        Assert.IsFalse(executor.Calls.Any(call =>
+            call.Arguments.StartsWith("upgrade ", StringComparison.Ordinal)));
+        StringAssert.Contains(result.Detail, "カタログ名「Brave Origin Nightly」と一致しないため除外");
     }
 
     [TestMethod]
@@ -188,11 +211,15 @@ public sealed class WingetOutputFilterTests
     {
         var executor = new RecordingExecutor(
             Success(OfficialSource),
+            Success(PackageTable(("Git", "Git.Git"), ("uv", "astral-sh.uv"))),
+            Success(PackageTable(("Git", "Git.Git"))),
+            Success("Successfully installed"),
+            Success(PackageTable(("uv", "astral-sh.uv"))),
             new CommandExecutionResult(
                 false,
                 string.Empty,
                 1,
-                "Successfully installed\nInstaller failed with exit code: 1",
+                "Installer failed with exit code: 1",
                 "error"));
         var action = new WingetUpgradeAction(executor);
 
@@ -200,7 +227,7 @@ public sealed class WingetOutputFilterTests
 
         Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
         Assert.IsFalse(result.Success);
-        StringAssert.Contains(result.Detail, "一部のパッケージは更新できませんでした");
+        StringAssert.Contains(result.Detail, "成功 1 件 / 失敗 1 件 / 安全確認で除外 0 件");
     }
 
     [TestMethod]
@@ -208,6 +235,8 @@ public sealed class WingetOutputFilterTests
     {
         var executor = new RecordingExecutor(
             Success(OfficialSource),
+            Success(PackageTable(("Git", "Git.Git"))),
+            Success(PackageTable(("Git", "Git.Git"))),
             Success("更新が完了しました"))
         {
             OutputLines = ["████ 50%", "更新が完了しました"],
@@ -230,11 +259,75 @@ public sealed class WingetOutputFilterTests
 
         Assert.IsTrue((await execution).Success);
         Assert.AreEqual(0, context.PostCount);
-        CollectionAssert.AreEqual(new[] { "更新が完了しました" }, received);
+        CollectionAssert.Contains(received, "更新が完了しました");
+        Assert.IsFalse(received.Any(line => line.Contains('█')));
+    }
+
+    [TestMethod]
+    public void 切り詰められた名前や不正なIDを含む一覧は拒否する()
+    {
+        Assert.IsFalse(WingetUpgradeAction.TryParsePackageTable(
+            PackageTable(("Brave Origin…", "Brave.BraveOrigin.Nightly")),
+            out _,
+            out var truncatedTableFound));
+        Assert.IsTrue(truncatedTableFound);
+
+        Assert.IsFalse(WingetUpgradeAction.TryParsePackageTable(
+            PackageTable(("安全でない候補", "invalid;command")),
+            out _,
+            out var unsafeTableFound));
+        Assert.IsTrue(unsafeTableFound);
+    }
+
+    [TestMethod]
+    public void 表末尾の集計行はpackageとして扱わない()
+    {
+        var output = PackageTable(("Git", "Git.Git"))
+                     + Environment.NewLine
+                     + "1 アップグレードを利用できます。";
+
+        Assert.IsTrue(WingetUpgradeAction.TryParsePackageTable(
+            output,
+            out var packages,
+            out var tableFound));
+        Assert.IsTrue(tableFound);
+        Assert.AreEqual(1, packages.Count);
+        Assert.AreEqual("Git.Git", packages[0].Id);
+    }
+
+    [TestMethod]
+    public void 日本語ヘッダーの全角幅で列位置がずれても解析できる()
+    {
+        const string output =
+            "名前         ID                        バージョン   利用可能\n" +
+            "---------------------------------------------------------------\n" +
+            "Brave Origin Brave.BraveOrigin.Nightly 150.1.92.141 151.1.94.83\n" +
+            "Git          Git.Git                   2.55.0.2     2.55.0.3\n" +
+            "2 アップグレードを利用できます。";
+
+        Assert.IsTrue(WingetUpgradeAction.TryParsePackageTable(
+            output,
+            out var packages,
+            out var tableFound));
+        Assert.IsTrue(tableFound);
+        Assert.AreEqual(2, packages.Count);
+        Assert.AreEqual("Brave Origin", packages[0].Name);
+        Assert.AreEqual("Brave.BraveOrigin.Nightly", packages[0].Id);
     }
 
     private static CommandExecutionResult Success(string output) =>
         new(true, string.Empty, 0, output, string.Empty);
+
+    private static string PackageTable(params (string Name, string Id)[] packages)
+    {
+        var nameWidth = Math.Max("名前".Length, packages.Max(package => package.Name.Length)) + 2;
+        var header = "名前".PadRight(nameWidth) + "ID  バージョン";
+        var rows = packages.Select(package =>
+            package.Name.PadRight(nameWidth) + package.Id + "  1.0");
+        return string.Join(
+            Environment.NewLine,
+            new[] { header, new string('-', header.Length) }.Concat(rows));
+    }
 
     private sealed class RecordingExecutor(params CommandExecutionResult[] results) : ICommandExecutor
     {

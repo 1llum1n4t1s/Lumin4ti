@@ -35,11 +35,12 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
 
     public string Id => "uwp-background-off";
 
-    public string Label => "UWP バックグラウンド実行を一括オフ (メモリ節約 200〜500MB)";
+    public string Label => "UWP バックグラウンド実行を一括オフ / 復元 (メモリ節約 200〜500MB)";
 
     public string Description =>
-        "ストアアプリ (UWP) が画面を閉じた後もバックグラウンドで動き続ける動作を、全アプリまとめて「常にオフ」に設定します (設定 > プライバシー > バックグラウンドアプリの一括版)。" +
-        "常駐が減ることで 200〜500MB 程度のメモリ節約が見込めます。通知やライブタイル更新が必要なアプリは、OFF に戻すか設定アプリで個別に「常にオン」へ変更してください。";
+        "ON にすると、ストアアプリ (UWP) のバックグラウンド実行を全アプリまとめて「常にオフ」にし、変更前の個別設定を保存します。" +
+        "OFF にすると、Lumin4ti が変更した項目だけを保存済みの個別設定へ戻します (適用後にユーザーが変更した項目は上書きしません)。" +
+        "ON/OFF が適用と復元の対になるため、実行ボタンではなくトグルとして表示しています。常駐が減ることで 200〜500MB 程度のメモリ節約が見込めます。";
 
     public CommandCategory Category => CommandCategory.Performance;
 

@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Globalization;
+using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Principal;
@@ -62,12 +63,15 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
     private const int MaximumEnvironmentCharacters = 32767;
     private const int MaximumResultBytes = 1024 * 1024;
     private const string MicrosoftWindowsCommonName = "Microsoft Windows";
-    private const string ScriptEnvironmentVariable = "LUMIN4TI_SCRIPT_B64";
+    private const string ScriptEnvironmentVariable = "LUMIN4TI_SCRIPT_GZIP_B64";
     private const string ResultEnvironmentVariable = "LUMIN4TI_RESULT_PATH";
 
     private const string PowerShellBootstrap =
-        "& ([ScriptBlock]::Create([Text.Encoding]::Unicode.GetString([Convert]::FromBase64String($env:" +
-        ScriptEnvironmentVariable + ")))";
+        "$b=[Convert]::FromBase64String($env:" + ScriptEnvironmentVariable + ");" +
+        "$m=[IO.MemoryStream]::new($b);" +
+        "$g=[IO.Compression.GZipStream]::new($m,[IO.Compression.CompressionMode]::Decompress);" +
+        "$r=[IO.StreamReader]::new($g,[Text.Encoding]::Unicode);" +
+        "&([ScriptBlock]::Create($r.ReadToEnd()))";
 
     private readonly TimeSpan _timeout;
 
@@ -646,13 +650,29 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
             ["CORECLR_ENABLE_PROFILING"] = "0",
             ["COR_ENABLE_PROFILING"] = "0",
             ["COMPlus_EnableDiagnostics"] = "0",
-            [ScriptEnvironmentVariable] = Convert.ToBase64String(Encoding.Unicode.GetBytes(script)),
+            [ScriptEnvironmentVariable] = EncodeScriptForEnvironment(script),
             [ResultEnvironmentVariable] = resultPath,
         };
 
         AddOptionalSystemFolder(values, "ProgramFiles(x86)", Environment.SpecialFolder.ProgramFilesX86);
         AddOptionalSystemFolder(values, "CommonProgramFiles(x86)", Environment.SpecialFolder.CommonProgramFilesX86);
         return values;
+    }
+
+    internal static string EncodeScriptForEnvironment(string script)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(script);
+        var scriptBytes = Encoding.Unicode.GetBytes(script);
+        using var compressed = new MemoryStream();
+        using (var gzip = new GZipStream(
+                   compressed,
+                   CompressionLevel.SmallestSize,
+                   leaveOpen: true))
+        {
+            gzip.Write(scriptBytes);
+        }
+
+        return Convert.ToBase64String(compressed.ToArray());
     }
 
     private static string GetKnownFolderPath(

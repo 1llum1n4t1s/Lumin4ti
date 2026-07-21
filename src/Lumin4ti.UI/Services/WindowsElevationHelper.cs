@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security.Principal;
 
@@ -13,6 +14,18 @@ namespace Lumin4ti.UI.Services;
 [SupportedOSPlatform("windows")]
 public static class WindowsElevationHelper
 {
+    private const string AppUserModelId = "velopack.Lumin4ti";
+
+    /// <summary>
+    /// Velopack のショートカットと実行プロセスの AUMID を一致させる。
+    /// UAC 自己昇格後もウィンドウ生成前に呼び出し、タスクバーの白紙アイコンを防ぐ。
+    /// </summary>
+    public static void TrySetCurrentProcessAppUserModelId()
+    {
+        try { _ = SetCurrentProcessExplicitAppUserModelID(AppUserModelId); }
+        catch { /* シェル連携の失敗だけで起動を止めない */ }
+    }
+
     public static bool IsRunningAsAdministrator()
     {
         using var identity = WindowsIdentity.GetCurrent();
@@ -53,4 +66,7 @@ public static class WindowsElevationHelper
             return false;
         }
     }
+
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern int SetCurrentProcessExplicitAppUserModelID(string appId);
 }

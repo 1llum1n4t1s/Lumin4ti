@@ -1,5 +1,6 @@
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
+using Lumin4ti.Core.Services;
 using Lumin4ti.Core.Services.Windows.Actions;
 
 namespace Lumin4ti.Tests;
@@ -118,6 +119,7 @@ public sealed class DefenderActionTests
         StringAssert.Contains(script, "ControlledFolderAccessProtectedFolders");
         StringAssert.Contains(script, "AttackSurfaceReductionOnlyExclusions");
         StringAssert.Contains(script, "Get-MpComputerStatus -ErrorAction Stop");
+        StringAssert.Contains(script, "if (-not [bool]$status.AMServiceEnabled)");
         StringAssert.Contains(script, "IsTamperProtected");
         StringAssert.Contains(script, "$after = Get-MpPreference -ErrorAction Stop");
         StringAssert.Contains(script, "$resetAppliedNames = @()");
@@ -131,6 +133,44 @@ public sealed class DefenderActionTests
         Assert.IsFalse(script.Contains("Set-Content", StringComparison.Ordinal));
         Assert.IsFalse(script.Contains("ConfigDefender", StringComparison.Ordinal));
         Assert.IsFalse(script.Contains("SilentlyContinue", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    public void Defender利用状態はサービスとアンチウイルス状態を厳格に読む()
+    {
+        Assert.IsTrue(DefenderResetAction.TryParseAvailability(
+            "診断行\n{\"AMServiceEnabled\":true,\"AntivirusEnabled\":false}",
+            out var passive));
+        Assert.IsTrue(passive.AMServiceEnabled);
+        Assert.IsFalse(passive.AntivirusEnabled, "他社製AVによるパッシブモードは許可対象です");
+
+        Assert.IsFalse(DefenderResetAction.TryParseAvailability(
+            "{\"AMServiceEnabled\":\"true\",\"AntivirusEnabled\":false}", out _));
+        Assert.IsFalse(DefenderResetAction.TryParseAvailability(
+            "{\"AMServiceEnabled\":true}", out _));
+    }
+
+    [TestMethod]
+    public async Task Defenderサービス無効時はバックアップ作成前に中止する()
+    {
+        var executor = new RecordingExecutor(new CommandExecutionResult(
+            true,
+            "powershell.exe",
+            0,
+            "{\"AMServiceEnabled\":false,\"AntivirusEnabled\":false}",
+            string.Empty));
+        var trustedParent = Path.Combine(Path.GetTempPath(), "Lumin4ti.Tests", Guid.NewGuid().ToString("N"));
+        var storage = new ProtectedBackupStorage(
+            Path.Combine(trustedParent, "backups"),
+            trustedParent);
+        var action = new DefenderResetAction(executor, storage);
+
+        var result = await action.ExecuteAsync();
+
+        Assert.IsFalse(result.Success);
+        StringAssert.Contains(result.Detail, "サービスが無効");
+        Assert.AreEqual(1, executor.Calls.Count);
+        Assert.IsFalse(Directory.Exists(trustedParent), "利用不可ならバックアップ用ディレクトリも作成しません");
     }
 
     [TestMethod]
@@ -163,8 +203,26 @@ public sealed class DefenderActionTests
         StringAssert.Contains(script, "$package = @(Get-AppxPackage -Name Microsoft.SecHealthUI -ErrorAction Stop)");
         StringAssert.Contains(script, "if ($package.Count -eq 0)");
         StringAssert.Contains(script, "$package | Reset-AppxPackage -ErrorAction Stop");
+        StringAssert.Contains(script, "$ProgressPreference = 'SilentlyContinue'");
+        StringAssert.Contains(script, "$packageFamilyName = $package[0].PackageFamilyName");
+        StringAssert.Contains(script, "[DateTime]::UtcNow.AddSeconds(30)");
         StringAssert.Contains(script, "$after = @(Get-AppxPackage -Name Microsoft.SecHealthUI -ErrorAction Stop)");
-        StringAssert.Contains(script, "if ($after.Count -eq 0)");
+        StringAssert.Contains(script, "if ($matchingAfter.Count -eq 0)");
+    }
+
+    [TestMethod]
+    public void Windowsセキュリティリセットの失敗表示からCLIXML進捗を除外する()
+    {
+        var result = new CommandExecutionResult(
+            false,
+            "powershell.exe",
+            1,
+            string.Empty,
+            "#< CLIXML\n再登録を確認できませんでした。\n<Objs Version=\"1.1.0.1\"><Obj><T>System.Management.Automation.ProgressRecord</T></Obj></Objs>");
+
+        Assert.AreEqual(
+            "再登録を確認できませんでした。",
+            SecurityAppResetAction.DescribeFailure(result));
     }
 
     private static CommandExecutionResult Success() =>

@@ -10,6 +10,8 @@ internal static class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        Services.WindowsElevationHelper.TrySetCurrentProcessAppUserModelId();
+
         // Velopack のブートストラップを最初に走らせる
         // (--veloapp-install / --veloapp-updated 等の internal hook を捌くため、Avalonia 起動・多重起動ガードより前に必須)
         var velopackApp = VelopackApp.Build();

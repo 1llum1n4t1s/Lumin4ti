@@ -1,5 +1,7 @@
+using System.IO.Compression;
 using System.Text;
 using Lumin4ti.Core.Services;
+using Lumin4ti.Core.Services.Windows.Actions;
 
 namespace Lumin4ti.Tests;
 
@@ -56,8 +58,25 @@ public sealed class UnelevatedCommandExecutorTests
 
         var encoded = commandLine[(commandLine.LastIndexOf(' ') + 1)..];
         var bootstrap = Encoding.Unicode.GetString(Convert.FromBase64String(encoded));
-        StringAssert.Contains(bootstrap, "$env:LUMIN4TI_SCRIPT_B64");
+        StringAssert.Contains(bootstrap, "$env:LUMIN4TI_SCRIPT_GZIP_B64");
+        StringAssert.Contains(bootstrap, "GZipStream");
         StringAssert.Contains(bootstrap, "ScriptBlock");
+    }
+
+    [TestMethod]
+    public void 長いクイックアクセスscriptは環境ブロック上限内へ圧縮できる()
+    {
+        var encoded = UnelevatedCommandExecutor.EncodeScriptForEnvironment(
+            QuickAccessSortAction.PowerShellScript);
+        var environmentBlock = UnelevatedCommandExecutor.BuildEnvironmentBlock(
+            new Dictionary<string, string>
+            {
+                ["LUMIN4TI_SCRIPT_GZIP_B64"] = encoded,
+                ["LUMIN4TI_RESULT_PATH"] = @"C:\Users\test\result.json",
+            });
+
+        Assert.IsTrue(environmentBlock.Length < 32767, environmentBlock.Length.ToString());
+        Assert.AreEqual(QuickAccessSortAction.PowerShellScript, DecodeScript(encoded));
     }
 
     [TestMethod]
@@ -82,5 +101,13 @@ public sealed class UnelevatedCommandExecutorTests
         Assert.Throws<ArgumentException>(() =>
             UnelevatedCommandExecutor.BuildEnvironmentBlock(
                 new Dictionary<string, string> { ["SAFE"] = "x\0EVIL=y" }));
+    }
+
+    private static string DecodeScript(string encoded)
+    {
+        using var compressed = new MemoryStream(Convert.FromBase64String(encoded));
+        using var gzip = new GZipStream(compressed, CompressionMode.Decompress);
+        using var reader = new StreamReader(gzip, Encoding.Unicode);
+        return reader.ReadToEnd();
     }
 }

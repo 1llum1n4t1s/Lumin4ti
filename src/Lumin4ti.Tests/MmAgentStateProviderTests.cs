@@ -183,13 +183,23 @@ public sealed class MmAgentStateProviderTests
     }
 
     [TestMethod]
-    public void Windows11_25H2クライアントの未対応機能だけを判定する()
+    [DataRow("OperationAPI")]
+    [DataRow("ApplicationLaunchPrefetching")]
+    public async Task Windowsビルドで先回りせず実コマンドから状態を取得する(string propertyName)
     {
-        Assert.IsTrue(MmAgentFeatureSupport.IsKnownUnsupported("OperationAPI", 26200, "Client"));
-        Assert.IsTrue(MmAgentFeatureSupport.IsKnownUnsupported("ApplicationLaunchPrefetching", 26200, "client"));
-        Assert.IsFalse(MmAgentFeatureSupport.IsKnownUnsupported("MemoryCompression", 26200, "Client"));
-        Assert.IsFalse(MmAgentFeatureSupport.IsKnownUnsupported("OperationAPI", 26100, "Client"));
-        Assert.IsFalse(MmAgentFeatureSupport.IsKnownUnsupported("OperationAPI", 26200, "Server"));
+        var executor = new SequenceExecutor(
+            Result(success: true, output: $"{{\"{propertyName}\":true}}"));
+        var provider = new MmAgentStateProvider(executor);
+        var toggle = new MmAgentFeatureToggle(
+            executor,
+            provider,
+            propertyName,
+            "test-mmagent",
+            propertyName,
+            "テスト用の説明です。");
+
+        Assert.AreEqual(true, await toggle.GetStateAsync());
+        Assert.AreEqual(1, executor.CallCount);
     }
 
     [TestMethod]

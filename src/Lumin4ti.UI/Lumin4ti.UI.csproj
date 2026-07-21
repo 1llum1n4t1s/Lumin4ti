@@ -18,7 +18,7 @@
     <!-- Velopack 本体は Program.cs / UpdateService が直接使うため、VelopackUpdateDialog 経由の
          transitive 参照に頼らず直接参照する (バージョンは両者で 1.2.0 に一致)。 -->
     <PackageReference Include="Velopack" Version="1.2.0" />
-    <PackageReference Include="VelopackUpdateDialog.Avalonia" Version="1.0.10" />
+    <PackageReference Include="VelopackUpdateDialog.Avalonia" Version="1.0.11" />
   </ItemGroup>
 
   <ItemGroup>
