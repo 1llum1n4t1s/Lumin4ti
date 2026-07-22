@@ -58,6 +58,11 @@ internal static class Program
             return Services.WindowsElevationHelper.TryRelaunchElevated(args) ? 0 : 1;
         }
 
+        if (OperatingSystem.IsWindows())
+        {
+            WindowsLegacyStartMenuShortcutMigrator.RepairInstalledShortcutMetadata();
+        }
+
         using var singleInstance = new SingleInstanceGuard("Lumin4ti");
         if (!singleInstance.TryAcquire())
         {

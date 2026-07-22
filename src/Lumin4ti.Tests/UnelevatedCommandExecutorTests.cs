@@ -108,6 +108,57 @@ public sealed class UnelevatedCommandExecutorTests
     }
 
     [TestMethod]
+    public void ExplorerBroker引数は固定launcherだけをFileで渡す()
+    {
+        var arguments = UnelevatedCommandExecutor.BuildExplorerBrokerArguments(
+            @"C:\Users\test\AppData\Local\Lumin4ti\medium-launchers\operation-0123.ps1");
+
+        Assert.AreEqual(
+            "-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass " +
+            "-WindowStyle Hidden -File \"C:\\Users\\test\\AppData\\Local\\Lumin4ti\\medium-launchers\\operation-0123.ps1\"",
+            arguments);
+        Assert.IsFalse(arguments.Contains("Shell.Application", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    public void ExplorerBrokerLauncherはscriptを圧縮して安全な環境変数へ渡す()
+    {
+        const string script = "Write-Output 'safe'";
+        var launcher = UnelevatedCommandExecutor.BuildExplorerBrokerLauncherScript(
+            script,
+            @"C:\Users\O'Brien\result.json",
+            @"C:\Users\O'Brien\process.pid");
+
+        StringAssert.Contains(launcher, "$env:LUMIN4TI_RESULT_PATH='C:\\Users\\O''Brien\\result.json'");
+        StringAssert.Contains(launcher, "WriteAllText('C:\\Users\\O''Brien\\process.pid'");
+        Assert.IsFalse(launcher.Contains(script, StringComparison.Ordinal));
+
+        const string prefix = "$env:LUMIN4TI_SCRIPT_GZIP_B64='";
+        var payloadStart = launcher.IndexOf(prefix, StringComparison.Ordinal) + prefix.Length;
+        var payloadEnd = launcher.IndexOf("'\r\n", payloadStart, StringComparison.Ordinal);
+        Assert.IsTrue(payloadStart >= prefix.Length);
+        Assert.IsTrue(payloadEnd > payloadStart);
+        Assert.AreEqual(script, DecodeScript(launcher[payloadStart..payloadEnd]));
+    }
+
+    [TestMethod]
+    public void ExplorerBroker引数はquoteを含むlauncherPathを拒否する()
+    {
+        Assert.Throws<ArgumentException>(() =>
+            UnelevatedCommandExecutor.BuildExplorerBrokerArguments(
+                "C:\\Users\\test\\bad\"name.ps1"));
+    }
+
+    [TestMethod]
+    public void Mediumプロセス起動失敗は両APIのWin32番号を示す()
+    {
+        var message = UnelevatedCommandExecutor.BuildProcessLaunchFailureMessage(1314, 5);
+
+        StringAssert.Contains(message, "CreateProcessWithTokenW=Win32 1314");
+        StringAssert.Contains(message, "CreateProcessAsUserW=Win32 5");
+    }
+
+    [TestMethod]
     public void 環境ブロックは安定順序で二重null終端になる()
     {
         var block = UnelevatedCommandExecutor.BuildEnvironmentBlock(

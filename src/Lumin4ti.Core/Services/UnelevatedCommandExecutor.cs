@@ -40,7 +40,12 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
     private static readonly Guid FolderIdProfile = new("5E6C858F-0E22-4760-9AFE-EA3317B67173");
     private static readonly Guid FolderIdRoamingAppData = new("3EB685DB-65F9-4CF6-A03A-E3EF65729F3D");
     private static readonly Guid FolderIdLocalAppData = new("F1B32785-6FBA-4FCF-9D55-7B8E7F157091");
+    private static readonly Guid ClsidShellWindows = new("9BA05972-F6A8-11CF-A442-00A0C90A8F39");
+    private static readonly Guid IidDispatch = new("00020400-0000-0000-C000-000000000046");
+    private static readonly TimeSpan ExplorerBrokerStartupTimeout = TimeSpan.FromSeconds(10);
 
+    private const uint ProcessTerminate = 0x00000001;
+    private const uint ProcessSetQuota = 0x00000100;
     private const uint ProcessQueryLimitedInformation = 0x00001000;
     private const uint Synchronize = 0x00100000;
     private const uint ShellProcessAccessMask = ProcessQueryLimitedInformation | Synchronize;
@@ -61,6 +66,13 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
     private const uint WaitFailed = 0xFFFFFFFF;
     private const uint ProcessPollMilliseconds = 250;
     private const uint TerminationWaitMilliseconds = 5000;
+    private const uint ExplorerBrokerPollMilliseconds = 50;
+    private const uint ClassContextLocalServer = 0x00000004;
+    private const uint CoInitApartmentThreaded = 0x00000002;
+    private const uint CoInitDisableOle1Dde = 0x00000004;
+    private const int RpcEChangedMode = unchecked((int)0x80010106);
+    private const int ShellWindowDesktop = 8;
+    private const int ShellWindowNeedDispatch = 1;
     private const int MaximumCommandLineCharacters = 1024;
     private const int MaximumEnvironmentCharacters = 32767;
     private const int MaximumResultBytes = 1024 * 1024;
@@ -184,47 +196,35 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
         using (shellToken)
         {
             EnsureAllowedToken(shellToken);
+            using var primaryToken = DuplicatePrimaryToken(shellToken, "対話中 Explorer");
+            EnsureAllowedToken(primaryToken);
+            var folders = new ShellKnownFolders(
+                GetKnownFolderPath(FolderIdProfile, primaryToken, "ユーザープロファイル"),
+                GetKnownFolderPath(FolderIdRoamingAppData, primaryToken, "AppData"),
+                GetKnownFolderPath(FolderIdLocalAppData, primaryToken, "LocalAppData"));
+            var resultPath = BuildResultPath(
+                folders.LocalAppData,
+                Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture));
 
-            const uint duplicatedTokenAccess =
-                TokenAssignPrimary | TokenDuplicate | TokenImpersonate | TokenQuery;
-            if (!DuplicateTokenEx(
-                    shellToken,
-                    duplicatedTokenAccess,
-                    nint.Zero,
-                    SecurityImpersonation,
-                    TokenPrimary,
-                    out var primaryToken))
+            try
             {
-                throw NewWin32Exception("対話中 Explorer の primary token を複製できませんでした");
-            }
+                var environment = CreateSafeEnvironmentValues(
+                    windowsDirectory,
+                    systemDirectory,
+                    programData,
+                    programFiles,
+                    commonProgramFiles,
+                    folders,
+                    script,
+                    resultPath);
+                var environmentBlock = BuildEnvironmentBlock(environment);
+                var commandLine = BuildPowerShellCommandLine(powerShellPath);
 
-            using (primaryToken)
-            {
-                EnsureAllowedToken(primaryToken);
-                var folders = new ShellKnownFolders(
-                    GetKnownFolderPath(FolderIdProfile, primaryToken, "ユーザープロファイル"),
-                    GetKnownFolderPath(FolderIdRoamingAppData, primaryToken, "AppData"),
-                    GetKnownFolderPath(FolderIdLocalAppData, primaryToken, "LocalAppData"));
-                var resultPath = BuildResultPath(
-                    folders.LocalAppData,
-                    Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture));
-
+                EnsureShellStillCurrent(shellProcessId, shellProcess);
+                ProcessWaitResult processResult;
                 try
                 {
-                    var environment = CreateSafeEnvironmentValues(
-                        windowsDirectory,
-                        systemDirectory,
-                        programData,
-                        programFiles,
-                        commonProgramFiles,
-                        folders,
-                        script,
-                        resultPath);
-                    var environmentBlock = BuildEnvironmentBlock(environment);
-                    var commandLine = BuildPowerShellCommandLine(powerShellPath);
-
-                    EnsureShellStillCurrent(shellProcessId, shellProcess);
-                    var processResult = await StartAndWaitAsync(
+                    processResult = await StartAndWaitAsync(
                         primaryToken,
                         powerShellPath,
                         commandLine,
@@ -232,41 +232,66 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
                         systemDirectory,
                         timeout,
                         ct).ConfigureAwait(false);
-
-                    string? resultJson = null;
-                    string? resultReadError = null;
+                }
+                catch (MediumProcessLaunchException tokenLaunchException)
+                {
                     try
                     {
-                        resultJson = WindowsIdentity.RunImpersonated(
-                            primaryToken,
-                            () => ReadResultFile(resultPath));
+                        processResult = await StartWithExplorerBrokerAsync(
+                            shellToken,
+                            shellProcessId,
+                            shellSessionId,
+                            shellProcess,
+                            powerShellPath,
+                            systemDirectory,
+                            folders.LocalAppData,
+                            script,
+                            resultPath,
+                            timeout,
+                            ct).ConfigureAwait(false);
                     }
-                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or DecoderFallbackException)
+                    catch (Exception brokerException) when (brokerException is not OperationCanceledException)
                     {
-                        resultReadError = ex.Message;
+                        throw new InvalidOperationException(
+                            $"{tokenLaunchException.Message}; " +
+                            $"Explorer broker での medium process 起動にも失敗しました: {brokerException.Message}",
+                            brokerException);
                     }
-
-                    if (processResult.TimedOut)
-                    {
-                        return new(
-                            false,
-                            processResult.ExitCode,
-                            resultJson,
-                            $"非昇格操作が {timeout.TotalMinutes:0.#} 分でタイムアウトしました");
-                    }
-
-                    var success = processResult.ExitCode == 0 && resultJson is not null;
-                    var error = success
-                        ? string.Empty
-                        : resultReadError is not null
-                            ? $"medium process の結果を読み取れませんでした: {resultReadError}"
-                            : $"medium process が失敗しました (exit={processResult.ExitCode})";
-                    return new(success, processResult.ExitCode, resultJson, error);
                 }
-                finally
+
+                string? resultJson = null;
+                string? resultReadError = null;
+                try
                 {
-                    TryDeleteResultFile(primaryToken, resultPath);
+                    resultJson = WindowsIdentity.RunImpersonated(
+                        primaryToken,
+                        () => ReadResultFile(resultPath));
                 }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or DecoderFallbackException)
+                {
+                    resultReadError = ex.Message;
+                }
+
+                if (processResult.TimedOut)
+                {
+                    return new(
+                        false,
+                        processResult.ExitCode,
+                        resultJson,
+                        $"非昇格操作が {timeout.TotalMinutes:0.#} 分でタイムアウトしました");
+                }
+
+                var success = processResult.ExitCode == 0 && resultJson is not null;
+                var error = success
+                    ? string.Empty
+                    : resultReadError is not null
+                        ? $"medium process の結果を読み取れませんでした: {resultReadError}"
+                        : $"medium process が失敗しました (exit={processResult.ExitCode})";
+                return new(success, processResult.ExitCode, resultJson, error);
+            }
+            finally
+            {
+                TryDeleteResultFile(primaryToken, resultPath);
             }
         }
     }
@@ -285,25 +310,12 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
         try
         {
             Marshal.Copy(environmentBytes, 0, environmentPointer, environmentBytes.Length);
-            var startupInfo = new StartupInfo
-            {
-                Size = (uint)Marshal.SizeOf<StartupInfo>(),
-                Desktop = @"winsta0\default",
-            };
-            var mutableCommandLine = new StringBuilder(commandLine, commandLine.Length + 1);
-            if (!CreateProcessWithTokenW(
-                    primaryToken,
-                    0,
-                    applicationPath,
-                    mutableCommandLine,
-                    CreateUnicodeEnvironment | CreateNoWindow,
-                    environmentPointer,
-                    workingDirectory,
-                    ref startupInfo,
-                    out var processInformation))
-            {
-                throw NewWin32Exception("medium token で Windows PowerShell を起動できませんでした");
-            }
+            var processInformation = CreateMediumProcess(
+                primaryToken,
+                applicationPath,
+                commandLine,
+                environmentPointer,
+                workingDirectory);
 
             using var processHandle = new SafeKernelHandle(processInformation.ProcessHandle, ownsHandle: true);
             using var threadHandle = new SafeKernelHandle(processInformation.ThreadHandle, ownsHandle: true);
@@ -341,7 +353,7 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
                             continue;
                         }
 
-                        // CreateProcessWithTokenW が返した full-access handle で停止する。
+                        // process creation API が返した full-access handle で停止する。
                         // 失敗しても既に終了した可能性を考慮して、有限時間だけ終了を再確認する。
                         _ = TerminateProcess(processHandle, 1);
                         var terminationWait = WaitForSingleObject(
@@ -376,6 +388,229 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
         {
             Marshal.FreeHGlobal(environmentPointer);
         }
+    }
+
+    private static async Task<ProcessWaitResult> StartWithExplorerBrokerAsync(
+        SafeAccessTokenHandle shellToken,
+        uint shellProcessId,
+        uint shellSessionId,
+        SafeKernelHandle shellProcess,
+        string applicationPath,
+        string workingDirectory,
+        string localAppData,
+        string script,
+        string resultPath,
+        TimeSpan timeout,
+        CancellationToken ct)
+    {
+        ct.ThrowIfCancellationRequested();
+        var nonce = Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture);
+        var brokerFiles = BuildExplorerBrokerPaths(localAppData, nonce);
+        var launcherScript = BuildExplorerBrokerLauncherScript(
+            script,
+            resultPath,
+            brokerFiles.ProcessIdPath);
+
+        SafeKernelHandle? launchedProcess = null;
+        try
+        {
+            WindowsIdentity.RunImpersonated(
+                shellToken,
+                () =>
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(brokerFiles.LauncherPath)!);
+                    File.WriteAllText(brokerFiles.LauncherPath, launcherScript, StrictUtf8);
+                });
+
+            ct.ThrowIfCancellationRequested();
+            EnsureShellStillCurrent(shellProcessId, shellProcess);
+            ExecuteInExplorerProcess(
+                shellProcessId,
+                applicationPath,
+                BuildExplorerBrokerArguments(brokerFiles.LauncherPath),
+                workingDirectory);
+
+            var startedAt = DateTime.UtcNow;
+            var deadline = timeout == Timeout.InfiniteTimeSpan
+                ? (DateTime?)null
+                : startedAt + timeout;
+            var startupDeadline = startedAt + ExplorerBrokerStartupTimeout;
+
+            while (true)
+            {
+                launchedProcess ??= TryOpenExplorerBrokerProcess(
+                    shellToken,
+                    shellSessionId,
+                    applicationPath,
+                    brokerFiles.ProcessIdPath);
+
+                if (UserFileExists(shellToken, resultPath))
+                {
+                    if (launchedProcess is null)
+                    {
+                        return new(0, false);
+                    }
+
+                    var finalWait = WaitForSingleObject(launchedProcess, TerminationWaitMilliseconds);
+                    if (finalWait == WaitObject0)
+                    {
+                        return new(GetProcessExitCode(launchedProcess), false);
+                    }
+
+                    if (finalWait == WaitFailed)
+                    {
+                        throw NewWin32Exception("Explorer broker が起動した process の終了待機に失敗しました");
+                    }
+
+                    return new(0, false);
+                }
+
+                if (launchedProcess is not null)
+                {
+                    var waitResult = WaitForSingleObject(launchedProcess, 0);
+                    if (waitResult == WaitObject0)
+                    {
+                        return new(GetProcessExitCode(launchedProcess), false);
+                    }
+
+                    if (waitResult == WaitFailed)
+                    {
+                        throw NewWin32Exception("Explorer broker が起動した process の待機に失敗しました");
+                    }
+                }
+
+                if (deadline is { } timeoutAt && DateTime.UtcNow >= timeoutAt)
+                {
+                    TerminateBrokerProcess(launchedProcess);
+                    return new(-1, true);
+                }
+
+                if (launchedProcess is null && DateTime.UtcNow >= startupDeadline)
+                {
+                    throw new InvalidOperationException(
+                        "Explorer broker は Windows PowerShell の起動確認を返しませんでした");
+                }
+
+                if (ct.IsCancellationRequested)
+                {
+                    TerminateBrokerProcess(launchedProcess);
+                    ct.ThrowIfCancellationRequested();
+                }
+
+                await Task.Delay((int)ExplorerBrokerPollMilliseconds, CancellationToken.None)
+                    .ConfigureAwait(false);
+            }
+        }
+        finally
+        {
+            launchedProcess?.Dispose();
+            TryDeleteResultFile(shellToken, brokerFiles.ProcessIdPath);
+            TryDeleteResultFile(shellToken, brokerFiles.LauncherPath);
+        }
+    }
+
+    private static SafeKernelHandle? TryOpenExplorerBrokerProcess(
+        SafeAccessTokenHandle shellToken,
+        uint shellSessionId,
+        string expectedApplicationPath,
+        string processIdPath)
+    {
+        var processIdText = WindowsIdentity.RunImpersonated(
+            shellToken,
+            () => File.Exists(processIdPath) ? File.ReadAllText(processIdPath, StrictUtf8) : null);
+        if (processIdText is null)
+        {
+            return null;
+        }
+
+        if (processIdText.Length is 0 or > 16 ||
+            !uint.TryParse(processIdText, NumberStyles.None, CultureInfo.InvariantCulture, out var processId) ||
+            processId == 0)
+        {
+            // WriteAllText の作成直後を観測した場合は一時的に空または途中のため、次の poll で再読する。
+            return null;
+        }
+
+        const uint jobCompatibleAccess =
+            ProcessTerminate | ProcessSetQuota | ProcessQueryLimitedInformation | Synchronize;
+        var process = OpenProcess(jobCompatibleAccess, inheritHandle: false, processId);
+        if (process.IsInvalid)
+        {
+            process.Dispose();
+            const uint minimumAccess = ProcessTerminate | ProcessQueryLimitedInformation | Synchronize;
+            process = OpenProcess(minimumAccess, inheritHandle: false, processId);
+        }
+
+        if (process.IsInvalid)
+        {
+            process.Dispose();
+            return null;
+        }
+
+        try
+        {
+            var actualApplicationPath = QueryProcessPath(process);
+            if (!Path.GetFullPath(actualApplicationPath)
+                    .Equals(Path.GetFullPath(expectedApplicationPath), StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    "Explorer broker が想定外の実行ファイルを起動したため停止しました");
+            }
+
+            if (!ProcessIdToSessionId(processId, out var processSessionId) ||
+                processSessionId != shellSessionId)
+            {
+                throw new InvalidOperationException(
+                    "Explorer broker が対話セッション外へ process を起動したため停止しました");
+            }
+
+            if (!OpenProcessToken(process, TokenQuery, out var processToken))
+            {
+                throw NewWin32Exception("Explorer broker が起動した process の token を開けませんでした");
+            }
+
+            using (processToken)
+            {
+                EnsureAllowedToken(processToken);
+                if (!TokensRepresentSameUser(shellToken, processToken))
+                {
+                    throw new InvalidOperationException(
+                        "Explorer broker が別ユーザーの process を起動したため停止しました");
+                }
+            }
+
+            ProcessJobTracker.Track(process.DangerousGetHandle());
+            return process;
+        }
+        catch
+        {
+            process.Dispose();
+            throw;
+        }
+    }
+
+    private static bool UserFileExists(SafeAccessTokenHandle token, string path) =>
+        WindowsIdentity.RunImpersonated(token, () => File.Exists(path));
+
+    private static int GetProcessExitCode(SafeKernelHandle process)
+    {
+        if (!GetExitCodeProcess(process, out var exitCode))
+        {
+            throw NewWin32Exception("Explorer broker が起動した process の終了コードを取得できませんでした");
+        }
+
+        return unchecked((int)exitCode);
+    }
+
+    private static void TerminateBrokerProcess(SafeKernelHandle? process)
+    {
+        if (process is null || process.IsInvalid || process.IsClosed)
+        {
+            return;
+        }
+
+        _ = TerminateProcess(process, 1);
+        _ = WaitForSingleObject(process, TerminationWaitMilliseconds);
     }
 
     private static void EnsureShellStillCurrent(
@@ -414,6 +649,37 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
         {
             throw new InvalidOperationException("対話中 Explorer の token が AppContainer のため使用できません");
         }
+    }
+
+    private static SafeAccessTokenHandle DuplicatePrimaryToken(
+        SafeAccessTokenHandle token,
+        string tokenDescription)
+    {
+        const uint duplicatedTokenAccess =
+            TokenAssignPrimary | TokenDuplicate | TokenImpersonate | TokenQuery;
+        if (!DuplicateTokenEx(
+                token,
+                duplicatedTokenAccess,
+                nint.Zero,
+                SecurityImpersonation,
+                TokenPrimary,
+                out var primaryToken))
+        {
+            throw NewWin32Exception($"{tokenDescription} の primary token を複製できませんでした");
+        }
+
+        return primaryToken;
+    }
+
+    private static bool TokensRepresentSameUser(
+        SafeAccessTokenHandle left,
+        SafeAccessTokenHandle right)
+    {
+        using var leftIdentity = new WindowsIdentity(left.DangerousGetHandle());
+        using var rightIdentity = new WindowsIdentity(right.DangerousGetHandle());
+        return leftIdentity.User is { } leftUser &&
+               rightIdentity.User is { } rightUser &&
+               leftUser.Equals(rightUser);
     }
 
     private static uint GetTokenIntegrityRid(SafeAccessTokenHandle token)
@@ -558,6 +824,72 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
 
         return resultPath;
     }
+
+    private static ExplorerBrokerPaths BuildExplorerBrokerPaths(string localAppData, string nonce)
+    {
+        if (string.IsNullOrWhiteSpace(localAppData) ||
+            !Path.IsPathFullyQualified(localAppData) ||
+            nonce.Length != 32 ||
+            !nonce.All(Uri.IsHexDigit))
+        {
+            throw new ArgumentException("Explorer broker の基準パスまたは nonce が不正です");
+        }
+
+        var root = Path.TrimEndingDirectorySeparator(Path.GetFullPath(localAppData));
+        var launcherDirectory = Path.GetFullPath(Path.Combine(root, "Lumin4ti", "medium-launchers"));
+        var launcherPath = Path.GetFullPath(
+            Path.Combine(launcherDirectory, $"operation-{nonce}.ps1"));
+        var processIdPath = Path.GetFullPath(
+            Path.Combine(launcherDirectory, $"operation-{nonce}.pid"));
+        if (!IsPathInside(launcherPath, root) || !IsPathInside(processIdPath, root))
+        {
+            throw new ArgumentException("Explorer broker の一時ファイルが LocalAppData の外を指しています");
+        }
+
+        return new(launcherPath, processIdPath);
+    }
+
+    internal static string BuildExplorerBrokerLauncherScript(
+        string script,
+        string resultPath,
+        string processIdPath)
+    {
+        if (string.IsNullOrWhiteSpace(script) ||
+            !Path.IsPathFullyQualified(resultPath) ||
+            !Path.IsPathFullyQualified(processIdPath))
+        {
+            throw new ArgumentException("Explorer broker の script または出力パスが不正です");
+        }
+
+        var encodedScript = EncodeScriptForEnvironment(script);
+        var escapedResultPath = EscapePowerShellSingleQuotedString(resultPath);
+        var escapedProcessIdPath = EscapePowerShellSingleQuotedString(processIdPath);
+        return
+            "$ErrorActionPreference='Stop'\r\n" +
+            $"[IO.File]::WriteAllText('{escapedProcessIdPath}',[string]$PID,[Text.UTF8Encoding]::new($false))\r\n" +
+            $"$env:{ScriptEnvironmentVariable}='{encodedScript}'\r\n" +
+            $"$env:{ResultEnvironmentVariable}='{escapedResultPath}'\r\n" +
+            PowerShellBootstrap;
+    }
+
+    internal static string BuildExplorerBrokerArguments(string launcherPath)
+    {
+        if (string.IsNullOrWhiteSpace(launcherPath) ||
+            !Path.IsPathFullyQualified(launcherPath) ||
+            launcherPath.Contains('"') ||
+            launcherPath.Contains('\r') ||
+            launcherPath.Contains('\n'))
+        {
+            throw new ArgumentException("Explorer broker の launcher path が不正です", nameof(launcherPath));
+        }
+
+        return
+            $"-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass " +
+            $"-WindowStyle Hidden -File \"{launcherPath}\"";
+    }
+
+    private static string EscapePowerShellSingleQuotedString(string value) =>
+        value.Replace("'", "''", StringComparison.Ordinal);
 
     internal static string BuildPowerShellCommandLine(string powerShellPath)
     {
@@ -795,12 +1127,201 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
             StringComparison.OrdinalIgnoreCase);
 
     private static Win32Exception NewWin32Exception(string message) =>
-        new(Marshal.GetLastWin32Error(), message);
+        CreateWin32Exception(Marshal.GetLastWin32Error(), message);
+
+    private static Win32Exception CreateWin32Exception(int errorCode, string message) =>
+        new(errorCode, $"{message} (Win32 {errorCode}: {new Win32Exception(errorCode).Message})");
+
+    private static void ExecuteInExplorerProcess(
+        uint expectedShellProcessId,
+        string applicationPath,
+        string arguments,
+        string workingDirectory)
+    {
+        var initializeResult = CoInitializeEx(
+            nint.Zero,
+            CoInitApartmentThreaded | CoInitDisableOle1Dde);
+        var uninitialize = initializeResult >= 0;
+        if (initializeResult < 0 && initializeResult != RpcEChangedMode)
+        {
+            Marshal.ThrowExceptionForHR(initializeResult);
+        }
+
+        nint dispatchPointer = nint.Zero;
+        object? shellWindows = null;
+        object? desktopWindow = null;
+        object? document = null;
+        object? shellApplication = null;
+        try
+        {
+            var classId = ClsidShellWindows;
+            var interfaceId = IidDispatch;
+            var createResult = CoCreateInstance(
+                ref classId,
+                nint.Zero,
+                ClassContextLocalServer,
+                ref interfaceId,
+                out dispatchPointer);
+            Marshal.ThrowExceptionForHR(createResult);
+
+            shellWindows = Marshal.GetObjectForIUnknown(dispatchPointer);
+            _ = Marshal.Release(dispatchPointer);
+            dispatchPointer = nint.Zero;
+
+            object location = null!;
+            object root = null!;
+            var desktopWindowHandle = 0;
+            dynamic shellWindowsDispatch = shellWindows;
+            desktopWindow = shellWindowsDispatch.FindWindowSW(
+                ref location,
+                ref root,
+                ShellWindowDesktop,
+                ref desktopWindowHandle,
+                ShellWindowNeedDispatch);
+            if (desktopWindow is null || desktopWindowHandle == 0 ||
+                GetWindowThreadProcessId((nint)desktopWindowHandle, out var desktopProcessId) == 0 ||
+                desktopProcessId != expectedShellProcessId)
+            {
+                throw new InvalidOperationException(
+                    "Explorer broker のデスクトップ window を検証できませんでした");
+            }
+
+            dynamic desktopDispatch = desktopWindow;
+            document = desktopDispatch.Document;
+            if (document is null)
+            {
+                throw new InvalidOperationException("Explorer broker の document を取得できませんでした");
+            }
+
+            dynamic documentDispatch = document;
+            shellApplication = documentDispatch.Application;
+            if (shellApplication is null)
+            {
+                throw new InvalidOperationException("Explorer broker の Shell application を取得できませんでした");
+            }
+
+            dynamic applicationDispatch = shellApplication;
+            applicationDispatch.ShellExecute(
+                applicationPath,
+                arguments,
+                workingDirectory,
+                "open",
+                0);
+        }
+        finally
+        {
+            if (dispatchPointer != nint.Zero)
+            {
+                _ = Marshal.Release(dispatchPointer);
+            }
+
+            ReleaseComObject(shellApplication);
+            if (!ReferenceEquals(document, shellApplication))
+            {
+                ReleaseComObject(document);
+            }
+
+            if (!ReferenceEquals(desktopWindow, document) &&
+                !ReferenceEquals(desktopWindow, shellApplication))
+            {
+                ReleaseComObject(desktopWindow);
+            }
+
+            if (!ReferenceEquals(shellWindows, desktopWindow) &&
+                !ReferenceEquals(shellWindows, document) &&
+                !ReferenceEquals(shellWindows, shellApplication))
+            {
+                ReleaseComObject(shellWindows);
+            }
+
+            if (uninitialize)
+            {
+                CoUninitialize();
+            }
+        }
+    }
+
+    private static void ReleaseComObject(object? value)
+    {
+        if (value is not null && Marshal.IsComObject(value))
+        {
+            _ = Marshal.ReleaseComObject(value);
+        }
+    }
+
+    private static ProcessInformation CreateMediumProcess(
+        SafeAccessTokenHandle primaryToken,
+        string applicationPath,
+        string commandLine,
+        nint environment,
+        string workingDirectory)
+    {
+        var creationFlags = CreateUnicodeEnvironment | CreateNoWindow;
+        var startupInfo = new StartupInfo
+        {
+            Size = (uint)Marshal.SizeOf<StartupInfo>(),
+        };
+        var withTokenCommandLine = new StringBuilder(commandLine, commandLine.Length + 1);
+        if (CreateProcessWithTokenW(
+                primaryToken,
+                0,
+                applicationPath,
+                withTokenCommandLine,
+                creationFlags,
+                environment,
+                workingDirectory,
+                ref startupInfo,
+                out var processInformation))
+        {
+            return processInformation;
+        }
+
+        var withTokenError = Marshal.GetLastWin32Error();
+        var fallbackStartupInfo = new StartupInfo
+        {
+            Size = (uint)Marshal.SizeOf<StartupInfo>(),
+        };
+        var asUserCommandLine = new StringBuilder(commandLine, commandLine.Length + 1);
+        if (CreateProcessAsUserW(
+                primaryToken,
+                applicationPath,
+                asUserCommandLine,
+                nint.Zero,
+                nint.Zero,
+                inheritHandles: false,
+                creationFlags,
+                environment,
+                workingDirectory,
+                ref fallbackStartupInfo,
+                out processInformation))
+        {
+            return processInformation;
+        }
+
+        var asUserError = Marshal.GetLastWin32Error();
+        throw new MediumProcessLaunchException(
+            asUserError,
+            BuildProcessLaunchFailureMessage(withTokenError, asUserError));
+    }
+
+    internal static string BuildProcessLaunchFailureMessage(int withTokenError, int asUserError) =>
+        "medium token で Windows PowerShell を起動できませんでした: " +
+        $"CreateProcessWithTokenW=Win32 {withTokenError} ({new Win32Exception(withTokenError).Message}); " +
+        $"CreateProcessAsUserW=Win32 {asUserError} ({new Win32Exception(asUserError).Message})";
 
     private sealed record ShellKnownFolders(
         string UserProfile,
         string RoamingAppData,
         string LocalAppData);
+
+    private sealed record ExplorerBrokerPaths(
+        string LauncherPath,
+        string ProcessIdPath);
+
+    private sealed class MediumProcessLaunchException(int errorCode, string message)
+        : Win32Exception(
+            errorCode,
+            $"{message} (Win32 {errorCode}: {new Win32Exception(errorCode).Message})");
 
     private readonly record struct ProcessWaitResult(int ExitCode, bool TimedOut);
 
@@ -943,6 +1464,39 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
         string currentDirectory,
         ref StartupInfo startupInfo,
         out ProcessInformation processInformation);
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("advapi32.dll", ExactSpelling = true, CharSet = CharSet.Unicode, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool CreateProcessAsUserW(
+        SafeAccessTokenHandle token,
+        string applicationName,
+        StringBuilder commandLine,
+        nint processAttributes,
+        nint threadAttributes,
+        [MarshalAs(UnmanagedType.Bool)] bool inheritHandles,
+        uint creationFlags,
+        nint environment,
+        string currentDirectory,
+        ref StartupInfo startupInfo,
+        out ProcessInformation processInformation);
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("ole32.dll", ExactSpelling = true)]
+    private static extern int CoInitializeEx(nint reserved, uint coInitialize);
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("ole32.dll", ExactSpelling = true)]
+    private static extern void CoUninitialize();
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("ole32.dll", ExactSpelling = true)]
+    private static extern int CoCreateInstance(
+        ref Guid classId,
+        nint outer,
+        uint classContext,
+        ref Guid interfaceId,
+        out nint instance);
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]

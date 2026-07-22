@@ -15,6 +15,7 @@ internal static class WindowsLegacyStartMenuShortcutMigrator
     private const string LegacyFolderName = "ゆろち";
     private const string ShortcutFileName = "Lumin4ti.lnk";
     private const string ExecutableFileName = "Lumin4ti.UI.exe";
+    private const string LauncherFileName = "Lumin4ti.exe";
 
     /// <summary>
     /// 現在のユーザーのスタートメニューで旧ショートカットの移行を試みる。
@@ -39,6 +40,120 @@ internal static class WindowsLegacyStartMenuShortcutMigrator
         catch (Exception)
         {
             // 更新処理を止めず、通常起動時の再試行へ委ねる。
+        }
+    }
+
+    /// <summary>
+    /// Velopack の実プロセス AUMID と、インストーラーが作成したショートカットの
+    /// AUMID・アイコン参照を一致させる。MSI がプロパティを省略した環境でも、
+    /// Windows がタスクバーで白紙アイコンへフォールバックしないようにする。
+    /// </summary>
+    internal static void RepairInstalledShortcutMetadata()
+    {
+        try
+        {
+            if (!VelopackLocator.IsCurrentSet)
+            {
+                return;
+            }
+
+            var locator = VelopackLocator.Current;
+            if (string.IsNullOrWhiteSpace(locator.RootAppDir)
+                || string.IsNullOrWhiteSpace(locator.AppUserModelId))
+            {
+                return;
+            }
+
+            var shortcutDirectories = new[]
+            {
+                Environment.GetFolderPath(Environment.SpecialFolder.Programs),
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonPrograms),
+                Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonDesktopDirectory),
+                Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "Microsoft", "Internet Explorer", "Quick Launch", "User Pinned", "TaskBar"),
+            };
+
+            foreach (var directory in shortcutDirectories
+                         .Where(directory => !string.IsNullOrWhiteSpace(directory))
+                         .Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                var shortcutPath = Path.Combine(directory, ShortcutFileName);
+                if (TryRepairShortcutMetadata(
+                        shortcutPath,
+                        locator.RootAppDir,
+                        locator.AppUserModelId,
+                        ReadShortcut,
+                        RepairShortcut))
+                {
+                    WindowsShellChangeNotifier.RefreshStartMenu(directory);
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // シェル連携の補修失敗だけでアプリ本体の起動を止めない。
+        }
+    }
+
+    internal static bool TryRepairShortcutMetadata(
+        string shortcutPath,
+        string? rootAppDirectory,
+        string? appUserModelId) =>
+        TryRepairShortcutMetadata(
+            shortcutPath,
+            rootAppDirectory,
+            appUserModelId,
+            ReadShortcut,
+            RepairShortcut);
+
+    internal static bool TryRepairShortcutMetadata(
+        string shortcutPath,
+        string? rootAppDirectory,
+        string? appUserModelId,
+        Func<string, ShortcutDetails?> readShortcut,
+        Action<string, string, string> repairShortcut)
+    {
+        ArgumentNullException.ThrowIfNull(readShortcut);
+        ArgumentNullException.ThrowIfNull(repairShortcut);
+
+        try
+        {
+            if (string.IsNullOrWhiteSpace(shortcutPath)
+                || string.IsNullOrWhiteSpace(rootAppDirectory)
+                || string.IsNullOrWhiteSpace(appUserModelId)
+                || !File.Exists(shortcutPath)
+                || IsReparsePoint(shortcutPath))
+            {
+                return false;
+            }
+
+            var normalizedRootAppDirectory = Path.GetFullPath(rootAppDirectory);
+            var shortcut = readShortcut(shortcutPath);
+            if (!IsLumin4tiShortcut(shortcut, normalizedRootAppDirectory))
+            {
+                return false;
+            }
+
+            var normalizedTargetPath = Path.GetFullPath(shortcut!.TargetPath!);
+            if (string.Equals(shortcut.IconPath, normalizedTargetPath, StringComparison.OrdinalIgnoreCase)
+                && shortcut.IconIndex == 0
+                && string.Equals(shortcut.AppUserModelId, appUserModelId, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            repairShortcut(
+                shortcutPath,
+                normalizedTargetPath,
+                appUserModelId);
+            return true;
+        }
+        catch (Exception)
+        {
+            // 起動中の一時的なファイルロックやアクセス拒否は次回起動で再試行する。
+            return false;
         }
     }
 
@@ -104,17 +219,47 @@ internal static class WindowsLegacyStartMenuShortcutMigrator
 
     private static ShortcutDetails? ReadShortcut(string shortcutPath)
     {
-        using var shortcut = new ShellLink(shortcutPath);
-        return new ShortcutDetails(shortcut.Target, shortcut.WorkingDirectory);
+        string targetPath;
+        string workingDirectory;
+        string iconPath;
+        int iconIndex;
+        using (var shortcut = new ShellLink(shortcutPath))
+        {
+            targetPath = shortcut.Target;
+            workingDirectory = shortcut.WorkingDirectory;
+            iconPath = shortcut.IconPath;
+            iconIndex = shortcut.IconIndex;
+        }
+
+        return new ShortcutDetails(
+            targetPath,
+            workingDirectory,
+            iconPath,
+            iconIndex,
+            WindowsShortcutPropertyStore.GetAppUserModelId(shortcutPath));
+    }
+
+    private static void RepairShortcut(string shortcutPath, string iconPath, string appUserModelId)
+    {
+        using var shortcut = new ShellLink(shortcutPath)
+        {
+            IconPath = iconPath,
+            IconIndex = 0,
+        };
+        shortcut.Save();
+        WindowsShortcutPropertyStore.SetAppUserModelId(shortcutPath, appUserModelId);
     }
 
     private static bool IsLumin4tiShortcut(ShortcutDetails? shortcut, string rootAppDirectory)
     {
-        if (shortcut is null
-            || !string.Equals(
-                Path.GetFileName(shortcut.TargetPath),
-                ExecutableFileName,
-                StringComparison.OrdinalIgnoreCase))
+        if (shortcut is null)
+        {
+            return false;
+        }
+
+        var executableFileName = Path.GetFileName(shortcut.TargetPath);
+        if (!string.Equals(executableFileName, ExecutableFileName, StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(executableFileName, LauncherFileName, StringComparison.OrdinalIgnoreCase))
         {
             return false;
         }
@@ -156,5 +301,10 @@ internal static class WindowsLegacyStartMenuShortcutMigrator
         }
     }
 
-    internal sealed record ShortcutDetails(string? TargetPath, string? WorkingDirectory);
+    internal sealed record ShortcutDetails(
+        string? TargetPath,
+        string? WorkingDirectory,
+        string? IconPath = null,
+        int IconIndex = 0,
+        string? AppUserModelId = null);
 }
