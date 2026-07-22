@@ -54,6 +54,14 @@ dotnet test Lumin4ti.slnx --filter "Name=既定値に戻せるトグルの既定
 
 [Program.cs](src/Lumin4ti.UI/Program.cs) で `VelopackApp.Build().Run()` → 非管理者なら自己昇格 (ShellExecute + runas) → `SingleInstanceGuard`。**`Debugger.IsAttached` のときは昇格をスキップ**して非昇格のまま続行するため、デバッグ実行 (F5) では HKLM 系操作・`Get-MMAgent`・イベントログ全削除などが権限エラーになる (これは正常)。管理者系までデバッグするなら IDE 自体を管理者起動する。
 
+### タスクバーアイコンと AUMID (回帰注意)
+
+v1.0.11〜1.0.13 で 3 回連続修正した領域。現行方針は「**プロセスだけが AUMID を名乗り、ショートカットには何も書かない**」:
+
+- 製品版 (`#if !DEBUG`) だけ起動直後に `WindowsElevationHelper.TrySetCurrentProcessAppUserModelId()` で Velopack の AUMID を設定する。Debug ビルドで名乗ると Windows がインストール済み製品の情報を参照して開発用 EXE のタスクバーアイコンが白紙になるため設定しない。
+- ショートカット (.lnk) へ AUMID や明示アイコンを追記しない。埋め込みアイコンの解決は Windows に任せる。v1.0.12 が追記した override は起動時に [WindowsLegacyStartMenuShortcutMigrator.ClearInstalledShortcutOverrides()](src/Lumin4ti.UI/Services/WindowsLegacyStartMenuShortcutMigrator.cs) が Start メニュー・デスクトップ・タスクバーピン留めから除去する。
+- .lnk のプロパティ操作が必要な場合は [WindowsShortcutPropertyStore](src/Lumin4ti.UI/Services/WindowsShortcutPropertyStore.cs) (IPropertyStore 直叩き) を使う。Velopack 1.2.0 の `ShellLink.SetAppUserModelId` は既存リンクへ Commit しないため使わない。
+
 ### ローカライズ
 
 Komorebi/Lhamiel と同一方式。翻訳は [Resources/Locales/*.axaml](src/Lumin4ti.UI/Resources/Locales/) (`ResourceDictionary`) を 1 言語 1 ファイルで 17 言語持ち、XAML は `{DynamicResource Text.Xxx}`、C# は `App.Text("key", 日本語フォールバック, args)` で引く。`en_US.axaml` が全キーの英語マスターで、非 ja 言語はこれを `MergedDictionaries` に含めて上書きする。`ja_JP.axaml` はシェル文言のみ (Action Label/Description・カテゴリ Caption・ステータスはコード内日本語がフォールバックになる)。
