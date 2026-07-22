@@ -67,8 +67,7 @@ public sealed class MaintenanceActionCatalogTests
         // レジストリ tweak や DISM 系は Explorer 再起動では反映されないので付けない
         Assert.IsFalse(items["svchost-split-threshold"].AffectsExplorer);
         Assert.IsFalse(items["wu-component-cleanup"].AffectsExplorer);
-        Assert.IsFalse(items.ContainsKey("quick-access-sort"),
-            "公開APIで順序を設定できず Shell verb が外部拡張で停止するため公開しない");
+        Assert.IsFalse(items["quick-access-sort"].AffectsExplorer);
     }
 
     [TestMethod]

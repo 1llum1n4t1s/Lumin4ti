@@ -144,6 +144,8 @@
   <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">Mengubah target sinkronisasi waktu Windows dari time.windows.com bawaan ke server NTP publik Jepang (ntp.jst.mfeed.ad.jp) untuk meningkatkan ketepatan dan kestabilan sinkronisasi waktu. Memulai ulang layanan Windows Time setelahnya agar langsung berlaku.</x:String>
 
   <!-- ===== Actions: Organize ===== -->
+  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">Urutkan pin Quick Access</x:String>
+  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Mengurutkan folder yang disematkan ke Quick Access secara menaik berdasarkan path (mencadangkan jump list sebelum dijalankan).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Urutkan variabel lingkungan Path</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Menghapus duplikat dan mengurutkan secara menaik entri variabel lingkungan Path pengguna dan sistem.</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Nonaktifkan proses latar belakang Edge (hemat 100–300 MB)</x:String>

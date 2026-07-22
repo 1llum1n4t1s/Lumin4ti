@@ -142,6 +142,8 @@
   <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">Changes Windows' time sync target from the default time.windows.com to a Japanese public NTP server (ntp.jst.mfeed.ad.jp) to improve time sync accuracy and stability. Restarts the Windows Time service afterward to apply immediately.</x:String>
 
   <!-- ===== Actions: Organize ===== -->
+  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">Sort Quick Access pins</x:String>
+  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Sorts folders pinned to Quick Access into ascending order by path (backs up the jump list before running).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Sort the Path environment variable</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Deduplicates and sorts the entries of the user and system Path environment variables in ascending order.</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Disable Edge background processes (save 100–300 MB)</x:String>

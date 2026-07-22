@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
 using Lumin4ti.Core.Services;
+using Lumin4ti.Core.Services.Windows.Actions;
 
 namespace Lumin4ti.Tests;
 
@@ -91,13 +92,10 @@ public sealed class UnelevatedCommandExecutorTests
     }
 
     [TestMethod]
-    public void 長いscriptは環境ブロック上限内へ圧縮できる()
+    public void 長いクイックアクセスscriptは環境ブロック上限内へ圧縮できる()
     {
-        var script = string.Concat(Enumerable.Repeat(
-            "$value = '対話中ユーザーの medium process で実行する長いscriptです'\r\n",
-            1000));
         var encoded = UnelevatedCommandExecutor.EncodeScriptForEnvironment(
-            script);
+            QuickAccessSortAction.PowerShellScript);
         var environmentBlock = UnelevatedCommandExecutor.BuildEnvironmentBlock(
             new Dictionary<string, string>
             {
@@ -106,7 +104,7 @@ public sealed class UnelevatedCommandExecutorTests
             });
 
         Assert.IsTrue(environmentBlock.Length < 32767, environmentBlock.Length.ToString());
-        Assert.AreEqual(script, DecodeScript(encoded));
+        Assert.AreEqual(QuickAccessSortAction.PowerShellScript, DecodeScript(encoded));
     }
 
     [TestMethod]

@@ -144,6 +144,8 @@
   <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">Binabago ang target ng time sync ng Windows mula sa default na time.windows.com patungo sa isang pampublikong Japanese NTP server (ntp.jst.mfeed.ad.jp) para mapabuti ang katumpakan at katatagan ng time sync. Nire-restart pagkatapos ang Windows Time service para agad magkabisa.</x:String>
 
   <!-- ===== Actions: Organize ===== -->
+  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">Ayusin ang mga pin ng Quick Access</x:String>
+  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Inaayos ang mga folder na naka-pin sa Quick Access sa pataas na pagkakasunod ayon sa path (nagba-backup ng jump list bago patakbuhin).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Ayusin ang Path environment variable</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Inaalis ang mga duplicate at inaayos sa pataas na pagkakasunod ang mga entry ng user at system na Path environment variable.</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">I-disable ang mga background process ng Edge (makatipid ng 100–300 MB)</x:String>

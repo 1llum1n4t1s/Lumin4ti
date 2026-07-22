@@ -144,6 +144,8 @@
   <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">將 Windows 的時間同步目標從預設的 time.windows.com 變更為日本公用 NTP 伺服器（ntp.jst.mfeed.ad.jp），以提高時間同步的準確度與穩定性。之後會重新啟動 Windows Time 服務以立即套用。</x:String>
 
   <!-- ===== Actions: Organize ===== -->
+  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">排序 Quick Access 釘選項目</x:String>
+  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">將釘選到 Quick Access 的資料夾依路徑遞增排序（執行前會備份跳躍清單）。</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">排序 Path 環境變數</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">將使用者與系統 Path 環境變數的項目去除重複並依遞增排序。</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">停用 Edge 背景處理程序（節省 100–300 MB）</x:String>
