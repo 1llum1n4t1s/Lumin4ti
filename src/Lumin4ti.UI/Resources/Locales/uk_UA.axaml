@@ -144,8 +144,6 @@
   <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">Змінює ціль синхронізації часу Windows зі стандартного time.windows.com на японський публічний NTP-сервер (ntp.jst.mfeed.ad.jp) для підвищення точності та стабільності синхронізації часу. Потім перезапускає службу часу Windows для негайного застосування.</x:String>
 
   <!-- ===== Actions: Organize ===== -->
-  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">Упорядкувати закріплені елементи Quick Access</x:String>
-  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Сортує папки, закріплені в Quick Access, за зростанням імен (перед запуском створює резервну копію списку переходів).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Упорядкувати змінну середовища Path</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Видаляє дублікати та сортує за зростанням записи користувацької та системної змінних середовища Path.</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Вимкнути фонові процеси Edge (заощадження 100–300 MB)</x:String>

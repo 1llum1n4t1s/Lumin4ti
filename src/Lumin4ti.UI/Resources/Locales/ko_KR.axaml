@@ -144,8 +144,6 @@
   <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">시간 동기화 정확도와 안정성을 높이기 위해 Windows의 시간 동기화 대상을 기본 time.windows.com에서 일본 공용 NTP 서버(ntp.jst.mfeed.ad.jp)로 변경합니다. 이후 Windows Time 서비스를 다시 시작해 즉시 적용합니다.</x:String>
 
   <!-- ===== Actions: Organize ===== -->
-  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">Quick Access 고정 항목 정렬</x:String>
-  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Quick Access에 고정된 폴더를 이름 오름차순으로 정렬합니다(실행 전 점프 목록을 백업).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Path 환경 변수 정렬</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">사용자 및 시스템 Path 환경 변수의 항목을 중복 제거하고 오름차순으로 정렬합니다.</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Edge 백그라운드 프로세스 끄기(100~300 MB 절약)</x:String>

@@ -85,14 +85,10 @@ public static class WindowsPerMachineMigration
                 return 1;
             }
 
-            var repairExitCode = await RepairMisplacedPerMachineInstallAsync(
+            return await RepairMisplacedPerMachineInstallAsync(
                 misplacedPerMachineRoot,
                 programFilesDirectory,
                 ct);
-            if (repairExitCode is not null)
-            {
-                return repairExitCode;
-            }
         }
 
         var legacyRoot = GetLegacyRootIfCurrentProcessIsPerUser(
@@ -180,6 +176,7 @@ public static class WindowsPerMachineMigration
         }
         catch (Exception ex) when (ex is
             HttpRequestException or
+            InvalidDataException or
             IOException or
             InvalidOperationException or
             SecurityException or
@@ -400,7 +397,7 @@ public static class WindowsPerMachineMigration
         }
     }
 
-    private static async Task<int?> RepairMisplacedPerMachineInstallAsync(
+    private static async Task<int> RepairMisplacedPerMachineInstallAsync(
         string misplacedRoot,
         string programFilesDirectory,
         CancellationToken ct)
@@ -478,6 +475,7 @@ public static class WindowsPerMachineMigration
         }
         catch (Exception ex) when (ex is
             HttpRequestException or
+            InvalidDataException or
             IOException or
             InvalidOperationException or
             SecurityException or

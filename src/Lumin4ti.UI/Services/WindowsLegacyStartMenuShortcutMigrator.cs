@@ -44,11 +44,10 @@ internal static class WindowsLegacyStartMenuShortcutMigrator
     }
 
     /// <summary>
-    /// Velopack の実プロセス AUMID と、インストーラーが作成したショートカットの
-    /// AUMID・アイコン参照を一致させる。MSI がプロパティを省略した環境でも、
-    /// Windows がタスクバーで白紙アイコンへフォールバックしないようにする。
+    /// v1.0.12 がショートカットへ追記した AUMID と明示アイコンを除去する。
+    /// Shisui と同様にリンク先 EXE の埋め込みアイコンを Windows 自身に解決させる。
     /// </summary>
-    internal static void RepairInstalledShortcutMetadata()
+    internal static void ClearInstalledShortcutOverrides()
     {
         try
         {
@@ -58,8 +57,7 @@ internal static class WindowsLegacyStartMenuShortcutMigrator
             }
 
             var locator = VelopackLocator.Current;
-            if (string.IsNullOrWhiteSpace(locator.RootAppDir)
-                || string.IsNullOrWhiteSpace(locator.AppUserModelId))
+            if (string.IsNullOrWhiteSpace(locator.RootAppDir))
             {
                 return;
             }
@@ -80,12 +78,11 @@ internal static class WindowsLegacyStartMenuShortcutMigrator
                          .Distinct(StringComparer.OrdinalIgnoreCase))
             {
                 var shortcutPath = Path.Combine(directory, ShortcutFileName);
-                if (TryRepairShortcutMetadata(
+                if (TryClearShortcutOverrides(
                         shortcutPath,
                         locator.RootAppDir,
-                        locator.AppUserModelId,
                         ReadShortcut,
-                        RepairShortcut))
+                        ClearShortcutOverrides))
                 {
                     WindowsShellChangeNotifier.RefreshStartMenu(directory);
                 }
@@ -97,32 +94,28 @@ internal static class WindowsLegacyStartMenuShortcutMigrator
         }
     }
 
-    internal static bool TryRepairShortcutMetadata(
+    internal static bool TryClearShortcutOverrides(
         string shortcutPath,
-        string? rootAppDirectory,
-        string? appUserModelId) =>
-        TryRepairShortcutMetadata(
+        string? rootAppDirectory) =>
+        TryClearShortcutOverrides(
             shortcutPath,
             rootAppDirectory,
-            appUserModelId,
             ReadShortcut,
-            RepairShortcut);
+            ClearShortcutOverrides);
 
-    internal static bool TryRepairShortcutMetadata(
+    internal static bool TryClearShortcutOverrides(
         string shortcutPath,
         string? rootAppDirectory,
-        string? appUserModelId,
         Func<string, ShortcutDetails?> readShortcut,
-        Action<string, string, string> repairShortcut)
+        Action<string> clearShortcutOverrides)
     {
         ArgumentNullException.ThrowIfNull(readShortcut);
-        ArgumentNullException.ThrowIfNull(repairShortcut);
+        ArgumentNullException.ThrowIfNull(clearShortcutOverrides);
 
         try
         {
             if (string.IsNullOrWhiteSpace(shortcutPath)
                 || string.IsNullOrWhiteSpace(rootAppDirectory)
-                || string.IsNullOrWhiteSpace(appUserModelId)
                 || !File.Exists(shortcutPath)
                 || IsReparsePoint(shortcutPath))
             {
@@ -136,18 +129,13 @@ internal static class WindowsLegacyStartMenuShortcutMigrator
                 return false;
             }
 
-            var normalizedTargetPath = Path.GetFullPath(shortcut!.TargetPath!);
-            if (string.Equals(shortcut.IconPath, normalizedTargetPath, StringComparison.OrdinalIgnoreCase)
-                && shortcut.IconIndex == 0
-                && string.Equals(shortcut.AppUserModelId, appUserModelId, StringComparison.Ordinal))
+            if (string.IsNullOrWhiteSpace(shortcut!.IconPath)
+                && string.IsNullOrWhiteSpace(shortcut.AppUserModelId))
             {
                 return false;
             }
 
-            repairShortcut(
-                shortcutPath,
-                normalizedTargetPath,
-                appUserModelId);
+            clearShortcutOverrides(shortcutPath);
             return true;
         }
         catch (Exception)
@@ -239,15 +227,15 @@ internal static class WindowsLegacyStartMenuShortcutMigrator
             WindowsShortcutPropertyStore.GetAppUserModelId(shortcutPath));
     }
 
-    private static void RepairShortcut(string shortcutPath, string iconPath, string appUserModelId)
+    private static void ClearShortcutOverrides(string shortcutPath)
     {
         using var shortcut = new ShellLink(shortcutPath)
         {
-            IconPath = iconPath,
+            IconPath = string.Empty,
             IconIndex = 0,
         };
         shortcut.Save();
-        WindowsShortcutPropertyStore.SetAppUserModelId(shortcutPath, appUserModelId);
+        WindowsShortcutPropertyStore.ClearAppUserModelId(shortcutPath);
     }
 
     private static bool IsLumin4tiShortcut(ShortcutDetails? shortcut, string rootAppDirectory)

@@ -17,8 +17,8 @@ public static class WindowsElevationHelper
     private const string AppUserModelId = "velopack.Lumin4ti";
 
     /// <summary>
-    /// Velopack のショートカットと実行プロセスの AUMID を一致させる。
-    /// UAC 自己昇格後もウィンドウ生成前に呼び出し、タスクバーの白紙アイコンを防ぐ。
+    /// Shisui と同じく製品版プロセスへ Velopack の AUMID を設定する。
+    /// ショートカット側へ AUMID や明示アイコンは追記せず、埋め込みアイコンの解決は Windows に任せる。
     /// </summary>
     public static void TrySetCurrentProcessAppUserModelId()
     {

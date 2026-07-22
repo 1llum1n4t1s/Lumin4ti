@@ -144,8 +144,6 @@
   <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">Scopum synchronizationis temporis Windows a praedefinito time.windows.com ad servitorem NTP publicum Iaponicum (ntp.jst.mfeed.ad.jp) mutat ut accurationem et stabilitatem synchronizationis temporis emendet. Postea servitium Windows Time restituit ut statim valeat.</x:String>
 
   <!-- ===== Actions: Organize ===== -->
-  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">Affixa Quick Access ordina</x:String>
-  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Directoria ad Quick Access affixa in ordinem ascendentem per nomen ordinat (indicem saltus ante exsecutionem servat).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Variabilem ambitus Path ordina</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Introitus variabilium ambitus Path usoris et systematis deduplicat et in ordinem ascendentem ordinat.</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Processus Edge in fundo exstingue (100–300 MB serva)</x:String>

@@ -144,8 +144,6 @@
   <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">Ändert das Zeitsynchronisierungsziel von Windows vom Standard time.windows.com auf einen öffentlichen japanischen NTP-Server (ntp.jst.mfeed.ad.jp), um Genauigkeit und Stabilität der Zeitsynchronisierung zu verbessern. Startet anschließend den Windows-Zeitdienst neu, damit es sofort wirksam wird.</x:String>
 
   <!-- ===== Actions: Organize ===== -->
-  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">Quick Access-Anheftungen sortieren</x:String>
-  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Sortiert an Quick Access angeheftete Ordner in aufsteigender Reihenfolge nach Namen (sichert die Sprungliste vor der Ausführung).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Umgebungsvariable Path sortieren</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Entfernt Duplikate und sortiert die Einträge der Benutzer- und System-Path-Umgebungsvariablen in aufsteigender Reihenfolge.</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Edge-Hintergrundprozesse deaktivieren (100–300 MB sparen)</x:String>

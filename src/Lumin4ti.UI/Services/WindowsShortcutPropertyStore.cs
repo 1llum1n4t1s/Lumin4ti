@@ -49,6 +49,29 @@ internal static class WindowsShortcutPropertyStore
         }
     }
 
+    internal static void ClearAppUserModelId(string shortcutPath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(shortcutPath);
+
+        var shellLink = (object)new ShellLinkComObject();
+        try
+        {
+            var persistFile = (IPersistFile)shellLink;
+            persistFile.Load(shortcutPath, StorageModeReadWrite);
+
+            var propertyStore = (IPropertyStore)shellLink;
+            var key = new PropertyKey(AppUserModelPropertyFormatId, 5);
+            var empty = new PropertyVariant();
+            Marshal.ThrowExceptionForHR(propertyStore.SetValue(ref key, empty));
+            Marshal.ThrowExceptionForHR(propertyStore.Commit());
+            persistFile.Save(shortcutPath, remember: true);
+        }
+        finally
+        {
+            _ = Marshal.FinalReleaseComObject(shellLink);
+        }
+    }
+
     internal static string? GetAppUserModelId(string shortcutPath)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(shortcutPath);

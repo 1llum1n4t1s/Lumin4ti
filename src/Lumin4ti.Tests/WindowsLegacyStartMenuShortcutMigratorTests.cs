@@ -140,34 +140,29 @@ public sealed class WindowsLegacyStartMenuShortcutMigratorTests
     }
 
     [TestMethod]
-    public void TryRepairShortcutMetadata_正規リンクならAumidと対象Exeアイコンを設定する()
+    public void TryClearShortcutOverrides_正規リンクの明示アイコンとAumidを除去する()
     {
         var shortcutPath = Path.Combine(_programsDirectory, "Lumin4ti.lnk");
         File.WriteAllText(shortcutPath, "lumin4ti");
-        string? repairedShortcut = null;
-        string? repairedIcon = null;
-        string? repairedAumid = null;
+        var current = _lumin4tiShortcut with
+        {
+            IconPath = _lumin4tiShortcut.TargetPath,
+            AppUserModelId = "velopack.Lumin4ti",
+        };
+        string? clearedShortcut = null;
 
-        var repaired = WindowsLegacyStartMenuShortcutMigrator.TryRepairShortcutMetadata(
+        var cleared = WindowsLegacyStartMenuShortcutMigrator.TryClearShortcutOverrides(
             shortcutPath,
             _rootAppDirectory,
-            "velopack.Lumin4ti",
-            ReadShortcut,
-            (path, icon, aumid) =>
-            {
-                repairedShortcut = path;
-                repairedIcon = icon;
-                repairedAumid = aumid;
-            });
+            _ => current,
+            path => clearedShortcut = path);
 
-        Assert.IsTrue(repaired);
-        Assert.AreEqual(shortcutPath, repairedShortcut);
-        Assert.AreEqual(Path.GetFullPath(_lumin4tiShortcut.TargetPath!), repairedIcon);
-        Assert.AreEqual("velopack.Lumin4ti", repairedAumid);
+        Assert.IsTrue(cleared);
+        Assert.AreEqual(shortcutPath, clearedShortcut);
     }
 
     [TestMethod]
-    public void TryRepairShortcutMetadata_実ショートカットへAumidと対象Exeアイコンを永続化する()
+    public void TryClearShortcutOverrides_実ショートカットをShisuiと同じメタデータなしへ戻す()
     {
         var shortcutPath = Path.Combine(_programsDirectory, "Lumin4ti.lnk");
         File.WriteAllText(_lumin4tiShortcut.TargetPath!, string.Empty);
@@ -175,84 +170,55 @@ public sealed class WindowsLegacyStartMenuShortcutMigratorTests
                {
                    Target = _lumin4tiShortcut.TargetPath,
                    WorkingDirectory = _lumin4tiShortcut.WorkingDirectory,
+                   IconPath = _lumin4tiShortcut.TargetPath,
+                   IconIndex = 0,
                })
         {
             shortcut.Save(shortcutPath);
         }
+        WindowsShortcutPropertyStore.SetAppUserModelId(shortcutPath, "velopack.Lumin4ti");
 
-        var repaired = WindowsLegacyStartMenuShortcutMigrator.TryRepairShortcutMetadata(
+        var cleared = WindowsLegacyStartMenuShortcutMigrator.TryClearShortcutOverrides(
             shortcutPath,
-            _rootAppDirectory,
-            "velopack.Lumin4ti");
-
-        Assert.IsTrue(repaired);
-        using var repairedShortcut = new ShellLink(shortcutPath);
-        Assert.AreEqual(Path.GetFullPath(_lumin4tiShortcut.TargetPath!), repairedShortcut.IconPath);
-        Assert.AreEqual(0, repairedShortcut.IconIndex);
-        Assert.AreEqual("velopack.Lumin4ti", WindowsShortcutPropertyStore.GetAppUserModelId(shortcutPath));
-    }
-
-    [TestMethod]
-    public void TryRepairShortcutMetadata_ルート直下ランチャーも正規リンクとして補修する()
-    {
-        var shortcutPath = Path.Combine(_programsDirectory, "Lumin4ti.lnk");
-        File.WriteAllText(shortcutPath, "launcher");
-        var launcher = new WindowsLegacyStartMenuShortcutMigrator.ShortcutDetails(
-            Path.Combine(_rootAppDirectory, "Lumin4ti.exe"),
             _rootAppDirectory);
-        var called = false;
 
-        var repaired = WindowsLegacyStartMenuShortcutMigrator.TryRepairShortcutMetadata(
-            shortcutPath,
-            _rootAppDirectory,
-            "velopack.Lumin4ti",
-            _ => launcher,
-            (_, _, _) => called = true);
-
-        Assert.IsTrue(repaired);
-        Assert.IsTrue(called);
+        Assert.IsTrue(cleared);
+        using var clearedShortcut = new ShellLink(shortcutPath);
+        Assert.IsTrue(string.IsNullOrWhiteSpace(clearedShortcut.IconPath));
+        Assert.IsNull(WindowsShortcutPropertyStore.GetAppUserModelId(shortcutPath));
     }
 
     [TestMethod]
-    public void TryRepairShortcutMetadata_別アプリの同名リンクは変更しない()
+    public void TryClearShortcutOverrides_別アプリの同名リンクは変更しない()
     {
         var shortcutPath = Path.Combine(_programsDirectory, "Lumin4ti.lnk");
         File.WriteAllText(shortcutPath, "other");
         var called = false;
 
-        var repaired = WindowsLegacyStartMenuShortcutMigrator.TryRepairShortcutMetadata(
+        var cleared = WindowsLegacyStartMenuShortcutMigrator.TryClearShortcutOverrides(
             shortcutPath,
             _rootAppDirectory,
-            "velopack.Lumin4ti",
             ReadShortcut,
-            (_, _, _) => called = true);
+            _ => called = true);
 
-        Assert.IsFalse(repaired);
+        Assert.IsFalse(cleared);
         Assert.IsFalse(called);
     }
 
     [TestMethod]
-    public void TryRepairShortcutMetadata_既に整合しているリンクは書き直さない()
+    public void TryClearShortcutOverrides_既にメタデータなしなら書き直さない()
     {
         var shortcutPath = Path.Combine(_programsDirectory, "Lumin4ti.lnk");
         File.WriteAllText(shortcutPath, "lumin4ti");
-        var targetPath = Path.GetFullPath(_lumin4tiShortcut.TargetPath!);
-        var current = _lumin4tiShortcut with
-        {
-            IconPath = targetPath,
-            IconIndex = 0,
-            AppUserModelId = "velopack.Lumin4ti",
-        };
         var called = false;
 
-        var repaired = WindowsLegacyStartMenuShortcutMigrator.TryRepairShortcutMetadata(
+        var cleared = WindowsLegacyStartMenuShortcutMigrator.TryClearShortcutOverrides(
             shortcutPath,
             _rootAppDirectory,
-            "velopack.Lumin4ti",
-            _ => current,
-            (_, _, _) => called = true);
+            ReadShortcut,
+            _ => called = true);
 
-        Assert.IsFalse(repaired);
+        Assert.IsFalse(cleared);
         Assert.IsFalse(called);
     }
 

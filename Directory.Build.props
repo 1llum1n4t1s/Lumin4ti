@@ -8,7 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <!-- リリースバージョン。更新は /vava スキル経由のみ (手動で上げない)。 -->
-    <Version>1.0.12</Version>
+    <Version>1.0.13</Version>
   </PropertyGroup>
 
 </Project>

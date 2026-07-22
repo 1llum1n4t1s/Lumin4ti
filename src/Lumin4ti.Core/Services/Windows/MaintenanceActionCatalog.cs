@@ -17,13 +17,6 @@ public sealed class MaintenanceActionCatalog
     public IReadOnlyList<IMaintenanceItem> Items { get; }
 
     public MaintenanceActionCatalog(ICommandExecutor executor)
-        : this(executor, new UnelevatedCommandExecutor())
-    {
-    }
-
-    internal MaintenanceActionCatalog(
-        ICommandExecutor executor,
-        IUnelevatedCommandExecutor unelevatedExecutor)
     {
         Items =
         [
@@ -187,7 +180,6 @@ public sealed class MaintenanceActionCatalog
             new NtpConfigAction(executor),
 
             // ═══ 整理・ソート ═══
-            new QuickAccessSortAction(unelevatedExecutor),
             new EnvPathSortAction(),
         ];
     }

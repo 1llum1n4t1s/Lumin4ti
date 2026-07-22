@@ -12,7 +12,6 @@ namespace Lumin4ti.Core.Services;
 [JsonSerializable(typeof(RegistryValueBackupDocument))]
 [JsonSerializable(typeof(UwpBackgroundJournal))]
 [JsonSerializable(typeof(VirtualizationSecuritySnapshot))]
-[JsonSerializable(typeof(QuickAccessScriptResult))]
 internal sealed partial class Lumin4tiJsonContext : JsonSerializerContext;
 
 internal static class Lumin4tiJson

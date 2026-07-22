@@ -144,8 +144,6 @@
   <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">कालसमन्वयशुद्धिं स्थैर्यं च वर्धयितुं, Windows-स्य कालसमन्वयलक्ष्यं प्रामाणिकtime.windows.com-तः जापानीसार्वजनिकNTP-सेवकं (ntp.jst.mfeed.ad.jp) प्रति परिवर्तयति। सद्यः प्रयोक्तुं अनन्तरं Windows Time-सेवां पुनःप्रारभते।</x:String>
 
   <!-- ===== Actions: Organize ===== -->
-  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">Quick Access-पिन् क्रमीकुरु</x:String>
-  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Quick Access-मध्ये पिन्कृतान् संपुटान् नाम्ना आरोहक्रमे क्रमीकरोति (चालनात् पूर्वं jump-सूचीं प्रतिलिपीकरोति)।</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Path-पर्यावरणचरं क्रमीकुरु</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">प्रयोक्तृ-तन्त्र-Path-पर्यावरणचरयोः प्रविष्टीः द्विरुक्तिरहिताः कृत्वा आरोहक्रमे क्रमीकरोति।</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Edge-पृष्ठभूमिप्रक्रियाः निष्क्रियाः कुरु (100–300 MB रक्षा)</x:String>

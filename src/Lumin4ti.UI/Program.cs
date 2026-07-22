@@ -11,9 +11,9 @@ internal static class Program
     [STAThread]
     public static int Main(string[] args)
     {
-        // 製品版では Velopack がショートカットへ設定する AUMID と実行プロセスを一致させる。
-        // Debug版まで製品版のAUMIDを名乗ると、Windowsがインストール済みショートカットの
-        // アイコン情報を参照し、開発用EXEのタスクバーアイコンが白紙になるため設定しない。
+        // Shisui と同じく製品版プロセスだけへ Velopack の AUMID を設定する。
+        // Debug版まで製品版のAUMIDを名乗ると、Windowsがインストール済み製品の情報を参照し、
+        // 開発用EXEのタスクバーアイコンが白紙になるため設定しない。
 #if !DEBUG
         if (OperatingSystem.IsWindows())
         {
@@ -60,7 +60,7 @@ internal static class Program
 
         if (OperatingSystem.IsWindows())
         {
-            WindowsLegacyStartMenuShortcutMigrator.RepairInstalledShortcutMetadata();
+            WindowsLegacyStartMenuShortcutMigrator.ClearInstalledShortcutOverrides();
         }
 
         using var singleInstance = new SingleInstanceGuard("Lumin4ti");

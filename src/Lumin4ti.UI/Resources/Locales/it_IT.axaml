@@ -144,8 +144,6 @@
   <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">Cambia la destinazione di sincronizzazione dell'ora di Windows dal predefinito time.windows.com a un server NTP pubblico giapponese (ntp.jst.mfeed.ad.jp) per migliorare la precisione e la stabilità della sincronizzazione dell'ora. Successivamente riavvia il servizio Ora di Windows per l'applicazione immediata.</x:String>
 
   <!-- ===== Actions: Organize ===== -->
-  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">Ordina gli elementi aggiunti ad Accesso rapido</x:String>
-  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Ordina le cartelle aggiunte ad Accesso rapido in ordine crescente per nome (esegue il backup della jump list prima dell'esecuzione).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Ordina la variabile d'ambiente Path</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">Rimuove i duplicati e ordina in ordine crescente le voci delle variabili d'ambiente Path utente e di sistema.</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Disabilita i processi in background di Edge (risparmia 100–300 MB)</x:String>

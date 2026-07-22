@@ -144,8 +144,6 @@
   <x:String x:Key="Text.Action.ntp-config.Desc" xml:space="preserve">நேர ஒத்திசைவு துல்லியத்தையும் நிலைத்தன்மையையும் மேம்படுத்த, Windows-இன் நேர ஒத்திசைவு இலக்கை இயல்பான time.windows.com-இலிருந்து ஜப்பானிய பொது NTP சேவையகத்திற்கு (ntp.jst.mfeed.ad.jp) மாற்றுகிறது. உடனடியாகச் செயல்படுத்த பின்னர் Windows Time சேவையை மறுதொடக்கம் செய்கிறது.</x:String>
 
   <!-- ===== Actions: Organize ===== -->
-  <x:String x:Key="Text.Action.quick-access-sort.Label" xml:space="preserve">Quick Access பின்களை வரிசைப்படுத்து</x:String>
-  <x:String x:Key="Text.Action.quick-access-sort.Desc" xml:space="preserve">Quick Access-இல் பின் செய்யப்பட்ட கோப்புறைகளைப் பெயர் மூலம் ஏறுவரிசையில் வரிசைப்படுத்துகிறது (இயக்குவதற்கு முன் ஜம்ப் பட்டியலை காப்புப் பிரதி எடுக்கிறது).</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Label" xml:space="preserve">Path சூழல் மாறியை வரிசைப்படுத்து</x:String>
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">பயனர் மற்றும் கணினி Path சூழல் மாறிகளின் உள்ளீடுகளை நகல்நீக்கி ஏறுவரிசையில் வரிசைப்படுத்துகிறது.</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Edge பின்னணி செயல்களை முடக்கு (100–300 MB சேமிக்கும்)</x:String>
