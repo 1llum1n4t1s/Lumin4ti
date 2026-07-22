@@ -1,6 +1,6 @@
-# AGENTS.md
+# CLAUDE.md
 
-This file provides guidance to Codex (ChatGPT) and other coding agents working in this repository.
+This file provides guidance to Claude Code when working in this repository.
 
 ## 概要
 
