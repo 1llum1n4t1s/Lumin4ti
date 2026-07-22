@@ -124,8 +124,6 @@
   <x:String x:Key="Text.Action.nvidia-msi-fix.Desc" xml:space="preserve">刪除過去的最佳化工具寫入 NVIDIA GPU 的 MSI 中斷限制（MessageNumberLimit），將中斷處理還原為預設的分散行為。若該值殘留，GPU 中斷會集中到 CPU 核心 0，可能造成遊戲頓挫。在沒有 NVIDIA GPU 的電腦上不做任何變更。</x:String>
 
   <!-- ===== Actions: System ===== -->
-  <x:String x:Key="Text.Action.power-plan-setup.Label" xml:space="preserve">將電源計劃/電源模式設為建議設定</x:String>
-  <x:String x:Key="Text.Action.power-plan-setup.Desc" xml:space="preserve">以「平衡」為基礎重新設定電源計劃，並將電源模式設為「最佳效能」（交流電與電池皆然）。同時寫入：關閉顯示器 = 交流電 180 分鐘 / 電池 30 分鐘，睡眠 = 永不，電源按鈕 = 關機，闔上上蓋 = 不採取動作（並取消隱藏這些被隱藏的項目）。現有的電源計劃自訂會還原為預設，因此若你使用自訂計劃請留意。</x:String>
   <x:String x:Key="Text.Action.hibernate-off.Label" xml:space="preserve">停用休眠</x:String>
   <x:String x:Key="Text.Action.hibernate-off.Desc" xml:space="preserve">停用休眠並刪除始終保留在系統磁碟機上的 hiberfil.sys（實體記憶體的百分之幾十 = 數 GB）。同時會停用快速啟動，因此啟動可能變慢。若你在筆記型電腦上使用休眠，請保持 OFF（預設）。</x:String>
   <x:String x:Key="Text.Action.mouse-accel-off.Label" xml:space="preserve">停用滑鼠加速（增強指標精確度）</x:String>

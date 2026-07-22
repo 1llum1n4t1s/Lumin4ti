@@ -11,7 +11,15 @@ internal static class Program
     [STAThread]
     public static int Main(string[] args)
     {
-        Services.WindowsElevationHelper.TrySetCurrentProcessAppUserModelId();
+        // 製品版では Velopack がショートカットへ設定する AUMID と実行プロセスを一致させる。
+        // Debug版まで製品版のAUMIDを名乗ると、Windowsがインストール済みショートカットの
+        // アイコン情報を参照し、開発用EXEのタスクバーアイコンが白紙になるため設定しない。
+#if !DEBUG
+        if (OperatingSystem.IsWindows())
+        {
+            Services.WindowsElevationHelper.TrySetCurrentProcessAppUserModelId();
+        }
+#endif
 
         // Velopack のブートストラップを最初に走らせる
         // (--veloapp-install / --veloapp-updated 等の internal hook を捌くため、Avalonia 起動・多重起動ガードより前に必須)
@@ -43,10 +51,9 @@ internal static class Program
         // app.manifest は asInvoker のまま、ここで自己再起動して昇格する (詳細は app.manifest のコメント参照)。
         // SingleInstanceGuard より前に行う: 非昇格プロセスがロックを握ったまま昇格版を起動すると
         // 昇格版が二重起動判定で弾かれてしまうため。
-        // デバッガ接続時は自己再起動するとデバッグセッションが切れてしまうため昇格せずそのまま続行する
-        // (HKLM 系アクションは失敗するが、UI・HKCU 系のデバッグは可能)。
-        if (!System.Diagnostics.Debugger.IsAttached
-            && !Services.WindowsElevationHelper.IsRunningAsAdministrator())
+        // Debug版もHKLM操作と、Explorerのmedium tokenから安全な子プロセスを生成するため昇格する。
+        // デバッガを接続したまま確認する場合は、IDE自体を管理者として起動する。
+        if (!Services.WindowsElevationHelper.IsRunningAsAdministrator())
         {
             return Services.WindowsElevationHelper.TryRelaunchElevated(args) ? 0 : 1;
         }

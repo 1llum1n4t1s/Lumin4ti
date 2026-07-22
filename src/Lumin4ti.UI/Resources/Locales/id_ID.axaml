@@ -124,8 +124,6 @@
   <x:String x:Key="Text.Action.nvidia-msi-fix.Desc" xml:space="preserve">Menghapus batas interupsi MSI (MessageNumberLimit) yang ditulis alat optimasi terdahulu ke GPU NVIDIA, mengembalikan penanganan interupsi ke perilaku terdistribusi bawaan. Jika nilai ini tetap ada, interupsi GPU terkonsentrasi pada inti CPU 0 dan dapat menyebabkan stutter dalam game. Tidak mengubah apa pun pada PC tanpa GPU NVIDIA.</x:String>
 
   <!-- ===== Actions: System ===== -->
-  <x:String x:Key="Text.Action.power-plan-setup.Label" xml:space="preserve">Setel paket daya / mode daya ke konfigurasi yang disarankan</x:String>
-  <x:String x:Key="Text.Action.power-plan-setup.Desc" xml:space="preserve">Mengonfigurasi ulang paket daya di atas dasar “Seimbang” dan menyetel mode daya ke “Performa terbaik” (baik AC maupun baterai). Juga menulis: matikan layar = 180 mnt pada AC / 30 mnt pada baterai, tidur = tidak pernah, tombol daya = matikan, menutup tutup laptop = tidak melakukan apa pun (serta menampilkan kembali item-item tersembunyi itu). Penyesuaian paket daya yang sudah ada kembali ke bawaan, jadi hati-hati bila Anda memakai paket kustom.</x:String>
   <x:String x:Key="Text.Action.hibernate-off.Label" xml:space="preserve">Nonaktifkan hibernasi</x:String>
   <x:String x:Key="Text.Action.hibernate-off.Desc" xml:space="preserve">Menonaktifkan hibernasi dan menghapus hiberfil.sys, yang selalu dicadangkan pada drive sistem (puluhan persen dari memori fisik = beberapa GB). Fast Startup dinonaktifkan bersamaan, jadi startup bisa menjadi lebih lambat. Biarkan OFF (bawaan) bila Anda memakai hibernasi pada laptop.</x:String>
   <x:String x:Key="Text.Action.mouse-accel-off.Label" xml:space="preserve">Nonaktifkan akselerasi mouse (Tingkatkan ketepatan penunjuk)</x:String>

@@ -124,8 +124,6 @@
   <x:String x:Key="Text.Action.nvidia-msi-fix.Desc" xml:space="preserve">पूर्वानुकूलनोपकरणाः NVIDIA GPU-अये अलिखन् यत् MSI-व्यवधानसीमां (MessageNumberLimit) लोपयति, व्यवधानसंचालनं च प्रामाणिकवितरिताचरणं प्रत्यानयति। यदि एतत् मूल्यं तिष्ठति, तर्हि GPU-व्यवधानानि CPU core 0-मध्ये संहन्यन्ते क्रीडासु च स्खलनं जनयितुं शक्नुवन्ति। NVIDIA GPU-रहितेषु PC-षु किमपि न परिवर्तयति।</x:String>
 
   <!-- ===== Actions: System ===== -->
-  <x:String x:Key="Text.Action.power-plan-setup.Label" xml:space="preserve">शक्तियोजनां / शक्तिविधिं अनुशंसितविन्यासे स्थापय</x:String>
-  <x:String x:Key="Text.Action.power-plan-setup.Desc" xml:space="preserve">“Balanced”-आधारे शक्तियोजनां पुनर्विन्यस्यति, शक्तिविधिं च “Best performance” इति स्थापयति (AC-वहनीयशक्तिद्वयेऽपि)। अपि च लिखति: प्रदर्शननिवृत्तिः = AC-मध्ये 180 निमेषाः / वहनीयशक्तौ 30 निमेषाः, निद्रा = कदापि न, शक्तिकुञ्चिका = shut down, आवरणपिधानं = किमपि न (तानि गुप्तवस्तूनि च अगोपयति)। विद्यमानशक्तियोजनानुकूलनानि प्रामाणिकस्थितिं प्रत्यानयन्ति, अतः यदि अनुकूलितयोजनां प्रयुङ्क्षे तर्हि सावधानो भव।</x:String>
   <x:String x:Key="Text.Action.hibernate-off.Label" xml:space="preserve">Hibernation निष्क्रियं कुरु</x:String>
   <x:String x:Key="Text.Action.hibernate-off.Desc" xml:space="preserve">Hibernation निष्क्रियं करोति, तन्त्रचक्रे सर्वदा आरक्षितं hiberfil.sys (भौतिकस्मृतेः दशकप्रतिशतम् = अनेकGB) लोपयति च। समकालं Fast Startup निष्क्रियं भवति, अतः प्रारम्भः मन्दतरः स्यात्। वहनीयसंगणके यदि hibernation प्रयुङ्क्षे तर्हि OFF (प्रामाणिकस्थितौ) त्यज।</x:String>
   <x:String x:Key="Text.Action.mouse-accel-off.Label" xml:space="preserve">Mouse acceleration निष्क्रियं कुरु (Enhance pointer precision)</x:String>

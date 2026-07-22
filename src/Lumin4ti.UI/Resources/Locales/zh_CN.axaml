@@ -124,8 +124,6 @@
   <x:String x:Key="Text.Action.nvidia-msi-fix.Desc" xml:space="preserve">删除过去的优化工具写入 NVIDIA GPU 的 MSI 中断限制（MessageNumberLimit），将中断处理还原为默认的分散行为。若该值残留，GPU 中断会集中到 CPU 核心 0，可能导致游戏卡顿。在没有 NVIDIA GPU 的电脑上不做任何更改。</x:String>
 
   <!-- ===== Actions: System ===== -->
-  <x:String x:Key="Text.Action.power-plan-setup.Label" xml:space="preserve">将电源计划/电源模式设为推荐配置</x:String>
-  <x:String x:Key="Text.Action.power-plan-setup.Desc" xml:space="preserve">以“平衡”为基础重新配置电源计划，并将电源模式设为“最佳性能”（交流电和电池均如此）。同时写入：关闭显示器 = 交流电 180 分钟 / 电池 30 分钟，睡眠 = 从不，电源按钮 = 关机，合上盖子 = 不采取任何操作（并取消隐藏这些被隐藏的项目）。现有的电源计划自定义会还原为默认，因此若你使用自定义计划请注意。</x:String>
   <x:String x:Key="Text.Action.hibernate-off.Label" xml:space="preserve">禁用休眠</x:String>
   <x:String x:Key="Text.Action.hibernate-off.Desc" xml:space="preserve">禁用休眠并删除始终预留在系统驱动器上的 hiberfil.sys（物理内存的百分之几十 = 数 GB）。同时会禁用快速启动，因此启动可能变慢。若你在笔记本电脑上使用休眠，请保持 OFF（默认）。</x:String>
   <x:String x:Key="Text.Action.mouse-accel-off.Label" xml:space="preserve">禁用鼠标加速（提高指针精确度）</x:String>

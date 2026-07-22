@@ -122,8 +122,6 @@
   <x:String x:Key="Text.Action.nvidia-msi-fix.Desc" xml:space="preserve">Deletes the MSI interrupt limit (MessageNumberLimit) that past optimization tools wrote to the NVIDIA GPU, reverting interrupt handling to the default distributed behavior. If this value remains, GPU interrupts concentrate on CPU core 0 and can cause stutter in games. Changes nothing on PCs without an NVIDIA GPU.</x:String>
 
   <!-- ===== Actions: System ===== -->
-  <x:String x:Key="Text.Action.power-plan-setup.Label" xml:space="preserve">Set power plan / power mode to the recommended configuration</x:String>
-  <x:String x:Key="Text.Action.power-plan-setup.Desc" xml:space="preserve">Reconfigures the power plan on the “Balanced” base and sets the power mode to “Best performance” (both AC and battery). It also writes: display off = 180 min on AC / 30 min on battery, sleep = never, power button = shut down, closing the lid = do nothing (and unhides those hidden items). Existing power plan customizations revert to defaults, so be careful if you use a custom plan.</x:String>
   <x:String x:Key="Text.Action.hibernate-off.Label" xml:space="preserve">Disable hibernation</x:String>
   <x:String x:Key="Text.Action.hibernate-off.Desc" xml:space="preserve">Disables hibernation and deletes hiberfil.sys, which is always reserved on the system drive (tens of percent of physical memory = several GB). Fast Startup is disabled at the same time, so startup may become slower. Leave it OFF (default) if you use hibernation on a laptop.</x:String>
   <x:String x:Key="Text.Action.mouse-accel-off.Label" xml:space="preserve">Disable mouse acceleration (Enhance pointer precision)</x:String>

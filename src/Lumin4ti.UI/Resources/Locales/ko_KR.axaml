@@ -124,8 +124,6 @@
   <x:String x:Key="Text.Action.nvidia-msi-fix.Desc" xml:space="preserve">과거 최적화 도구가 NVIDIA GPU에 기록한 MSI 인터럽트 제한(MessageNumberLimit)을 삭제해 인터럽트 처리를 기본 분산 동작으로 되돌립니다. 이 값이 남아 있으면 GPU 인터럽트가 CPU 코어 0에 집중되어 게임에서 끊김을 일으킬 수 있습니다. NVIDIA GPU가 없는 PC에서는 아무것도 바뀌지 않습니다.</x:String>
 
   <!-- ===== Actions: System ===== -->
-  <x:String x:Key="Text.Action.power-plan-setup.Label" xml:space="preserve">전원 계획/전원 모드를 권장 구성으로 설정</x:String>
-  <x:String x:Key="Text.Action.power-plan-setup.Desc" xml:space="preserve">“균형 조정” 기반으로 전원 계획을 재구성하고 전원 모드를 “최고 성능”으로 설정합니다(AC와 배터리 모두). 또한 디스플레이 끄기 = AC 180분 / 배터리 30분, 절전 = 안 함, 전원 단추 = 종료, 덮개 닫기 = 아무 작업 안 함으로 기록합니다(숨겨진 해당 항목도 표시). 기존 전원 계획 사용자 지정은 기본값으로 되돌아가므로 사용자 지정 계획을 사용한다면 주의하세요.</x:String>
   <x:String x:Key="Text.Action.hibernate-off.Label" xml:space="preserve">최대 절전 모드 비활성화</x:String>
   <x:String x:Key="Text.Action.hibernate-off.Desc" xml:space="preserve">최대 절전 모드를 비활성화하고 시스템 드라이브에 항상 예약되는 hiberfil.sys(물리 메모리의 수십 퍼센트 = 수 GB)를 삭제합니다. 동시에 빠른 시작이 비활성화되므로 시작이 느려질 수 있습니다. 노트북에서 최대 절전 모드를 사용한다면 OFF(기본값)로 두세요.</x:String>
   <x:String x:Key="Text.Action.mouse-accel-off.Label" xml:space="preserve">마우스 가속(포인터 정확도 향상) 비활성화</x:String>

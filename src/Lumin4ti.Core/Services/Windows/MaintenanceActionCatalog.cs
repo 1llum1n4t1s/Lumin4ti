@@ -125,7 +125,6 @@ public sealed class MaintenanceActionCatalog
             new NvidiaMsiFixAction(),
 
             // ═══ システム設定 ═══
-            new PowerPlanSetupAction(executor),
             new HibernateToggle(executor),
             new RegistryToggle(
                 id: "mouse-accel-off",

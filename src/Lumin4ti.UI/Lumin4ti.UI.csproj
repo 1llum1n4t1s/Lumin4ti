@@ -33,6 +33,12 @@
     <AvaloniaResource Include="icon/app.ico" />
   </ItemGroup>
 
+  <!-- Windowsアプリのアイコン/manifest設定が欠落する回帰をビルド時に検出する。 -->
+  <Target Name="ValidateWindowsApplicationMetadata" BeforeTargets="CoreCompile">
+    <Error Condition="'$(ApplicationIcon)' == '' Or !Exists('$(MSBuildProjectDirectory)\$(ApplicationIcon)')" Text="Windows アプリの ApplicationIcon が未設定か、ファイルが存在しません。" />
+    <Error Condition="'$(ApplicationManifest)' == '' Or !Exists('$(MSBuildProjectDirectory)\$(ApplicationManifest)')" Text="Windows アプリの ApplicationManifest が未設定か、ファイルが存在しません。" />
+  </Target>
+
   <!-- アイコンを Publish 出力にコピー (vpk pack の icon 引数用) -->
   <Target Name="CopyAppIcon" AfterTargets="Publish">
     <Copy SourceFiles="icon\app.ico" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />

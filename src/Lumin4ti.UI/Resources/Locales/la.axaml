@@ -124,8 +124,6 @@
   <x:String x:Key="Text.Action.nvidia-msi-fix.Desc" xml:space="preserve">Limen interruptionum MSI (MessageNumberLimit) quod instrumenta optimizationis praeterita ad NVIDIA GPU scripserunt delet, tractationem interruptionum ad mores distributos praedefinitos revertens. Si hic valor manet, interruptiones GPU in CPU core 0 concentrantur et haesitationem in ludis efficere possunt. In PC sine NVIDIA GPU nihil mutat.</x:String>
 
   <!-- ===== Actions: System ===== -->
-  <x:String x:Key="Text.Action.power-plan-setup.Label" xml:space="preserve">Consilium potentiae / modum potentiae ad configurationem commendatam pone</x:String>
-  <x:String x:Key="Text.Action.power-plan-setup.Desc" xml:space="preserve">Consilium potentiae super basi “Balanced” reconfigurat et modum potentiae ad “Best performance” ponit (tam AC quam pila). Praeterea scribit: monstratio exstincta = 180 min in AC / 30 min in pila, somnus = numquam, bucca potentiae = shut down, operculo clauso = nihil fac (et illa elementa abscondita denudat). Accommodationes consilii potentiae exsistentes ad praedefinita revertunt, ergo cave si consilium proprium usurpas.</x:String>
   <x:String x:Key="Text.Action.hibernate-off.Label" xml:space="preserve">Hibernationem inhabilita</x:String>
   <x:String x:Key="Text.Action.hibernate-off.Desc" xml:space="preserve">Hibernationem inhabilitat et hiberfil.sys, qui in instrumento systematis semper reservatur (decem centesimae memoriae physicae = aliquot GB), delet. Fast Startup eodem tempore inhabilitatur, ergo initium tardius fieri potest. OFF (praedefinitum) relinque si hibernatione in portatili uteris.</x:String>
   <x:String x:Key="Text.Action.mouse-accel-off.Label" xml:space="preserve">Accelerationem muris inhabilita (Enhance pointer precision)</x:String>
