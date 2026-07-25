@@ -72,7 +72,7 @@ Komorebi/Lhamiel と同一方式。翻訳は [Resources/Locales/*.axaml](src/Lum
 
 ## リリース・配信 (Cloudflare R2 + ローカル署名)
 
-自動更新は **Cloudflare R2** 配信。クライアントは [UpdateService.cs](src/Lumin4ti.UI/Services/UpdateService.cs) で `SimpleWebSource(UpdateBaseUrl)` (= `https://lumin4ti.nephilim.jp`) の `releases.win.json` を見る (`UpdateBaseUrl`/`UpdateChannel` は [AppSettings.cs](src/Lumin4ti.Core/Models/AppSettings.cs) にハードコード)。GitHub Releases は使わない。
+自動更新は **Cloudflare R2** 配信。クライアントは [UpdateService.cs](src/Lumin4ti.UI/Services/UpdateService.cs) で `SimpleWebSource(UpdateBaseUrl)` (= `https://lumin4ti.kagayoi.com`) の `releases.win.json` を見る (`UpdateBaseUrl`/`UpdateChannel` は [AppSettings.cs](src/Lumin4ti.Core/Models/AppSettings.cs) にハードコード)。GitHub Releases は使わない。
 
 ### 配布契約と変更権限
 
@@ -86,8 +86,8 @@ Komorebi/Lhamiel と同一方式。翻訳は [Resources/Locales/*.axaml](src/Lum
 - 旧`%LocalAppData%\Lumin4ti`版は、通常の自己昇格より前に[WindowsPerMachineMigration.cs](src/Lumin4ti.Core/Services/Windows/WindowsPerMachineMigration.cs)が固定URLのMSIを取得し、署名と発行元を検証してからPerMachine版へ移行する。設定・ログ・`%ProgramData%`の復元用バックアップは保持し、旧本体・Updater・キャッシュ・HKCUアンインストール登録・ユーザーショートカットだけを回収する。ユーザー書き込み可能な旧`Update.exe`は実行せず、`Update.exe`または`packages`だけが残った部分移行も次回の信頼済みPerMachine起動で再回収する。ショートカット削除後は`SHChangeNotify`でStartメニューの表示キャッシュを更新する。
 - Velopack 1.2.0の生成MSIは`--instLocation PerMachine`でも`INSTALLFOLDER`が`TARGETDIR`直下になるため、[set-msi-program-files-location.ps1](scripts/set-msi-program-files-location.ps1)でDirectory表を`ProgramFiles64Folder\Lumin4ti`へ補正し、変更後のMSIを再署名してから検証・公開する。アプリ内移行も`VELOPACK_INSTALLDIR=<Program Files>\Lumin4ti`を明示する。補正前MSIで作られた既知の誤配置（ドライブ直下の`Lumin4ti`と`Program Files\ゆろち\Lumin4ti`）から起動した場合は、署名・MSI登録・`.msi-installed`を確認して固定MSIでProgram Filesへメジャーアップグレードし、旧プロセス終了後にその既知ルートだけを回収する。同一ProductCode/Versionで通常の`/i`が配置を変えない場合だけ`REINSTALL=ALL REINSTALLMODE=vamus`で全再配置・再キャッシュする。任意のカスタム配置は自動削除しない。
 - 前提: SimplySign Desktop がログイン済み (`Cert:\CurrentUser\My` に `CN=Open Source Developer Yuichiro Shinozaki` が見える) / `<Version>` が `/vava` 済み / `C:\Users\IMT\dev\Secret\secrets.json` に `cloudflare.api_token`。
-- **ランディングページ**は [web/](web/) の Cloudflare Worker (`lumin4ti-landing`)。`lumin4ti.nephilim.jp/*` に張った Worker Route が R2 カスタムドメインより優先され、`/` と `/index.html` だけ [web/index.html](web/index.html) を返し、それ以外 (更新ファイル) は R2 へ委譲する。ページ更新は `web/` で `pnpm dlx wrangler deploy` (トークンは secrets.json から env 注入・値は露出させない)。
-- R2 バケット `lumin4ti-updates` (account `10901bfadbf1005164774a7350082985` / zone `nephilim.jp`)。`local-release/` は `.gitignore` 済み。
+- **ランディングページ**は [web/](web/) の Cloudflare Worker (`lumin4ti-landing`)。`lumin4ti.kagayoi.com/*` に張った Worker Route が R2 カスタムドメインより優先され、`/` と `/index.html` だけ [web/index.html](web/index.html) を返し、それ以外 (更新ファイル) は R2 へ委譲する。ページ更新は `web/` で `pnpm dlx wrangler deploy` (トークンは secrets.json から env 注入・値は露出させない)。
+- R2 バケット `lumin4ti-updates` (account `10901bfadbf1005164774a7350082985` / zone `kagayoi.com`)。`local-release/` は `.gitignore` 済み。
 
 ## コードレビュー時の注意点 (このコードベース特有)
 

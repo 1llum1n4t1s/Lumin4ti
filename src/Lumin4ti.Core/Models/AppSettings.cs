@@ -4,7 +4,7 @@ namespace Lumin4ti.Core.Models;
 
 public sealed class AppSettings
 {
-    public const string DefaultUpdateBaseUrl = "https://lumin4ti.nephilim.jp";
+    public const string DefaultUpdateBaseUrl = "https://lumin4ti.kagayoi.com";
 
     /// <summary>表示言語のロケールキー (例: "ja_JP")。空なら OS ロケールから自動判定する。</summary>
     public string Locale { get; set; } = string.Empty;

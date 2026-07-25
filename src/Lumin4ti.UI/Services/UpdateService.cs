@@ -7,7 +7,7 @@ using Velopack.Sources;
 namespace Lumin4ti.UI.Services;
 
 /// <summary>
-/// Velopack の SimpleWebSource ベースで Cloudflare R2 (lumin4ti.nephilim.jp) から更新を取得する。
+/// Velopack の SimpleWebSource ベースで Cloudflare R2 (lumin4ti.kagayoi.com) から更新を取得する。
 /// 実際のチェック / ダウンロード / 適用 UI は VelopackUpdateDialog.Avalonia が担うため、本サービスは
 /// UpdateManager の生成と現在バージョンの取得だけを提供する。
 /// 配信元 URL は <see cref="AppSettings.UpdateBaseUrl"/> にハードコード固定 (settings.json から書き換え不可)。

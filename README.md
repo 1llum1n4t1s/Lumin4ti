@@ -4,7 +4,7 @@
 
 Lumin4ti は、Windows 10 / 11 のメンテナンスや設定変更を、分かりやすい画面から行える無料アプリです。コマンドを入力する必要はなく、各項目の効果と注意点を確認しながら操作できます。
 
-[Lumin4ti をダウンロード](https://lumin4ti.nephilim.jp/Lumin4ti-win.msi)（Windows 64-bit）
+[Lumin4ti をダウンロード](https://lumin4ti.kagayoi.com/Lumin4ti-win.msi)（Windows 64-bit）
 
 ## できること
 
@@ -18,7 +18,7 @@ Lumin4ti は、Windows 10 / 11 のメンテナンスや設定変更を、分か�
 
 ## インストール
 
-1. [署名済みインストーラー](https://lumin4ti.nephilim.jp/Lumin4ti-win.msi)をダウンロードします。
+1. [署名済みインストーラー](https://lumin4ti.kagayoi.com/Lumin4ti-win.msi)をダウンロードします。
 2. ダウンロードした `Lumin4ti-win.msi` を実行し、画面の案内に従います。
 3. Lumin4ti を起動し、ユーザーアカウント制御（UAC）が表示されたら内容を確認して許可します。
 

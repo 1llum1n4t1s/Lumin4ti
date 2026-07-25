@@ -42,7 +42,7 @@ public sealed class DistributionContractTests
         StringAssert.Contains(releaseScript, "旧PerUserインストーラ");
         StringAssert.Contains(readme, "Lumin4ti-win.msi");
         Assert.IsFalse(readme.Contains("Lumin4ti-win-Setup.exe", StringComparison.OrdinalIgnoreCase));
-        StringAssert.Contains(appSettings, "https://lumin4ti.nephilim.jp");
+        StringAssert.Contains(appSettings, "https://lumin4ti.kagayoi.com");
         StringAssert.Contains(appSettings, "UpdateChannel => \"win\"");
 
         Assert.IsFalse(

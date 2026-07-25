@@ -28,7 +28,7 @@ $VpkVersion = '1.2.0'
 Write-Host "vpk 固定バージョン: $VpkVersion"
 $WranglerVersion = '4.92.0'         # サプライチェーン対策でバージョン固定
 $Bucket = 'lumin4ti-updates'
-$BaseUrl = 'https://lumin4ti.nephilim.jp'
+$BaseUrl = 'https://lumin4ti.kagayoi.com'
 $AccountId = '10901bfadbf1005164774a7350082985'
 $NupkgRetentionGraceDays = 30
 $SecretsPath = 'C:\Users\IMT\dev\Secret\secrets.json'
@@ -348,7 +348,7 @@ Write-Host "✅ R2 全アップロード完了: $uploaded ファイル (manifest
 # 毎リリースで中身が変わるのに URL が不変。パージしないと自動更新が旧版を掴む。
 Write-Host '== Cloudflare キャッシュパージ ==' -ForegroundColor Cyan
 $cfHeaders = @{ Authorization = "Bearer $($env:CLOUDFLARE_API_TOKEN)" }
-$zoneName = ([uri]$BaseUrl).Host -replace '^[^.]+\.', ''   # <sub>.nephilim.jp → nephilim.jp (apex)
+$zoneName = ([uri]$BaseUrl).Host -replace '^[^.]+\.', ''   # <sub>.kagayoi.com → kagayoi.com (apex)
 $zoneResp = Invoke-RestMethod -Uri "https://api.cloudflare.com/client/v4/zones?name=$zoneName" -Headers $cfHeaders -TimeoutSec 30
 if (-not $zoneResp.success -or @($zoneResp.result).Count -eq 0) { throw "Cloudflare zone '$zoneName' の取得に失敗しました" }
 $zoneId = $zoneResp.result[0].id
