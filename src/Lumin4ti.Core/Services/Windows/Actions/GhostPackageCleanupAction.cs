@@ -38,6 +38,7 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
     private readonly Func<IReadOnlyList<string>?> _readStartMenuAppIds;
     private readonly Action _refreshStartMenu;
     private readonly Func<string, IProgress<string>?, CancellationToken, Task<string?>>? _repairSystemAppAsync;
+    private readonly Func<string, bool> _canRepairSystemApp;
 
     public GhostPackageCleanupAction(ICommandExecutor executor)
         : this(
@@ -49,7 +50,8 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
             (familyName, progress, ct) =>
                 SystemAppCapabilityRepair.CanRepair(familyName)
                     ? SystemAppCapabilityRepair.TryRepairAsync(familyName, executor, progress, ct)
-                    : Task.FromResult<string?>("この項目に対応するオプション機能が分かりません"))
+                    : Task.FromResult<string?>("この項目に対応するオプション機能が分かりません"),
+            SystemAppCapabilityRepair.CanRepair)
     {
     }
 
@@ -59,7 +61,8 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
         Func<string, bool> isConfirmedMissing,
         Func<IReadOnlyList<string>?> readStartMenuAppIds,
         Action refreshStartMenu,
-        Func<string, IProgress<string>?, CancellationToken, Task<string?>>? repairSystemAppAsync = null)
+        Func<string, IProgress<string>?, CancellationToken, Task<string?>>? repairSystemAppAsync = null,
+        Func<string, bool>? canRepairSystemApp = null)
     {
         _enumeratePackages = enumeratePackages;
         _removePackageAsync = removePackageAsync;
@@ -67,6 +70,7 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
         _readStartMenuAppIds = readStartMenuAppIds;
         _refreshStartMenu = refreshStartMenu;
         _repairSystemAppAsync = repairSystemAppAsync;
+        _canRepairSystemApp = canRepairSystemApp ?? (_ => false);
     }
 
     public string Id => "remove-ghost-packages";
@@ -150,6 +154,14 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
         // 削除ではなく本体 (オプション機能) の入れ直しで正しい状態へ戻す。
         var unresolved = await RepairAsync(pending, lines, progress, ct);
         var repairedCount = pending.Count - unresolved.Count;
+
+        // 解除できたシステムアプリも「本来入っているべき」ので、残骸を消したうえで本体を入れ直す。
+        var restoredCount = await RestoreRemovedSystemAppsAsync(
+            ghosts.Where(ghost => !pending.Contains(ghost) && _canRepairSystemApp(ghost.FamilyName)).ToList(),
+            lines,
+            progress,
+            ct);
+        repairedCount += restoredCount;
 
         if (removedCount > 0 || repairedCount > 0)
         {
@@ -281,6 +293,53 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
         return unresolved;
     }
 
+    /// <summary>
+    /// 解除できたシステムアプリの本体を入れ直す。ここでの失敗はスタートメニューの表示問題を
+    /// 悪化させない (残骸は既に消えている) ので、成功件数だけ返して部分失敗にはしない。
+    /// </summary>
+    private async Task<int> RestoreRemovedSystemAppsAsync(
+        IReadOnlyList<PackageRegistration> targets,
+        List<string> lines,
+        IProgress<string>? progress,
+        CancellationToken ct)
+    {
+        if (_repairSystemAppAsync is null)
+        {
+            return 0;
+        }
+
+        var restored = 0;
+        foreach (var target in targets)
+        {
+            ct.ThrowIfCancellationRequested();
+            progress?.Report($"システムアプリの本体を入れ直しています: {target.DisplayName}");
+
+            string? error;
+            try
+            {
+                error = await _repairSystemAppAsync(target.FamilyName, progress, ct);
+            }
+            catch (Exception ex) when (ex is COMException or UnauthorizedAccessException or InvalidOperationException)
+            {
+                error = ex.Message;
+            }
+
+            if (error is null)
+            {
+                restored++;
+                lines.Add($"  - 再インストール: {target.DisplayName} (システムアプリなので本体を入れ直しました)");
+                LoggerBootstrap.Log.Info($"{Id}: 本体を再インストール {target.FamilyName}");
+            }
+            else
+            {
+                lines.Add($"  - 本体の入れ直しは見送りました: {target.DisplayName} — {error}");
+                LoggerBootstrap.Log.Info($"{Id}: 本体の再インストールに失敗 {target.FamilyName}: {error}");
+            }
+        }
+
+        return restored;
+    }
+
     /// <summary>修復後に実体が戻ったかを再列挙で確認する (登録自体が消えていれば解消扱い)。</summary>
     private async Task<bool> IsStillGhostAsync(PackageRegistration target, CancellationToken ct)
     {
@@ -378,27 +437,65 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
         if (deprovision && OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763))
         {
             // システムアプリは全ユーザー向けプロビジョニングが残っていると登録解除が巻き戻される。
-            var deprovisionResult = await packageManager
-                .DeprovisionPackageForAllUsersAsync(package.FamilyName)
-                .AsTask(ct);
-            if (deprovisionResult.ExtendedErrorCode is not null)
+            try
             {
+                var deprovisionResult = await packageManager
+                    .DeprovisionPackageForAllUsersAsync(package.FamilyName)
+                    .AsTask(ct);
+                if (deprovisionResult.ExtendedErrorCode is not null)
+                {
+                    LoggerBootstrap.Log.Info(
+                        $"remove-ghost-packages: プロビジョニング解除は不可 {package.FamilyName}: {deprovisionResult.ExtendedErrorCode.Message}");
+                }
+            }
+            catch (COMException ex)
+            {
+                // プロビジョニングされていない移行残骸では ERROR_NOT_FOUND になる。解除本体は続行する。
                 LoggerBootstrap.Log.Info(
-                    $"remove-ghost-packages: プロビジョニング解除は不可 {package.FamilyName}: {deprovisionResult.ExtendedErrorCode.Message}");
+                    $"remove-ghost-packages: プロビジョニング解除は対象外 {package.FamilyName}: {ex.Message.Trim()}");
             }
         }
 
-        var result = await packageManager
-            .RemovePackageAsync(package.FullName, RemovalOptions.RemoveForAllUsers)
-            .AsTask(ct);
-
-        if (result.ExtendedErrorCode is null)
+        // OS のメジャーアップグレードでマシン側の登録が消え、ユーザー側の登録だけが残った残骸では
+        // RemoveForAllUsers が ERROR_NOT_FOUND (0x80070490) になる。その場合は現在ユーザーの
+        // 登録だけを解除すればスタートメニューから消える。
+        var allUsersError = await TryRemoveAsync(packageManager, package.FullName, RemovalOptions.RemoveForAllUsers, ct);
+        if (allUsersError is null)
         {
             return null;
         }
 
-        return string.IsNullOrWhiteSpace(result.ErrorText)
-            ? result.ExtendedErrorCode.Message
-            : result.ErrorText;
+        LoggerBootstrap.Log.Info(
+            $"remove-ghost-packages: 全ユーザー解除に失敗したため現在ユーザーで再試行 {package.FullName}: {allUsersError}");
+
+        var currentUserError = await TryRemoveAsync(packageManager, package.FullName, RemovalOptions.None, ct);
+        return currentUserError is null
+            ? null
+            : $"{allUsersError} (現在ユーザーからの解除も失敗: {currentUserError})";
+    }
+
+    /// <summary>登録解除を 1 回試す。COM 例外もエラー文字列に変換して呼び出し側の分岐を単純にする。</summary>
+    private static async Task<string?> TryRemoveAsync(
+        PackageManager packageManager,
+        string fullName,
+        RemovalOptions options,
+        CancellationToken ct)
+    {
+        try
+        {
+            var result = await packageManager.RemovePackageAsync(fullName, options).AsTask(ct);
+            if (result.ExtendedErrorCode is null)
+            {
+                return null;
+            }
+
+            return string.IsNullOrWhiteSpace(result.ErrorText)
+                ? result.ExtendedErrorCode.Message.Trim()
+                : result.ErrorText.Trim();
+        }
+        catch (COMException ex)
+        {
+            return ex.Message.Trim();
+        }
     }
 }

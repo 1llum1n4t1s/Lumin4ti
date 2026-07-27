@@ -58,14 +58,16 @@ public sealed class GhostPackageCleanupTests
         IReadOnlyList<string>? startAppIds,
         Action? refreshStartMenu = null,
         Func<string, bool>? isConfirmedMissing = null,
-        Func<string, IProgress<string>?, CancellationToken, Task<string?>>? repairSystemAppAsync = null) =>
+        Func<string, IProgress<string>?, CancellationToken, Task<string?>>? repairSystemAppAsync = null,
+        Func<string, bool>? canRepairSystemApp = null) =>
         new(
             store.Enumerate,
             store.RemoveAsync,
             isConfirmedMissing ?? (path => path.Contains("ghost", StringComparison.OrdinalIgnoreCase) || path == GhostPath),
             () => startAppIds,
             refreshStartMenu ?? (() => { }),
-            repairSystemAppAsync);
+            repairSystemAppAsync,
+            canRepairSystemApp);
 
     [TestMethod]
     public async Task スタートに出ている壊れた登録だけを解除する()
@@ -206,6 +208,45 @@ public sealed class GhostPackageCleanupTests
 
         Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
         StringAssert.Contains(result.Detail, "実体が復元されませんでした");
+    }
+
+    [TestMethod]
+    public async Task 解除できたシステムアプリは本体を入れ直す()
+    {
+        var store = new FakeStore([Ghost()]);
+        var repairedFamilies = new List<string>();
+
+        var result = await CreateAction(
+                store,
+                [$"{GhostFamily}!Microsoft.PPIProjection"],
+                repairSystemAppAsync: (family, _, _) =>
+                {
+                    repairedFamilies.Add(family);
+                    return Task.FromResult<string?>(null);
+                },
+                canRepairSystemApp: family => family == GhostFamily)
+            .ExecuteAsync();
+
+        Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
+        CollectionAssert.AreEqual(new[] { GhostFamily }, repairedFamilies, "残骸を消したうえで本体を入れ直す");
+        StringAssert.Contains(result.Detail, "再インストール");
+    }
+
+    [TestMethod]
+    public async Task 解除後の入れ直しに失敗しても部分失敗にはしない()
+    {
+        var store = new FakeStore([Ghost()]);
+
+        var result = await CreateAction(
+                store,
+                [$"{GhostFamily}!Microsoft.PPIProjection"],
+                repairSystemAppAsync: (_, _, _) => Task.FromResult<string?>("WSUS 環境のため取得できません"),
+                canRepairSystemApp: family => family == GhostFamily)
+            .ExecuteAsync();
+
+        // ゴースト自体は消えているので表示問題は解決している
+        Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
+        StringAssert.Contains(result.Detail, "本体の入れ直しは見送りました");
     }
 
     [TestMethod]

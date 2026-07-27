@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
@@ -74,18 +75,26 @@ internal static partial class SystemAppCapabilityRepair
         return $"オプション機能 {resolvedId} の追加に失敗しました (exit={retry.ExitCode})";
     }
 
-    private static Task<CommandExecutionResult> AddCapabilityAsync(
+    private static async Task<CommandExecutionResult> AddCapabilityAsync(
         string capabilityId,
         ICommandExecutor executor,
         IProgress<string>? progress,
         CancellationToken ct)
     {
-        progress?.Report($"オプション機能を追加しています: {capabilityId}");
-        return executor.RunAsync(
+        progress?.Report($"オプション機能を追加しています: {capabilityId} (Windows Update から取得するため数分かかることがあります)");
+        // 長時間かかる工程なので、開始と所要時間をログに残して「無反応」と「本当に遅い」を切り分けられるようにする。
+        LoggerBootstrap.Log.Info($"remove-ghost-packages: /Add-Capability 開始 {capabilityId}");
+        var started = Stopwatch.GetTimestamp();
+
+        var result = await executor.RunAsync(
             "dism.exe",
             $"/online /Add-Capability /CapabilityName:{capabilityId} /NoRestart",
             ct,
             progress);
+
+        LoggerBootstrap.Log.Info(
+            $"remove-ghost-packages: /Add-Capability 完了 {capabilityId} (exit={result.ExitCode} / {Stopwatch.GetElapsedTime(started).TotalSeconds:F0} 秒)");
+        return result;
     }
 
     /// <summary>"App.WirelessDisplay.Connect~~~~0.0.1.0" → "App.WirelessDisplay.Connect"。</summary>
@@ -105,7 +114,11 @@ internal static partial class SystemAppCapabilityRepair
         IProgress<string>? progress,
         CancellationToken ct)
     {
+        LoggerBootstrap.Log.Info($"remove-ghost-packages: /Get-Capabilities 開始 (接頭辞 {prefix})");
+        var started = Stopwatch.GetTimestamp();
         var list = await executor.RunAsync("dism.exe", "/online /Get-Capabilities", ct, progress);
+        LoggerBootstrap.Log.Info(
+            $"remove-ghost-packages: /Get-Capabilities 完了 (exit={list.ExitCode} / {Stopwatch.GetElapsedTime(started).TotalSeconds:F0} 秒)");
         if (!list.Success)
         {
             return null;
