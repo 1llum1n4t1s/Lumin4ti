@@ -27,6 +27,18 @@ public sealed class GhostPackageCleanupTests
 
         public IReadOnlyList<PackageRegistration> Enumerate() => [.. _packages];
 
+        /// <summary>本体の入れ直しで実体フォルダが復活した状態を再現する。</summary>
+        public void RestoreInstallLocation(string familyName)
+        {
+            for (var i = 0; i < _packages.Count; i++)
+            {
+                if (_packages[i].FamilyName == familyName)
+                {
+                    _packages[i] = _packages[i] with { InstalledPath = @"C:\Windows\SystemApps\restored" };
+                }
+            }
+        }
+
         public Task<string?> RemoveAsync(PackageRegistration package, bool deprovision, CancellationToken ct)
         {
             RemoveCalls.Add((package.FullName, deprovision));
@@ -45,13 +57,15 @@ public sealed class GhostPackageCleanupTests
         FakeStore store,
         IReadOnlyList<string>? startAppIds,
         Action? refreshStartMenu = null,
-        Func<string, bool>? isConfirmedMissing = null) =>
+        Func<string, bool>? isConfirmedMissing = null,
+        Func<string, IProgress<string>?, CancellationToken, Task<string?>>? repairSystemAppAsync = null) =>
         new(
             store.Enumerate,
             store.RemoveAsync,
             isConfirmedMissing ?? (path => path.Contains("ghost", StringComparison.OrdinalIgnoreCase) || path == GhostPath),
             () => startAppIds,
-            refreshStartMenu ?? (() => { }));
+            refreshStartMenu ?? (() => { }),
+            repairSystemAppAsync);
 
     [TestMethod]
     public async Task スタートに出ている壊れた登録だけを解除する()
@@ -131,6 +145,74 @@ public sealed class GhostPackageCleanupTests
             store.RemoveCalls.Select(c => c.Deprovision).ToArray(),
             "1 回目は通常解除、残ったら 2 回目でプロビジョニング解除を伴う再試行");
         StringAssert.Contains(result.Detail, "残存");
+    }
+
+    [TestMethod]
+    public async Task 削除できないシステムアプリは本体を入れ直して修復する()
+    {
+        var store = new FakeStore([Ghost()]);
+        store.Unremovable.Add(GhostFullName);
+        var repairedFamilies = new List<string>();
+        var refreshed = false;
+
+        var result = await CreateAction(
+                store,
+                [$"{GhostFamily}!Microsoft.PPIProjection"],
+                refreshStartMenu: () => refreshed = true,
+                repairSystemAppAsync: (family, _, _) =>
+                {
+                    repairedFamilies.Add(family);
+                    store.RestoreInstallLocation(family);
+                    return Task.FromResult<string?>(null);
+                })
+            .ExecuteAsync();
+
+        Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
+        CollectionAssert.AreEqual(new[] { GhostFamily }, repairedFamilies);
+        StringAssert.Contains(result.Detail, "再インストール");
+        Assert.IsTrue(refreshed, "再インストール後もスタートメニューを再構築する");
+    }
+
+    [TestMethod]
+    public async Task 入れ直しもできない項目は理由付きで残存として報告する()
+    {
+        var store = new FakeStore([Ghost()]);
+        store.Unremovable.Add(GhostFullName);
+
+        var result = await CreateAction(
+                store,
+                [$"{GhostFamily}!Microsoft.PPIProjection"],
+                repairSystemAppAsync: (_, _, _) =>
+                    Task.FromResult<string?>("この項目に対応するオプション機能が分かりません"))
+            .ExecuteAsync();
+
+        Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
+        StringAssert.Contains(result.Detail, "残存");
+        StringAssert.Contains(result.Detail, "オプション機能が分かりません");
+    }
+
+    [TestMethod]
+    public async Task 本体を追加しても実体が戻らなければ成功として報告しない()
+    {
+        var store = new FakeStore([Ghost()]);
+        store.Unremovable.Add(GhostFullName);
+
+        // オプション機能が「インストール済み」のままで DISM が何もせず成功を返すケース
+        var result = await CreateAction(
+                store,
+                [$"{GhostFamily}!Microsoft.PPIProjection"],
+                repairSystemAppAsync: (_, _, _) => Task.FromResult<string?>(null))
+            .ExecuteAsync();
+
+        Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
+        StringAssert.Contains(result.Detail, "実体が復元されませんでした");
+    }
+
+    [TestMethod]
+    public void 修復対象のシステムアプリを判定できる()
+    {
+        Assert.IsTrue(SystemAppCapabilityRepair.CanRepair("Microsoft.PPIProjection_cw5n1h2txyewy"));
+        Assert.IsFalse(SystemAppCapabilityRepair.CanRepair("Contoso.SomeStoreApp_8wekyb3d8bbwe"));
     }
 
     [TestMethod]

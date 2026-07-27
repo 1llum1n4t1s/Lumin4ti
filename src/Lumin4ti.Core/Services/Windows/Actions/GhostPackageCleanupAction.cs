@@ -37,14 +37,19 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
     private readonly Func<string, bool> _isConfirmedMissing;
     private readonly Func<IReadOnlyList<string>?> _readStartMenuAppIds;
     private readonly Action _refreshStartMenu;
+    private readonly Func<string, IProgress<string>?, CancellationToken, Task<string?>>? _repairSystemAppAsync;
 
-    public GhostPackageCleanupAction()
+    public GhostPackageCleanupAction(ICommandExecutor executor)
         : this(
             EnumerateRegisteredPackages,
             RemovePackageAsync,
             path => StartupCommandParser.IsConfirmedMissing(path),
             StartMenuAppListReader.TryReadAppUserModelIds,
-            StartMenuAppListReader.RefreshStartMenu)
+            StartMenuAppListReader.RefreshStartMenu,
+            (familyName, progress, ct) =>
+                SystemAppCapabilityRepair.CanRepair(familyName)
+                    ? SystemAppCapabilityRepair.TryRepairAsync(familyName, executor, progress, ct)
+                    : Task.FromResult<string?>("この項目に対応するオプション機能が分かりません"))
     {
     }
 
@@ -53,23 +58,26 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
         Func<PackageRegistration, bool, CancellationToken, Task<string?>> removePackageAsync,
         Func<string, bool> isConfirmedMissing,
         Func<IReadOnlyList<string>?> readStartMenuAppIds,
-        Action refreshStartMenu)
+        Action refreshStartMenu,
+        Func<string, IProgress<string>?, CancellationToken, Task<string?>>? repairSystemAppAsync = null)
     {
         _enumeratePackages = enumeratePackages;
         _removePackageAsync = removePackageAsync;
         _isConfirmedMissing = isConfirmedMissing;
         _readStartMenuAppIds = readStartMenuAppIds;
         _refreshStartMenu = refreshStartMenu;
+        _repairSystemAppAsync = repairSystemAppAsync;
     }
 
     public string Id => "remove-ghost-packages";
 
-    public string Label => "スタートメニューの壊れたアプリ登録 (ゴースト) を削除";
+    public string Label => "スタートメニューの壊れたアプリ項目 (ゴースト) を修復";
 
     public string Description =>
-        "スタートメニューに並んでいるのに実体フォルダが存在しないアプリ登録 (ゴースト) を検出し、全ユーザーから登録解除してスタートの一覧を再構築します。" +
+        "スタートメニューに並んでいるのに実体フォルダが存在しないアプリ (ゴースト登録) を検出して修復します。" +
         "Windows のメジャーアップグレードでシステムアプリのファイルだけが消えたときに発生し、表示名を解決できないため " +
         "「ms-resource:ProductNameWindowsStore」のような生の文字列で並び、クリックしても起動しない項目になります。" +
+        "基本は全ユーザーからの登録解除で消しますが、Windows が保護していて消せないシステムアプリは、本来あるべき状態に戻すため本体 (オプション機能) を入れ直します。" +
         "誤削除を避けるため、スタートに実際に表示されている項目だけを対象とし、準備済みの固定ドライブ上でフォルダの不在が確認できないものは残します。";
 
     public CommandCategory Category => CommandCategory.Cleanup;
@@ -137,26 +145,32 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
         }
 
         var removedCount = ghosts.Count - pending.Count;
-        if (removedCount > 0)
+
+        // Windows が保護していて消せない = 本来そこに在るべきシステムアプリなので、
+        // 削除ではなく本体 (オプション機能) の入れ直しで正しい状態へ戻す。
+        var unresolved = await RepairAsync(pending, lines, progress, ct);
+        var repairedCount = pending.Count - unresolved.Count;
+
+        if (removedCount > 0 || repairedCount > 0)
         {
             progress?.Report("スタートメニューの一覧を再構築しています...");
             _refreshStartMenu();
         }
 
-        foreach (var survivor in pending)
+        if (unresolved.Count > 0)
         {
-            lines.Add($"  - 残存: {survivor.DisplayName} ({survivor.FullName})");
-        }
-
-        if (pending.Count > 0)
-        {
-            lines.Add("  - 残った項目は Windows がシステムアプリとして保護しています。オプション機能を入れ直してから削除するか、サインアウト後に再実行してください");
-            LoggerBootstrap.Log.Error($"{Id}: {removedCount} 件解除 / {pending.Count} 件残存");
+            lines.Add("  - 残った項目は Windows がシステムアプリとして保護しています。サインアウト後に再実行するか、設定のオプション機能から本体を入れ直してください");
+            LoggerBootstrap.Log.Error(
+                $"{Id}: {removedCount} 件解除 / {repairedCount} 件再インストール / {unresolved.Count} 件残存");
             return MaintenanceActionResult.Partial(lines);
         }
 
-        lines.Add($"  - {removedCount} 件のゴースト登録を削除しました (スタートメニューを再構築済み)");
-        LoggerBootstrap.Log.Info($"{Id}: {removedCount} 件解除");
+        if (removedCount > 0)
+        {
+            lines.Add($"  - {removedCount} 件のゴースト登録を削除しました (スタートメニューを再構築済み)");
+        }
+
+        LoggerBootstrap.Log.Info($"{Id}: {removedCount} 件解除 / {repairedCount} 件再インストール");
         return MaintenanceActionResult.Ok(lines);
     }
 
@@ -214,6 +228,67 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
         }
 
         return survivors;
+    }
+
+    /// <summary>
+    /// 登録解除できなかった項目の本体を入れ直して修復する。戻り値は修復もできなかった項目。
+    /// 入れ直し後は実体フォルダが復活し、スタートの表示名も正しく解決されるようになる。
+    /// </summary>
+    private async Task<List<PackageRegistration>> RepairAsync(
+        IReadOnlyList<PackageRegistration> targets,
+        List<string> lines,
+        IProgress<string>? progress,
+        CancellationToken ct)
+    {
+        var unresolved = new List<PackageRegistration>();
+        foreach (var target in targets)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            if (_repairSystemAppAsync is null)
+            {
+                unresolved.Add(target);
+                lines.Add($"  - 残存: {target.DisplayName} ({target.FullName})");
+                continue;
+            }
+
+            progress?.Report($"本体を入れ直しています: {target.DisplayName}");
+            string? error;
+            try
+            {
+                error = await _repairSystemAppAsync(target.FamilyName, progress, ct);
+            }
+            catch (Exception ex) when (ex is COMException or UnauthorizedAccessException or InvalidOperationException)
+            {
+                error = ex.Message;
+            }
+
+            if (error is null && !await IsStillGhostAsync(target, ct))
+            {
+                lines.Add($"  - 再インストール: {target.DisplayName} (削除できないシステムアプリのため本体を復元しました)");
+                LoggerBootstrap.Log.Info($"{Id}: 本体を再インストール {target.FamilyName}");
+                continue;
+            }
+
+            unresolved.Add(target);
+            // オプション機能が「インストール済み」のまま実体だけ欠けていると DISM は何もせず成功を返すため、
+            // 追加コマンドの成功では判定せず、実体が戻ったかどうかで判定する。
+            lines.Add(error is null
+                ? $"  - 残存: {target.DisplayName} — 本体を追加しても実体が復元されませんでした (設定のオプション機能で一度削除してから追加し直してください)"
+                : $"  - 残存: {target.DisplayName} — {error}");
+        }
+
+        return unresolved;
+    }
+
+    /// <summary>修復後に実体が戻ったかを再列挙で確認する (登録自体が消えていれば解消扱い)。</summary>
+    private async Task<bool> IsStillGhostAsync(PackageRegistration target, CancellationToken ct)
+    {
+        var packages = await Task.Run(_enumeratePackages, ct);
+        return packages.Any(package =>
+            package.FamilyName.Equals(target.FamilyName, StringComparison.OrdinalIgnoreCase) &&
+            package.InstalledPath is { Length: > 0 } path &&
+            _isConfirmedMissing(path));
     }
 
     /// <summary>
