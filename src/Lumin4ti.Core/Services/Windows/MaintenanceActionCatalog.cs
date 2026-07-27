@@ -40,6 +40,15 @@ public sealed class MaintenanceActionCatalog
             new BrokenStartupCleanupAction(),
             new DeadAssociationCleanupAction(),
             new GhostPackageCleanupAction(executor),
+            new SystemPackageRepairAction(
+                id: "repair-shell-client-cbs",
+                familyName: "MicrosoftWindows.Client.CBS_cw5n1h2txyewy",
+                label: "検索・入力・ウィジェットの不調を修復 (シェル系システムアプリの再登録)",
+                description:
+                    "Windows の検索 (SearchHost)、日本語入力や絵文字パネル (TextInputHost)、ウィジェット (WebExperienceHost) をまとめて提供している " +
+                    "システムアプリ MicrosoftWindows.Client.CBS を登録し直します。検索ボックスが固まる・入力候補が出ない・ウィジェットが真っ白になるといった、" +
+                    "本体は壊れていないのに登録状態だけが壊れた不調に効きます。アンインストールはせず、設定や履歴も消えません。" +
+                    "再登録時に常駐プロセスがいったん終了し、必要になった時点で Windows が起動し直します。"),
             new EventLogClearAction(),
             new StoreCacheResetAction(executor),
             new TrimOptimizeAction(executor),
