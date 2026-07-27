@@ -83,7 +83,7 @@
   <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">연결 프로그램에서 존재하지 않는 앱 제거</x:String>
   <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">실행 파일이 더 이상 존재하지 않는 앱을 연결 프로그램 후보 목록과 Applications 등록에서 제거합니다.</x:String>
   <x:String x:Key="Text.Action.remove-ghost-packages.Label" xml:space="preserve">시작 메뉴의 깨진(고스트) 앱 등록 제거</x:String>
-  <x:String x:Key="Text.Action.remove-ghost-packages.Desc" xml:space="preserve">설치 폴더가 이미 없는데도 등록만 남아 있는 앱(고스트 등록)을 찾아 모든 사용자에서 등록을 해제합니다. Windows 대규모 업그레이드에서 시스템 앱의 파일만 삭제될 때 발생하며, 표시 이름을 확인할 수 없어 시작 메뉴에 "ms-resource:ProductNameWindowsStore" 같은 원본 문자열이 나타나고 클릭해도 실행되지 않습니다. 잘못된 삭제를 막기 위해 준비된 고정 드라이브에서 폴더가 없음을 확실히 확인한 항목만 처리하며, 확인할 수 없는 항목은 그대로 둡니다.</x:String>
+  <x:String x:Key="Text.Action.remove-ghost-packages.Desc" xml:space="preserve">설치 폴더가 이미 없는데도 시작 메뉴에 표시되는 앱 항목(고스트 등록)을 찾아 모든 사용자에서 등록을 해제하고 시작 메뉴 목록을 다시 만듭니다. Windows 대규모 업그레이드에서 시스템 앱의 파일만 삭제될 때 발생하며, 표시 이름을 확인할 수 없어 시작 메뉴에 "ms-resource:ProductNameWindowsStore" 같은 원본 문자열이 나타나고 클릭해도 실행되지 않습니다. 잘못된 삭제를 막기 위해 실제로 시작 메뉴에 보이는 항목만 처리하며, 준비된 고정 드라이브에서 폴더가 없음을 확인할 수 없는 항목은 그대로 둡니다.</x:String>
   <x:String x:Key="Text.Action.event-log-clear.Label" xml:space="preserve">이벤트 뷰어 로그 모두 삭제</x:String>
   <x:String x:Key="Text.Action.event-log-clear.Desc" xml:space="preserve">이벤트 뷰어에 쌓인 모든 채널의 로그를 삭제해 로그 저장 영역(대개 수백 MB)을 확보합니다. 과거의 문제 해결 정보도 사라지므로 최근 문제를 조사하는 중에는 실행하지 마세요. 일부 보호된 시스템 로그는 건너뜁니다.</x:String>
   <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">Microsoft Store 캐시 지우기</x:String>

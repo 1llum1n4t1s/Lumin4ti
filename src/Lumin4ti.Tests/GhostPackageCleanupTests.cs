@@ -6,103 +6,152 @@ namespace Lumin4ti.Tests;
 [TestClass]
 public sealed class GhostPackageCleanupTests
 {
-    private static PackageRegistration Package(string name, string? path) =>
-        new($"{name}_1.0.0.0_neutral_neutral_cw5n1h2txyewy", name, path);
+    private const string GhostFamily = "Microsoft.PPIProjection_cw5n1h2txyewy";
+    private const string GhostFullName = "Microsoft.PPIProjection_10.0.22621.1_neutral_neutral_cw5n1h2txyewy";
+    private const string GhostPath = @"C:\Windows\SystemApps\Microsoft.PPIProjection_cw5n1h2txyewy";
+
+    private static PackageRegistration Ghost() =>
+        new(GhostFullName, GhostFamily, "Microsoft.PPIProjection", GhostPath);
+
+    private static PackageRegistration Package(string family, string path) =>
+        new($"{family}_1.0.0.0_x64__cw5n1h2txyewy", family, family, path);
+
+    /// <summary>登録解除に成功した (= 再列挙で消える) 挙動をエミュレートする。</summary>
+    private sealed class FakeStore(IEnumerable<PackageRegistration> packages)
+    {
+        private readonly List<PackageRegistration> _packages = [.. packages];
+
+        public List<(string FullName, bool Deprovision)> RemoveCalls { get; } = [];
+
+        public HashSet<string> Unremovable { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+        public IReadOnlyList<PackageRegistration> Enumerate() => [.. _packages];
+
+        public Task<string?> RemoveAsync(PackageRegistration package, bool deprovision, CancellationToken ct)
+        {
+            RemoveCalls.Add((package.FullName, deprovision));
+            if (Unremovable.Contains(package.FullName))
+            {
+                // 「成功を返すのに登録が残る」システムアプリの挙動を再現する
+                return Task.FromResult<string?>(null);
+            }
+
+            _packages.RemoveAll(p => p.FullName == package.FullName);
+            return Task.FromResult<string?>(null);
+        }
+    }
 
     private static GhostPackageCleanupAction CreateAction(
-        IReadOnlyList<PackageRegistration> packages,
-        List<string> removed,
-        Func<string, bool>? isConfirmedMissing = null,
-        string? removeError = null) =>
+        FakeStore store,
+        IReadOnlyList<string>? startAppIds,
+        Action? refreshStartMenu = null,
+        Func<string, bool>? isConfirmedMissing = null) =>
         new(
-            () => packages,
-            (package, _) =>
-            {
-                removed.Add(package.FullName);
-                return Task.FromResult(removeError);
-            },
-            isConfirmedMissing ?? (path => path.Contains("ghost", StringComparison.OrdinalIgnoreCase)));
+            store.Enumerate,
+            store.RemoveAsync,
+            isConfirmedMissing ?? (path => path.Contains("ghost", StringComparison.OrdinalIgnoreCase) || path == GhostPath),
+            () => startAppIds,
+            refreshStartMenu ?? (() => { }));
 
     [TestMethod]
-    public async Task フォルダが確実に存在しない登録だけを解除する()
+    public async Task スタートに出ている壊れた登録だけを解除する()
     {
-        var removed = new List<string>();
-        var action = CreateAction(
-            [
-                Package("Microsoft.PPIProjection", @"C:\Windows\SystemApps\ghost"),
-                Package("Microsoft.WindowsCalculator", @"C:\Program Files\WindowsApps\alive"),
-            ],
-            removed);
+        var store = new FakeStore([
+            Ghost(),
+            // スタートに出ない更新残骸 (LKG / SxS) はフォルダが無くても触らない
+            Package("MicrosoftWindows.LKG.Search_cw5n1h2txyewy", @"C:\Windows\SystemApps\LKG\ghost"),
+            Package("MicrosoftWindows.61869720.Voiess_cw5n1h2txyewy", @"C:\Windows\SystemApps\SxS\ghost"),
+        ]);
+        var refreshed = false;
 
-        var result = await action.ExecuteAsync();
+        var result = await CreateAction(
+                store,
+                [$"{GhostFamily}!Microsoft.PPIProjection", "308046B0AF4A39CB"],
+                refreshStartMenu: () => refreshed = true)
+            .ExecuteAsync();
 
         Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
-        CollectionAssert.AreEqual(
-            new[] { "Microsoft.PPIProjection_1.0.0.0_neutral_neutral_cw5n1h2txyewy" },
-            removed);
+        CollectionAssert.AreEqual(new[] { GhostFullName }, store.RemoveCalls.Select(c => c.FullName).ToArray());
+        Assert.IsTrue(refreshed, "解除したらスタートメニューを再構築する");
+    }
+
+    [TestMethod]
+    public async Task スタートに出ていてもフォルダがあるなら触らない()
+    {
+        var store = new FakeStore([new(GhostFullName, GhostFamily, "ワイヤレス ディスプレイ", GhostPath)]);
+
+        var result = await CreateAction(
+                store,
+                [$"{GhostFamily}!Microsoft.PPIProjection"],
+                isConfirmedMissing: _ => false)
+            .ExecuteAsync();
+
+        Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
+        Assert.AreEqual(0, store.RemoveCalls.Count);
+        StringAssert.Contains(result.Detail, "壊れた項目はありませんでした");
     }
 
     [TestMethod]
     public async Task パスを取得できない登録には触れない()
     {
-        var removed = new List<string>();
-        var action = CreateAction(
-            [Package("Microsoft.Unknown", null), Package("Microsoft.Empty", string.Empty)],
-            removed,
-            // 不在判定に到達したら誤削除なので、常に「欠損」と答えるスタブで検出する
-            isConfirmedMissing: _ => true);
+        var store = new FakeStore([new(GhostFullName, GhostFamily, "Microsoft.PPIProjection", null)]);
 
-        var result = await action.ExecuteAsync();
+        var result = await CreateAction(store, [$"{GhostFamily}!Microsoft.PPIProjection"], isConfirmedMissing: _ => true)
+            .ExecuteAsync();
 
         Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
-        Assert.AreEqual(0, removed.Count);
-        StringAssert.Contains(result.Detail, "ゴースト登録はありませんでした");
+        Assert.AreEqual(0, store.RemoveCalls.Count);
     }
 
     [TestMethod]
-    public async Task 解除に失敗した項目があれば部分成功として報告する()
+    public async Task スタート一覧を読めないときは何も変更しない()
     {
-        var removed = new List<string>();
-        var action = CreateAction(
-            [Package("Microsoft.PPIProjection", @"C:\Windows\SystemApps\ghost")],
-            removed,
-            removeError: "0x80073CFA");
+        var store = new FakeStore([Ghost()]);
+        var refreshed = false;
 
-        var result = await action.ExecuteAsync();
+        var result = await CreateAction(store, startAppIds: null, refreshStartMenu: () => refreshed = true)
+            .ExecuteAsync();
+
+        Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
+        Assert.AreEqual(0, store.RemoveCalls.Count);
+        Assert.IsFalse(refreshed);
+    }
+
+    [TestMethod]
+    public async Task 成功応答でも登録が残るならプロビジョニング解除で再試行する()
+    {
+        var store = new FakeStore([Ghost()]);
+        store.Unremovable.Add(GhostFullName);
+
+        var result = await CreateAction(store, [$"{GhostFamily}!Microsoft.PPIProjection"]).ExecuteAsync();
 
         Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
-        StringAssert.Contains(result.Detail, "0x80073CFA");
-    }
-
-    [TestMethod]
-    public async Task 列挙が空でも成功として扱う()
-    {
-        var removed = new List<string>();
-        var action = CreateAction([], removed);
-
-        var result = await action.ExecuteAsync();
-
-        Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
-        Assert.AreEqual(0, removed.Count);
+        CollectionAssert.AreEqual(
+            new[] { false, true },
+            store.RemoveCalls.Select(c => c.Deprovision).ToArray(),
+            "1 回目は通常解除、残ったら 2 回目でプロビジョニング解除を伴う再試行");
+        StringAssert.Contains(result.Detail, "残存");
     }
 
     [TestMethod]
     public async Task 進捗は対象ごとに通知される()
     {
-        var removed = new List<string>();
+        var store = new FakeStore([Ghost()]);
         var messages = new List<string>();
-        var action = CreateAction(
-            [
-                Package("Microsoft.PPIProjection", @"C:\Windows\SystemApps\ghost"),
-                Package("Microsoft.Other", @"C:\Windows\SystemApps\ghost2"),
-            ],
-            removed);
 
-        await action.ExecuteAsync(new RecordingProgress(messages), CancellationToken.None);
+        await CreateAction(store, [$"{GhostFamily}!Microsoft.PPIProjection"])
+            .ExecuteAsync(new RecordingProgress(messages), CancellationToken.None);
 
-        Assert.AreEqual(2, removed.Count);
         Assert.IsTrue(messages.Any(m => m.Contains("Microsoft.PPIProjection", StringComparison.Ordinal)));
-        Assert.IsTrue(messages.Any(m => m.Contains("Microsoft.Other", StringComparison.Ordinal)));
+    }
+
+    [TestMethod]
+    public void AUMIDからパッケージファミリー名を取り出す()
+    {
+        Assert.AreEqual(GhostFamily, StartMenuAppListReader.TryGetPackageFamilyName($"{GhostFamily}!App"));
+        // Win32 アプリの AUMID にはファミリー名が無い
+        Assert.IsNull(StartMenuAppListReader.TryGetPackageFamilyName("308046B0AF4A39CB"));
+        Assert.IsNull(StartMenuAppListReader.TryGetPackageFamilyName("!LeadingSeparator"));
     }
 
     /// <summary>Progress&lt;T&gt; は同期コンテキスト依存で通知順が保証されないため、同期記録に差し替える。</summary>

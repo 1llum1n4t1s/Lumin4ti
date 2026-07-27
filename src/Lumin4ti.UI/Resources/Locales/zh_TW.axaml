@@ -83,7 +83,7 @@
   <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">從「開啟方式」中移除不存在的應用程式</x:String>
   <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">從「開啟方式」候選清單與 Applications 登錄中移除執行檔已不存在的應用程式。</x:String>
   <x:String x:Key="Text.Action.remove-ghost-packages.Label" xml:space="preserve">刪除開始功能表中損毀的（幽靈）應用程式註冊</x:String>
-  <x:String x:Key="Text.Action.remove-ghost-packages.Desc" xml:space="preserve">偵測安裝資料夾已不存在卻仍保留註冊紀錄的應用程式（幽靈註冊），並為所有使用者取消註冊。Windows 大版本升級只刪除系統應用程式的檔案時會發生這種情況：顯示名稱無法解析，開始功能表會出現 "ms-resource:ProductNameWindowsStore" 之類的原始字串，點擊也不會啟動。為避免誤刪，僅處理在就緒的固定磁碟上確認資料夾確實不存在的項目，無法確認者一律保留。</x:String>
+  <x:String x:Key="Text.Action.remove-ghost-packages.Desc" xml:space="preserve">偵測安裝資料夾已不存在卻仍顯示在開始功能表中的應用程式項目（幽靈註冊），為所有使用者取消註冊並重建開始功能表清單。Windows 大版本升級只刪除系統應用程式的檔案時會發生這種情況：顯示名稱無法解析，開始功能表會出現 "ms-resource:ProductNameWindowsStore" 之類的原始字串，點擊也不會啟動。為避免誤刪，僅處理實際顯示在開始功能表中的項目，無法在就緒的固定磁碟上確認資料夾不存在者一律保留。</x:String>
   <x:String x:Key="Text.Action.event-log-clear.Label" xml:space="preserve">刪除所有事件檢視器記錄檔</x:String>
   <x:String x:Key="Text.Action.event-log-clear.Desc" xml:space="preserve">刪除事件檢視器中累積的所有通道記錄檔，釋放記錄檔儲存區域（通常數百 MB）。過去的疑難排解資訊也會遺失，因此調查近期問題時請勿執行。部分受保護的系統記錄檔會被略過。</x:String>
   <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">清除 Microsoft Store 快取</x:String>
