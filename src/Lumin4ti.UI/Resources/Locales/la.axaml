@@ -99,7 +99,9 @@
   <x:String x:Key="Text.Action.mmagent-page-combining.Label" xml:space="preserve">Page Combining</x:String>
   <x:String x:Key="Text.Action.mmagent-page-combining.Desc" xml:space="preserve">Paginas memoriae contentu identico in unam coniungit, duplicationem tollens. Memoriam servat cum multae applicationes eiusdem generis currunt. Commendatur: ON (in nonnullis editionibus praedefinitum OFF).</x:String>
   <x:String x:Key="Text.Action.mmagent-operation-api.Label" xml:space="preserve">Operation Recorder API</x:String>
-  <x:String x:Key="Text.Action.mmagent-operation-api.Desc" xml:space="preserve">API ut instrumenta externa mores SysMain (olim Superfetch) recordent et repetant. Instrumentis probationis et analysis efficientiae destinatum, in usu normali non adhibitum. Commendatur: OFF (status Windows praedefinitus quoque OFF).</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Desc" xml:space="preserve">API qua instrumenta externa mores SysMain (olim Superfetch) recordantur et iterant. Instrumentis mensurae et analysis destinata, in usu cotidiano non adhibita. "Inactivum" commendatur, sed quaedam Windows editiones inactivationem recusant: tunc numerus tabellarum recordandarum minutus onus levat. Inactivatio a systemate praelectionis pendet: si "Praelectio initus applicationum" vel "Praeinitium applicationum" extinguitur, etiam haec functio inactiva fit.</x:String>
+  <x:String x:Key="Text.Choice.Disabled" xml:space="preserve">Inactivum</x:String>
+  <x:String x:Key="Text.Choice.Default" xml:space="preserve">praedefinitum</x:String>
   <x:String x:Key="Text.Action.mmagent-launch-prefetch.Label" xml:space="preserve">Praeacquisitio initii applicationum</x:String>
   <x:String x:Key="Text.Action.mmagent-launch-prefetch.Desc" xml:space="preserve">Fasciculos quos applicationes frequenter usurpatae onerant discit et in initio eos praeacquirit ut initium acceleret (Prefetch). Etiam in SSD moram initii minuere adiuvat. Commendatur: ON (status Windows praedefinitus quoque ON).</x:String>
   <x:String x:Key="Text.Action.mmagent-prelaunch.Label" xml:space="preserve">Praeinitium applicationum UWP</x:String>

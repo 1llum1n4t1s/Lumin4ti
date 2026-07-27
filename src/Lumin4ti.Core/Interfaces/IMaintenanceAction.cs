@@ -55,6 +55,33 @@ public interface IMaintenanceAction : IMaintenanceItem
         ExecuteAsync(ct);
 }
 
+/// <summary>選択肢 1 つ分。<paramref name="Value"/> は永続的な識別子、表示名は UI がローカライズする。</summary>
+/// <param name="Value">設定値の識別子 (数値設定ならその数値の文字列)。</param>
+/// <param name="Label">日本語マスターの表示名。数値のように翻訳が不要なものはそのまま表示される。</param>
+/// <param name="IsDefault">Windows 既定の選択肢か (UI が「既定」と併記する)。</param>
+/// <param name="LabelKey">翻訳が要る選択肢のローカライズキー (null なら Label をそのまま表示)。</param>
+public sealed record MaintenanceChoiceOption(
+    string Value,
+    string Label,
+    bool IsDefault = false,
+    string? LabelKey = null);
+
+/// <summary>
+/// ON/OFF では表せない設定 (数値や段階) を選択式で切り替える型のメンテナンス項目。
+/// 例: オペレーションレコーダーは「無効」か記録ファイル数の指定で、二値に収まらない。
+/// </summary>
+public interface IMaintenanceChoice : IMaintenanceItem
+{
+    /// <summary>選べる値 (表示順)。</summary>
+    IReadOnlyList<MaintenanceChoiceOption> Options { get; }
+
+    /// <summary>現在選ばれている値。null = 判定できない (非対応環境・権限不足等)。</summary>
+    Task<string?> GetSelectedValueAsync(CancellationToken ct = default);
+
+    /// <summary>値を適用する。</summary>
+    Task<MaintenanceActionResult> SetSelectedValueAsync(string value, CancellationToken ct = default);
+}
+
 /// <summary>
 /// ON/OFF を切り替えられる型のメンテナンス項目。ON = 最適化 (tweak) が適用された状態、
 /// OFF = Windows 既定の状態、で統一する。

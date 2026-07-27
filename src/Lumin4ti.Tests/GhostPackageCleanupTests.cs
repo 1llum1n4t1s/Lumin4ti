@@ -21,7 +21,7 @@ public sealed class GhostPackageCleanupTests
     {
         private readonly List<PackageRegistration> _packages = [.. packages];
 
-        public List<(string FullName, bool Deprovision)> RemoveCalls { get; } = [];
+        public List<(string FullName, PackageRemovalMode Mode)> RemoveCalls { get; } = [];
 
         public HashSet<string> Unremovable { get; } = new(StringComparer.OrdinalIgnoreCase);
 
@@ -39,12 +39,21 @@ public sealed class GhostPackageCleanupTests
             }
         }
 
-        public Task<string?> RemoveAsync(PackageRegistration package, bool deprovision, CancellationToken ct)
+        /// <summary>全ユーザー解除では消えず、現在ユーザー指定でだけ消えるパッケージ (移行残骸の再現)。</summary>
+        public HashSet<string> CurrentUserOnly { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+        public Task<string?> RemoveAsync(PackageRegistration package, PackageRemovalMode mode, CancellationToken ct)
         {
-            RemoveCalls.Add((package.FullName, deprovision));
+            RemoveCalls.Add((package.FullName, mode));
             if (Unremovable.Contains(package.FullName))
             {
                 // 「成功を返すのに登録が残る」システムアプリの挙動を再現する
+                return Task.FromResult<string?>(null);
+            }
+
+            if (mode == PackageRemovalMode.AllUsers && CurrentUserOnly.Contains(package.FullName))
+            {
+                // 全ユーザー解除は成功を返すのに何も消えない
                 return Task.FromResult<string?>(null);
             }
 
@@ -143,10 +152,26 @@ public sealed class GhostPackageCleanupTests
 
         Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
         CollectionAssert.AreEqual(
-            new[] { false, true },
-            store.RemoveCalls.Select(c => c.Deprovision).ToArray(),
-            "1 回目は通常解除、残ったら 2 回目でプロビジョニング解除を伴う再試行");
+            new[] { PackageRemovalMode.AllUsers, PackageRemovalMode.CurrentUser },
+            store.RemoveCalls.Select(c => c.Mode).ToArray(),
+            "1 回目は全ユーザー解除、残ったら 2 回目は現在ユーザー指定で再試行");
         StringAssert.Contains(result.Detail, "残存");
+    }
+
+    [TestMethod]
+    public async Task 全ユーザー解除が空振りでも現在ユーザー指定で消せる()
+    {
+        // マシン側の登録が消えた移行残骸: 全ユーザー解除は成功を返すのに何も消えない
+        var store = new FakeStore([Ghost()]);
+        store.CurrentUserOnly.Add(GhostFullName);
+
+        var result = await CreateAction(store, [$"{GhostFamily}!Microsoft.PPIProjection"]).ExecuteAsync();
+
+        Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
+        CollectionAssert.AreEqual(
+            new[] { PackageRemovalMode.AllUsers, PackageRemovalMode.CurrentUser },
+            store.RemoveCalls.Select(c => c.Mode).ToArray());
+        StringAssert.Contains(result.Detail, "登録解除");
     }
 
     [TestMethod]
@@ -254,6 +279,68 @@ public sealed class GhostPackageCleanupTests
     {
         Assert.IsTrue(SystemAppCapabilityRepair.CanRepair("Microsoft.PPIProjection_cw5n1h2txyewy"));
         Assert.IsFalse(SystemAppCapabilityRepair.CanRepair("Contoso.SomeStoreApp_8wekyb3d8bbwe"));
+    }
+
+    [TestMethod]
+    public void WSUS固定でローカルソースも無い構成はオプション機能を取得できないと判定する()
+    {
+        var reason = SystemAppCapabilityRepair.EvaluateFeatureOnDemandPolicy(
+            useWuServer: 1,
+            repairContentServerSource: null,
+            localSourcePath: null);
+
+        Assert.IsNotNull(reason);
+        StringAssert.Contains(reason, "WSUS");
+    }
+
+    [TestMethod]
+    public void 取得できる構成では事前判定で弾かない()
+    {
+        // 通常の PC (WSUS 未使用・wuauserv は手動)
+        Assert.IsNull(SystemAppCapabilityRepair.EvaluateFeatureOnDemandPolicy(null, null, null, null, 3));
+        // WSUS でも「Windows Update から直接ダウンロード」が有効
+        Assert.IsNull(SystemAppCapabilityRepair.EvaluateFeatureOnDemandPolicy(1, 2, null));
+        // WSUS でもローカルの取得元がある
+        Assert.IsNull(SystemAppCapabilityRepair.EvaluateFeatureOnDemandPolicy(1, null, @"D:\sources\sxs"));
+    }
+
+    [TestMethod]
+    public void WindowsUpdateサービスが無効なら取得不能と判定する()
+    {
+        var reason = SystemAppCapabilityRepair.EvaluateFeatureOnDemandPolicy(
+            useWuServer: null,
+            repairContentServerSource: null,
+            localSourcePath: null,
+            doNotConnectToWindowsUpdateInternetLocations: null,
+            windowsUpdateServiceStart: 4);
+
+        Assert.IsNotNull(reason);
+        StringAssert.Contains(reason, "wuauserv");
+    }
+
+    [TestMethod]
+    public void WU接続禁止ポリシーがあれば取得不能と判定する()
+    {
+        var reason = SystemAppCapabilityRepair.EvaluateFeatureOnDemandPolicy(
+            useWuServer: null,
+            repairContentServerSource: null,
+            localSourcePath: null,
+            doNotConnectToWindowsUpdateInternetLocations: 1,
+            windowsUpdateServiceStart: 3);
+
+        Assert.IsNotNull(reason);
+        StringAssert.Contains(reason, "インターネット上の場所に接続しない");
+    }
+
+    [TestMethod]
+    public void ローカル取得元があればサービス無効でも弾かない()
+    {
+        Assert.IsNull(SystemAppCapabilityRepair.EvaluateFeatureOnDemandPolicy(
+            useWuServer: 1,
+            repairContentServerSource: null,
+            localSourcePath: @"D:\sources\sxs",
+            doNotConnectToWindowsUpdateInternetLocations: 1,
+            windowsUpdateServiceStart: 4));
     }
 
     [TestMethod]

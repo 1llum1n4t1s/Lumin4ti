@@ -19,6 +19,19 @@ internal sealed record PackageRegistration(
     string DisplayName,
     string? InstalledPath);
 
+/// <summary>登録解除の狙い方。</summary>
+internal enum PackageRemovalMode
+{
+    /// <summary>全ユーザーの登録を解除する (通常のアンインストール相当)。</summary>
+    AllUsers,
+
+    /// <summary>
+    /// プロビジョニング解除を試したうえで、現在ユーザーの登録だけを解除する。
+    /// マシン側の登録が消えた移行残骸は全ユーザー解除が空振り (成功応答でも未削除) になるため必要。
+    /// </summary>
+    CurrentUser,
+}
+
 /// <summary>
 /// スタートメニューに並んでいるのに実体フォルダが存在しないパッケージ登録 (ゴースト) を
 /// WinRT の PackageManager で登録解除し、スタートメニューの一覧を再構築する。
@@ -33,7 +46,7 @@ internal sealed record PackageRegistration(
 public sealed class GhostPackageCleanupAction : IMaintenanceAction
 {
     private readonly Func<IReadOnlyList<PackageRegistration>> _enumeratePackages;
-    private readonly Func<PackageRegistration, bool, CancellationToken, Task<string?>> _removePackageAsync;
+    private readonly Func<PackageRegistration, PackageRemovalMode, CancellationToken, Task<string?>> _removePackageAsync;
     private readonly Func<string, bool> _isConfirmedMissing;
     private readonly Func<IReadOnlyList<string>?> _readStartMenuAppIds;
     private readonly Action _refreshStartMenu;
@@ -57,7 +70,7 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
 
     internal GhostPackageCleanupAction(
         Func<IReadOnlyList<PackageRegistration>> enumeratePackages,
-        Func<PackageRegistration, bool, CancellationToken, Task<string?>> removePackageAsync,
+        Func<PackageRegistration, PackageRemovalMode, CancellationToken, Task<string?>> removePackageAsync,
         Func<string, bool> isConfirmedMissing,
         Func<IReadOnlyList<string>?> readStartMenuAppIds,
         Action refreshStartMenu,
@@ -138,10 +151,12 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
         var lines = new List<string>();
         var pending = ghosts;
 
-        // 1 回目は通常の登録解除、残ったものはプロビジョニング解除を伴う 2 回目で再試行する。
-        foreach (var deprovision in (bool[])[false, true])
+        // 1 回目は全ユーザーからの解除、残ったものはプロビジョニング解除 + 現在ユーザーからの解除で再試行する。
+        // 移行残骸ではマシン側の登録が既に無く、全ユーザー解除が「成功」を返しても
+        // ユーザー側の登録が残るため、2 回目は明示的にユーザー登録だけを狙う。
+        foreach (var mode in (PackageRemovalMode[])[PackageRemovalMode.AllUsers, PackageRemovalMode.CurrentUser])
         {
-            pending = await RemoveAsync(pending, deprovision, lines, progress, ct);
+            pending = await RemoveAsync(pending, mode, lines, progress, ct);
             if (pending.Count == 0)
             {
                 break;
@@ -197,7 +212,7 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
     /// </summary>
     private async Task<List<PackageRegistration>> RemoveAsync(
         IReadOnlyList<PackageRegistration> targets,
-        bool deprovision,
+        PackageRemovalMode mode,
         List<string> lines,
         IProgress<string>? progress,
         CancellationToken ct)
@@ -209,7 +224,7 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
 
             try
             {
-                var error = await _removePackageAsync(target, deprovision, ct);
+                var error = await _removePackageAsync(target, mode, ct);
                 if (error is not null)
                 {
                     LoggerBootstrap.Log.Error($"{Id}: 登録解除に失敗 {target.FullName}: {error}");
@@ -429,12 +444,12 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
 
     private static async Task<string?> RemovePackageAsync(
         PackageRegistration package,
-        bool deprovision,
+        PackageRemovalMode mode,
         CancellationToken ct)
     {
         var packageManager = new PackageManager();
 
-        if (deprovision && OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763))
+        if (mode == PackageRemovalMode.CurrentUser && OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763))
         {
             // システムアプリは全ユーザー向けプロビジョニングが残っていると登録解除が巻き戻される。
             try
@@ -456,9 +471,17 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
             }
         }
 
-        // OS のメジャーアップグレードでマシン側の登録が消え、ユーザー側の登録だけが残った残骸では
-        // RemoveForAllUsers が ERROR_NOT_FOUND (0x80070490) になる。その場合は現在ユーザーの
-        // 登録だけを解除すればスタートメニューから消える。
+        // OS のメジャーアップグレードでマシン側の登録が消え、ユーザー側の登録だけが残った残骸では、
+        // RemoveForAllUsers が ERROR_NOT_FOUND (0x80070490) になるか、成功を返しても何も消えない。
+        // どちらの場合も現在ユーザーの登録を直接狙えば消えるので、2 巡目は最初からそちらを使う。
+        if (mode == PackageRemovalMode.CurrentUser)
+        {
+            var currentUserOnlyError = await TryRemoveAsync(packageManager, package.FullName, RemovalOptions.None, ct);
+            LoggerBootstrap.Log.Info(
+                $"remove-ghost-packages: 現在ユーザーからの解除 {package.FullName}: {currentUserOnlyError ?? "エラーなし"}");
+            return currentUserOnlyError;
+        }
+
         var allUsersError = await TryRemoveAsync(packageManager, package.FullName, RemovalOptions.RemoveForAllUsers, ct);
         if (allUsersError is null)
         {

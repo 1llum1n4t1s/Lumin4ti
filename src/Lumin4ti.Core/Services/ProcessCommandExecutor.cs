@@ -13,6 +13,7 @@ public class ProcessCommandExecutor : ICommandExecutor
 {
     private static readonly TimeSpan DefaultCommandTimeout = TimeSpan.FromHours(1);
     private readonly TimeSpan _commandTimeout;
+    private readonly TimeSpan _outputDrainGrace;
 
     // 厳密 UTF-8 (不正バイトで例外)。CodePages プロバイダに依存しないので静的初期化順の問題も無い。
     private static readonly Encoding StrictUtf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
@@ -39,7 +40,7 @@ public class ProcessCommandExecutor : ICommandExecutor
     {
     }
 
-    internal ProcessCommandExecutor(TimeSpan commandTimeout)
+    internal ProcessCommandExecutor(TimeSpan commandTimeout, TimeSpan? outputDrainGrace = null)
     {
         if (commandTimeout <= TimeSpan.Zero)
         {
@@ -47,6 +48,7 @@ public class ProcessCommandExecutor : ICommandExecutor
         }
 
         _commandTimeout = commandTimeout;
+        _outputDrainGrace = outputDrainGrace ?? DefaultOutputDrainGrace;
     }
 
     public async Task<CommandExecutionResult> RunAsync(
@@ -101,12 +103,24 @@ public class ProcessCommandExecutor : ICommandExecutor
             // 生バイトで受け取ってから自前でデコードする。dism / reg 等の出力は環境によって
             // UTF-8 だったり OEM コードページ (日本語 = CP932) だったりするため。
             // 両ストリームを並行して読み、片方のバッファが詰まるデッドロックを避ける。
-            using var stdoutBuffer = new MemoryStream();
-            using var stderrBuffer = new MemoryStream();
+            // 起動したプロセスが終了しても、出力パイプを継承した孫プロセス (dism の DismHost 等) が
+            // 生き残ると EOF が来ない。EOF 待ちを先に置くと、実処理が数秒で終わっていても
+            // こちらが待ち続けてしまうため、プロセス終了を先に待ち、出力の回収には猶予を設ける。
+            var stdoutBuffer = new ConcurrentByteBuffer();
+            var stderrBuffer = new ConcurrentByteBuffer();
             var readOut = PumpAsync(process.StandardOutput.BaseStream, stdoutBuffer, onOutputLine, executionToken);
             var readErr = PumpAsync(process.StandardError.BaseStream, stderrBuffer, onLine: null, executionToken);
-            await Task.WhenAll(readOut, readErr).ConfigureAwait(false);
+
             await process.WaitForExitAsync(executionToken).ConfigureAwait(false);
+
+            var pumps = Task.WhenAll(readOut, readErr);
+            var drained = await Task.WhenAny(pumps, Task.Delay(_outputDrainGrace, executionToken)).ConfigureAwait(false);
+            if (drained != pumps)
+            {
+                // 孫プロセスがパイプを保持している。既に終了済みのコマンドの結果は確定しているので先へ進む。
+                LoggerBootstrap.Log.Info(
+                    $"出力の回収が {FormatTimeout(_outputDrainGrace)} で完了しなかったため打ち切りました: {commandLine}");
+            }
 
             // キャンセル登録がプロセスを終了すると、出力の drain と WaitForExitAsync が
             // 先に正常完了することがある。この場合も timeout / 呼出元キャンセルとして扱う。
@@ -116,8 +130,8 @@ public class ProcessCommandExecutor : ICommandExecutor
                 process.ExitCode == 0,
                 commandLine,
                 process.ExitCode,
-                DecodeConsoleOutput(stdoutBuffer.ToArray()).TrimEnd(),
-                DecodeConsoleOutput(stderrBuffer.ToArray()).TrimEnd());
+                DecodeConsoleOutput(stdoutBuffer.Snapshot()).TrimEnd(),
+                DecodeConsoleOutput(stderrBuffer.Snapshot()).TrimEnd());
         }
         catch (OperationCanceledException) when (!ct.IsCancellationRequested)
         {
@@ -131,6 +145,45 @@ public class ProcessCommandExecutor : ICommandExecutor
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return new CommandExecutionResult(false, commandLine, -1, string.Empty, ex.Message);
+        }
+    }
+
+    /// <summary>プロセス終了後に残りの出力を回収するための既定の猶予。</summary>
+    private static readonly TimeSpan DefaultOutputDrainGrace = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// 回収を打ち切った後も pump が書き込み続ける可能性があるため、書き込みとスナップショットを
+    /// 同じロックで直列化する。MemoryStream 自体はスレッドセーフではない。
+    /// </summary>
+    internal sealed class ConcurrentByteBuffer : MemoryStream
+    {
+        private readonly Lock _gate = new();
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            lock (_gate)
+            {
+                base.Write(buffer, offset, count);
+            }
+        }
+
+        public override long Length
+        {
+            get
+            {
+                lock (_gate)
+                {
+                    return base.Length;
+                }
+            }
+        }
+
+        public byte[] Snapshot()
+        {
+            lock (_gate)
+            {
+                return ToArray();
+            }
         }
     }
 
@@ -157,6 +210,22 @@ public class ProcessCommandExecutor : ICommandExecutor
         }
     }
 
+    /// <summary>
+    /// 回収を打ち切った後にプロセスとストリームが破棄されると、残った pump の読み取りが
+    /// 例外になる。結果は既に確定しているので、EOF と同じ扱いで静かに終える。
+    /// </summary>
+    private static async ValueTask<int> ReadSafelyAsync(Stream source, byte[] chunk, CancellationToken ct)
+    {
+        try
+        {
+            return await source.ReadAsync(chunk.AsMemory(), ct).ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is IOException or ObjectDisposedException or InvalidOperationException)
+        {
+            return 0;
+        }
+    }
+
     internal static async Task PumpAsync(
         Stream source,
         MemoryStream buffer,
@@ -172,7 +241,7 @@ public class ProcessCommandExecutor : ICommandExecutor
         if (onLine is null)
         {
             // 進捗通知不要でも上限付きで読む
-            while ((read = await source.ReadAsync(chunk.AsMemory(), ct).ConfigureAwait(false)) > 0)
+            while ((read = await ReadSafelyAsync(source, chunk, ct).ConfigureAwait(false)) > 0)
             {
                 AppendCapped(buffer, chunk, read);
             }
@@ -180,7 +249,7 @@ public class ProcessCommandExecutor : ICommandExecutor
             return;
         }
 
-        while ((read = await source.ReadAsync(chunk.AsMemory(), ct).ConfigureAwait(false)) > 0)
+        while ((read = await ReadSafelyAsync(source, chunk, ct).ConfigureAwait(false)) > 0)
         {
             AppendCapped(buffer, chunk, read);
             for (var i = 0; i < read; i++)

@@ -173,6 +173,9 @@ public sealed class MmAgentFeatureToggle(
 {
     private readonly SemaphoreSlim _setGate = new(1, 1);
 
+    /// <summary>レジストリ経由で無効化する直前の値 (ON で戻すときに使う)。</summary>
+    private int? _valueBeforeDisable;
+
     public string Id => id;
 
     public string Label => label;
@@ -186,10 +189,23 @@ public sealed class MmAgentFeatureToggle(
     /// <summary>Get-MMAgent のプロパティ名 = Enable/Disable-MMAgent のパラメーター名。</summary>
     internal string PropertyName => propertyName;
 
-    public Task<bool?> GetStateAsync(CancellationToken ct = default) =>
-        stateProvider.IsUnsupported(propertyName)
-            ? Task.FromResult<bool?>(null)
-            : stateProvider.GetAsync(propertyName, ct);
+    public Task<bool?> GetStateAsync(CancellationToken ct = default)
+    {
+        if (stateProvider.IsUnsupported(propertyName))
+        {
+            return Task.FromResult<bool?>(null);
+        }
+
+        // レジストリ経由で無効化した直後は、再起動まで Get-MMAgent が有効のままを報告することがある。
+        // 設定として保存されている値 (レジストリ) を優先し、表示が ON へ戻って見えるのを防ぐ。
+        if (MmAgentRegistryFallback.CanFallBack(propertyName) &&
+            MmAgentRegistryFallback.TryReadState(propertyName) is false)
+        {
+            return Task.FromResult<bool?>(false);
+        }
+
+        return stateProvider.GetAsync(propertyName, ct);
+    }
 
     public async Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default)
     {
@@ -234,6 +250,14 @@ public sealed class MmAgentFeatureToggle(
             var reason = result.StandardError.Split('\n', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim() ?? string.Empty;
             if (IsNotSupportedError(result.StandardError))
             {
+                // cmdlet が非対応でも、同じ設定を持つレジストリ値から切り替えられる機能がある。
+                // 「切り替えられないはず」と決めつけず、代替手段があるならそちらで達成する。
+                if (MmAgentRegistryFallback.CanFallBack(propertyName))
+                {
+                    LoggerBootstrap.Log.Info($"{Id}: {cmdlet} が非対応のためレジストリ経由で切り替えます");
+                    return await SetViaRegistryAsync(on, ct);
+                }
+
                 stateProvider.MarkUnsupported(propertyName);
                 LoggerBootstrap.Log.Error($"{Id}: {cmdlet} はこの Windows でサポートされていません");
                 return UnsupportedResult();
@@ -255,45 +279,95 @@ public sealed class MmAgentFeatureToggle(
         }
     }
 
+    /// <summary>
+    /// cmdlet が非対応を返す機能を、設定の実体であるレジストリ値から切り替える。
+    /// 書き込み後は Get-MMAgent の値で反映を確認し、まだ古い値なら再起動が要ることを明示する。
+    /// </summary>
+    private async Task<MaintenanceActionResult> SetViaRegistryAsync(bool on, CancellationToken ct)
+    {
+        if (!on)
+        {
+            // 次に ON へ戻すときのために、無効化直前の値を控える (既に控えがあれば上書きしない)。
+            _valueBeforeDisable ??= MmAgentRegistryFallback.TryReadRawValue();
+        }
+
+        var error = MmAgentRegistryFallback.TrySetState(
+            propertyName,
+            on,
+            // ON で戻すときは無効化前の値を使う。控えが無ければ Windows 既定 (3) に戻す。
+            readPreviousValue: () => _valueBeforeDisable);
+        if (error is not null)
+        {
+            return MaintenanceActionResult.Fail($"{Label} を切り替えられませんでした: {error}");
+        }
+
+        stateProvider.SetKnownValue(propertyName, on);
+        var applied = $"  - {propertyName} を{(on ? "有効化" : "無効化")}しました (PowerShell が非対応のためレジストリ経由)";
+
+        var fresh = await stateProvider.ReadFreshAsync(propertyName, ct);
+        if (fresh is bool freshValue && freshValue != on)
+        {
+            // レジストリは変わったが MMAgent 側の報告値が追いつかない場合。
+            stateProvider.SetKnownValue(propertyName, on);
+            return MaintenanceActionResult.Partial(
+                $"{applied}{Environment.NewLine}  - 反映には再起動 (または SysMain の再起動) が必要です");
+        }
+
+        LoggerBootstrap.Log.Info($"{Id} → {(on ? "有効" : "無効")} (レジストリ経由)");
+        return MaintenanceActionResult.Ok(applied);
+    }
+
     /// <summary>非対応エラー以外の失敗に、確認すべき実行環境を添える。</summary>
     private string FailureHint() =>
         " (SysMain サービスの状態または Windows 側の MMAgent 対応状況を確認してください)";
 
     private MaintenanceActionResult UnsupportedResult() => MaintenanceActionResult.Fail(
-        $"{Label} は、このバージョンの Windows では安全に切り替えられないため操作を無効化しました。");
+        // 「安全のため無効化した」と書くと Lumin4ti の判断に見えるが、実際は OS 側の cmdlet が
+        // 変更を拒否している。原因と、利用者が取れる次の手を伝える書き方にする。
+        $"{Label} は、この Windows の Enable/Disable-MMAgent が変更を拒否するため切り替えられません " +
+        $"(この要求はサポートされていません)。設定は変更していません。{DependencyHint()}");
+
+    /// <summary>
+    /// 単独では変更できない機能に、連動で切り替わる前提機能を案内する。
+    /// オペレーションレコーダーはプリフェッチ機構の一部なので、前提側を無効にすると一緒に無効になる。
+    /// </summary>
+    private string DependencyHint() =>
+        string.Equals(propertyName, "OperationAPI", StringComparison.OrdinalIgnoreCase)
+            ? " この機能はプリフェッチ機構の一部のため、「アプリ起動プリフェッチ」または「アプリ事前起動」を OFF にすると連動して無効になります。"
+            : string.Empty;
 
     internal static bool IsNotSupportedError(string standardError) =>
         standardError.Contains("0x80070032", StringComparison.OrdinalIgnoreCase) ||
         standardError.Contains("この要求はサポートされていません", StringComparison.OrdinalIgnoreCase) ||
         standardError.Contains("The request is not supported", StringComparison.OrdinalIgnoreCase);
 
-    /// <summary>MMAgent の全機能トグルを生成する (カタログの並び順)。状態取得は共有プロバイダ 1 回に集約。</summary>
-    public static IReadOnlyList<MmAgentFeatureToggle> CreateAll(ICommandExecutor executor)
+    /// <summary>
+    /// MMAgent の全機能項目を生成する (カタログの並び順)。状態取得は共有プロバイダ 1 回に集約。
+    /// オペレーションレコーダーだけは ON/OFF に収まらないため選択式 (IMaintenanceChoice) にしている。
+    /// </summary>
+    public static IReadOnlyList<IMaintenanceItem> CreateAll(ICommandExecutor executor)
     {
         var provider = new MmAgentStateProvider(executor);
         return
         [
-            new(executor, provider, "MemoryCompression",
+            new MmAgentFeatureToggle(executor, provider, "MemoryCompression",
                 "mmagent-memory-compression",
                 "メモリ圧縮 (Memory Compression)",
                 "メモリ不足時、ディスクへスワップアウトする前にページを RAM 内で圧縮して実効容量を増やす機能です。" +
                 "わずかな CPU 負荷と引き換えにスワップ由来の遅さと SSD への書き込みを減らせます。推奨は ON (Windows 既定も ON) です。"),
-            new(executor, provider, "PageCombining",
+            new MmAgentFeatureToggle(executor, provider, "PageCombining",
                 "mmagent-page-combining",
                 "ページ結合 (Page Combining)",
                 "内容が完全に同一のメモリページを 1 つに共有して重複を取り除く機能です。同種のアプリを多数起動する使い方でメモリ節約効果があります。" +
                 "推奨は ON です (エディションによっては既定 OFF)。"),
-            new(executor, provider, "OperationAPI",
-                "mmagent-operation-api",
-                "Operation Recorder API",
-                "SysMain (旧 Superfetch) の動作を外部ツールから記録・再生するための API です。ベンチマークや性能解析ツール向けの機能で、通常の利用では使われません。" +
-                "Windows のバージョンによっては PowerShell からの切り替えがサポートされないため、その場合は操作できません。"),
-            new(executor, provider, "ApplicationLaunchPrefetching",
+            // 無効化を拒否する Windows でも記録ファイル数は変えられるため、選択式で両方を扱う。
+            new MmAgentOperationApiChoice(executor, provider),
+            new MmAgentFeatureToggle(executor, provider, "ApplicationLaunchPrefetching",
                 "mmagent-launch-prefetch",
                 "アプリ起動プリフェッチ",
                 "よく使うアプリの読み込むファイルを学習し、起動時に先読みして起動を高速化する機能 (Prefetch) です。" +
                 "SSD でも起動待ちの短縮に寄与します。通常は有効のままを推奨しますが、Windows のバージョンによっては PowerShell から切り替えられません。"),
-            new(executor, provider, "ApplicationPreLaunch",
+            new MmAgentFeatureToggle(executor, provider, "ApplicationPreLaunch",
                 "mmagent-prelaunch",
                 "UWP アプリの事前起動",
                 "近いうちに使われそうなストアアプリ (UWP) を予測して、実際に開く前からバックグラウンドで起動しておく機能です。" +

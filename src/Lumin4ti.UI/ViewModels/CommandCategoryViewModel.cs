@@ -47,7 +47,7 @@ public partial class CommandCategoryViewModel : ObservableObject
         _captionFallback = caption;
         Items = catalog.Items
             .Where(i => i.Category == category)
-            .Select(i => new CommandItemViewModel(i, RunActionAsync, SetToggleAsync))
+            .Select(i => new CommandItemViewModel(i, RunActionAsync, SetToggleAsync, SetChoiceAsync))
             .ToList();
 
         App.LocaleChanged += () =>
@@ -66,6 +66,7 @@ public partial class CommandCategoryViewModel : ObservableObject
     public async Task LoadToggleStatesAsync()
     {
         var toggles = Items.Where(i => i.Item is IMaintenanceToggle).ToList();
+        var choices = Items.Where(i => i.Item is IMaintenanceChoice).ToList();
         await Task.WhenAll(toggles.Select(async item =>
         {
             bool? state;
@@ -80,7 +81,90 @@ public partial class CommandCategoryViewModel : ObservableObject
             }
 
             await Dispatcher.UIThread.InvokeAsync(() => item.ApplyState(state));
-        }));
+        }).Concat(choices.Select(async item =>
+        {
+            string? value;
+            try
+            {
+                value = await ((IMaintenanceChoice)item.Item).GetSelectedValueAsync();
+            }
+            catch (Exception ex)
+            {
+                LoggerBootstrap.Log.Error($"{item.Item.Id} の状態取得に失敗しました", ex);
+                value = null;
+            }
+
+            await Dispatcher.UIThread.InvokeAsync(() => item.ApplySelectedValue(value));
+        })));
+    }
+
+    /// <summary>
+    /// ドロップダウンで選ばれた値を適用する。トグルと同様に、成否にかかわらず
+    /// 適用後の実状態を読み直して表示へ反映する (推測値を残さない)。
+    /// </summary>
+    private async Task SetChoiceAsync(CommandItemViewModel item, string value)
+    {
+        var choice = (IMaintenanceChoice)item.Item;
+        item.IsRunning = true;
+        item.ResultText = string.Empty;
+        var ct = item.BeginRun();
+        if (!_operationCoordinator.TryBegin(out var operation, ct))
+        {
+            ShowBusyResult(item);
+            item.EndRun();
+            item.IsRunning = false;
+            await ReloadChoiceAsync(item, choice);
+            return;
+        }
+
+        using var activeOperation = operation!;
+        StatusText = App.Text("Status.Applying", "{0} を適用中…", item.Label);
+        try
+        {
+            MaintenanceActionResult result;
+            try
+            {
+                result = await choice.SetSelectedValueAsync(value, activeOperation.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                result = MaintenanceActionResult.Canceled();
+            }
+            catch (Exception ex)
+            {
+                LoggerBootstrap.Log.Error($"{item.Item.Id} の適用に失敗しました", ex);
+                result = MaintenanceActionResult.Fail(ex.Message);
+            }
+
+            await ReloadChoiceAsync(item, choice);
+            ShowResult(
+                item,
+                result,
+                App.Text("Status.Applied", "{0} を変更しました", item.Label),
+                App.Text("Status.ApplyFailed", "{0} の変更に失敗しました (ログを確認してください)", item.Label));
+        }
+        finally
+        {
+            item.EndRun();
+            item.IsRunning = false;
+        }
+    }
+
+    private static async Task ReloadChoiceAsync(CommandItemViewModel item, IMaintenanceChoice choice)
+    {
+        string? actual;
+        using var verificationCts = new CancellationTokenSource(StateVerificationTimeout);
+        try
+        {
+            actual = await choice.GetSelectedValueAsync(verificationCts.Token);
+        }
+        catch (Exception ex)
+        {
+            LoggerBootstrap.Log.Error($"{choice.Id} の変更後状態取得に失敗しました", ex);
+            actual = null;
+        }
+
+        await Dispatcher.UIThread.InvokeAsync(() => item.ApplySelectedValue(actual));
     }
 
     private async Task RunActionAsync(CommandItemViewModel item)

@@ -99,7 +99,9 @@
   <x:String x:Key="Text.Action.mmagent-page-combining.Label" xml:space="preserve">分頁合併</x:String>
   <x:String x:Key="Text.Action.mmagent-page-combining.Desc" xml:space="preserve">將內容相同的記憶體分頁合併為一個，消除重複。執行多個同類應用程式時可節省記憶體。建議：ON（部分版本預設 OFF）。</x:String>
   <x:String x:Key="Text.Action.mmagent-operation-api.Label" xml:space="preserve">Operation Recorder API</x:String>
-  <x:String x:Key="Text.Action.mmagent-operation-api.Desc" xml:space="preserve">供外部工具記錄並重播 SysMain（原 Superfetch）行為的 API。針對基準測試與效能分析工具，一般使用中不會用到。建議：OFF（Windows 預設也是 OFF）。</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Desc" xml:space="preserve">供外部工具記錄並重播 SysMain（原 Superfetch）行為的 API。針對基準測試與效能分析工具，一般使用中不會用到。建議選擇「停用」，但部分 Windows 版本會拒絕停用；此時減少記錄檔案數可降低負載。停用與預先擷取子系統連動，因此關閉「應用程式啟動預先擷取」或「應用程式預先啟動」時本功能也會一併停用。</x:String>
+  <x:String x:Key="Text.Choice.Disabled" xml:space="preserve">停用</x:String>
+  <x:String x:Key="Text.Choice.Default" xml:space="preserve">預設</x:String>
   <x:String x:Key="Text.Action.mmagent-launch-prefetch.Label" xml:space="preserve">應用程式啟動預先擷取</x:String>
   <x:String x:Key="Text.Action.mmagent-launch-prefetch.Desc" xml:space="preserve">學習常用應用程式載入的檔案，並在啟動時預先擷取以加快啟動速度（Prefetch）。即使在 SSD 上也有助於減少啟動等待。建議：ON（Windows 預設也是 ON）。</x:String>
   <x:String x:Key="Text.Action.mmagent-prelaunch.Label" xml:space="preserve">UWP 應用程式預先啟動</x:String>

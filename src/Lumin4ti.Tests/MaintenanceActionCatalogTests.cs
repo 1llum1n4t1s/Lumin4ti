@@ -25,11 +25,22 @@ public sealed class MaintenanceActionCatalogTests
     }
 
     [TestMethod]
-    public void 全項目が実行型かトグル型のどちらかである()
+    public void 全項目が実行型かトグル型か選択式のいずれかである()
     {
         foreach (var item in CreateCatalog().Items)
         {
-            Assert.IsTrue(item is IMaintenanceAction or IMaintenanceToggle, item.Id);
+            Assert.IsTrue(item is IMaintenanceAction or IMaintenanceToggle or IMaintenanceChoice, item.Id);
+        }
+    }
+
+    [TestMethod]
+    public void 選択式の項目は選択肢と既定値を持つ()
+    {
+        foreach (var choice in CreateCatalog().Items.OfType<IMaintenanceChoice>())
+        {
+            Assert.IsTrue(choice.Options.Count >= 2, choice.Id);
+            CollectionAssert.AllItemsAreUnique(choice.Options.Select(o => o.Value).ToList(), choice.Id);
+            Assert.AreEqual(1, choice.Options.Count(o => o.IsDefault), $"{choice.Id} の既定値は 1 つ");
         }
     }
 

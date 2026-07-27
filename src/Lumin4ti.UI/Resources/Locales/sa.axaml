@@ -99,7 +99,9 @@
   <x:String x:Key="Text.Action.mmagent-page-combining.Label" xml:space="preserve">Page Combining</x:String>
   <x:String x:Key="Text.Action.mmagent-page-combining.Desc" xml:space="preserve">समानविषयकानि स्मृतिपृष्ठानि एकत्र मेलयति, द्विरुक्तिं च अपनयति। समानप्रकारकान् बहून् अनुप्रयोगान् चालयन् स्मृतिं रक्षति। अनुशंसा: ON (केषुचित् संस्करणेषु प्रामाणिकस्थितिः OFF)।</x:String>
   <x:String x:Key="Text.Action.mmagent-operation-api.Label" xml:space="preserve">Operation Recorder API</x:String>
-  <x:String x:Key="Text.Action.mmagent-operation-api.Desc" xml:space="preserve">SysMain (पूर्वं Superfetch) आचरणं लेखितुं पुनश्चालयितुं च बाह्योपकरणेभ्यः API। सामान्यप्रयोगे न प्रयुक्तं, बेञ्चमार्किङ्ग-कार्यक्षमताविश्लेषणोपकरणेभ्यः उद्दिष्टम्। अनुशंसा: OFF (Windows-प्रामाणिकस्थितिः अपि OFF)।</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Desc" xml:space="preserve">SysMain (पूर्वं Superfetch) इत्यस्य व्यवहारं बाह्यसाधनानि लिखितुं पुनःप्रचालयितुं च शक्नुवन्ति इति API। मापनसाधनेभ्यः कार्यक्षमताविश्लेषणाय च उद्दिष्टम्, सामान्ये उपयोगे न प्रयुज्यते। "निष्क्रियम्" इति अनुशंसितम्, परं केचन Windows-संस्करणाः निष्क्रियीकरणं निषेधन्ति; तदा लिखितसञ्चिकानां संख्यां न्यूनीकृत्य भारः अल्पीभवति। निष्क्रियीकरणं पूर्वग्रहणतन्त्रेण सह सम्बद्धम्, अतः "अनुप्रयोगारम्भपूर्वग्रहणम्" अथवा "अनुप्रयोगपूर्वारम्भः" निवारिते इदमपि निष्क्रियं भवति।</x:String>
+  <x:String x:Key="Text.Choice.Disabled" xml:space="preserve">निष्क्रियम्</x:String>
+  <x:String x:Key="Text.Choice.Default" xml:space="preserve">पूर्वनिर्धारितम्</x:String>
   <x:String x:Key="Text.Action.mmagent-launch-prefetch.Label" xml:space="preserve">अनुप्रयोगप्रारम्भ-पूर्वानयनम्</x:String>
   <x:String x:Key="Text.Action.mmagent-launch-prefetch.Desc" xml:space="preserve">पुनः पुनः प्रयुक्तानाम् अनुप्रयोगानां आरोपितसञ्चिकाः शिक्षित्वा, प्रारम्भं द्रुतीकर्तुं ताः प्रारम्भे पूर्वम् आनयति (Prefetch)। SSD-मध्ये अपि प्रारम्भप्रतीक्षां न्यूनीकर्तुं साहाय्यं करोति। अनुशंसा: ON (Windows-प्रामाणिकस्थितिः अपि ON)।</x:String>
   <x:String x:Key="Text.Action.mmagent-prelaunch.Label" xml:space="preserve">UWP-अनुप्रयोग-पूर्वप्रारम्भः</x:String>

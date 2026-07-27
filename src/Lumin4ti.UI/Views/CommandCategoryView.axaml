@@ -39,6 +39,16 @@
                                   IsVisible="{Binding IsStateKnown}"
                                   OnContent="ON" OffContent="OFF" />
                   </StackPanel>
+                  <!--  選択式 (ON/OFF に収まらない数値・段階設定)。実行中・状態不明時は操作不可  -->
+                  <ComboBox ItemsSource="{Binding ChoiceOptions}" SelectedItem="{Binding SelectedChoice}"
+                            IsEnabled="{Binding CanChoose}" IsVisible="{Binding IsChoice}"
+                            MinWidth="140" VerticalAlignment="Center">
+                    <ComboBox.ItemTemplate>
+                      <DataTemplate x:DataType="vm:ChoiceOptionViewModel">
+                        <TextBlock Text="{Binding Display}" />
+                      </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                  </ComboBox>
                 </StackPanel>
                 <!--  実行中のライブ出力 (直近数行)  -->
                 <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,0"

@@ -177,7 +177,9 @@ public sealed class MmAgentStateProviderTests
         var result = await toggle.SetStateAsync(false);
 
         Assert.IsFalse(result.Success);
-        StringAssert.Contains(result.Detail, "操作を無効化しました");
+        // 原因が OS 側の cmdlet にあることが利用者に伝わる文言になっている
+        StringAssert.Contains(result.Detail, "変更を拒否する");
+        StringAssert.Contains(result.Detail, "設定は変更していません");
         Assert.IsNull(await toggle.GetStateAsync());
         Assert.AreEqual(3, executor.CallCount, "非対応判定後に追加の状態照会を実行してはいけません");
     }
