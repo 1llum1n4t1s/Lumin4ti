@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Lumin4ti.Core.Interfaces;
+using Lumin4ti.Core.Models;
 
 namespace Lumin4ti.Core.Services.Windows.Actions;
 
@@ -12,14 +13,15 @@ namespace Lumin4ti.Core.Services.Windows.Actions;
 internal static partial class SystemAppCapabilityRepair
 {
     /// <summary>
-    /// PackageFamilyName → 本体を提供するオプション機能の ID 接頭辞。
-    /// 完全な ID (末尾の "~~~~0.0.1.0") は OS ごとに変わるため、実際の値は DISM の一覧から解決する。
+    /// PackageFamilyName → 本体を提供するオプション機能の既定 ID。
+    /// まずこの ID をそのまま追加し、OS 側でバージョン部が違って失敗したときだけ
+    /// DISM の一覧から解決し直す (一覧取得は Windows Update への問い合わせで数分かかるため後回しにする)。
     /// </summary>
-    private static readonly Dictionary<string, string> CapabilityPrefixes = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly Dictionary<string, string> CapabilityIds = new(StringComparer.OrdinalIgnoreCase)
     {
         // 「接続 (ワイヤレスディスプレイ受信)」= スタートに ms-resource:ProductNameWindowsStore で出る典型例
-        ["Microsoft.PPIProjection_cw5n1h2txyewy"] = "App.WirelessDisplay.Connect",
-        ["MicrosoftCorporationII.QuickAssist_8wekyb3d8bbwe"] = "App.Support.QuickAssist",
+        ["Microsoft.PPIProjection_cw5n1h2txyewy"] = "App.WirelessDisplay.Connect~~~~0.0.1.0",
+        ["MicrosoftCorporationII.QuickAssist_8wekyb3d8bbwe"] = "App.Support.QuickAssist~~~~0.0.1.0",
     };
 
     [GeneratedRegex(@"[A-Za-z0-9._]+~[~A-Za-z0-9._-]*", RegexOptions.CultureInvariant)]
@@ -27,7 +29,7 @@ internal static partial class SystemAppCapabilityRepair
 
     /// <summary>この パッケージを入れ直しで修復できるか。</summary>
     public static bool CanRepair(string packageFamilyName) =>
-        CapabilityPrefixes.ContainsKey(packageFamilyName);
+        CapabilityIds.ContainsKey(packageFamilyName);
 
     /// <summary>
     /// 本体のオプション機能を追加する。成功したら null、失敗したら利用者向けの理由を返す。
@@ -38,33 +40,59 @@ internal static partial class SystemAppCapabilityRepair
         IProgress<string>? progress,
         CancellationToken ct)
     {
-        if (!CapabilityPrefixes.TryGetValue(packageFamilyName, out var prefix))
+        if (!CapabilityIds.TryGetValue(packageFamilyName, out var capabilityId))
         {
             return "この項目に対応するオプション機能が分かりません";
         }
 
-        var capabilityId = await ResolveCapabilityIdAsync(prefix, executor, ct);
-        if (capabilityId is null)
-        {
-            return $"オプション機能 {prefix} がこの Windows に見つかりません";
-        }
-
-        progress?.Report($"オプション機能を追加しています: {capabilityId}");
-        var add = await executor.RunAsync(
-            "dism.exe",
-            $"/online /Add-Capability /CapabilityName:{capabilityId} /NoRestart",
-            ct,
-            progress);
-
+        var add = await AddCapabilityAsync(capabilityId, executor, progress, ct);
         if (DismExitCode.IsSuccessOrRebootRequired(add))
         {
             LoggerBootstrap.Log.Info($"remove-ghost-packages: {capabilityId} を追加 (exit={add.ExitCode})");
             return null;
         }
 
+        // 既定 ID のバージョン部が OS と食い違う場合だけ、時間のかかる一覧取得へ降りる。
+        progress?.Report("既定の機能 ID で追加できなかったため、Windows Update から一覧を取得します (数分かかることがあります)...");
+        var resolvedId = await ResolveCapabilityIdAsync(CapabilityPrefixOf(capabilityId), executor, progress, ct);
+        if (resolvedId is null || resolvedId.Equals(capabilityId, StringComparison.OrdinalIgnoreCase))
+        {
+            LoggerBootstrap.Log.Error(
+                $"remove-ghost-packages: {capabilityId} の追加に失敗 (exit={add.ExitCode}): {add.StandardError}");
+            return $"オプション機能 {capabilityId} の追加に失敗しました (exit={add.ExitCode})";
+        }
+
+        var retry = await AddCapabilityAsync(resolvedId, executor, progress, ct);
+        if (DismExitCode.IsSuccessOrRebootRequired(retry))
+        {
+            LoggerBootstrap.Log.Info($"remove-ghost-packages: {resolvedId} を追加 (exit={retry.ExitCode})");
+            return null;
+        }
+
         LoggerBootstrap.Log.Error(
-            $"remove-ghost-packages: {capabilityId} の追加に失敗 (exit={add.ExitCode}): {add.StandardError}");
-        return $"オプション機能 {capabilityId} の追加に失敗しました (exit={add.ExitCode})";
+            $"remove-ghost-packages: {resolvedId} の追加に失敗 (exit={retry.ExitCode}): {retry.StandardError}");
+        return $"オプション機能 {resolvedId} の追加に失敗しました (exit={retry.ExitCode})";
+    }
+
+    private static Task<CommandExecutionResult> AddCapabilityAsync(
+        string capabilityId,
+        ICommandExecutor executor,
+        IProgress<string>? progress,
+        CancellationToken ct)
+    {
+        progress?.Report($"オプション機能を追加しています: {capabilityId}");
+        return executor.RunAsync(
+            "dism.exe",
+            $"/online /Add-Capability /CapabilityName:{capabilityId} /NoRestart",
+            ct,
+            progress);
+    }
+
+    /// <summary>"App.WirelessDisplay.Connect~~~~0.0.1.0" → "App.WirelessDisplay.Connect"。</summary>
+    private static string CapabilityPrefixOf(string capabilityId)
+    {
+        var separator = capabilityId.IndexOf('~');
+        return separator > 0 ? capabilityId[..separator] : capabilityId;
     }
 
     /// <summary>
@@ -74,9 +102,10 @@ internal static partial class SystemAppCapabilityRepair
     private static async Task<string?> ResolveCapabilityIdAsync(
         string prefix,
         ICommandExecutor executor,
+        IProgress<string>? progress,
         CancellationToken ct)
     {
-        var list = await executor.RunAsync("dism.exe", "/online /Get-Capabilities", ct);
+        var list = await executor.RunAsync("dism.exe", "/online /Get-Capabilities", ct, progress);
         if (!list.Success)
         {
             return null;
