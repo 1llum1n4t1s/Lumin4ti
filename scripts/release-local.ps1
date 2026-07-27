@@ -493,8 +493,8 @@ if ($toDelete.Count -eq 0) {
     Write-Host '  ✅ 削除対象なし'
 } else {
     $deleted = 0; $failed = 0
-    foreach ($object in $toDelete) {
-        $key = [string]$object.key
+    # $toDelete は key 文字列の配列 (保持ポリシーの判定を key だけで行うため)
+    foreach ($key in $toDelete) {
         $encoded = [uri]::EscapeDataString($key)
         try {
             Invoke-RestMethod -Method Delete -Uri "$api/objects/$encoded" -Headers $headers -TimeoutSec 30 | Out-Null

@@ -142,8 +142,12 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
         var registrations = new Dictionary<string, PackageRegistration>(StringComparer.OrdinalIgnoreCase);
 
         // 既定の FindPackages() は Main/Framework/Resource/Bundle だけなので、
-        // Optional / Xap 種別の取り残しも拾えるよう全種別を対象にする。
-        foreach (var package in packageManager.FindPackagesWithPackageTypes(PackageTypes.All))
+        // Optional / Xap 種別の取り残しも拾えるよう全種別を対象にする (19041 以降で利用可)。
+        var packages = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 19041)
+            ? packageManager.FindPackagesWithPackageTypes(PackageTypes.All)
+            : packageManager.FindPackages();
+
+        foreach (var package in packages)
         {
             var fullName = package.Id.FullName;
             if (registrations.ContainsKey(fullName))
