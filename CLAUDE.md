@@ -94,3 +94,13 @@ Komorebi/Lhamiel と同一方式。翻訳は [Resources/Locales/*.axaml](src/Lum
 - トグルの多重操作レース: `ToggleSwitch` の `IsEnabled` は `CanToggle` (= 状態既知 かつ 非実行中) にバインドすること。
 - 状態表示の乖離を避ける: `GetStateAsync` はレジストリだけでなく実適用状態も見る (例: VBS トグルは bcdedit の `hypervisorlaunchtype` も照合)。部分適用を避けるため、失敗しやすいステップ (bcdedit 等) を先に実行してから残りを書く。
 - 部分失敗を成功と偽らない: マルチステップ (powercfg 等) は重要ステップの失敗で `Fail` を返す。
+
+## ドメイン移行（2026-07 開始・期限 2027/05/31）
+
+屋号を **Kagayoi** に統一したため、配信ドメインを `nephilim.jp` から `kagayoi.com` へ移行中。方針の全体像はユーザーグローバルの `CLAUDE.md` §屋号とドメイン を参照する。
+
+- **旧ドメイン `nephilim.jp` はレジストラで廃止申請済みで 2027/05/31 に失効する**（延長しない）。それまでに出荷済みバイナリを新ドメインへ移行しきる。
+- 旧ホストの Worker route / custom domain は**期限まで消さない**。消すと出荷済みアプリの自動更新が止まる。
+- `nephilim.jp` の Redirect Rules は `/` だけを 301 する。`releases.*.json` / `*.nupkg` / `*-Setup.exe` は転送せず R2 が配信を続ける。
+- 配信は `lumin4ti.kagayoi.com`（R2 `lumin4ti-updates`）。旧 `lumin4ti.nephilim.jp` は route に併記して残してある。
+- アプリ名 `Lumin4ti` 自体は既存ユーザーが混乱するので改名しない。

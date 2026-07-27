@@ -39,6 +39,7 @@ public sealed class MaintenanceActionCatalog
             new TrayIconResetAction(),
             new BrokenStartupCleanupAction(),
             new DeadAssociationCleanupAction(),
+            new GhostPackageCleanupAction(),
             new EventLogClearAction(),
             new StoreCacheResetAction(executor),
             new TrimOptimizeAction(executor),

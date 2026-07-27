@@ -82,6 +82,8 @@
   <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">删除可执行文件已不存在的启动项（当前用户），以及对应的孤立条目。</x:String>
   <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">从“打开方式”中删除不存在的应用</x:String>
   <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">从“打开方式”候选列表和 Applications 注册中删除可执行文件已不存在的应用。</x:String>
+  <x:String x:Key="Text.Action.remove-ghost-packages.Label" xml:space="preserve">删除开始菜单中损坏的（幽灵）应用注册</x:String>
+  <x:String x:Key="Text.Action.remove-ghost-packages.Desc" xml:space="preserve">检测安装文件夹已不存在却仍保留注册记录的应用（幽灵注册），并为所有用户取消注册。Windows 大版本升级只删除了系统应用的文件时会出现这种情况：显示名称无法解析，开始菜单里会出现 "ms-resource:ProductNameWindowsStore" 之类的原始字符串，点击也不会启动。为避免误删，仅处理在就绪的固定磁盘上确认文件夹确实不存在的项目，无法确认的一律保留。</x:String>
   <x:String x:Key="Text.Action.event-log-clear.Label" xml:space="preserve">删除所有事件查看器日志</x:String>
   <x:String x:Key="Text.Action.event-log-clear.Desc" xml:space="preserve">删除事件查看器中累积的所有通道的日志，释放日志存储区域（通常数百 MB）。过去的故障排查信息也会丢失，因此在调查近期问题时请勿运行。部分受保护的系统日志会被跳过。</x:String>
   <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">清除 Microsoft Store 缓存</x:String>

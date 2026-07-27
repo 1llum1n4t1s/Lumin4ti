@@ -30,7 +30,7 @@ $WranglerVersion = '4.92.0'         # サプライチェーン対策でバージ
 $Bucket = 'lumin4ti-updates'
 $BaseUrl = 'https://lumin4ti.kagayoi.com'
 $AccountId = '10901bfadbf1005164774a7350082985'
-$NupkgRetentionGraceDays = 30
+$KeepVersionCount = 2                # 全プロジェクト共通の保持ポリシー: 直近 2 バージョン
 $SecretsPath = 'C:\Users\IMT\dev\Secret\secrets.json'
 $CertSubjectName = 'Open Source Developer Yuichiro Shinozaki'
 # /n (Subject 名) で選択: 証明書の年次更新で thumbprint が変わっても動く
@@ -456,23 +456,33 @@ while ($true) {
     if (-not $cursor) { break }
 }
 
-$graceCutoff = [DateTimeOffset]::UtcNow.AddDays(-$NupkgRetentionGraceDays)
+# 全プロジェクト共通の保持ポリシー: manifest 参照 + 固定名 + 直近 $KeepVersionCount バージョン。
+# ⚠️ 旧実装は「'*.nupkg' かつ last_modified が猶予日数より古い」を条件にしていたため、
+#    猶予期間 (30 日) 内のリリースが重なると旧 nupkg が積み上がり続けた
+#    (2026-07 実測: 1.0.3〜1.0.12 の 12 個 = 0.65GB が滞留)。直近 2 世代を残せば
+#    配信直後の伝播中クライアントも 1 つ前を引けるので、猶予日数は不要。
+#    固定ファイル名 (*.msi / Setup.exe / Portable.zip / RELEASES* / releases.*.json) は
+#    バージョン文字列を含まないので対象外 = 安全。
+$versionPattern = '(\d+\.\d+\.\d+)'
 $toDelete = @()
 if ($previousManifestReadSucceeded) {
-    $toDelete = @($allObjects | Where-Object {
-        $key = [string]$_.key
-        if ($key -notlike '*.nupkg' -or $keep.ContainsKey($key)) { return $false }
+    $allKeys = @($allObjects | ForEach-Object { [string]$_.key })
+    $allVersions = @(
+        $allKeys | ForEach-Object {
+            $m = [regex]::Match($_, $versionPattern)
+            if ($m.Success) { $m.Groups[1].Value }
+        } | Sort-Object -Property { [version]$_ } -Unique
+    )
+    $keepVersions = @($allVersions | Select-Object -Last $KeepVersionCount)
+    Write-Host "  保持バージョン: $($keepVersions -join ', ') (全 $($allVersions.Count) 世代)"
 
-        $lastModifiedProperty = $_.PSObject.Properties['last_modified']
-        if (-not $lastModifiedProperty -or -not $lastModifiedProperty.Value) { return $false }
-        try {
-            $lastModified = [DateTimeOffset]$lastModifiedProperty.Value
-        }
-        catch {
-            return $false
-        }
-
-        return $lastModified -lt $graceCutoff
+    $toDelete = @($allKeys | Where-Object {
+        # manifest が参照するファイルは絶対保持 (消すと自動更新が壊れる)
+        if ($keep.ContainsKey($_)) { return $false }
+        # 固定ファイル名はバージョン文字列を含まない = 毎リリース上書きなので保持
+        $m = [regex]::Match($_, $versionPattern)
+        if (-not $m.Success) { return $false }
+        return $keepVersions -notcontains $m.Groups[1].Value
     })
 }
 else {
@@ -495,7 +505,7 @@ if ($toDelete.Count -eq 0) {
             $failed++
         }
     }
-    Write-Host "  🧹 クリーンアップ: $deleted 削除 / $failed 失敗 (保持猶予 $NupkgRetentionGraceDays 日)"
+    Write-Host "  🧹 クリーンアップ: $deleted 削除 / $failed 失敗 (直近 $KeepVersionCount バージョンを保持)"
     if ($failed -gt 0 -and $deleted -eq 0) { throw '旧 nupkg の削除がすべて失敗しました。API token の権限を確認してください。' }
 }
 
