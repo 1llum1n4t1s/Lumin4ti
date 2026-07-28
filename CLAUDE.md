@@ -19,6 +19,7 @@ dotnet test Lumin4ti.slnx --filter "Name=既定値に戻せるトグルの既定
 ```
 
 - TFM は `net10.0-windows10.0.20348.0` ([Directory.Build.props](Directory.Build.props))。UWP パッケージ列挙 (WinRT `PackageManager`) のため Windows SDK 付き。
+- **`.github/` は存在せず CI は無い**。ローカルの `dotnet build` (0 warnings) と `dotnet test` が唯一の検証ゲートなので、変更後は必ず両方通す。
 - **バージョン (`Directory.Build.props` の `<Version>`) は `/vava` 経由でのみ更新**。コード修正のついでに触らない。
 
 ## アーキテクチャ
@@ -48,10 +49,30 @@ dotnet test Lumin4ti.slnx --filter "Name=既定値に戻せるトグルの既定
 - **セキュリティ (回帰厳禁)**: bare exe 名を渡すと `CreateProcess` の検索順序でインストールディレクトリが `System32` より先に照合され、昇格プロセスがバイナリプランティング LPE を踏む。`ProcessCommandExecutor` は [SystemProcessResolver](src/Lumin4ti.Core/Services/SystemProcessResolver.cs) でフルパス解決 + `WorkingDirectory=System32` 固定してこれを封じている。呼び出し側は論理名でよいが、この解決を外さないこと。
 - 子プロセスは [ProcessJobTracker](src/Lumin4ti.Core/Services/ProcessJobTracker.cs) の Job Object (KILL_ON_JOB_CLOSE) に紐付け、アプリ終了時に OS が孤児を kill する。`ct` キャンセル時はプロセスツリーごと kill。
 - 出力は UTF-8 → OEM (CP932) の順で自動デコード。長時間コマンドの進捗は `\r`/`\n` 区切りで `IProgress<string>` 通知。
+- サービスの停止・再開が要る操作は [WindowsServiceControl](src/Lumin4ti.Core/Services/Windows/WindowsServiceControl.cs) を通す。状態照会は SCM を直接叩き (`QueryState`)、停止・開始だけ `net.exe` に委ねる。`SuspendAsync` は**元から稼働していたサービスだけ**を止めて `ServiceSuspension` を返し、呼び出し側は失敗・キャンセル時も `finally` で `ResumeAsync()` を必ず実行する。キャンセル時に例外を投げず途中で打ち切るのは、既に止めたサービスの再開手段を呼び出し側が失わないため。
 
 ### 破壊的操作の復元性
 
 「OFF で Windows 既定に戻す」を謳う以上、ハードコード既定値でなく**ユーザーの元の値**へ戻す。`RegistryToggle` は ON 適用前に [RegistryValueBackup](src/Lumin4ti.Core/Services/Windows/Actions/RegistryValueBackup.cs) で `%APPDATA%\Lumin4ti\backups\` にスナップショットし、OFF で復元 (UWP・Defender も同様のバックアップを持つ)。不可逆操作を足すときは同様のバックアップを検討する。
+
+### 一時ファイル・キャッシュの削除 (グループ実行)
+
+旧バッチのファイル削除は、対象を用途別にまとめた「グループ 1 つ = ボタン 1 つ」として実装している。ロジックは 3 ファイルに分かれ、**掃除対象を増やすときは [FileCleanupGroups.cs](src/Lumin4ti.Core/Services/Windows/Actions/FileCleanupGroups.cs) のパス表へ 1 行足すだけ**でよい (個別クラスを作らない)。
+
+- [FileCleanupEngine](src/Lumin4ti.Core/Services/Windows/Actions/FileCleanupEngine.cs) — 削除の実体。`CleanupTarget` は `Contents` (中身だけ) / `Remove` (フォルダごと) / `Files` (パターン一致) の 3 種。使用中ファイルは飛ばして続行し、削除数・解放バイト数・ブロック数を `CleanupOutcome` に集計する。
+- [FileCleanupAction](src/Lumin4ti.Core/Services/Windows/Actions/FileCleanupAction.cs) — グループ 1 件分の `IMaintenanceAction`。サービス停止・再起動要否・Explorer 影響・再起動時削除予約をコンストラクタ引数で受ける。
+- ゴミ箱だけは Shell API 直呼びの [RecycleBinCleanupAction](src/Lumin4ti.Core/Services/Windows/Actions/RecycleBinCleanupAction.cs)。
+
+**安全ガード (回帰厳禁)**: 実運用では他人の PC の実データを消すため、次を外さない。
+
+- `TryResolve` が、環境変数の未解決 (`%ProgramData%` 未定義で `\LGHUB\cache` になる等)、相対パス、ドライブ直下、`%LOCALAPPDATA%` 等の基点フォルダを拒否する。基点フォルダは `Files` 指定 (`IconCache.db` / `FNTCACHE.DAT`) のときだけ許可する。
+- ジャンクション・シンボリックリンクは辿らずリンクだけ消す。キャッシュを別ドライブへ逃がしている環境で実体を消さないため。
+- 認証情報・鍵・アプリ設定のフォルダ (`.gnupg` / `.aws` / `.config` / `.codex` 等) はどのグループにも入れない。再生成できないので掃除の巻き添えにしない。[FileCleanupTests](src/Lumin4ti.Tests/FileCleanupTests.cs) が回帰を検出する。
+- シェルが握って離さないファイル (アイコン・フォントキャッシュ) は `MoveFileEx(MOVEFILE_DELAY_UNTIL_REBOOT)` で再起動時削除に回す。Explorer を kill しないのは、失敗時に利用者がシェル無しで取り残されるのを避けるため。
+
+### 同時実行と終了処理
+
+[MaintenanceOperationCoordinator](src/Lumin4ti.UI/Services/MaintenanceOperationCoordinator.cs) が状態変更操作を **同時に 1 件だけ**に制限する (`TryBegin` が false なら UI は「実行中」表示に落とす)。終了要求では `RequestCancellation()` が全操作へキャンセルを通知し、`WaitForIdleAsync()` が各操作の補償・再検証を含む `finally` の完了を待ってからアプリを閉じる。長時間アクションを足すときは、この lease を跨いで生き残る後始末を作らないこと。
 
 ### 昇格とデバッグ起動
 
@@ -96,7 +117,8 @@ Komorebi/Lhamiel と同一方式。翻訳は [Resources/Locales/*.axaml](src/Lum
 
 - トグルの多重操作レース: `ToggleSwitch` の `IsEnabled` は `CanToggle` (= 状態既知 かつ 非実行中) にバインドすること。
 - 状態表示の乖離を避ける: `GetStateAsync` はレジストリだけでなく実適用状態も見る (例: VBS トグルは bcdedit の `hypervisorlaunchtype` も照合)。部分適用を避けるため、失敗しやすいステップ (bcdedit 等) を先に実行してから残りを書く。
-- 部分失敗を成功と偽らない: マルチステップ (powercfg 等) は重要ステップの失敗で `Fail` を返す。
+- 部分失敗を成功と偽らない: マルチステップ (powercfg 等) は重要ステップの失敗で `Fail` を返す。使用中ファイルのスキップのように「想定内の一部未処理」は `Partial` と結果行で伝える。
+- 配布契約は [DistributionContractTests](src/Lumin4ti.Tests/DistributionContractTests.cs) が横断で固定している。`Lumin4ti.UI.csproj` / `scripts/release-local.ps1` / `scripts/set-msi-program-files-location.ps1` / `README.md` / `AppSettings.cs` を編集すると、意図せずここで落ちることがある。落ちたら文字列だけ直さず、配布方式を変えていないかを先に確認する。
 
 ## ドメイン移行（2026-07 開始・期限 2027/05/31）
 

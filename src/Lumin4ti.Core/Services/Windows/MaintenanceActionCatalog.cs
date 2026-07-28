@@ -37,6 +37,7 @@ public sealed class MaintenanceActionCatalog
             new ComponentStoreCleanupAction(executor),
             new ShellFolderRepairAction(executor),
             new TrayIconResetAction(),
+            new GpuPreferenceResetAction(),
             new BrokenStartupCleanupAction(),
             new DeadAssociationCleanupAction(),
             new GhostPackageCleanupAction(executor),
@@ -52,6 +53,8 @@ public sealed class MaintenanceActionCatalog
             new EventLogClearAction(),
             new StoreCacheResetAction(executor),
             new TrimOptimizeAction(executor),
+            // 一時ファイル・キャッシュの削除は用途ごとのグループに分けて、消したいものだけ選べるようにする
+            .. FileCleanupGroups.CreateAll(executor),
 
             // ═══ パフォーマンス ═══
             // MMAgent (メモリ管理) は機能ごとに個別トグル。ON = 機能有効 / OFF = 機能無効 (推奨値は各説明を参照)

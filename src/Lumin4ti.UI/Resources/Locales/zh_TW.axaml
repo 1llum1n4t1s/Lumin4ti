@@ -78,6 +78,8 @@
   <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">透過重新註冊 shell32.dll，修復系統資料夾名稱（例如下載）顯示為英文等顯示異常。</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">重設系統匣圖示快取</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">清除通知區域（系統匣）的圖示快取。解決已解除安裝應用程式的圖示殘留在隱藏圖示區域的問題。你的系統匣顯示/隱藏自訂會被重設一次。</x:String>
+  <x:String x:Key="Text.Action.gpu-preference-reset.Label" xml:space="preserve">刪除所有應用程式的圖形設定（GPU 指定）</x:String>
+  <x:String x:Key="Text.Action.gpu-preference-reset.Desc" xml:space="preserve">刪除在「設定 &gt; 系統 &gt; 顯示器 &gt; 圖形」中為個別應用程式指定的 GPU 設定（高效能 / 省電）的所有登錄，讓所有應用程式回到由 Windows 自動判斷。適用於已解除安裝應用程式的登錄殘留，或應用程式總是在非預期的 GPU 上啟動時的整理。桌面應用程式與市集應用程式皆為對象。全域設定（自動 HDR、可變重新整理頻率、視窗化遊戲最佳化）不會被刪除。各應用程式於下次啟動時生效。</x:String>
   <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">移除損毀的啟動項目</x:String>
   <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">移除執行檔已不存在的啟動項目（目前使用者），以及對應的孤立項目。</x:String>
   <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">從「開啟方式」中移除不存在的應用程式</x:String>
@@ -92,6 +94,28 @@
   <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">使用 WSReset 重設 Microsoft Store 快取。用於 Store 無法開啟、下載沒有進度或反覆出現「重試」錯誤的標準修復方法。應用程式與帳戶資訊不會被移除。完成後 Store 應用程式可能會自動開啟。</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">SSD TRIM 與可用空間整合</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">對所有磁碟區執行向 SSD 傳送 TRIM 通知（/L）與可用空間整合（/X），以維持 SSD 寫入效能並整理可用空間的破碎情形。視磁碟配置而定，可能需要幾分鐘到數十分鐘。執行期間可繼續使用電腦。</x:String>
+  <x:String x:Key="Text.Action.cleanup-user-temp.Label" xml:space="preserve">刪除使用者暫存檔與快取</x:String>
+  <x:String x:Key="Text.Action.cleanup-user-temp.Desc" xml:space="preserve">刪除目前登入使用者的暫存資料夾（%LOCALAPPDATA%\Temp）、當機傾印、著色器快取、Internet Explorer 與 WebView 快取、最近使用檔案的記錄以及輸入法轉換快取。通常可釋出數 GB 空間。正被應用程式占用的檔案會自動略過，因此在工作中執行也很安全。</x:String>
+  <x:String x:Key="Text.Action.cleanup-system-temp.Label" xml:space="preserve">刪除系統暫存檔與記錄檔</x:String>
+  <x:String x:Key="Text.Action.cleanup-system-temp.Desc" xml:space="preserve">刪除 Windows 本身的暫存資料夾、安裝與服務記錄檔、BITS 傳輸佇列、傳遞最佳化快取，以及 Windows Defender 的舊定義備份與掃描歷程。執行期間會暫停 BITS 與傳遞最佳化服務，完成後再回復原本狀態。用於追查過往問題的記錄檔也會一併消失，正在調查故障時請勿執行。</x:String>
+  <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">刪除應用程式快取與記錄檔</x:String>
+  <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">刪除以 Electron 為基礎的應用程式（Claude、Cursor、Discord、Antigravity 等）的快取、GPU 著色器快取（NVIDIA DXCache、AMD）、Unreal Engine 的衍生資料，以及常駐工具的記錄檔。設定與登入狀態都會保留，各應用程式會在下次啟動時重新建立快取。未安裝的應用程式會直接略過。</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">刪除開發工具的套件快取</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">刪除 npm、NuGet、pip、Yarn、Gradle、Maven、Bun、uv 累積的已下載套件快取，有時可釋出數十 GB。認證資訊與設定資料夾（.gnupg、.aws、.config 等）不在刪除範圍內。刪除後各專案在下次建置或還原時會重新下載套件，因此僅該次會額外花費時間與流量。</x:String>
+  <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">刪除瀏覽器快取</x:String>
+  <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">偵測已安裝的 Chromium 系瀏覽器（Edge、Chrome、Brave、Vivaldi、Comet），刪除所有設定檔中的網頁快取、GPU 著色器快取、Service Worker、當機報告與擴充功能的暫存資料。通常可釋出數 GB 空間。書籤、密碼與登入狀態不會被刪除。執行前先關閉瀏覽器可以刪得更徹底。</x:String>
+  <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">重建圖示、縮圖與字型快取</x:String>
+  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">刪除檔案總管的圖示快取、縮圖快取與字型快取，讓 Windows 重新建立。這是圖示空白或錯亂、縮圖不更新、文字顯示異常時的標準修復方式。執行後會重新啟動檔案總管，被殼層占用而無法刪除的檔案會在下次重新開機時刪除。快取重建期間顯示會暫時變慢。</x:String>
+  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">刪除 Windows Update 的下載快取</x:String>
+  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">刪除已套用更新的下載檔案（SoftwareDistribution）、更新歷程資料存放區以及簽章目錄快取（catroot2）。這是更新卡住、同一更新反覆失敗時的標準處理方式，也能釋出數 GB 空間。執行時會暫停相關服務，完成後回復原狀。Windows Update 的更新歷程顯示會被清除。</x:String>
+  <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">刪除並重建預先擷取資料與搜尋索引</x:String>
+  <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">刪除加速應用程式啟動的預先擷取資料（Prefetch）與檔案總管的搜尋索引，讓 Windows 重新建立。適用於搜尋不到結果或總是找到過期檔案的情況。在重建完成前的數十分鐘到數小時內，應用程式啟動與搜尋都會變慢，背景 CPU 使用率也會上升。</x:String>
+  <x:String x:Key="Text.Action.cleanup-drive-root-leftovers.Label" xml:space="preserve">刪除磁碟根目錄下殘留的資料夾</x:String>
+  <x:String x:Key="Text.Action.cleanup-drive-root-leftovers.Desc" xml:space="preserve">刪除驅動程式安裝程式與作業系統升級在系統磁碟根目錄留下的資料夾（AMD、Intel、SWSetup、PerfLogs、OneDriveTemp、$SysReset、Windows.old）。光是 Windows.old 就可能達到數十 GB，是釋出空間最多的一項。注意：刪除 Windows.old 後，大型更新後將無法回復到先前版本，剛升級完成時請勿執行。</x:String>
+  <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Label" xml:space="preserve">刪除 Outlook 的離線快取</x:String>
+  <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Desc" xml:space="preserve">刪除 Outlook 在本機保存的信箱副本，也就是離線資料（.ost）與搜尋資料（.nst）。單一檔案可能達到數 GB 至數十 GB。伺服器上的郵件不會被刪除，下次啟動 Outlook 時會重新同步。注意：在重新同步完成前看不到過往郵件，網路較慢時可能需要數小時。僅存在於本機的 .pst 資料不在刪除範圍內。</x:String>
+  <x:String x:Key="Text.Action.cleanup-recycle-bin.Label" xml:space="preserve">清空資源回收筒</x:String>
+  <x:String x:Key="Text.Action.cleanup-recycle-bin.Desc" xml:space="preserve">清空所有磁碟機的資源回收筒，釋出已刪除檔案占用的空間。不會出現確認對話方塊，執行後即無法復原，請先確認裡面沒有需要的檔案。</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">記憶體壓縮</x:String>

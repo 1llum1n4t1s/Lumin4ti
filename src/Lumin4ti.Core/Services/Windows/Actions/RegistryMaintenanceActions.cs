@@ -45,6 +45,102 @@ public sealed class TrayIconResetAction : IMaintenanceAction
 }
 
 /// <summary>
+/// 「設定 > ディスプレイ > グラフィック」でアプリごとに指定した GPU の設定を全件削除する。
+/// 値名が実行ファイルのフルパス (デスクトップアプリ) か AUMID (ストアアプリ) で、
+/// 値データが "GpuPreference=2;" のような設定文字列という構造。
+/// </summary>
+[SupportedOSPlatform("windows")]
+public sealed class GpuPreferenceResetAction : IMaintenanceAction
+{
+    internal const string UserGpuPreferencesKey = @"SOFTWARE\Microsoft\DirectX\UserGpuPreferences";
+
+    /// <summary>
+    /// 同じキーに同居する、アプリ登録ではない OS 全体の設定 (自動 HDR、可変リフレッシュレート、
+    /// ウィンドウ表示のゲームの最適化)。アプリ単位の指定ではないので削除対象から除く。
+    /// </summary>
+    internal const string GlobalSettingsValueName = "DirectXUserGlobalSettings";
+
+    /// <summary>結果に個別列挙するアプリ数の上限 (超過分は件数だけ伝える)。</summary>
+    private const int MaxListedEntries = 15;
+
+    public string Id => "gpu-preference-reset";
+
+    public string Label => "アプリごとのグラフィック設定 (GPU の指定) をすべて削除";
+
+    public string Description =>
+        "「設定 > システム > ディスプレイ > グラフィック」で個別に指定した、アプリごとの GPU 設定 (高パフォーマンス / 省電力) の登録をすべて削除し、" +
+        "どのアプリも Windows の自動判定に戻します。アンインストール済みアプリの登録が残り続ける、意図しない GPU で起動する、といった場合の整理に使います。" +
+        "デスクトップアプリとストアアプリの両方が対象です。全体設定 (自動 HDR、可変リフレッシュレート、ウィンドウ表示のゲームの最適化) は削除しません。" +
+        "各アプリの次回起動から反映されます。";
+
+    public CommandCategory Category => CommandCategory.Cleanup;
+
+    public bool RequiresReboot => false;
+
+    /// <summary>アプリ登録として削除してよい値か (OS 全体の設定だけを残す)。</summary>
+    internal static bool IsAppRegistration(string valueName) =>
+        !string.IsNullOrEmpty(valueName) &&
+        !valueName.Equals(GlobalSettingsValueName, StringComparison.OrdinalIgnoreCase);
+
+    public Task<MaintenanceActionResult> ExecuteAsync(CancellationToken ct = default)
+    {
+        using var key = Registry.CurrentUser.OpenSubKey(UserGpuPreferencesKey, writable: true);
+        if (key is null)
+        {
+            LoggerBootstrap.Log.Info($"{Id}: キーなし");
+            return Task.FromResult(MaintenanceActionResult.Ok("  - アプリごとの GPU 設定は登録されていませんでした"));
+        }
+
+        var targets = key.GetValueNames().Where(IsAppRegistration).ToList();
+        var removed = new List<string>();
+        var failures = new List<string>();
+
+        foreach (var name in targets)
+        {
+            ct.ThrowIfCancellationRequested();
+            try
+            {
+                key.DeleteValue(name, throwOnMissingValue: false);
+                removed.Add(name);
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException)
+            {
+                failures.Add(name);
+            }
+        }
+
+        // 何を消したかは復元の手がかりになるので、表示を打ち切っても全件ログへ残す。
+        foreach (var name in removed)
+        {
+            LoggerBootstrap.Log.Info($"{Id}: 削除 {name}");
+        }
+
+        if (removed.Count == 0 && failures.Count == 0)
+        {
+            LoggerBootstrap.Log.Info($"{Id}: 削除対象なし");
+            return Task.FromResult(MaintenanceActionResult.Ok("  - アプリごとの GPU 設定は登録されていませんでした"));
+        }
+
+        var lines = new List<string> { $"  - {removed.Count} 件のアプリの GPU 設定を削除しました" };
+        lines.AddRange(removed.Take(MaxListedEntries).Select(name => $"    {name}"));
+        if (removed.Count > MaxListedEntries)
+        {
+            lines.Add($"    ほか {removed.Count - MaxListedEntries} 件 (全件はログに記録しました)");
+        }
+
+        if (failures.Count == 0)
+        {
+            LoggerBootstrap.Log.Info($"{Id}: {removed.Count} 件削除");
+            return Task.FromResult(MaintenanceActionResult.Ok(lines));
+        }
+
+        LoggerBootstrap.Log.Error($"{Id}: {removed.Count} 件削除 / {failures.Count} 件失敗");
+        lines.Add($"  - {failures.Count} 件は権限不足で削除できませんでした");
+        return Task.FromResult(MaintenanceActionResult.Partial(lines));
+    }
+}
+
+/// <summary>
 /// Game Bar / Game DVR 関連の無効化設定を削除して Windows 既定に戻す。
 /// 過去の最適化ツール等が書き込んだ「録画無効化」を解除し、Game Bar を正常動作に戻す。
 /// </summary>

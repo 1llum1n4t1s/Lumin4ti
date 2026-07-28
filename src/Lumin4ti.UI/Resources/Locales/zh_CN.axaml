@@ -78,6 +78,8 @@
   <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">通过重新注册 shell32.dll，修复系统文件夹名称（例如下载）显示为英文等显示异常。</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">重置系统托盘图标缓存</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">清除通知区域（系统托盘）的图标缓存。解决已卸载应用的图标残留在隐藏图标区域的问题。你的托盘显示/隐藏自定义会被重置一次。</x:String>
+  <x:String x:Key="Text.Action.gpu-preference-reset.Label" xml:space="preserve">删除所有应用的图形设置（GPU 指定）</x:String>
+  <x:String x:Key="Text.Action.gpu-preference-reset.Desc" xml:space="preserve">删除在「设置 &gt; 系统 &gt; 屏幕 &gt; 显示卡」中为各个应用单独指定的 GPU 设置（高性能 / 节能）的全部登记，让所有应用恢复由 Windows 自动判断。适用于已卸载应用的登记残留、或应用总是在非预期的 GPU 上启动时的整理。桌面应用和商店应用均为对象。全局设置（自动 HDR、可变刷新率、窗口化游戏优化）不会被删除。各应用在下次启动时生效。</x:String>
   <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">删除损坏的启动项</x:String>
   <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">删除可执行文件已不存在的启动项（当前用户），以及对应的孤立条目。</x:String>
   <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">从“打开方式”中删除不存在的应用</x:String>
@@ -92,6 +94,28 @@
   <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">使用 WSReset 重置 Microsoft Store 缓存。用于 Store 无法打开、下载无进展或反复出现“重试”错误的标准修复方法。应用和账户信息不会被删除。完成后 Store 应用可能会自动打开。</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">SSD TRIM 与可用空间整合</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">对所有卷执行向 SSD 发送 TRIM 通知（/L）和可用空间整合（/X），以保持 SSD 写入性能并整理可用空间碎片。视驱动器布局而定，可能需要几分钟到几十分钟。运行期间可继续使用电脑。</x:String>
+  <x:String x:Key="Text.Action.cleanup-user-temp.Label" xml:space="preserve">删除用户临时文件和缓存</x:String>
+  <x:String x:Key="Text.Action.cleanup-user-temp.Desc" xml:space="preserve">删除当前登录用户的临时文件夹（%LOCALAPPDATA%\Temp）、崩溃转储、着色器缓存、Internet Explorer 与 WebView 缓存、最近使用文件的记录以及输入法转换缓存。通常可释放数 GB 空间。正在被应用占用的文件会自动跳过，因此在工作过程中也能安全执行。</x:String>
+  <x:String x:Key="Text.Action.cleanup-system-temp.Label" xml:space="preserve">删除系统临时文件和日志</x:String>
+  <x:String x:Key="Text.Action.cleanup-system-temp.Desc" xml:space="preserve">删除 Windows 自身的临时文件夹、安装与服务日志、BITS 传输队列、传递优化缓存，以及 Windows Defender 的旧定义备份和扫描历史。执行期间会暂停 BITS 和传递优化服务，完成后恢复原状态。用于排查以往故障的日志也会一并消失，正在调查问题时请勿执行。</x:String>
+  <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">删除应用缓存和日志</x:String>
+  <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">删除基于 Electron 的应用（Claude、Cursor、Discord、Antigravity 等）的缓存、GPU 着色器缓存（NVIDIA DXCache、AMD）、Unreal Engine 的派生数据以及常驻工具的日志。设置和登录状态不会丢失，各应用会在下次启动时重新生成缓存。未安装的应用会直接跳过。</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">删除开发工具的包缓存</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">删除 npm、NuGet、pip、Yarn、Gradle、Maven、Bun、uv 积累的已下载包缓存，有时可释放数十 GB。凭据和配置文件夹（.gnupg、.aws、.config 等）不在删除范围内。删除后各项目在下次构建或还原时会重新下载依赖包，因此仅那一次会额外花费时间和流量。</x:String>
+  <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">删除浏览器缓存</x:String>
+  <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">检测已安装的 Chromium 系浏览器（Edge、Chrome、Brave、Vivaldi、Comet），删除全部配置文件中的网页缓存、GPU 着色器缓存、Service Worker、崩溃报告和扩展的临时数据。通常可释放数 GB 空间。书签、密码和登录状态不会被删除。执行前先关闭浏览器可以删除得更彻底。</x:String>
+  <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">重建图标、缩略图和字体缓存</x:String>
+  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">删除文件资源管理器的图标缓存、缩略图缓存和字体缓存，让 Windows 重新生成。这是图标空白或错乱、缩略图不更新、文字显示异常时的常规修复手段。执行后会重启资源管理器，被外壳占用而无法删除的文件将在下次重启时删除。缓存重建期间显示会暂时变慢。</x:String>
+  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">删除 Windows 更新的下载缓存</x:String>
+  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">删除已安装更新的下载文件（SoftwareDistribution）、更新历史数据存储以及签名目录缓存（catroot2）。这是更新中途卡住、同一更新反复失败时的常规处理方法，也能释放数 GB 空间。执行时会暂停相关服务，完成后恢复原状态。Windows 更新的历史记录显示会被清空。</x:String>
+  <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">删除并重建预读数据和搜索索引</x:String>
+  <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">删除用于加快应用启动的预读数据（Prefetch）和文件资源管理器的搜索索引，让 Windows 重新生成。适用于搜索不出结果或总是命中过期文件的情况。在重建完成前的数十分钟至数小时内，应用启动和搜索都会变慢，后台 CPU 占用也会升高。</x:String>
+  <x:String x:Key="Text.Action.cleanup-drive-root-leftovers.Label" xml:space="preserve">删除驱动器根目录下的残留文件夹</x:String>
+  <x:String x:Key="Text.Action.cleanup-drive-root-leftovers.Desc" xml:space="preserve">删除驱动程序安装包和系统升级在系统盘根目录留下的文件夹（AMD、Intel、SWSetup、PerfLogs、OneDriveTemp、$SysReset、Windows.old）。仅 Windows.old 就可能占用数十 GB，是释放空间最多的一项。注意：删除 Windows.old 后将无法在大版本更新后回退到旧版本，升级刚完成时请勿执行。</x:String>
+  <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Label" xml:space="preserve">删除 Outlook 的脱机缓存</x:String>
+  <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Desc" xml:space="preserve">删除 Outlook 在本地保存的邮箱副本，即脱机数据（.ost）和搜索数据（.nst）。单个文件可能达到数 GB 至数十 GB。服务器上的邮件不会被删除，下次启动 Outlook 时会重新同步。注意：在重新同步完成前看不到过往邮件，网络较慢时可能需要数小时。仅存在于本地的 .pst 数据不在删除范围内。</x:String>
+  <x:String x:Key="Text.Action.cleanup-recycle-bin.Label" xml:space="preserve">清空回收站</x:String>
+  <x:String x:Key="Text.Action.cleanup-recycle-bin.Desc" xml:space="preserve">清空所有驱动器的回收站，释放已删除文件占用的空间。不会弹出确认对话框，执行后无法恢复，请先确认回收站中没有需要的文件。</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">内存压缩</x:String>

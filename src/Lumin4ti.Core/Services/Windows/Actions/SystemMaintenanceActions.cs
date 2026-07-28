@@ -1,12 +1,9 @@
-using System.ComponentModel;
 using System.Diagnostics.Eventing.Reader;
 using System.Runtime.ExceptionServices;
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
 using Microsoft.Win32;
-using Microsoft.Win32.SafeHandles;
 
 namespace Lumin4ti.Core.Services.Windows.Actions;
 
@@ -20,11 +17,6 @@ public sealed class NtpConfigAction : IMaintenanceAction
     internal const string ParametersKey = @"SYSTEM\CurrentControlSet\Services\W32Time\Parameters";
     internal const string ConfigKey = @"SYSTEM\CurrentControlSet\Services\W32Time\Config";
     internal const string NtpServer = "ntp.jst.mfeed.ad.jp";
-    private const uint ScManagerConnect = 0x0001;
-    private const uint ServiceQueryStatus = 0x0004;
-    private const uint ServiceStopped = 0x00000001;
-    private const uint ServiceRunning = 0x00000004;
-    private const int ScStatusProcessInfo = 0;
 
     private readonly ICommandExecutor _executor;
     private readonly Func<bool> _isServiceRunning;
@@ -152,91 +144,19 @@ public sealed class NtpConfigAction : IMaintenanceAction
             ? $"exit={result.ExitCode}"
             : result.StandardError.Trim();
 
-    private static bool IsWindowsTimeRunning()
+    /// <summary>
+    /// w32time の稼働状態。SCM の照会は <see cref="WindowsServiceControl"/> と共通化している。
+    /// 遷移中は停止・再開の判断ができないため、設定を始めずに中断する。
+    /// </summary>
+    private static bool IsWindowsTimeRunning() => WindowsServiceControl.QueryState("w32time") switch
     {
-        using var manager = OpenSCManager(null, null, ScManagerConnect);
-        if (manager.IsInvalid)
-        {
-            throw new Win32Exception(Marshal.GetLastWin32Error(), "Service Control Manager を開けませんでした");
-        }
-
-        using var service = OpenService(manager, "w32time", ServiceQueryStatus);
-        if (service.IsInvalid)
-        {
-            throw new Win32Exception(Marshal.GetLastWin32Error(), "w32time サービスを開けませんでした");
-        }
-
-        if (!QueryServiceStatusEx(
-                service,
-                ScStatusProcessInfo,
-                out var status,
-                (uint)Marshal.SizeOf<ServiceStatusProcess>(),
-                out _))
-        {
-            throw new Win32Exception(Marshal.GetLastWin32Error(), "w32time の状態を取得できませんでした");
-        }
-
-        return status.CurrentState switch
-        {
-            ServiceStopped => false,
-            ServiceRunning => true,
-            _ => throw new InvalidOperationException(
-                $"w32time が状態遷移中のため NTP 設定を開始できません (state={status.CurrentState})"),
-        };
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct ServiceStatusProcess
-    {
-        public uint ServiceType;
-        public uint CurrentState;
-        public uint ControlsAccepted;
-        public uint Win32ExitCode;
-        public uint ServiceSpecificExitCode;
-        public uint CheckPoint;
-        public uint WaitHint;
-        public uint ProcessId;
-        public uint ServiceFlags;
-    }
-
-    private sealed class SafeServiceHandle : SafeHandleZeroOrMinusOneIsInvalid
-    {
-        public SafeServiceHandle()
-            : base(ownsHandle: true)
-        {
-        }
-
-        protected override bool ReleaseHandle() => CloseServiceHandle(handle);
-    }
-
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [DllImport("advapi32.dll", EntryPoint = "OpenSCManagerW", ExactSpelling = true, CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern SafeServiceHandle OpenSCManager(
-        string? machineName,
-        string? databaseName,
-        uint desiredAccess);
-
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [DllImport("advapi32.dll", EntryPoint = "OpenServiceW", ExactSpelling = true, CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern SafeServiceHandle OpenService(
-        SafeServiceHandle serviceManager,
-        string serviceName,
-        uint desiredAccess);
-
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [DllImport("advapi32.dll", ExactSpelling = true, SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool QueryServiceStatusEx(
-        SafeServiceHandle service,
-        int infoLevel,
-        out ServiceStatusProcess buffer,
-        uint bufferSize,
-        out uint bytesNeeded);
-
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [DllImport("advapi32.dll", ExactSpelling = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool CloseServiceHandle(nint serviceHandle);
+        WindowsServiceState.Stopped => false,
+        WindowsServiceState.Running => true,
+        WindowsServiceState.NotInstalled => throw new InvalidOperationException(
+            "この環境には w32time サービスがありません。"),
+        _ => throw new InvalidOperationException(
+            "w32time が状態遷移中のため NTP 設定を開始できません"),
+    };
 }
 
 internal interface INtpConfigurationStore
