@@ -31,10 +31,13 @@ dotnet test Lumin4ti.slnx --filter "Name=既定値に戻せるトグルの既定
 
 ### メンテナンス項目の中核 (最重要)
 
-すべての「機能」は `IMaintenanceItem` を軸にした 2 型 ([IMaintenanceAction.cs](src/Lumin4ti.Core/Interfaces/IMaintenanceAction.cs)):
+すべての「機能」は `IMaintenanceItem` を軸にした 3 型 ([IMaintenanceAction.cs](src/Lumin4ti.Core/Interfaces/IMaintenanceAction.cs)):
 
 - **`IMaintenanceAction`** — 「実行」ボタン型 (1 回実行)。`ExecuteAsync(IProgress<string>?, ct)` でライブ進捗を UI へ流せる。
 - **`IMaintenanceToggle`** — ON/OFF トグル型。**ON = 最適化を適用 / OFF = Windows 既定に戻す** で統一 (例外は MMAgent 系トグルのみ ON = 機能有効)。`GetStateAsync`/`SetStateAsync`。
+- **`IMaintenanceChoice`** — ドロップダウン選択型。ON/OFF に収まらない数値・段階設定に使う (例: `MmAgentOperationApiChoice` は「無効」と記録ファイル数を 1 つの操作で選ばせる)。`Options`/`GetSelectedValueAsync`/`SetSelectedValueAsync`。選択肢の表示名は翻訳不要なら `Label` をそのまま出し、翻訳が要るものだけ `LabelKey` を持たせる。`IsDefault` を付けた選択肢に UI が「(既定)」を添える。
+
+`IMaintenanceItem.ParentId` に前提となる項目の Id を入れると、その項目は**親カードの中へ 1 段だけ入れ子表示**され、親トグルが OFF の間は操作不可になる (OS 側で連動して無効になる子設定に使う)。親は同じカテゴリに置くこと。
 
 新機能を足すときは Actions 配下にクラスを作り、**[MaintenanceActionCatalog.cs](src/Lumin4ti.Core/Services/Windows/MaintenanceActionCatalog.cs) の `Items` に登録するだけ**で UI に現れる。カタログの並び順が画面の表示順。単純なレジストリ tweak は個別クラスを作らず汎用の `RegistryToggle` にスペックを渡す。
 

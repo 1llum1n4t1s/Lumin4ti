@@ -21,6 +21,11 @@ internal static class Program
         }
 #endif
 
+        // Avalonia 起動より前に走る経路 (Velopack フック / PerMachine 移行) の失敗も追えるよう、
+        // 最初にログを構成する。Initialize は冪等なので App 側の呼び出しと二重にならない。
+        LoggerBootstrap.Initialize();
+        LoggerBootstrap.LogEnvironment();
+
         // Velopack のブートストラップを最初に走らせる
         // (--veloapp-install / --veloapp-updated 等の internal hook を捌くため、Avalonia 起動・多重起動ガードより前に必須)
         var velopackApp = VelopackApp.Build();

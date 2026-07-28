@@ -16,7 +16,8 @@ public sealed class MmAgentOperationApiChoiceTests
             string fileName,
             string arguments,
             CancellationToken ct = default,
-            IProgress<string>? onOutputLine = null)
+            IProgress<string>? onOutputLine = null,
+            TimeSpan? timeout = null)
         {
             Commands.Add(arguments);
             return Task.FromResult(respond(arguments));
@@ -40,8 +41,10 @@ public sealed class MmAgentOperationApiChoiceTests
         CollectionAssert.AreEqual(
             new[] { "disabled", "128", "256", "512", "1024" },
             choice.Options.Select(o => o.Value).ToArray());
-        Assert.AreEqual("512", choice.Options.Single(o => o.IsDefault).Value);
-        Assert.AreEqual("512", MmAgentOperationApiChoice.DefaultValue);
+        // 既定印と公開する既定値は同じ情報源から導出されること (片方だけ変えられない)
+        Assert.AreEqual(
+            MmAgentOperationApiChoice.DefaultValue,
+            choice.Options.Single(o => o.IsDefault).Value);
     }
 
     [TestMethod]
@@ -104,16 +107,44 @@ public sealed class MmAgentOperationApiChoiceTests
     [TestMethod]
     public async Task 無効状態から数値を選ぶと機能を有効に戻してから設定する()
     {
-        var executor = new FakeExecutor(command =>
-            command.Contains("Get-MMAgent | ConvertTo-Json", StringComparison.Ordinal)
-                ? Ok("{\"OperationAPI\":false}")
-                : Ok());
+        // Enable-MMAgent が通る環境: 有効化後の読み取りでは True を返す
+        var enabled = false;
+        FakeExecutor? executor = null;
+        executor = new FakeExecutor(command =>
+        {
+            if (command.Contains("Enable-MMAgent", StringComparison.Ordinal))
+            {
+                enabled = true;
+                return Ok();
+            }
+
+            return command.Contains("Get-MMAgent | ConvertTo-Json", StringComparison.Ordinal)
+                ? Ok($"{{\"OperationAPI\":{(enabled ? "true" : "false")}}}")
+                : Ok();
+        });
 
         var result = await CreateChoice(executor).SetSelectedValueAsync("128");
 
         Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
         Assert.IsTrue(executor.Commands.Any(c => c.Contains("Enable-MMAgent -OperationAPI", StringComparison.Ordinal)));
         Assert.IsTrue(executor.Commands.Any(c => c.Contains("Set-MMAgent -MaxOperationAPIFiles 128", StringComparison.Ordinal)));
+    }
+
+    [TestMethod]
+    public async Task 数値を設定しても機能が無効のままなら部分成功として理由を出す()
+    {
+        // プリフェッチ機構が OFF で OperationAPI が連動無効の環境
+        var executor = new FakeExecutor(command =>
+            command.Contains("Get-MMAgent | ConvertTo-Json", StringComparison.Ordinal)
+                ? Ok("{\"OperationAPI\":false}")
+                : Ok());
+
+        var result = await CreateChoice(executor).SetSelectedValueAsync("512");
+
+        Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
+        StringAssert.Contains(result.Detail, "記録ファイル数を 512 に設定しました");
+        StringAssert.Contains(result.Detail, "無効のまま");
+        StringAssert.Contains(result.Detail, "アプリ起動プリフェッチ");
     }
 
     [TestMethod]

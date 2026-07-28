@@ -175,6 +175,29 @@ public sealed class GhostPackageCleanupTests
     }
 
     [TestMethod]
+    public async Task 現在ユーザーへの登録が無い残骸は解除を試さず修復へ回す()
+    {
+        // SYSTEM へ Staged されているだけの状態: 解除すべきユーザー登録が存在しない
+        var store = new FakeStore([Ghost() with { IsRegisteredForCurrentUser = false }]);
+        var repairedFamilies = new List<string>();
+
+        var result = await CreateAction(
+                store,
+                [$"{GhostFamily}!Microsoft.PPIProjection"],
+                repairSystemAppAsync: (family, _, _) =>
+                {
+                    repairedFamilies.Add(family);
+                    store.RestoreInstallLocation(family);
+                    return Task.FromResult<string?>(null);
+                })
+            .ExecuteAsync();
+
+        Assert.AreEqual(0, store.RemoveCalls.Count, "空振りする解除 API を呼ばない");
+        CollectionAssert.AreEqual(new[] { GhostFamily }, repairedFamilies);
+        Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
+    }
+
+    [TestMethod]
     public async Task 削除できないシステムアプリは本体を入れ直して修復する()
     {
         var store = new FakeStore([Ghost()]);

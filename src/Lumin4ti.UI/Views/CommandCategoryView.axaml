@@ -16,7 +16,7 @@
             <Border Background="{DynamicResource Brush.Container}"
                     BorderBrush="{DynamicResource Brush.Border}"
                     BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,0,0,8">
-              <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+              <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto">
                 <StackPanel Grid.Row="0" Grid.Column="0" Spacing="2" VerticalAlignment="Center" Margin="0,0,12,0">
                   <TextBlock Text="{Binding Label}" FontWeight="SemiBold" TextWrapping="Wrap" />
                   <TextBlock Text="{Binding Description}" Classes="caption" TextWrapping="Wrap" />
@@ -77,6 +77,57 @@
                     </SelectableTextBlock.Styles>
                   </SelectableTextBlock>
                 </Border>
+                <!--  子項目 (前提設定に連動する子設定)。親カードの中へインデントして描画する  -->
+                <ItemsControl Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="16,10,0,0"
+                              ItemsSource="{Binding Children}" IsVisible="{Binding HasChildren}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:CommandItemViewModel">
+                      <Border BorderBrush="{DynamicResource Brush.Border}" BorderThickness="2,0,0,0"
+                              Padding="12,4,0,4" Margin="0,4,0,0">
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                          <StackPanel Grid.Row="0" Grid.Column="0" Spacing="2" VerticalAlignment="Center" Margin="0,0,12,0">
+                            <TextBlock Text="{Binding Label}" FontWeight="SemiBold" FontSize="13" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding Description}" Classes="caption" TextWrapping="Wrap" />
+                          </StackPanel>
+                          <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <ProgressBar IsIndeterminate="True" Width="60" IsVisible="{Binding IsRunning}" />
+                            <ComboBox ItemsSource="{Binding ChoiceOptions}" SelectedItem="{Binding SelectedChoice}"
+                                      IsEnabled="{Binding CanChoose}" IsVisible="{Binding IsChoice}"
+                                      MinWidth="140" VerticalAlignment="Center">
+                              <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ChoiceOptionViewModel">
+                                  <TextBlock Text="{Binding Display}" />
+                                </DataTemplate>
+                              </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <ToggleSwitch IsChecked="{Binding IsChecked}" IsEnabled="{Binding CanToggle}"
+                                          IsVisible="{Binding IsToggle}"
+                                          OnContent="ON" OffContent="OFF" />
+                          </StackPanel>
+                          <!--  子項目の実行結果  -->
+                          <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,0"
+                                  Background="{DynamicResource Brush.Window}" CornerRadius="6" Padding="10,6"
+                                  IsVisible="{Binding ResultText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                            <SelectableTextBlock Text="{Binding ResultText}" FontSize="12" TextWrapping="Wrap"
+                                                 FontFamily="Cascadia Mono, Consolas, monospace"
+                                                 Foreground="{DynamicResource Brush.FG1}"
+                                                 Classes.error="{Binding LastRunFailed}"
+                                                 Classes.warning="{Binding LastRunWarning}">
+                              <SelectableTextBlock.Styles>
+                                <Style Selector="SelectableTextBlock.warning">
+                                  <Setter Property="Foreground" Value="#FF9500" />
+                                </Style>
+                                <Style Selector="SelectableTextBlock.error">
+                                  <Setter Property="Foreground" Value="#FF3B30" />
+                                </Style>
+                              </SelectableTextBlock.Styles>
+                            </SelectableTextBlock>
+                          </Border>
+                        </Grid>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
               </Grid>
             </Border>
           </DataTemplate>

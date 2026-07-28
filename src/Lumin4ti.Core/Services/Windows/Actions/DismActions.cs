@@ -23,11 +23,17 @@ public abstract class DismActionBase(ICommandExecutor executor) : IMaintenanceAc
 
     protected abstract string Arguments { get; }
 
+    /// <summary>
+    /// このコマンドの実行上限。DISM のサービシングは途中で kill するとコンポーネントストアを
+    /// 中途状態にするため、既定 (1 時間) より長く待つ必要がある処理は派生側で伸ばす。
+    /// </summary>
+    protected virtual TimeSpan? Timeout => null;
+
     public Task<MaintenanceActionResult> ExecuteAsync(CancellationToken ct = default) => ExecuteAsync(null, ct);
 
     public async Task<MaintenanceActionResult> ExecuteAsync(IProgress<string>? progress, CancellationToken ct = default)
     {
-        var result = await executor.RunAsync("dism.exe", Arguments, ct, progress);
+        var result = await executor.RunAsync("dism.exe", Arguments, ct, progress, Timeout);
 
         if (DismExitCode.IsSuccessOrRebootRequired(result))
         {
@@ -76,6 +82,10 @@ public sealed class ComponentStoreCleanupAction(ICommandExecutor executor) : Dis
     public override bool IsLongRunning => true;
 
     protected override string Arguments => "/online /Cleanup-Image /StartComponentCleanup /ResetBase";
+
+    // 途中で kill するとコンポーネントストアが中途状態になる。低速なディスクや大量の世代が
+    // 残った PC では 1 時間を超えることがあるため、既定より長い上限を与える。
+    protected override TimeSpan? Timeout => TimeSpan.FromHours(3);
 }
 
 // (Recall の切り替えは RecallToggle 参照 — ON/OFF 型のため本基底は使わない)

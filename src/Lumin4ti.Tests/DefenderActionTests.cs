@@ -18,7 +18,8 @@ public sealed class DefenderActionTests
             string fileName,
             string arguments,
             CancellationToken ct = default,
-            IProgress<string>? onOutputLine = null)
+            IProgress<string>? onOutputLine = null,
+            TimeSpan? timeout = null)
         {
             Calls.Add((fileName, arguments, ct));
             return Task.FromResult(_results.Dequeue());
@@ -241,7 +242,8 @@ public sealed class DefenderActionTests
             string fileName,
             string arguments,
             CancellationToken ct = default,
-            IProgress<string>? onOutputLine = null)
+            IProgress<string>? onOutputLine = null,
+            TimeSpan? timeout = null)
         {
             Calls.Add((arguments, ct));
             if (Calls.Count == 1)

@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services.Windows;
@@ -19,11 +21,14 @@ public class MainWindowViewModel
 
     public VersionViewModel Version { get; }
 
+    private readonly MaintenanceOperationCoordinator _operationCoordinator;
+
     public MainWindowViewModel(
         MaintenanceActionCatalog catalog,
         VersionViewModel version,
         MaintenanceOperationCoordinator operationCoordinator)
     {
+        _operationCoordinator = operationCoordinator;
         Update = new CommandCategoryViewModel(
             catalog,
             operationCoordinator,
@@ -62,11 +67,36 @@ public class MainWindowViewModel
         // トグルの現在状態はバックグラウンドで読み込む (DISM/Get-MMAgent 等で外部プロセスを起動しうる)。
         // Task.Run で包み、async の同期プレフィックス (Process.Start) が UI スレッド上で走って
         // 起動描画をブロックするのを防ぐ。
-        _ = Task.Run(() => Task.WhenAll(
-            Update.LoadToggleStatesAsync(),
-            Cleanup.LoadToggleStatesAsync(),
-            Performance.LoadToggleStatesAsync(),
-            System.LoadToggleStatesAsync(),
-            Organize.LoadToggleStatesAsync()));
+        _ = Task.Run(ReloadAllStatesAsync);
+    }
+
+    /// <summary>状態を読み直した直近時刻 (再アクティブのたびに外部プロセスを起こさないための間隔管理)。</summary>
+    private long _lastStateLoadAt = Stopwatch.GetTimestamp();
+
+    /// <summary>再読込を許す最短間隔。</summary>
+    private static readonly TimeSpan StateReloadInterval = TimeSpan.FromMinutes(1);
+
+    private Task ReloadAllStatesAsync() => Task.WhenAll(
+        Update.LoadToggleStatesAsync(),
+        Cleanup.LoadToggleStatesAsync(),
+        Performance.LoadToggleStatesAsync(),
+        System.LoadToggleStatesAsync(),
+        Organize.LoadToggleStatesAsync());
+
+    /// <summary>
+    /// ウィンドウが再びアクティブになったときに状態を読み直す。設定アプリやポリシー更新など
+    /// アプリ外での変更を取り込み、古い表示のまま操作させない。
+    /// 実行中の操作があるとき、および前回から間隔が空いていないときは何もしない。
+    /// </summary>
+    public void RefreshStatesOnActivated()
+    {
+        if (_operationCoordinator.ActiveCount != 0 ||
+            Stopwatch.GetElapsedTime(_lastStateLoadAt) < StateReloadInterval)
+        {
+            return;
+        }
+
+        _lastStateLoadAt = Stopwatch.GetTimestamp();
+        _ = Task.Run(ReloadAllStatesAsync);
     }
 }

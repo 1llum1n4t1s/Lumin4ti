@@ -98,6 +98,56 @@ public sealed class RegistryToggleTests
     }
 
     [TestMethod]
+    public void HKCUの退避は利用者ごとに分かれHKLMはマシン共通に置く()
+    {
+        var userSpecs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
+        var machineSpecs = new[]
+        {
+            new RegistryToggleSpec(RegistryHive.LocalMachine, KeyPath, "Value", RegistryValueKind.DWord, 1, 9),
+        };
+        var registry = new FakeRegistryValueAccessor();
+        registry.Set(userSpecs[0], RegistryValueSnapshot.Dword(9));
+        registry.Set(machineSpecs[0], RegistryValueSnapshot.Dword(9));
+        var storage = new MemoryRegistryBackupStorage();
+        var backup = new RegistryValueBackup(storage, registry);
+
+        backup.Save(ToggleId, userSpecs);
+        backup.Save("machine-toggle-test", machineSpecs);
+
+        // HKCU は利用者 SID 配下、HKLM は従来どおりの位置
+        Assert.IsTrue(storage.FileExists(Path.Combine("registry", CurrentUserSid(), ToggleId + ".json")));
+        Assert.IsTrue(storage.FileExists(Path.Combine("registry", "machine-toggle-test.json")));
+    }
+
+    [TestMethod]
+    public void 利用者スコープ導入前の退避があればそこから復元する()
+    {
+        var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
+        var registry = new FakeRegistryValueAccessor();
+        registry.Set(specs[0], RegistryValueSnapshot.Dword(9));
+        var storage = new MemoryRegistryBackupStorage();
+        var seed = new RegistryValueBackup(storage, registry);
+        seed.Save(ToggleId, specs);
+
+        // 旧バージョンが書いた位置 (利用者スコープ無し) へ移し替える
+        var legacyPath = Path.Combine("registry", ToggleId + ".json");
+        storage.SetJson(legacyPath, storage.GetJson(BackupPath(ToggleId)));
+        storage.Delete(BackupPath(ToggleId));
+
+        registry.Set(specs[0], RegistryValueSnapshot.Dword(1));
+        var backup = new RegistryValueBackup(storage, registry);
+
+        // 再 ON では旧退避を真の元値として保持し、OFF ではそこから復元する
+        backup.Save(ToggleId, specs);
+        Assert.IsFalse(storage.FileExists(BackupPath(ToggleId)), "旧退避があるうちは新しい場所へ作り直さない");
+
+        var restored = backup.TryRestore(ToggleId, specs, []);
+
+        Assert.AreEqual(RegistryBackupRestoreStatus.Restored, restored.Status);
+        AssertSnapshot(RegistryValueSnapshot.Dword(9), registry.Read(specs[0]), specs[0].Name);
+    }
+
+    [TestMethod]
     public void 旧Dictionary形式は復元も再保存も拒否して一件も書かない()
     {
         var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
@@ -426,7 +476,17 @@ public sealed class RegistryToggleTests
     private static RegistryToggleSpec Spec(string name, RegistryValueKind kind, object appliedValue) =>
         new(RegistryHive.CurrentUser, KeyPath, name, kind, appliedValue);
 
-    private static string BackupPath(string id) => Path.Combine("registry", id + ".json");
+    /// <summary>
+    /// このテストの spec はすべて HKCU なので、退避先は利用者ごとに分かれる
+    /// (マシン共通の保存場所で別利用者の元値を壊さないための実装と対になっている)。
+    /// </summary>
+    private static string BackupPath(string id) => Path.Combine("registry", CurrentUserSid(), id + ".json");
+
+    private static string CurrentUserSid()
+    {
+        using var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
+        return identity.User?.Value ?? "unknown-user";
+    }
 
     private static void AssertSnapshot(
         RegistryValueSnapshot expected,

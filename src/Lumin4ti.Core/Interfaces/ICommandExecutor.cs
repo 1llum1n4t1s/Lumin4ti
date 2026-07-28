@@ -20,9 +20,14 @@ public interface ICommandExecutor
     /// 指定すると標準出力を 1 行受信するたびに呼ばれる (長時間コマンドのライブ進捗表示用)。
     /// null なら完了時にまとめて返すだけ。
     /// </param>
+    /// <param name="timeout">
+    /// このコマンドだけの実行上限。null なら実装既定 (1 時間)。
+    /// 中断コストの高いコマンド (コンポーネントストアの整理等) に長めの値を与えるために使う。
+    /// </param>
     Task<CommandExecutionResult> RunAsync(
         string fileName,
         string arguments,
         CancellationToken ct = default,
-        IProgress<string>? onOutputLine = null);
+        IProgress<string>? onOutputLine = null,
+        TimeSpan? timeout = null);
 }

@@ -44,14 +44,19 @@ public sealed class MmAgentOperationApiChoice : IMaintenanceChoice
 
     public bool RequiresReboot => false;
 
+    /// <summary>プリフェッチ機構に連動するため、アプリ起動プリフェッチの子項目として表示する。</summary>
+    public string? ParentId => "mmagent-launch-prefetch";
+
     // 数値は言語に依存しないのでそのまま表示し、翻訳が要る「無効」だけキーを持たせる。
+    // 既定印は DefaultMaxFiles から導出し、定数と選択肢が食い違わないようにする。
     public IReadOnlyList<MaintenanceChoiceOption> Options { get; } =
     [
         new(DisabledValue, "無効", LabelKey: "Choice.Disabled"),
-        new("128", "128"),
-        new("256", "256"),
-        new("512", "512", IsDefault: true),
-        new("1024", "1024"),
+        .. new[] { 128, 256, 512, 1024 }.Select(files =>
+        {
+            var value = files.ToString(CultureInfo.InvariantCulture);
+            return new MaintenanceChoiceOption(value, value, IsDefault: files == DefaultMaxFiles);
+        }),
     ];
 
     public async Task<string?> GetSelectedValueAsync(CancellationToken ct = default)
@@ -86,6 +91,13 @@ public sealed class MmAgentOperationApiChoice : IMaintenanceChoice
             {
                 _stateProvider.SetKnownValue("OperationAPI", true);
             }
+            else
+            {
+                // 有効化できたか分からないまま古い値を残さない (実際の状態は最後に読み直す)。
+                _stateProvider.Invalidate("OperationAPI");
+                LoggerBootstrap.Log.Info(
+                    $"{Id}: Enable-MMAgent -OperationAPI が失敗: {FirstLine(enable.StandardError)}");
+            }
         }
 
         var result = await RunAsync(
@@ -100,7 +112,21 @@ public sealed class MmAgentOperationApiChoice : IMaintenanceChoice
         }
 
         LoggerBootstrap.Log.Info($"{Id}: 記録ファイル数を {maxFiles} に設定");
-        return MaintenanceActionResult.Ok($"  - 記録ファイル数を {maxFiles} に設定しました");
+        var applied = $"  - 記録ファイル数を {maxFiles} に設定しました";
+
+        // 記録ファイル数を書けても、プリフェッチ機構が OFF なら機能自体は無効のまま。
+        // 表示は読み直した実状態 (無効) になるので、成功だけを伝えると食い違って見える。
+        if (await _stateProvider.ReadFreshAsync("OperationAPI", ct) == false)
+        {
+            LoggerBootstrap.Log.Info($"{Id}: 記録ファイル数は設定したが機能は無効のまま");
+            return MaintenanceActionResult.Partial(
+                $"{applied}{Environment.NewLine}" +
+                "  - ただしオペレーションレコーダーは無効のままです (プリフェッチ機構に連動して無効化されています)" +
+                $"{Environment.NewLine}" +
+                "  - 有効にするには「アプリ起動プリフェッチ」を ON にしてください");
+        }
+
+        return MaintenanceActionResult.Ok(applied);
     }
 
     private async Task<MaintenanceActionResult> DisableAsync(CancellationToken ct)
@@ -109,6 +135,8 @@ public sealed class MmAgentOperationApiChoice : IMaintenanceChoice
         if (result.Success)
         {
             _stateProvider.SetKnownValue("OperationAPI", false);
+            // 連動する他機能の値も古くなるため捨てる。
+            _stateProvider.InvalidateOthers("OperationAPI");
             LoggerBootstrap.Log.Info($"{Id}: 無効化しました");
             return MaintenanceActionResult.Ok("  - オペレーションレコーダー API を無効化しました");
         }

@@ -51,8 +51,52 @@ public partial class CommandItemViewModel : ObservableObject
     [ObservableProperty]
     private ChoiceOptionViewModel? selectedChoice;
 
-    /// <summary>ドロップダウンを操作できるか (状態既知かつ非実行中)。</summary>
-    public bool CanChoose => IsStateKnown && !IsRunning;
+    /// <summary>
+    /// 親項目 (前提設定)。親が OFF の間は OS 側で連動して無効になるため、子は操作不可にする。
+    /// </summary>
+    public CommandItemViewModel? Parent { get; private set; }
+
+    /// <summary>この項目にぶら下がる子項目 (無ければ空)。</summary>
+    public IReadOnlyList<CommandItemViewModel> Children { get; private set; } = [];
+
+    /// <summary>子項目を持つか (UI の入れ子表示の可否)。</summary>
+    public bool HasChildren => Children.Count > 0;
+
+    /// <summary>親子関係を結ぶ (カテゴリ VM が構築時に 1 回だけ呼ぶ)。</summary>
+    public void AttachChildren(IReadOnlyList<CommandItemViewModel> children)
+    {
+        Children = children;
+        foreach (var child in children)
+        {
+            child.Parent = this;
+        }
+
+        OnPropertyChanged(nameof(Children));
+        OnPropertyChanged(nameof(HasChildren));
+    }
+
+    /// <summary>ドロップダウンを操作できるか (状態既知・非実行中・親が有効)。</summary>
+    public bool CanChoose => IsStateKnown && !IsRunning && (Parent is null || Parent.IsChecked);
+
+    /// <summary>直近に「実状態として確認できた」選択値 (適用できなかったときの戻し先)。</summary>
+    private ChoiceOptionViewModel? _lastKnownChoice;
+
+    /// <summary>
+    /// 適用せずに表示だけ直前の既知値へ戻す。別操作の実行中で適用を断ったときに使い、
+    /// 外部プロセスでの状態照会を伴わずに UI と実状態の食い違いを解消する。
+    /// </summary>
+    public void RestorePreviousSelection()
+    {
+        _suppressToggleWrite = true;
+        try
+        {
+            SelectedChoice = _lastKnownChoice;
+        }
+        finally
+        {
+            _suppressToggleWrite = false;
+        }
+    }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanToggle))]
@@ -187,6 +231,7 @@ public partial class CommandItemViewModel : ObservableObject
             }
 
             SelectedChoice = option;
+            _lastKnownChoice = option;
             IsStateKnown = true;
         }
         finally
@@ -222,6 +267,12 @@ public partial class CommandItemViewModel : ObservableObject
 
     partial void OnIsCheckedChanged(bool value)
     {
+        // 親が OFF になったら子は操作不可になるので、子の活性表示を更新する。
+        foreach (var child in Children)
+        {
+            child.OnPropertyChanged(nameof(CanChoose));
+        }
+
         if (_suppressToggleWrite || !IsToggle)
         {
             return;

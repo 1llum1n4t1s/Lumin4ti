@@ -137,7 +137,8 @@ public sealed class NtpConfigActionTests
             string fileName,
             string arguments,
             CancellationToken ct = default,
-            IProgress<string>? onOutputLine = null)
+            IProgress<string>? onOutputLine = null,
+            TimeSpan? timeout = null)
         {
             var call = Interlocked.Increment(ref _callCount);
             Invocations.Add(new Invocation(fileName, arguments, ct));

@@ -10,7 +10,7 @@ public sealed class MaintenanceActionCatalogTests
 {
     private sealed class NoopExecutor : ICommandExecutor
     {
-        public Task<CommandExecutionResult> RunAsync(string fileName, string arguments, CancellationToken ct = default, IProgress<string>? onOutputLine = null) =>
+        public Task<CommandExecutionResult> RunAsync(string fileName, string arguments, CancellationToken ct = default, IProgress<string>? onOutputLine = null, TimeSpan? timeout = null) =>
             Task.FromResult(new CommandExecutionResult(true, $"{fileName} {arguments}", 0, string.Empty, string.Empty));
     }
 
@@ -30,6 +30,19 @@ public sealed class MaintenanceActionCatalogTests
         foreach (var item in CreateCatalog().Items)
         {
             Assert.IsTrue(item is IMaintenanceAction or IMaintenanceToggle or IMaintenanceChoice, item.Id);
+        }
+    }
+
+    [TestMethod]
+    public void 子項目の親は同じカテゴリに実在する()
+    {
+        var items = CreateCatalog().Items;
+        foreach (var child in items.Where(i => i.ParentId is not null))
+        {
+            var parent = items.SingleOrDefault(i => i.Id == child.ParentId);
+            Assert.IsNotNull(parent, $"{child.Id} の親 {child.ParentId} が見つかりません");
+            Assert.AreEqual(parent.Category, child.Category, $"{child.Id} は親と同じカテゴリに置く");
+            Assert.IsNull(parent.ParentId, $"{child.Id} の親がさらに子になっている (入れ子は 1 段まで)");
         }
     }
 

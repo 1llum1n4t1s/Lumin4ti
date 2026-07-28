@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -18,6 +19,9 @@ public partial class CommandCategoryViewModel : ObservableObject
 {
     private static readonly TimeSpan StateVerificationTimeout = TimeSpan.FromSeconds(15);
 
+    /// <summary>ライブ出力の再描画間隔 (高頻度な進捗通知で UI スレッドを占有しないための下限)。</summary>
+    private static readonly TimeSpan ProgressRenderInterval = TimeSpan.FromMilliseconds(120);
+
     private readonly CommandCategory _category;
     private readonly string _titleFallback;
     private readonly string _captionFallback;
@@ -29,7 +33,11 @@ public partial class CommandCategoryViewModel : ObservableObject
     /// <summary>カテゴリ説明 (ローカライズ済み)。</summary>
     public string Caption => App.Text($"Category.{_category}.Caption", _captionFallback);
 
+    /// <summary>画面に並ぶトップレベル項目 (子項目は親カードの中に描画される)。</summary>
     public IReadOnlyList<CommandItemViewModel> Items { get; }
+
+    /// <summary>子項目も含む全項目 (状態読み込み用)。</summary>
+    private IReadOnlyList<CommandItemViewModel> AllItems { get; set; } = [];
 
     [ObservableProperty]
     private string statusText = string.Empty;
@@ -45,9 +53,26 @@ public partial class CommandCategoryViewModel : ObservableObject
         _operationCoordinator = operationCoordinator;
         _titleFallback = title;
         _captionFallback = caption;
-        Items = catalog.Items
+        var all = catalog.Items
             .Where(i => i.Category == category)
             .Select(i => new CommandItemViewModel(i, RunActionAsync, SetToggleAsync, SetChoiceAsync))
+            .ToList();
+
+        // 前提設定を持つ項目 (ParentId) は親カードの中へ入れ子表示する。
+        // 親が同じカテゴリに無い場合は独立項目として扱い、迷子にしない。
+        var byId = all.ToDictionary(vm => vm.Item.Id);
+        foreach (var parent in all)
+        {
+            var children = all.Where(c => c.Item.ParentId == parent.Item.Id).ToList();
+            if (children.Count > 0)
+            {
+                parent.AttachChildren(children);
+            }
+        }
+
+        AllItems = all;
+        Items = all
+            .Where(vm => vm.Item.ParentId is not { } parentId || !byId.ContainsKey(parentId))
             .ToList();
 
         App.LocaleChanged += () =>
@@ -65,14 +90,24 @@ public partial class CommandCategoryViewModel : ObservableObject
     /// </summary>
     public async Task LoadToggleStatesAsync()
     {
-        var toggles = Items.Where(i => i.Item is IMaintenanceToggle).ToList();
-        var choices = Items.Where(i => i.Item is IMaintenanceChoice).ToList();
+        var toggles = AllItems.Where(i => i.Item is IMaintenanceToggle).ToList();
+        var choices = AllItems.Where(i => i.Item is IMaintenanceChoice).ToList();
+
+        // 状態取得は外部プロセス (Get-MMAgent / dism / bcdedit) を伴い、環境によっては返ってこない。
+        // 適用後の検証と同じ上限を課し、ハングした子プロセスに最大 1 時間居座られないようにする。
+        using var loadCts = new CancellationTokenSource(StateVerificationTimeout);
         await Task.WhenAll(toggles.Select(async item =>
         {
             bool? state;
             try
             {
-                state = await ((IMaintenanceToggle)item.Item).GetStateAsync();
+                state = await ((IMaintenanceToggle)item.Item).GetStateAsync(loadCts.Token);
+            }
+            catch (OperationCanceledException) when (loadCts.IsCancellationRequested)
+            {
+                LoggerBootstrap.Log.Error(
+                    $"{item.Item.Id} の状態取得が {StateVerificationTimeout.TotalSeconds:0} 秒でタイムアウトしました");
+                state = null;
             }
             catch (Exception ex)
             {
@@ -86,7 +121,13 @@ public partial class CommandCategoryViewModel : ObservableObject
             string? value;
             try
             {
-                value = await ((IMaintenanceChoice)item.Item).GetSelectedValueAsync();
+                value = await ((IMaintenanceChoice)item.Item).GetSelectedValueAsync(loadCts.Token);
+            }
+            catch (OperationCanceledException) when (loadCts.IsCancellationRequested)
+            {
+                LoggerBootstrap.Log.Error(
+                    $"{item.Item.Id} の状態取得が {StateVerificationTimeout.TotalSeconds:0} 秒でタイムアウトしました");
+                value = null;
             }
             catch (Exception ex)
             {
@@ -105,15 +146,19 @@ public partial class CommandCategoryViewModel : ObservableObject
     private async Task SetChoiceAsync(CommandItemViewModel item, string value)
     {
         var choice = (IMaintenanceChoice)item.Item;
+        var startedAt = Stopwatch.GetTimestamp();
+        LoggerBootstrap.Log.Info($"{item.Item.Id}: {value} を適用開始");
         item.IsRunning = true;
         item.ResultText = string.Empty;
         var ct = item.BeginRun();
         if (!_operationCoordinator.TryBegin(out var operation, ct))
         {
             ShowBusyResult(item);
+            // 実行中の別操作と外部コマンドによる状態照会を競合させない。
+            // ドロップダウンで先に変わった表示だけを、直前の既知値へ戻す。
+            item.RestorePreviousSelection();
             item.EndRun();
             item.IsRunning = false;
-            await ReloadChoiceAsync(item, choice);
             return;
         }
 
@@ -137,6 +182,7 @@ public partial class CommandCategoryViewModel : ObservableObject
             }
 
             await ReloadChoiceAsync(item, choice);
+            LogOperationFinished(item, "選択の適用", result, startedAt);
             ShowResult(
                 item,
                 result,
@@ -147,6 +193,37 @@ public partial class CommandCategoryViewModel : ObservableObject
         {
             item.EndRun();
             item.IsRunning = false;
+        }
+    }
+
+    /// <summary>
+    /// 親の切り替えで連動して変わった子の表示を読み直す。子の型 (トグル / 選択式) を問わず扱い、
+    /// 将来トグルの子を足したときに片方だけ更新されない状態を作らない。
+    /// </summary>
+    private static async Task ReloadChildAsync(CommandItemViewModel child)
+    {
+        switch (child.Item)
+        {
+            case IMaintenanceChoice childChoice:
+                await ReloadChoiceAsync(child, childChoice);
+                break;
+            case IMaintenanceToggle childToggle:
+                bool? state;
+                using (var verificationCts = new CancellationTokenSource(StateVerificationTimeout))
+                {
+                    try
+                    {
+                        state = await childToggle.GetStateAsync(verificationCts.Token);
+                    }
+                    catch (Exception ex)
+                    {
+                        LoggerBootstrap.Log.Error($"{childToggle.Id} の変更後状態取得に失敗しました", ex);
+                        state = null;
+                    }
+                }
+
+                await Dispatcher.UIThread.InvokeAsync(() => child.ApplyState(state));
+                break;
         }
     }
 
@@ -169,6 +246,8 @@ public partial class CommandCategoryViewModel : ObservableObject
 
     private async Task RunActionAsync(CommandItemViewModel item)
     {
+        var startedAt = Stopwatch.GetTimestamp();
+        LoggerBootstrap.Log.Info($"{item.Item.Id}: 実行開始");
         item.IsRunning = true;
         item.ResultText = string.Empty;
         var ct = item.BeginRun();
@@ -189,8 +268,11 @@ public partial class CommandCategoryViewModel : ObservableObject
             MaintenanceActionResult result;
             try
             {
-                // 実行中のライブ出力: 直近 8 行を保持して表示する (Progress<T> は UI スレッドへ marshal される)
+                // 実行中のライブ出力: 直近 8 行を保持して表示する (Progress<T> は UI スレッドへ marshal される)。
+                // DISM / winget は \r ごとに進捗行を書き換えるため通知が高頻度になる。
+                // 人間の知覚上ほぼ等価な間隔でまとめ、UI スレッドの再描画を抑える。
                 var recentLines = new Queue<string>(capacity: 9);
+                var lastRendered = Stopwatch.GetTimestamp() - Stopwatch.Frequency;
                 var progress = new Progress<string>(line =>
                 {
                     recentLines.Enqueue(line);
@@ -199,6 +281,12 @@ public partial class CommandCategoryViewModel : ObservableObject
                         recentLines.Dequeue();
                     }
 
+                    if (Stopwatch.GetElapsedTime(lastRendered) < ProgressRenderInterval)
+                    {
+                        return;
+                    }
+
+                    lastRendered = Stopwatch.GetTimestamp();
                     item.ProgressText = string.Join(Environment.NewLine, recentLines);
                 });
 
@@ -219,6 +307,7 @@ public partial class CommandCategoryViewModel : ObservableObject
             }
 
             result = await RestartExplorerIfNeededAsync(item, result);
+            LogOperationFinished(item, "実行", result, startedAt);
             ShowResult(
                 item,
                 result,
@@ -232,8 +321,32 @@ public partial class CommandCategoryViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// 操作の結末を 1 行にまとめて残す。キャンセルと部分成功は個々のアクションがログを書かないため、
+    /// ここで記録しないと「いつ何をして、どうなったか」が後から追えない。
+    /// </summary>
+    private static void LogOperationFinished(
+        CommandItemViewModel item,
+        string operation,
+        MaintenanceActionResult result,
+        long startedAt)
+    {
+        var seconds = Stopwatch.GetElapsedTime(startedAt).TotalSeconds;
+        var message = $"{item.Item.Id}: {operation} {result.Status} ({seconds:F1} 秒)";
+        if (result.Status is MaintenanceActionStatus.Failed or MaintenanceActionStatus.Partial)
+        {
+            LoggerBootstrap.Log.Error(message);
+        }
+        else
+        {
+            LoggerBootstrap.Log.Info(message);
+        }
+    }
+
     private async Task SetToggleAsync(CommandItemViewModel item, bool on)
     {
+        var startedAt = Stopwatch.GetTimestamp();
+        LoggerBootstrap.Log.Info($"{item.Item.Id}: {(on ? "ON" : "OFF")} へ切り替え開始");
         item.IsRunning = true;
         item.ResultText = string.Empty;
         var ct = item.BeginRun();
@@ -293,7 +406,14 @@ public partial class CommandCategoryViewModel : ObservableObject
 
             item.ApplyState(actualState);
 
+            // 親を切り替えると OS 側で子設定も連動して変わるため、子の表示を読み直す。
+            foreach (var child in item.Children)
+            {
+                await ReloadChildAsync(child);
+            }
+
             result = await RestartExplorerIfNeededAsync(item, result);
+            LogOperationFinished(item, on ? "ON 切り替え" : "OFF 切り替え", result, startedAt);
             ShowResult(
                 item,
                 result,

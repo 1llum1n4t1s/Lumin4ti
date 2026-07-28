@@ -298,7 +298,8 @@ public sealed class MmAgentStateProviderTests
             string fileName,
             string arguments,
             CancellationToken ct = default,
-            IProgress<string>? onOutputLine = null)
+            IProgress<string>? onOutputLine = null,
+            TimeSpan? timeout = null)
         {
             ct.ThrowIfCancellationRequested();
             CallCount++;
@@ -315,7 +316,8 @@ public sealed class MmAgentStateProviderTests
             string fileName,
             string arguments,
             CancellationToken ct = default,
-            IProgress<string>? onOutputLine = null) => _completion.Task;
+            IProgress<string>? onOutputLine = null,
+            TimeSpan? timeout = null) => _completion.Task;
 
         public void Complete() => _completion.TrySetResult(
             new CommandExecutionResult(false, "powershell.exe", -1, string.Empty, "test complete"));
@@ -343,7 +345,8 @@ public sealed class MmAgentStateProviderTests
             string fileName,
             string arguments,
             CancellationToken ct = default,
-            IProgress<string>? onOutputLine = null)
+            IProgress<string>? onOutputLine = null,
+            TimeSpan? timeout = null)
         {
             return Interlocked.Increment(ref _callCount) switch
             {
@@ -378,7 +381,8 @@ public sealed class MmAgentStateProviderTests
             string fileName,
             string arguments,
             CancellationToken ct = default,
-            IProgress<string>? onOutputLine = null) => Interlocked.Increment(ref _callCount) switch
+            IProgress<string>? onOutputLine = null,
+            TimeSpan? timeout = null) => Interlocked.Increment(ref _callCount) switch
             {
                 1 => _initial.Task,
                 2 => Task.FromResult(Result(success: true)),
@@ -399,7 +403,8 @@ public sealed class MmAgentStateProviderTests
             string fileName,
             string arguments,
             CancellationToken ct = default,
-            IProgress<string>? onOutputLine = null) => callback(Interlocked.Increment(ref _callCount), ct);
+            IProgress<string>? onOutputLine = null,
+            TimeSpan? timeout = null) => callback(Interlocked.Increment(ref _callCount), ct);
     }
 
     private sealed class SerializedSetExecutor : ICommandExecutor
@@ -418,7 +423,8 @@ public sealed class MmAgentStateProviderTests
             string fileName,
             string arguments,
             CancellationToken ct = default,
-            IProgress<string>? onOutputLine = null)
+            IProgress<string>? onOutputLine = null,
+            TimeSpan? timeout = null)
         {
             var call = Interlocked.Increment(ref _callCount);
             if (call == 1)

@@ -341,7 +341,8 @@ public sealed class WingetOutputFilterTests
             string fileName,
             string arguments,
             CancellationToken ct = default,
-            IProgress<string>? onOutputLine = null)
+            IProgress<string>? onOutputLine = null,
+            TimeSpan? timeout = null)
         {
             Calls.Add((fileName, arguments));
             foreach (var line in OutputLines)

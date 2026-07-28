@@ -17,7 +17,8 @@ internal sealed record PackageRegistration(
     string FullName,
     string FamilyName,
     string DisplayName,
-    string? InstalledPath);
+    string? InstalledPath,
+    bool IsRegisteredForCurrentUser = true);
 
 /// <summary>登録解除の狙い方。</summary>
 internal enum PackageRemovalMode
@@ -149,19 +150,32 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
         }
 
         var lines = new List<string>();
-        var pending = ghosts;
+
+        // SYSTEM へ Staged されているだけの残骸は、解除すべきユーザー登録が存在しない。
+        // どの RemovePackage も空振りするだけなので試行せず、本体の入れ直しへ回す。
+        var stagedOnly = ghosts.Where(ghost => !ghost.IsRegisteredForCurrentUser).ToList();
+        foreach (var ghost in stagedOnly)
+        {
+            LoggerBootstrap.Log.Info($"{Id}: 現在ユーザーへの登録が無いため解除を試行しない {ghost.FullName}");
+        }
+
+        var pending = ghosts.Where(ghost => ghost.IsRegisteredForCurrentUser).ToList();
 
         // 1 回目は全ユーザーからの解除、残ったものはプロビジョニング解除 + 現在ユーザーからの解除で再試行する。
         // 移行残骸ではマシン側の登録が既に無く、全ユーザー解除が「成功」を返しても
         // ユーザー側の登録が残るため、2 回目は明示的にユーザー登録だけを狙う。
         foreach (var mode in (PackageRemovalMode[])[PackageRemovalMode.AllUsers, PackageRemovalMode.CurrentUser])
         {
-            pending = await RemoveAsync(pending, mode, lines, progress, ct);
             if (pending.Count == 0)
             {
                 break;
             }
+
+            pending = await RemoveAsync(pending, mode, lines, progress, ct);
         }
+
+        // 解除できなかったものと、そもそも解除対象が無いものをまとめて修復へ回す。
+        pending = [.. pending, .. stagedOnly];
 
         var removedCount = ghosts.Count - pending.Count;
 
@@ -375,6 +389,14 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
         var packageManager = new PackageManager();
         var registrations = new Dictionary<string, PackageRegistration>(StringComparer.OrdinalIgnoreCase);
 
+        // 現在ユーザーへ登録されているか。SYSTEM に Staged されているだけの残骸は
+        // 解除すべきユーザー登録が存在せず、どの RemovePackage も空振りするので事前に区別する。
+        var currentUserPackages = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var package in packageManager.FindPackagesForUser(string.Empty))
+        {
+            currentUserPackages.Add(package.Id.FullName);
+        }
+
         // 既定の FindPackages() は Main/Framework/Resource/Bundle だけなので、
         // Optional / Xap 種別の取り残しも拾えるよう全種別を対象にする (19041 以降で利用可)。
         var packages = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 19041)
@@ -393,7 +415,8 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
                 fullName,
                 package.Id.FamilyName,
                 TryGetDisplayName(package) ?? fullName,
-                TryGetInstalledPath(package));
+                TryGetInstalledPath(package),
+                currentUserPackages.Contains(fullName));
         }
 
         return [.. registrations.Values];
@@ -497,6 +520,22 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
             : $"{allUsersError} (現在ユーザーからの解除も失敗: {currentUserError})";
     }
 
+    /// <summary>
+    /// 失敗を必ず読める文にする。Windows の配置 API は文言が空の失敗を返すことがあるため、
+    /// メッセージが無ければ HRESULT を出して「理由が空欄」の結果を残さない。
+    /// </summary>
+    private static string Describe(Exception error, string? errorText)
+    {
+        var code = $"0x{error.HResult:X8}";
+        if (!string.IsNullOrWhiteSpace(errorText))
+        {
+            return $"{errorText.Trim()} ({code})";
+        }
+
+        var message = error.Message.Trim();
+        return message.Length > 0 ? $"{message} ({code})" : $"エラーコード {code}";
+    }
+
     /// <summary>登録解除を 1 回試す。COM 例外もエラー文字列に変換して呼び出し側の分岐を単純にする。</summary>
     private static async Task<string?> TryRemoveAsync(
         PackageManager packageManager,
@@ -512,13 +551,12 @@ public sealed class GhostPackageCleanupAction : IMaintenanceAction
                 return null;
             }
 
-            return string.IsNullOrWhiteSpace(result.ErrorText)
-                ? result.ExtendedErrorCode.Message.Trim()
-                : result.ErrorText.Trim();
+            // 文言が空の失敗があるため、必ず HRESULT を添えて「理由が空欄」にしない。
+            return Describe(result.ExtendedErrorCode, result.ErrorText);
         }
         catch (COMException ex)
         {
-            return ex.Message.Trim();
+            return Describe(ex, errorText: null);
         }
     }
 }

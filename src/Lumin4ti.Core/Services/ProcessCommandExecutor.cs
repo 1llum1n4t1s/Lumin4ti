@@ -55,11 +55,14 @@ public class ProcessCommandExecutor : ICommandExecutor
         string fileName,
         string arguments,
         CancellationToken ct = default,
-        IProgress<string>? onOutputLine = null)
+        IProgress<string>? onOutputLine = null,
+        TimeSpan? timeout = null)
     {
         var commandLine = string.IsNullOrEmpty(arguments) ? fileName : $"{fileName} {arguments}";
+        // 呼び出し側が上限を指定しなければ実装既定を使う (中断コストの高いコマンドだけ延ばせる)。
+        var effectiveTimeout = timeout ?? _commandTimeout;
         using var executionCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        executionCts.CancelAfter(_commandTimeout);
+        executionCts.CancelAfter(effectiveTimeout);
         var executionToken = executionCts.Token;
 
         try
@@ -108,16 +111,34 @@ public class ProcessCommandExecutor : ICommandExecutor
             // こちらが待ち続けてしまうため、プロセス終了を先に待ち、出力の回収には猶予を設ける。
             var stdoutBuffer = new ConcurrentByteBuffer();
             var stderrBuffer = new ConcurrentByteBuffer();
-            var readOut = PumpAsync(process.StandardOutput.BaseStream, stdoutBuffer, onOutputLine, executionToken);
+            // 打ち切り後に残った pump が進捗を報告し続けると、完了処理でクリアした表示を上書きしてしまう。
+            // 通知先をゲート越しにして、打ち切りと同時に黙らせる。
+            var gatedProgress = onOutputLine is null ? null : new GatedProgress(onOutputLine);
+            var readOut = PumpAsync(process.StandardOutput.BaseStream, stdoutBuffer, gatedProgress, executionToken);
             var readErr = PumpAsync(process.StandardError.BaseStream, stderrBuffer, onLine: null, executionToken);
 
-            await process.WaitForExitAsync(executionToken).ConfigureAwait(false);
+            // 無出力のまま長時間かかるコマンド (WU 待ちの DISM 等) でも生存が分かるようにする。
+            using var heartbeatCts = CancellationTokenSource.CreateLinkedTokenSource(executionToken);
+            var heartbeat = ReportHeartbeatAsync(gatedProgress, commandLine, heartbeatCts.Token);
+            try
+            {
+                await process.WaitForExitAsync(executionToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                await heartbeatCts.CancelAsync().ConfigureAwait(false);
+                await heartbeat.ConfigureAwait(false);
+            }
 
             var pumps = Task.WhenAll(readOut, readErr);
-            var drained = await Task.WhenAny(pumps, Task.Delay(_outputDrainGrace, executionToken)).ConfigureAwait(false);
-            if (drained != pumps)
+            try
+            {
+                await pumps.WaitAsync(_outputDrainGrace, executionToken).ConfigureAwait(false);
+            }
+            catch (TimeoutException)
             {
                 // 孫プロセスがパイプを保持している。既に終了済みのコマンドの結果は確定しているので先へ進む。
+                gatedProgress?.Close();
                 LoggerBootstrap.Log.Info(
                     $"出力の回収が {FormatTimeout(_outputDrainGrace)} で完了しなかったため打ち切りました: {commandLine}");
             }
@@ -140,7 +161,7 @@ public class ProcessCommandExecutor : ICommandExecutor
                 commandLine,
                 -1,
                 string.Empty,
-                $"コマンドが {FormatTimeout(_commandTimeout)} でタイムアウトしました");
+                $"コマンドが {FormatTimeout(effectiveTimeout)} でタイムアウトしました");
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -150,6 +171,57 @@ public class ProcessCommandExecutor : ICommandExecutor
 
     /// <summary>プロセス終了後に残りの出力を回収するための既定の猶予。</summary>
     private static readonly TimeSpan DefaultOutputDrainGrace = TimeSpan.FromSeconds(5);
+
+    /// <summary>出力が無いまま続くコマンドの生存を知らせる間隔。</summary>
+    private static readonly TimeSpan HeartbeatInterval = TimeSpan.FromSeconds(30);
+
+    /// <summary>
+    /// 進捗を出さないコマンドが長引くと「固まった」のか「時間がかかっている」のか区別できない。
+    /// 出力の有無にかかわらず経過時間を通知して、待ってよい状態であることを示す。
+    /// </summary>
+    private static async Task ReportHeartbeatAsync(
+        IProgress<string>? progress,
+        string commandLine,
+        CancellationToken ct)
+    {
+        if (progress is null)
+        {
+            return;
+        }
+
+        var started = Stopwatch.GetTimestamp();
+        try
+        {
+            using var timer = new PeriodicTimer(HeartbeatInterval);
+            while (await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
+            {
+                progress.Report($"実行中... ({Stopwatch.GetElapsedTime(started).TotalMinutes:F0} 分経過)");
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // プロセス終了に追随して止まるだけなので通知は不要。
+        }
+    }
+
+    /// <summary>
+    /// 打ち切り後に取り残された pump からの進捗通知を止めるためのゲート。
+    /// Close 後の Report は捨てるので、完了処理でクリアした表示が後から復活しない。
+    /// </summary>
+    private sealed class GatedProgress(IProgress<string> inner) : IProgress<string>
+    {
+        private volatile bool _closed;
+
+        public void Close() => _closed = true;
+
+        public void Report(string value)
+        {
+            if (!_closed)
+            {
+                inner.Report(value);
+            }
+        }
+    }
 
     /// <summary>
     /// 回収を打ち切った後も pump が書き込み続ける可能性があるため、書き込みとスナップショットを
@@ -316,7 +388,52 @@ public class ProcessCommandExecutor : ICommandExecutor
         }
         catch (DecoderFallbackException)
         {
+            // 出力の途中で打ち切った場合 (回収の猶予切れ・バッファ上限) は末尾のマルチバイト列が
+            // 分断される。末尾だけの破断で全文を OEM 扱いにすると、UTF-8 出力が丸ごと化けるため、
+            // 不完全な末尾を落としてもう一度 UTF-8 として解釈できるかを先に試す。
+            var trimmed = TrimIncompleteUtf8Tail(bytes);
+            if (trimmed != bytes.Length)
+            {
+                try
+                {
+                    return StrictUtf8.GetString(bytes, 0, trimmed);
+                }
+                catch (DecoderFallbackException)
+                {
+                    // 末尾以外にも不正バイトがある = そもそも UTF-8 ではない。
+                }
+            }
+
             return OemEncoding.GetString(bytes);
         }
+    }
+
+    /// <summary>
+    /// 末尾にある「途中で切れた UTF-8 シーケンス」を除いた長さを返す。完結していれば元の長さ。
+    /// UTF-8 のマルチバイトは最大 4 バイトなので、後ろ 3 バイトまで見れば判定できる。
+    /// </summary>
+    private static int TrimIncompleteUtf8Tail(byte[] bytes)
+    {
+        for (var offset = 1; offset <= 3 && offset <= bytes.Length; offset++)
+        {
+            var b = bytes[^offset];
+            if ((b & 0b1100_0000) == 0b1000_0000)
+            {
+                // 継続バイト。先頭バイトを探して遡る。
+                continue;
+            }
+
+            // 先頭バイトの示す長さより手前で切れていれば、そのシーケンスごと落とす。
+            var expected = b switch
+            {
+                >= 0b1111_0000 => 4,
+                >= 0b1110_0000 => 3,
+                >= 0b1100_0000 => 2,
+                _ => 1,
+            };
+            return expected > offset ? bytes.Length - offset : bytes.Length;
+        }
+
+        return bytes.Length;
     }
 }

@@ -86,6 +86,27 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
     internal void Invalidate(string propertyName) =>
         _overrides[propertyName] = new StateOverride(IsKnown: false, Value: false);
 
+    /// <summary>
+    /// 指定した機能以外の共有スナップショットを捨てる。MMAgent は機能同士が OS 側で連動するため
+    /// (プリフェッチを切るとオペレーションレコーダーも無効になる)、1 つ切り替えたら他は取り直す。
+    /// </summary>
+    internal void InvalidateOthers(string changedPropertyName)
+    {
+        lock (_cacheSync)
+        {
+            // 成功済みスナップショットを破棄し、次回参照で Get-MMAgent を実行し直す。
+            _cacheTask = null;
+        }
+
+        foreach (var propertyName in _overrides.Keys)
+        {
+            if (!string.Equals(propertyName, changedPropertyName, StringComparison.OrdinalIgnoreCase))
+            {
+                _overrides.TryRemove(propertyName, out _);
+            }
+        }
+    }
+
     /// <summary>OS が切り替え要求を拒否した機能を、以後の操作対象から外す。</summary>
     internal void MarkUnsupported(string propertyName) => _unsupported[propertyName] = 0;
 
@@ -227,6 +248,8 @@ public sealed class MmAgentFeatureToggle(
             if (result.Success)
             {
                 stateProvider.SetKnownValue(propertyName, on);
+                // 連動する他機能 (プリフェッチ ⇄ オペレーションレコーダー等) の値は古くなるため捨てる。
+                stateProvider.InvalidateOthers(propertyName);
                 LoggerBootstrap.Log.Info($"{Id} → {(on ? "有効" : "無効")}");
                 return MaintenanceActionResult.Ok($"  - {propertyName} を{(on ? "有効化" : "無効化")}しました");
             }
@@ -302,6 +325,8 @@ public sealed class MmAgentFeatureToggle(
         }
 
         stateProvider.SetKnownValue(propertyName, on);
+        // プリフェッチを切ると OS 側でオペレーションレコーダーも連動して無効になるため、他機能は取り直す。
+        stateProvider.InvalidateOthers(propertyName);
         var applied = $"  - {propertyName} を{(on ? "有効化" : "無効化")}しました (PowerShell が非対応のためレジストリ経由)";
 
         var fresh = await stateProvider.ReadFreshAsync(propertyName, ct);
@@ -360,8 +385,8 @@ public sealed class MmAgentFeatureToggle(
                 "ページ結合 (Page Combining)",
                 "内容が完全に同一のメモリページを 1 つに共有して重複を取り除く機能です。同種のアプリを多数起動する使い方でメモリ節約効果があります。" +
                 "推奨は ON です (エディションによっては既定 OFF)。"),
-            // 無効化を拒否する Windows でも記録ファイル数は変えられるため、選択式で両方を扱う。
-            new MmAgentOperationApiChoice(executor, provider),
+            // プリフェッチ (親) を先に置く。オペレーションレコーダーは親が OFF だと連動して無効になるため、
+            // 「親を ON にしてください」という案内が画面上でも自然に上を指すようにする。
             new MmAgentFeatureToggle(executor, provider, "ApplicationLaunchPrefetching",
                 "mmagent-launch-prefetch",
                 "アプリ起動プリフェッチ",
@@ -372,6 +397,9 @@ public sealed class MmAgentFeatureToggle(
                 "UWP アプリの事前起動",
                 "近いうちに使われそうなストアアプリ (UWP) を予測して、実際に開く前からバックグラウンドで起動しておく機能です。" +
                 "体感は速くなりますがメモリを先取りで消費するため、メモリ節約を優先するなら OFF を推奨します。"),
+            // 上のプリフェッチ系に連動する子設定なので、親の直後に置く。
+            // 無効化を拒否する Windows でも記録ファイル数は変えられるため、選択式で両方を扱う。
+            new MmAgentOperationApiChoice(executor, provider),
         ];
     }
 }

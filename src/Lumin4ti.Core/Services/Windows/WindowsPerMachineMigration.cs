@@ -139,6 +139,15 @@ public static class WindowsPerMachineMigration
         {
             Directory.CreateDirectory(temporaryDirectory);
             await DownloadMsiAsync(msiPath, ct);
+
+            // 署名検証から msiexec 完了までの間に差し替えられないよう、書き込みと削除を拒否する
+            // ハンドルを保持し続ける (%TEMP% は同一ユーザーが書き込めるため検証だけでは足りない)。
+            using var verifiedMsiLock = new FileStream(
+                msiPath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read);
+
             if (!ExecutableTrustVerifier.TryVerify(
                     msiPath,
                     ExpectedPublisher,
@@ -149,7 +158,9 @@ public static class WindowsPerMachineMigration
                 return 1;
             }
 
+            LoggerBootstrap.Log.Info($"per-machine-migration: 署名検証に成功しインストールを開始 {msiPath}");
             var exitCode = InstallMsi(msiPath);
+            LoggerBootstrap.Log.Info($"per-machine-migration: msiexec 終了 (exit={exitCode})");
             if (exitCode is not 0 and not 3010)
             {
                 ShowError($"PerMachine MSIのインストールに失敗しました (終了コード: {exitCode})。");
@@ -414,6 +425,15 @@ public static class WindowsPerMachineMigration
         {
             Directory.CreateDirectory(temporaryDirectory);
             await DownloadMsiAsync(msiPath, ct);
+
+            // 署名検証から msiexec 完了までの間に差し替えられないよう、書き込みと削除を拒否する
+            // ハンドルを保持し続ける (%TEMP% は同一ユーザーが書き込めるため検証だけでは足りない)。
+            using var verifiedMsiLock = new FileStream(
+                msiPath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read);
+
             if (!ExecutableTrustVerifier.TryVerify(
                     msiPath,
                     ExpectedPublisher,
@@ -431,7 +451,9 @@ public static class WindowsPerMachineMigration
                 Environment.ProcessId,
                 expectedInstalledExecutable);
 
+            LoggerBootstrap.Log.Info($"per-machine-migration: 署名検証に成功しインストールを開始 {msiPath}");
             var exitCode = InstallMsi(msiPath);
+            LoggerBootstrap.Log.Info($"per-machine-migration: msiexec 終了 (exit={exitCode})");
             if (exitCode is not 0 and not 3010 and not 1638)
             {
                 ClearProtectedPendingMigration();
@@ -575,7 +597,10 @@ public static class WindowsPerMachineMigration
             arguments += " REINSTALL=ALL REINSTALLMODE=vamus";
         }
 
-        startInfo.Arguments = arguments + " /passive /norestart";
+        // 失敗時の切り分けはこのログだけが頼りになる (画面はダイアログ 1 枚で消える)。
+        var msiLogPath = Path.Combine(AppPaths.LogsDirectory, "msi-per-machine.log");
+        startInfo.Arguments = arguments + $" /passive /norestart /l*v \"{msiLogPath}\"";
+        LoggerBootstrap.Log.Info($"per-machine-migration: msiexec {startInfo.Arguments}");
         return startInfo;
     }
 
@@ -1015,11 +1040,21 @@ public static class WindowsPerMachineMigration
         "設定・ログ・復元用バックアップを保持したままProgram Filesへ修復移行し、完了後に旧インストール先を削除します。続行しますか？",
         0x00000001u | 0x00000040u) == 1;
 
-    private static void ShowInformation(string message) =>
+    private static void ShowInformation(string message)
+    {
+        LoggerBootstrap.Log.Info($"per-machine-migration: {message.ReplaceLineEndings(" ")}");
         _ = MessageBox(message, 0x00000000u | 0x00000040u);
+    }
 
-    private static void ShowError(string message) =>
+    /// <summary>
+    /// 失敗はダイアログを閉じると消えてしまい、利用者環境では再現できない。
+    /// 表示と同時に必ずログへ残し、後から原因へ到達できるようにする。
+    /// </summary>
+    private static void ShowError(string message)
+    {
+        LoggerBootstrap.Log.Error($"per-machine-migration: {message.ReplaceLineEndings(" ")}");
         _ = MessageBox(message, 0x00000000u | 0x00000010u);
+    }
 
     private static int MessageBox(string message, uint type) =>
         MessageBoxW(IntPtr.Zero, message, "Lumin4ti セキュリティ移行", type | 0x00010000u);

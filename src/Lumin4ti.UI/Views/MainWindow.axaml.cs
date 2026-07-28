@@ -1,3 +1,4 @@
+using System;
 using Avalonia.Controls;
 using Lumin4ti.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +20,15 @@ public partial class MainWindow : Window
         _operationCoordinator = operationCoordinator;
         InitializeComponent();
         Closing += OnClosing;
+        Activated += OnActivated;
     }
+
+    /// <summary>
+    /// 他のツールや Windows 側の変更を取り込むため、ウィンドウへ戻ってきたら状態を読み直す。
+    /// 頻度制限と実行中判定は ViewModel 側が持ち、外部プロセスを無駄に起こさない。
+    /// </summary>
+    private void OnActivated(object? sender, EventArgs e) =>
+        (DataContext as ViewModels.MainWindowViewModel)?.RefreshStatesOnActivated();
 
     private async void OnClosing(object? sender, WindowClosingEventArgs e)
     {

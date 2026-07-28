@@ -19,7 +19,30 @@ internal sealed class RegistryValueBackup(
         new ProtectedRegistryBackupStorage(ProtectedBackupStorage.Default),
         WindowsRegistryValueAccessor.Instance);
 
-    private static string RelativePath(string id) => Path.Combine("registry", id + ".json");
+    /// <summary>
+    /// 退避先。保存場所はマシン共通 (%ProgramData%) なので、HKCU を含む項目は利用者ごとに分ける。
+    /// 分けないと、同じ PC の別利用者が同じ項目を操作したときに互いの元値を壊してしまう。
+    /// </summary>
+    private static string RelativePath(string id, IReadOnlyList<RegistryToggleSpec> specs) =>
+        specs.Any(spec => spec.Hive == RegistryHive.CurrentUser)
+            ? Path.Combine("registry", CurrentUserScope(), id + ".json")
+            : LegacyRelativePath(id);
+
+    /// <summary>利用者スコープを導入する前の退避先 (既存バックアップを読み落とさないために残す)。</summary>
+    private static string LegacyRelativePath(string id) => Path.Combine("registry", id + ".json");
+
+    private static string CurrentUserScope()
+    {
+        try
+        {
+            using var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
+            return identity.User?.Value ?? "unknown-user";
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or SecurityException)
+        {
+            return "unknown-user";
+        }
+    }
 
     /// <summary>
     /// ON 適用前の各 spec の現在値を型付きで退避する。既存バックアップは真の元値を保つため
@@ -28,10 +51,15 @@ internal sealed class RegistryValueBackup(
     public void Save(string id, IReadOnlyList<RegistryToggleSpec> specs)
     {
         ValidateSpecs(specs);
-        var relativePath = RelativePath(id);
-        if (storage.FileExists(relativePath))
+        var relativePath = RelativePath(id, specs);
+
+        // 利用者スコープ導入前の退避が残っていれば、それが真の元値。新しい場所へ作り直さない。
+        var existingPath = storage.FileExists(relativePath) ? relativePath
+            : storage.FileExists(LegacyRelativePath(id)) ? LegacyRelativePath(id)
+            : null;
+        if (existingPath is not null)
         {
-            var existing = LoadRestorePlan(relativePath, specs);
+            var existing = LoadRestorePlan(existingPath, specs);
             if (!existing.IsValid)
             {
                 throw new InvalidDataException(
@@ -68,10 +96,17 @@ internal sealed class RegistryValueBackup(
         IReadOnlyList<RegistryToggleSpec> specs,
         List<string> lines)
     {
-        var relativePath = RelativePath(id);
+        var relativePath = RelativePath(id, specs);
         if (!storage.FileExists(relativePath))
         {
-            return new(RegistryBackupRestoreStatus.Missing);
+            // 利用者スコープ導入前に書かれた退避があればそちらから復元する (元値を捨てない)。
+            var legacyPath = LegacyRelativePath(id);
+            if (relativePath == legacyPath || !storage.FileExists(legacyPath))
+            {
+                return new(RegistryBackupRestoreStatus.Missing);
+            }
+
+            relativePath = legacyPath;
         }
 
         var loaded = LoadRestorePlan(relativePath, specs);

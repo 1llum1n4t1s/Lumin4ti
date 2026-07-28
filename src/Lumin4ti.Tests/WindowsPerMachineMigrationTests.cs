@@ -180,9 +180,11 @@ public sealed class WindowsPerMachineMigrationTests
 
         Assert.AreEqual("runas", startInfo.Verb);
         Assert.IsTrue(startInfo.UseShellExecute);
-        Assert.AreEqual(
-            @"/i ""C:\Temp\Lumin4ti-win.msi"" VELOPACK_INSTALLDIR=""C:\Program Files\Lumin4ti"" /passive /norestart",
-            startInfo.Arguments);
+        StringAssert.StartsWith(
+            startInfo.Arguments,
+            @"/i ""C:\Temp\Lumin4ti-win.msi"" VELOPACK_INSTALLDIR=""C:\Program Files\Lumin4ti"" /passive /norestart");
+        // 失敗時の調査手段として Windows Installer の詳細ログを必ず要求する (出力先は環境依存)
+        StringAssert.Contains(startInfo.Arguments, "/l*v ");
         Assert.AreEqual(0, startInfo.ArgumentList.Count);
     }
 
@@ -206,9 +208,10 @@ public sealed class WindowsPerMachineMigrationTests
             programFiles,
             reinstallExistingProduct: true);
 
-        Assert.AreEqual(
-            @"/i ""C:\Temp\Lumin4ti-win.msi"" VELOPACK_INSTALLDIR=""C:\Program Files\Lumin4ti"" REINSTALL=ALL REINSTALLMODE=vamus /passive /norestart",
-            startInfo.Arguments);
+        StringAssert.StartsWith(
+            startInfo.Arguments,
+            @"/i ""C:\Temp\Lumin4ti-win.msi"" VELOPACK_INSTALLDIR=""C:\Program Files\Lumin4ti"" REINSTALL=ALL REINSTALLMODE=vamus /passive /norestart");
+        StringAssert.Contains(startInfo.Arguments, "/l*v ");
         Assert.AreEqual(0, startInfo.ArgumentList.Count);
     }
 

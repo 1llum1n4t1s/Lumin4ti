@@ -4,7 +4,8 @@ namespace Lumin4ti.Core.Interfaces;
 
 /// <summary>
 /// 画面に並ぶメンテナンス項目の共通メタデータ。
-/// 実行ボタン型は <see cref="IMaintenanceAction"/>、ON/OFF 切替型は <see cref="IMaintenanceToggle"/> を実装する。
+/// 実行ボタン型は <see cref="IMaintenanceAction"/>、ON/OFF 切替型は <see cref="IMaintenanceToggle"/>、
+/// ON/OFF に収まらない選択式は <see cref="IMaintenanceChoice"/> を実装する。
 /// </summary>
 public interface IMaintenanceItem
 {
@@ -35,6 +36,12 @@ public interface IMaintenanceItem
 
     /// <summary>実行に数分かかる可能性があるか (UI の注記表示用)。</summary>
     bool IsLongRunning => false;
+
+    /// <summary>
+    /// 前提となる項目の Id (null なら独立項目)。OS 側で親の状態に連動する設定に付ける。
+    /// UI は親カードの中に入れ子で描画し、親が OFF の間は操作不可にする。
+    /// </summary>
+    string? ParentId => null;
 }
 
 /// <summary>
