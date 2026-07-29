@@ -16,8 +16,15 @@ public static class LoggerBootstrap
     private static bool _initialized;
 
     /// <summary>
+    /// ログ構成自体に失敗した理由 (成功時は null)。ファイルへ残せない状況を
+    /// 利用者へ伝えるため、UI から参照できるようにしておく。
+    /// </summary>
+    public static string? InitializationFailure { get; private set; }
+
+    /// <summary>
     /// ログ出力を構成する。起動経路が複数あるため冪等にし、最初の 1 回だけ実際に構成する
     /// (Velopack フックや PerMachine 移行は Avalonia 起動より前に走るため、そこからも呼べるようにする)。
+    /// ログ基盤の失敗でアプリ起動そのものを止めないよう、例外は握ってここへ記録する。
     /// </summary>
     public static void Initialize()
     {
@@ -27,13 +34,23 @@ public static class LoggerBootstrap
         }
 
         _initialized = true;
-        Directory.CreateDirectory(AppPaths.LogsDirectory);
-
-        LogManager.Configure(builder =>
+        try
         {
-            builder.AddSuperLightFile(Path.Combine(AppPaths.LogsDirectory, "Lumin4ti_${shortdate}.log"));
-            builder.SetMinimumLevel(LogLevel.Information);
-        });
+            Directory.CreateDirectory(AppPaths.LogsDirectory);
+
+            LogManager.Configure(builder =>
+            {
+                builder.AddSuperLightFile(Path.Combine(AppPaths.LogsDirectory, "Lumin4ti_${shortdate}.log"));
+                builder.SetMinimumLevel(LogLevel.Information);
+            });
+        }
+        catch (Exception ex)
+        {
+            // ここで失敗するとログ自体が残せないため、標準エラーだけが唯一の手がかりになる。
+            InitializationFailure = $"{ex.GetType().Name}: {ex.Message}";
+            Console.Error.WriteLine(
+                $"[Lumin4ti] ログ出力を構成できませんでした ({AppPaths.LogsDirectory}): {InitializationFailure}");
+        }
     }
 
     /// <summary>

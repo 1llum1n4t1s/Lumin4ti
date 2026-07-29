@@ -7,18 +7,16 @@ using Lumin4ti.Core.Models;
 namespace Lumin4ti.Core.Services.Windows.Actions;
 
 /// <summary>
-/// オペレーションレコーダー API の設定。ON/OFF トグルではなく選択式にしている。
+/// オペレーションレコーダー API が記録に使うファイル数の設定。ON/OFF に収まらないので選択式にしている。
 ///
-/// この機能は Windows によって Disable-MMAgent が拒否される (0x80070032) ことがあり、
-/// その場合でも Set-MMAgent -MaxOperationAPIFiles で記録するファイル数は減らせる。
-/// 「無効にできる環境では無効、できない環境では記録量を絞る」を 1 つの操作で選べるようにする。
+/// 「無効」は選択肢に持たない。この API はプリフェッチ機構に連動し、無効化は親項目の
+/// 「アプリ起動プリフェッチ」を OFF にすることと同義で、単独では選べないため
+/// (Windows が Disable-MMAgent を 0x80070032 で拒否する環境もある)。
+/// ここでは記録量だけを扱い、有効・無効の表現は親トグルに任せる。
 /// </summary>
 [SupportedOSPlatform("windows")]
 public sealed class MmAgentOperationApiChoice : IMaintenanceChoice
 {
-    /// <summary>無効を表す選択値 (数値ではないので特別扱いする)。</summary>
-    public const string DisabledValue = "disabled";
-
     /// <summary>Windows 既定の記録ファイル数。</summary>
     private const int DefaultMaxFiles = 512;
 
@@ -36,9 +34,10 @@ public sealed class MmAgentOperationApiChoice : IMaintenanceChoice
     public string Label => "オペレーションレコーダー API";
 
     public string Description =>
-        "SysMain (旧 Superfetch) の動作を外部ツールが記録・再生するための API です。ベンチマークや性能解析ツール向けで、通常の利用では使いません。" +
-        "推奨は「無効」ですが、この機能の無効化を Windows が拒否する環境があります (その場合は記録するファイル数を減らすと負荷を抑えられます)。" +
-        "無効化はプリフェッチ機構に連動するため、「アプリ起動プリフェッチ」や「アプリ事前起動」を OFF にすると一緒に無効になります。";
+        "SysMain (旧 Superfetch) の動作を外部ツールが記録・再生するための API が、記録に使うファイル数を選びます。" +
+        "ベンチマークや性能解析ツール向けの機能で、通常の利用では使いません。数を小さくするほど記録の負荷とディスク使用量を抑えられます。" +
+        "機能そのものを止めたい場合は、親項目の「アプリ起動プリフェッチ」を OFF にしてください " +
+        "(この API はプリフェッチ機構に連動して無効になるため、単独で無効にすることはできません)。";
 
     public CommandCategory Category => CommandCategory.Performance;
 
@@ -47,11 +46,10 @@ public sealed class MmAgentOperationApiChoice : IMaintenanceChoice
     /// <summary>プリフェッチ機構に連動するため、アプリ起動プリフェッチの子項目として表示する。</summary>
     public string? ParentId => "mmagent-launch-prefetch";
 
-    // 数値は言語に依存しないのでそのまま表示し、翻訳が要る「無効」だけキーを持たせる。
+    // 数値は言語に依存しないので、そのまま表示する (翻訳キーは不要)。
     // 既定印は DefaultMaxFiles から導出し、定数と選択肢が食い違わないようにする。
     public IReadOnlyList<MaintenanceChoiceOption> Options { get; } =
     [
-        new(DisabledValue, "無効", LabelKey: "Choice.Disabled"),
         .. new[] { 128, 256, 512, 1024 }.Select(files =>
         {
             var value = files.ToString(CultureInfo.InvariantCulture);
@@ -59,25 +57,18 @@ public sealed class MmAgentOperationApiChoice : IMaintenanceChoice
         }),
     ];
 
+    /// <summary>
+    /// 現在の記録ファイル数を返す。有効・無効は親トグルが表すため、ここでは問い合わせない
+    /// (無効時に選択肢に無い値を返すと、UI が未知の値として選択肢を作ってしまう)。
+    /// </summary>
     public async Task<string?> GetSelectedValueAsync(CancellationToken ct = default)
     {
-        var enabled = await _stateProvider.GetAsync("OperationAPI", ct);
-        if (enabled == false)
-        {
-            return DisabledValue;
-        }
-
         var maxFiles = await ReadMaxFilesAsync(ct);
         return maxFiles?.ToString(CultureInfo.InvariantCulture);
     }
 
     public async Task<MaintenanceActionResult> SetSelectedValueAsync(string value, CancellationToken ct = default)
     {
-        if (string.Equals(value, DisabledValue, StringComparison.OrdinalIgnoreCase))
-        {
-            return await DisableAsync(ct);
-        }
-
         if (!int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out var maxFiles) || maxFiles <= 0)
         {
             return MaintenanceActionResult.Fail($"記録ファイル数として解釈できない値です: {value}");
@@ -127,40 +118,6 @@ public sealed class MmAgentOperationApiChoice : IMaintenanceChoice
         }
 
         return MaintenanceActionResult.Ok(applied);
-    }
-
-    private async Task<MaintenanceActionResult> DisableAsync(CancellationToken ct)
-    {
-        var result = await RunAsync("Disable-MMAgent -OperationAPI -ErrorAction Stop", ct);
-        if (result.Success)
-        {
-            _stateProvider.SetKnownValue("OperationAPI", false);
-            // 連動する他機能の値も古くなるため捨てる。
-            _stateProvider.InvalidateOthers("OperationAPI");
-            LoggerBootstrap.Log.Info($"{Id}: 無効化しました");
-            return MaintenanceActionResult.Ok("  - オペレーションレコーダー API を無効化しました");
-        }
-
-        // 既に無効なら目的は達成済み (冪等)。
-        if (await _stateProvider.ReadFreshAsync("OperationAPI", ct) == false)
-        {
-            _stateProvider.SetKnownValue("OperationAPI", false);
-            return MaintenanceActionResult.Ok("  - オペレーションレコーダー API は既に無効です");
-        }
-
-        var reason = FirstLine(result.StandardError);
-        if (MmAgentFeatureToggle.IsNotSupportedError(result.StandardError))
-        {
-            LoggerBootstrap.Log.Error($"{Id}: Disable-MMAgent はこの Windows でサポートされていません");
-            return MaintenanceActionResult.Fail(
-                "この Windows の Disable-MMAgent が無効化を拒否しました (この要求はサポートされていません)。" +
-                "「アプリ起動プリフェッチ」または「アプリ事前起動」を OFF にすると連動して無効になります。" +
-                "そのままにする場合は、記録ファイル数を小さい値にすると負荷を抑えられます。");
-        }
-
-        LoggerBootstrap.Log.Error($"{Id}: Disable-MMAgent が失敗: {reason}");
-        return MaintenanceActionResult.Fail(
-            $"無効化できませんでした{(reason.Length > 0 ? $": {reason}" : string.Empty)}");
     }
 
     /// <summary>Get-MMAgent の MaxOperationAPIFiles を読む (共有プロバイダは真偽値しか保持しないため個別に取得)。</summary>

@@ -123,8 +123,7 @@
   <x:String x:Key="Text.Action.mmagent-page-combining.Label" xml:space="preserve">页面合并</x:String>
   <x:String x:Key="Text.Action.mmagent-page-combining.Desc" xml:space="preserve">将内容相同的内存页面合并为一个，消除重复。运行多个同类应用时可节省内存。推荐：ON（部分版本默认 OFF）。</x:String>
   <x:String x:Key="Text.Action.mmagent-operation-api.Label" xml:space="preserve">Operation Recorder API</x:String>
-  <x:String x:Key="Text.Action.mmagent-operation-api.Desc" xml:space="preserve">供外部工具记录并重放 SysMain（原 Superfetch）行为的 API。面向基准测试与性能分析工具，日常使用中不会用到。建议选择“禁用”，但部分 Windows 版本会拒绝禁用；此时减少记录文件数可以降低负载。禁用与预读取子系统联动，因此关闭“应用启动预读取”或“应用预启动”时本功能也会一并禁用。</x:String>
-  <x:String x:Key="Text.Choice.Disabled" xml:space="preserve">禁用</x:String>
+  <x:String x:Key="Text.Action.mmagent-operation-api.Desc" xml:space="preserve">选择 SysMain（原 Superfetch）的操作记录器 API 用于记录的文件数量。该功能面向基准测试和性能分析工具，日常使用中用不到。数值越小，记录负载和磁盘占用越低。若要停用功能本身，请将上级项目「应用启动预读」设为 OFF —— 该 API 随预读子系统一同被禁用，无法单独禁用。</x:String>
   <x:String x:Key="Text.Choice.Default" xml:space="preserve">默认</x:String>
   <x:String x:Key="Text.Action.mmagent-launch-prefetch.Label" xml:space="preserve">应用程序启动预取</x:String>
   <x:String x:Key="Text.Action.mmagent-launch-prefetch.Desc" xml:space="preserve">学习常用应用加载的文件，并在启动时预先取入以加快启动速度（Prefetch）。即使在 SSD 上也有助于减少启动等待。推荐：ON（Windows 默认也是 ON）。</x:String>

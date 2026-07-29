@@ -26,6 +26,8 @@ public sealed class SingleInstanceGuard : IDisposable
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or IOException or WaitHandleCannotBeOpenedException)
         {
+            // 取得できないと起動を中止するため、理由を残さないと「無反応で終了」に見えてしまう。
+            LoggerBootstrap.Log.Error($"多重起動ガードの mutex を作成できませんでした ({ex.GetType().Name})", ex);
             _mutex = null;
             _acquired = false;
         }

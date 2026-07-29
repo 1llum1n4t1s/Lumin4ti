@@ -116,6 +116,8 @@ internal static class MmAgentRegistryFallback
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException or IOException)
         {
+            // null は UI 上「状態不明」になるだけなので、理由はログにしか残せない。
+            LoggerBootstrap.Log.Error($"{PrefetchKeyPath}\\EnablePrefetcher を読み取れませんでした", ex);
             return null;
         }
     }
@@ -130,6 +132,8 @@ internal static class MmAgentRegistryFallback
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException or IOException)
         {
+            // 復元用の控えが取れないまま変更へ進むと元へ戻せなくなるため残す。
+            LoggerBootstrap.Log.Error($"{PrefetchKeyPath}\\EnablePrefetcher の現在値を控えられませんでした", ex);
             return null;
         }
     }

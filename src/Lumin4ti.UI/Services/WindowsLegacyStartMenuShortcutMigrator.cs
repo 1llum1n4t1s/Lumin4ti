@@ -1,4 +1,5 @@
 using System.Runtime.Versioning;
+using Lumin4ti.Core.Services;
 using Lumin4ti.Core.Services.Windows;
 using Velopack.Locators;
 using Velopack.Windows;
@@ -37,9 +38,10 @@ internal static class WindowsLegacyStartMenuShortcutMigrator
                 ReadShortcut);
             WindowsShellChangeNotifier.RefreshStartMenu(programsDirectory);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // 更新処理を止めず、通常起動時の再試行へ委ねる。
+            // 更新処理を止めず、通常起動時の再試行へ委ねる。何度も再試行されるので理由を残す。
+            LoggerBootstrap.Log.Error("スタートメニューのショートカット移行に失敗しました", ex);
         }
     }
 
@@ -88,9 +90,11 @@ internal static class WindowsLegacyStartMenuShortcutMigrator
                 }
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // シェル連携の補修失敗だけでアプリ本体の起動を止めない。
+            // シェル連携の補修失敗だけでアプリ本体の起動を止めないが、
+            // タスクバーアイコンの不具合調査に必要なので理由を残す。
+            LoggerBootstrap.Log.Error("ショートカットの上書き設定を除去できませんでした", ex);
         }
     }
 
@@ -138,9 +142,10 @@ internal static class WindowsLegacyStartMenuShortcutMigrator
             clearShortcutOverrides(shortcutPath);
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // 起動中の一時的なファイルロックやアクセス拒否は次回起動で再試行する。
+            LoggerBootstrap.Log.Error($"ショートカットの上書き設定を除去できませんでした: {shortcutPath}", ex);
             return false;
         }
     }
@@ -198,9 +203,10 @@ internal static class WindowsLegacyStartMenuShortcutMigrator
             TryDeleteIfEmpty(legacyDirectory);
             return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // 高速更新フックでは例外を Velopack へ伝播させない。
+            // 高速更新フックでは例外を Velopack へ伝播させない (伝播すると更新自体が失敗扱いになる)。
+            LoggerBootstrap.Log.Error($"旧スタートメニューフォルダの移行に失敗しました: {programsDirectory}", ex);
             return false;
         }
     }

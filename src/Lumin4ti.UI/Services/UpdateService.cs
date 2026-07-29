@@ -60,8 +60,10 @@ public sealed class UpdateService
                 ? manager.CurrentVersion.ToString()
                 : "開発ビルド";
         }
-        catch
+        catch (Exception ex)
         {
+            // インストール版なのに「開発ビルド」と出る場合の原因を追えるようにする。
+            LoggerBootstrap.Log.Error("現在バージョンを取得できないため開発ビルド扱いにします", ex);
             return "開発ビルド";
         }
     }

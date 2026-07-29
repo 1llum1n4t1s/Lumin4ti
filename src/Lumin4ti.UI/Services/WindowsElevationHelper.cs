@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using Lumin4ti.Core.Services;
 using System.Security.Principal;
 
 namespace Lumin4ti.UI.Services;
@@ -16,14 +17,29 @@ public static class WindowsElevationHelper
 {
     private const string AppUserModelId = "velopack.Lumin4ti";
 
+    /// <summary>ERROR_CANCELLED。UAC プロンプトで「いいえ」が選ばれた場合。</summary>
+    private const int ErrorCancelled = 1223;
+
     /// <summary>
     /// Shisui と同じく製品版プロセスへ Velopack の AUMID を設定する。
     /// ショートカット側へ AUMID や明示アイコンは追記せず、埋め込みアイコンの解決は Windows に任せる。
     /// </summary>
     public static void TrySetCurrentProcessAppUserModelId()
     {
-        try { _ = SetCurrentProcessExplicitAppUserModelID(AppUserModelId); }
-        catch { /* シェル連携の失敗だけで起動を止めない */ }
+        try
+        {
+            var hresult = SetCurrentProcessExplicitAppUserModelID(AppUserModelId);
+            if (hresult != 0)
+            {
+                // タスクバーのアイコン・ピン留めが崩れる原因になるため、失敗を残す。
+                LoggerBootstrap.Log.Error($"AppUserModelID を設定できませんでした (HRESULT=0x{hresult:X8})");
+            }
+        }
+        catch (Exception ex)
+        {
+            // シェル連携の失敗だけで起動は止めないが、理由は残す。
+            LoggerBootstrap.Log.Error("AppUserModelID の設定に失敗しました", ex);
+        }
     }
 
     public static bool IsRunningAsAdministrator()
@@ -42,6 +58,7 @@ public static class WindowsElevationHelper
         var exePath = Environment.ProcessPath;
         if (string.IsNullOrEmpty(exePath))
         {
+            LoggerBootstrap.Log.Error("自分自身の実行ファイルパスを取得できないため昇格できませんでした");
             return false;
         }
 
@@ -60,9 +77,19 @@ public static class WindowsElevationHelper
             using var process = Process.Start(startInfo);
             return process is not null;
         }
-        catch (Win32Exception)
+        catch (Win32Exception ex)
         {
-            // ユーザーが UAC プロンプトで「いいえ」を選択した場合 (ERROR_CANCELLED)
+            // ERROR_CANCELLED (1223) は利用者が UAC で「いいえ」を選んだ想定内の分岐。
+            // それ以外はポリシーや環境の問題で、原因が分からないと調べようがないため残す。
+            if (ex.NativeErrorCode == ErrorCancelled)
+            {
+                LoggerBootstrap.Log.Info("UAC の昇格プロンプトで拒否されたため起動を中止しました");
+            }
+            else
+            {
+                LoggerBootstrap.Log.Error($"管理者権限での再起動に失敗しました (Win32={ex.NativeErrorCode})", ex);
+            }
+
             return false;
         }
     }

@@ -29,10 +29,14 @@ public class ProcessCommandExecutor : ICommandExecutor
         {
             OemEncoding = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // 想定外のコードページでも落ちないよう、全バイトを写像できる Latin1 を最終手段にする。
+            // このフォールバックに落ちると外部コマンドの日本語出力が化けるため、必ず残す。
             OemEncoding = Encoding.Latin1;
+            LoggerBootstrap.Log.Error(
+                $"OEM コードページ ({CultureInfo.CurrentCulture.TextInfo.OEMCodePage}) を取得できないため Latin1 で代替します",
+                ex);
         }
     }
 

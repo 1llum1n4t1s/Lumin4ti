@@ -34,12 +34,13 @@ public sealed class MmAgentOperationApiChoiceTests
         new(executor, new MmAgentStateProvider(executor));
 
     [TestMethod]
-    public void 選択肢は無効と記録ファイル数を持ち既定は512()
+    public void 選択肢は記録ファイル数だけを持ち既定は512()
     {
         var choice = CreateChoice(new FakeExecutor(_ => Ok()));
 
+        // 「無効」はアプリ起動プリフェッチを OFF にするのと同義で単独では選べないため、選択肢に持たない。
         CollectionAssert.AreEqual(
-            new[] { "disabled", "128", "256", "512", "1024" },
+            new[] { "128", "256", "512", "1024" },
             choice.Options.Select(o => o.Value).ToArray());
         // 既定印と公開する既定値は同じ情報源から導出されること (片方だけ変えられない)
         Assert.AreEqual(
@@ -48,44 +49,14 @@ public sealed class MmAgentOperationApiChoiceTests
     }
 
     [TestMethod]
-    public async Task 無効を選ぶとDisableMMAgentを実行する()
+    public async Task 無効化は行わない()
     {
-        var executor = new FakeExecutor(_ => Ok());
+        // 回帰防止: どの選択値でも Disable-MMAgent を実行しない。
+        var executor = new FakeExecutor(_ => Ok("{\"OperationAPI\":true}"));
 
-        var result = await CreateChoice(executor).SetSelectedValueAsync(MmAgentOperationApiChoice.DisabledValue);
+        _ = await CreateChoice(executor).SetSelectedValueAsync("128");
 
-        Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
-        Assert.IsTrue(executor.Commands.Any(c => c.Contains("Disable-MMAgent -OperationAPI", StringComparison.Ordinal)));
-    }
-
-    [TestMethod]
-    public async Task 無効化を拒否されたら連動手順を案内する()
-    {
-        // 無効化は拒否され、現在値の再取得では有効のままが返る環境
-        var executor = new FakeExecutor(command =>
-            command.Contains("Disable-MMAgent", StringComparison.Ordinal)
-                ? Fail("この要求はサポートされていません。")
-                : Ok("{\"OperationAPI\":true}"));
-
-        var result = await CreateChoice(executor).SetSelectedValueAsync(MmAgentOperationApiChoice.DisabledValue);
-
-        Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
-        StringAssert.Contains(result.Detail, "アプリ起動プリフェッチ");
-        StringAssert.Contains(result.Detail, "記録ファイル数");
-    }
-
-    [TestMethod]
-    public async Task 拒否されても既に無効なら成功として扱う()
-    {
-        var executor = new FakeExecutor(command =>
-            command.Contains("Disable-MMAgent", StringComparison.Ordinal)
-                ? Fail("この要求はサポートされていません。")
-                : Ok("{\"OperationAPI\":false}"));
-
-        var result = await CreateChoice(executor).SetSelectedValueAsync(MmAgentOperationApiChoice.DisabledValue);
-
-        Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
-        StringAssert.Contains(result.Detail, "既に無効");
+        Assert.IsFalse(executor.Commands.Any(c => c.Contains("Disable-MMAgent", StringComparison.Ordinal)));
     }
 
     [TestMethod]
@@ -159,25 +130,16 @@ public sealed class MmAgentOperationApiChoiceTests
     }
 
     [TestMethod]
-    public async Task 無効なら現在値として無効を返す()
+    public async Task 現在値は記録ファイル数だけを読んで返す()
     {
-        var executor = new FakeExecutor(_ => Ok("{\"OperationAPI\":false}"));
-
-        var value = await CreateChoice(executor).GetSelectedValueAsync();
-
-        Assert.AreEqual(MmAgentOperationApiChoice.DisabledValue, value);
-    }
-
-    [TestMethod]
-    public async Task 有効なら現在の記録ファイル数を返す()
-    {
-        var executor = new FakeExecutor(command =>
-            command.Contains("MaxOperationAPIFiles", StringComparison.Ordinal)
-                ? Ok("256")
-                : Ok("{\"OperationAPI\":true}"));
+        var executor = new FakeExecutor(_ => Ok("256"));
 
         var value = await CreateChoice(executor).GetSelectedValueAsync();
 
         Assert.AreEqual("256", value);
+        // 有効・無効は親トグルが表すので、OperationAPI の状態は問い合わせない
+        // (選択肢に無い値を返すと UI が未知の選択肢を作ってしまう)。
+        Assert.AreEqual(1, executor.Commands.Count);
+        StringAssert.Contains(executor.Commands[0], "MaxOperationAPIFiles");
     }
 }

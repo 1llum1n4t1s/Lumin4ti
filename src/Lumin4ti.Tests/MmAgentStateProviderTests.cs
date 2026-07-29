@@ -186,7 +186,6 @@ public sealed class MmAgentStateProviderTests
 
     [TestMethod]
     [DataRow("OperationAPI")]
-    [DataRow("ApplicationLaunchPrefetching")]
     public async Task Windowsビルドで先回りせず実コマンドから状態を取得する(string propertyName)
     {
         var executor = new SequenceExecutor(
@@ -202,6 +201,40 @@ public sealed class MmAgentStateProviderTests
 
         Assert.AreEqual(true, await toggle.GetStateAsync());
         Assert.AreEqual(1, executor.CallCount);
+    }
+
+    [TestMethod]
+    public async Task アプリ起動プリフェッチはレジストリの無効化を実コマンドより優先する()
+    {
+        // ApplicationLaunchPrefetching だけは HKLM の EnablePrefetcher を実コマンドより優先する
+        // (レジストリで無効化した直後、Get-MMAgent が再起動まで有効を報告し続けるため)。
+        // 実機のレジストリ値で結果が変わる仕様なので、どちらの環境でも仕様どおりかを検証する。
+        const string propertyName = "ApplicationLaunchPrefetching";
+        var executor = new SequenceExecutor(
+            Result(success: true, output: $"{{\"{propertyName}\":true}}"));
+        var provider = new MmAgentStateProvider(executor);
+        var toggle = new MmAgentFeatureToggle(
+            executor,
+            provider,
+            propertyName,
+            "test-mmagent",
+            propertyName,
+            "テスト用の説明です。");
+
+        var registryDisabled = MmAgentRegistryFallback.TryReadState(propertyName) is false;
+
+        var state = await toggle.GetStateAsync();
+
+        if (registryDisabled)
+        {
+            Assert.AreEqual(false, state, "レジストリが無効なら実コマンドの結果より優先する");
+            Assert.AreEqual(0, executor.CallCount, "レジストリで確定するなら実コマンドは呼ばない");
+        }
+        else
+        {
+            Assert.AreEqual(true, state, "レジストリが無効でなければ実コマンドの結果を使う");
+            Assert.AreEqual(1, executor.CallCount);
+        }
     }
 
     [TestMethod]

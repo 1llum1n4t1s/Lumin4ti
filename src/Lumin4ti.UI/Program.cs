@@ -25,6 +25,11 @@ internal static class Program
         // 最初にログを構成する。Initialize は冪等なので App 側の呼び出しと二重にならない。
         LoggerBootstrap.Initialize();
         LoggerBootstrap.LogEnvironment();
+        if (LoggerBootstrap.InitializationFailure is { } logFailure)
+        {
+            // ログへは残せない状態なので、コンソールへ 1 行だけ理由を出す。
+            Console.Error.WriteLine($"[Lumin4ti] ログを記録できない状態で起動します: {logFailure}");
+        }
 
         // Velopack のブートストラップを最初に走らせる
         // (--veloapp-install / --veloapp-updated 等の internal hook を捌くため、Avalonia 起動・多重起動ガードより前に必須)
@@ -48,6 +53,7 @@ internal static class Program
             var migrationExitCode = WindowsPerMachineMigration.HandleStartupAsync(args).GetAwaiter().GetResult();
             if (migrationExitCode is not null)
             {
+                LoggerBootstrap.Log.Info($"起動: PerMachine 移行で終了します (exit={migrationExitCode.Value})");
                 return migrationExitCode.Value;
             }
         }
@@ -60,6 +66,7 @@ internal static class Program
         // デバッガを接続したまま確認する場合は、IDE自体を管理者として起動する。
         if (!Services.WindowsElevationHelper.IsRunningAsAdministrator())
         {
+            // 昇格できなかった理由は TryRelaunchElevated 側がログへ残す。
             return Services.WindowsElevationHelper.TryRelaunchElevated(args) ? 0 : 1;
         }
 
@@ -71,6 +78,9 @@ internal static class Program
         using var singleInstance = new SingleInstanceGuard("Lumin4ti");
         if (!singleInstance.TryAcquire())
         {
+            // 画面が出ないまま終了するため、既起動なのか mutex 作成失敗なのかを残す
+            // (作成失敗の場合は SingleInstanceGuard 側が理由を出力している)。
+            LoggerBootstrap.Log.Info("起動: 既に起動中のため終了します");
             return 1;
         }
 
