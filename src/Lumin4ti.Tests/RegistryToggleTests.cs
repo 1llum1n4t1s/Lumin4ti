@@ -120,7 +120,7 @@ public sealed class RegistryToggleTests
     }
 
     [TestMethod]
-    public void 利用者スコープ導入前の退避があればそこから復元する()
+    public void 利用者スコープ導入前の退避は現在の利用者スコープへ一度だけ移行してから復元する()
     {
         var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
         var registry = new FakeRegistryValueAccessor();
@@ -137,12 +137,46 @@ public sealed class RegistryToggleTests
         registry.Set(specs[0], RegistryValueSnapshot.Dword(1));
         var backup = new RegistryValueBackup(storage, registry);
 
-        // 再 ON では旧退避を真の元値として保持し、OFF ではそこから復元する
+        // 再 ON では旧退避の真の元値を現在の利用者スコープへ複製し、レガシーは消す
+        // (別の利用者が後から同じ項目を ON にしたときに、このレガシーを誤って再利用しないため)。
         backup.Save(ToggleId, specs);
-        Assert.IsFalse(storage.FileExists(BackupPath(ToggleId)), "旧退避があるうちは新しい場所へ作り直さない");
+        Assert.IsTrue(storage.FileExists(BackupPath(ToggleId)), "旧退避は利用者スコープへ移行される");
+        Assert.IsFalse(storage.FileExists(legacyPath), "移行後はレガシーを残さない");
 
         var restored = backup.TryRestore(ToggleId, specs, []);
 
+        Assert.AreEqual(RegistryBackupRestoreStatus.Restored, restored.Status);
+        AssertSnapshot(RegistryValueSnapshot.Dword(9), registry.Read(specs[0]), specs[0].Name);
+    }
+
+    [TestMethod]
+    public void 移行後の再Saveはレガシーではなく利用者スコープの既存バックアップを保持する()
+    {
+        var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
+        var registry = new FakeRegistryValueAccessor();
+        registry.Set(specs[0], RegistryValueSnapshot.Dword(9));
+        var storage = new MemoryRegistryBackupStorage();
+        var seed = new RegistryValueBackup(storage, registry);
+        seed.Save(ToggleId, specs);
+        var legacyPath = Path.Combine("registry", ToggleId + ".json");
+        storage.SetJson(legacyPath, storage.GetJson(BackupPath(ToggleId)));
+        storage.Delete(BackupPath(ToggleId));
+
+        registry.Set(specs[0], RegistryValueSnapshot.Dword(1));
+        var backup = new RegistryValueBackup(storage, registry);
+        backup.Save(ToggleId, specs); // 1 回目: レガシーを利用者スコープへ移行する
+
+        // 移行後にレガシーが復活しても (別利用者が旧版のまま操作した想定)、
+        // 既に利用者スコープにバックアップがある限りそちらを優先し、レガシーを読み直さない。
+        storage.SetJson(legacyPath, Lumin4tiJson.Serialize(new RegistryValueBackupDocument
+        {
+            SchemaVersion = RegistryValueBackupDocument.CurrentSchemaVersion,
+            Entries = [RegistryValueBackupEntry.Create(specs[0], RegistryValueSnapshot.Dword(999))],
+        }));
+        registry.Set(specs[0], RegistryValueSnapshot.Dword(2));
+        backup.Save(ToggleId, specs); // 2 回目: 利用者スコープの既存バックアップをそのまま使う
+
+        var restored = backup.TryRestore(ToggleId, specs, []);
         Assert.AreEqual(RegistryBackupRestoreStatus.Restored, restored.Status);
         AssertSnapshot(RegistryValueSnapshot.Dword(9), registry.Read(specs[0]), specs[0].Name);
     }

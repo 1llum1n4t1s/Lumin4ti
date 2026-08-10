@@ -1,5 +1,6 @@
 using System.Runtime.Versioning;
 using System.Security;
+using System.Text;
 using System.Text.Json;
 using Microsoft.Win32;
 
@@ -53,13 +54,9 @@ internal sealed class RegistryValueBackup(
         ValidateSpecs(specs);
         var relativePath = RelativePath(id, specs);
 
-        // 利用者スコープ導入前の退避が残っていれば、それが真の元値。新しい場所へ作り直さない。
-        var existingPath = storage.FileExists(relativePath) ? relativePath
-            : storage.FileExists(LegacyRelativePath(id)) ? LegacyRelativePath(id)
-            : null;
-        if (existingPath is not null)
+        if (storage.FileExists(relativePath))
         {
-            var existing = LoadRestorePlan(existingPath, specs);
+            var existing = LoadRestorePlan(relativePath, specs);
             if (!existing.IsValid)
             {
                 throw new InvalidDataException(
@@ -67,6 +64,21 @@ internal sealed class RegistryValueBackup(
             }
 
             return;
+        }
+
+        // 利用者スコープ導入前の退避が残っていれば、それが最初にこの項目を ON にした利用者の
+        // 真の元値。現在の利用者スコープへ一度だけ移し (レガシーは消す)、別の利用者が後から
+        // 同じ項目を ON にしたときにレガシーを「自分の元値」として誤って再利用しないようにする。
+        var legacyPath = LegacyRelativePath(id);
+        if (relativePath != legacyPath && storage.FileExists(legacyPath))
+        {
+            var legacy = LoadRestorePlan(legacyPath, specs);
+            if (legacy.IsValid)
+            {
+                MigrateLegacyBackup(legacyPath, relativePath);
+                return;
+            }
+            // 破損・spec 不一致のレガシーは移行せず無視し、現在の実値で新規スナップショットを作る。
         }
 
         var entries = new List<RegistryValueBackupEntry>(specs.Count);
@@ -136,6 +148,27 @@ internal sealed class RegistryValueBackup(
         }
 
         return new(RegistryBackupRestoreStatus.Restored);
+    }
+
+    /// <summary>検証済みのレガシー退避をそのまま利用者スコープへ複製し、レガシーを削除する。</summary>
+    private void MigrateLegacyBackup(string legacyPath, string relativePath)
+    {
+        var content = storage.ReadAllText(legacyPath);
+        storage.WriteNewAtomically(relativePath, stream =>
+        {
+            using var writer = new StreamWriter(stream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false), leaveOpen: true);
+            writer.Write(content);
+        });
+
+        try
+        {
+            storage.Delete(legacyPath);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException)
+        {
+            // 複製は完了している。レガシーを消せなかっただけなので、次回以降も同じ内容を複製するだけで安全。
+            LoggerBootstrap.Log.Error($"レガシーのレジストリ復元バックアップを削除できませんでした: {legacyPath}", ex);
+        }
     }
 
     private RegistryRestorePlanLoadResult LoadRestorePlan(
