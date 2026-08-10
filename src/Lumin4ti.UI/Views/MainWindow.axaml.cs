@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Avalonia.Controls;
 using Lumin4ti.UI.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,10 +33,23 @@ public partial class MainWindow : Window
 
     private async void OnClosing(object? sender, WindowClosingEventArgs e)
     {
-        if (_allowClose || e.CloseReason == WindowCloseReason.OSShutdown ||
-            _operationCoordinator.ActiveCount == 0)
+        if (_allowClose || _operationCoordinator.ActiveCount == 0)
         {
             return;
+        }
+
+        // OS シャットダウンでも、DISM のコンポーネントストア操作のようにキャンセルできない処理が
+        // Job Object 経由で強制終了され中途半端に終わらないよう、通常のクローズと同じ補償待ちフローへ
+        // 合流させる。Windows へは ShutdownBlockReasonCreate でシャットダウンの一時保留を伝え、
+        // 利用者には「アプリが終了処理中」であることが標準の UI で示される。
+        var hwnd = e.CloseReason == WindowCloseReason.OSShutdown
+            ? TryGetPlatformHandle()?.Handle ?? IntPtr.Zero
+            : IntPtr.Zero;
+        if (hwnd != IntPtr.Zero)
+        {
+            NativeMethods.ShutdownBlockReasonCreate(
+                hwnd,
+                App.Text("Shutdown.BlockReason", "Lumin4ti がメンテナンス操作の完了を待っています…"));
         }
 
         // CLRを先に終了すると、各アクションの catch/finally にある補償処理も失われる。
@@ -51,7 +65,22 @@ public partial class MainWindow : Window
 
         await _operationCoordinator.WaitForIdleAsync();
 
+        if (hwnd != IntPtr.Zero)
+        {
+            NativeMethods.ShutdownBlockReasonDestroy(hwnd);
+        }
+
         _allowClose = true;
         Close();
+    }
+
+    /// <summary>OS シャットダウン中の一時保留を Windows へ伝える User32 API。</summary>
+    private static class NativeMethods
+    {
+        [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern bool ShutdownBlockReasonCreate(IntPtr hWnd, string pwszReason);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool ShutdownBlockReasonDestroy(IntPtr hWnd);
     }
 }

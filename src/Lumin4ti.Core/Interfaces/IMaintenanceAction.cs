@@ -38,6 +38,13 @@ public interface IMaintenanceItem
     bool IsLongRunning => false;
 
     /// <summary>
+    /// 実行中にキャンセルしてよいか。DISM のコンポーネントストア清掃のように、途中終了すると
+    /// 対象を中途状態にする処理は false を返し、UI のキャンセルボタンとアプリ終了時の
+    /// キャンセル通知の両方から保護する (完了まで待たせる)。
+    /// </summary>
+    bool SupportsCancellation => true;
+
+    /// <summary>
     /// 前提となる項目の Id (null なら独立項目)。OS 側で親の状態に連動する設定に付ける。
     /// UI は親カードの中に入れ子で描画し、親が OFF の間は操作不可にする。
     /// </summary>

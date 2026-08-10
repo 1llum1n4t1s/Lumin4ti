@@ -113,8 +113,10 @@ public partial class CommandItemViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(CanChoose))]
     private bool isStateKnown;
 
-    /// <summary>トグルを操作可能か。状態既知かつ実行中でないときのみ (多重操作レース防止)。</summary>
-    public bool CanToggle => IsStateKnown && !IsRunning;
+    /// <summary>
+    /// トグルを操作可能か。状態既知かつ実行中でなく (多重操作レース防止)、親が有効なときのみ。
+    /// </summary>
+    public bool CanToggle => IsStateKnown && !IsRunning && (Parent is null || Parent.IsChecked);
 
     /// <summary>実行中のアクションをキャンセルするための CTS (実行中のみ非 null)。</summary>
     private CancellationTokenSource? _cts;
@@ -175,7 +177,7 @@ public partial class CommandItemViewModel : ObservableObject
     public CancellationToken BeginRun()
     {
         _cts = new CancellationTokenSource();
-        CanCancel = true;
+        CanCancel = Item.SupportsCancellation;
         return _cts.Token;
     }
 
@@ -271,6 +273,7 @@ public partial class CommandItemViewModel : ObservableObject
         foreach (var child in Children)
         {
             child.OnPropertyChanged(nameof(CanChoose));
+            child.OnPropertyChanged(nameof(CanToggle));
         }
 
         if (_suppressToggleWrite || !IsToggle)

@@ -21,6 +21,8 @@ public abstract class DismActionBase(ICommandExecutor executor) : IMaintenanceAc
 
     public abstract bool IsLongRunning { get; }
 
+    public virtual bool SupportsCancellation => true;
+
     protected abstract string Arguments { get; }
 
     /// <summary>
@@ -33,7 +35,10 @@ public abstract class DismActionBase(ICommandExecutor executor) : IMaintenanceAc
 
     public async Task<MaintenanceActionResult> ExecuteAsync(IProgress<string>? progress, CancellationToken ct = default)
     {
-        var result = await executor.RunAsync("dism.exe", Arguments, ct, progress, Timeout);
+        // SupportsCancellation が false のコマンドは、開始後に kill するとコンポーネントストアを
+        // 中途状態にするため、UI のキャンセル操作やアプリ終了時のキャンセル通知を伝播させない。
+        var effectiveCt = SupportsCancellation ? ct : CancellationToken.None;
+        var result = await executor.RunAsync("dism.exe", Arguments, effectiveCt, progress, Timeout);
 
         if (DismExitCode.IsSuccessOrRebootRequired(result))
         {
@@ -81,11 +86,15 @@ public sealed class ComponentStoreCleanupAction(ICommandExecutor executor) : Dis
 
     public override bool IsLongRunning => true;
 
+    // 途中で kill するとコンポーネントストアが中途状態になるため、開始後はキャンセルさせない。
+    public override bool SupportsCancellation => false;
+
     protected override string Arguments => "/online /Cleanup-Image /StartComponentCleanup /ResetBase";
 
-    // 途中で kill するとコンポーネントストアが中途状態になる。低速なディスクや大量の世代が
-    // 残った PC では 1 時間を超えることがあるため、既定より長い上限を与える。
-    protected override TimeSpan? Timeout => TimeSpan.FromHours(3);
+    // 途中で kill するとコンポーネントストアが中途状態になる。SupportsCancellation=false だけでは
+    // ProcessCommandExecutor の実行タイムアウトによる自動 kill を防げないため、時間経過によるキャンセル
+    // 自体を無効化し、完走を優先する (万一ハングした場合は利用者がタスクマネージャーで対処する)。
+    protected override TimeSpan? Timeout => System.Threading.Timeout.InfiniteTimeSpan;
 }
 
 // (Recall の切り替えは RecallToggle 参照 — ON/OFF 型のため本基底は使わない)
