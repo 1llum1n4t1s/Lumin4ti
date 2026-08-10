@@ -180,7 +180,7 @@ foreach ($runtime in $Runtimes) {
             --packId Lumin4ti `
             --packVersion $version `
             --packTitle 'Lumin4ti' `
-            --packAuthors 'ゆろち' `
+            --packAuthors 'Kagayoi' `
             --mainExe Lumin4ti.UI.exe `
             --icon (Join-Path 'src' 'Lumin4ti.UI' 'icon' 'app.ico') `
             --packDir $publishDir `
