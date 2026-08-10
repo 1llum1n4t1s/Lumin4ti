@@ -33,14 +33,21 @@ public sealed class MaintenanceActionCatalog
             new DefenderResetAction(executor),
             new SecurityAppResetAction(executor),
 
-            // ═══ クリーンアップ・修復 ═══
+            // ═══ クリーンアップ ═══
             new ComponentStoreCleanupAction(executor),
-            new ShellFolderRepairAction(executor),
-            new TrayIconResetAction(),
             new GpuPreferenceResetAction(),
             new BrokenStartupCleanupAction(),
             new DeadAssociationCleanupAction(),
             new GhostPackageCleanupAction(executor),
+            new EventLogClearAction(),
+            new TrimOptimizeAction(executor),
+            // 一時ファイル・キャッシュの削除は用途ごとのグループに分けて、消したいものだけ選べるようにする
+            .. FileCleanupGroups.CreateAll(executor),
+            new ScheduledTempCleanupToggle(executor),
+
+            // ═══ 修復 ═══
+            new ShellFolderRepairAction(executor),
+            new TrayIconResetAction(),
             new SystemPackageRepairAction(
                 id: "repair-shell-client-cbs",
                 familyName: "MicrosoftWindows.Client.CBS_cw5n1h2txyewy",
@@ -50,11 +57,7 @@ public sealed class MaintenanceActionCatalog
                     "システムアプリ MicrosoftWindows.Client.CBS を登録し直します。検索ボックスが固まる・入力候補が出ない・ウィジェットが真っ白になるといった、" +
                     "本体は壊れていないのに登録状態だけが壊れた不調に効きます。アンインストールはせず、設定や履歴も消えません。" +
                     "再登録時に常駐プロセスがいったん終了し、必要になった時点で Windows が起動し直します。"),
-            new EventLogClearAction(),
             new StoreCacheResetAction(executor),
-            new TrimOptimizeAction(executor),
-            // 一時ファイル・キャッシュの削除は用途ごとのグループに分けて、消したいものだけ選べるようにする
-            .. FileCleanupGroups.CreateAll(executor),
 
             // ═══ パフォーマンス ═══
             // MMAgent (メモリ管理) は機能ごとに個別トグル。ON = 機能有効 / OFF = 機能無効 (推奨値は各説明を参照)

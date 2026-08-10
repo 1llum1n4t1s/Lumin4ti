@@ -5,7 +5,8 @@
 
   <!-- ===== Tabs ===== -->
   <x:String x:Key="Text.Tab.Update" xml:space="preserve">Оновлення та безпека</x:String>
-  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Очищення та відновлення</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Очищення</x:String>
+  <x:String x:Key="Text.Tab.Repair" xml:space="preserve">Відновлення</x:String>
   <x:String x:Key="Text.Tab.Performance" xml:space="preserve">Продуктивність</x:String>
   <x:String x:Key="Text.Tab.System" xml:space="preserve">Система</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Упорядкування</x:String>
@@ -33,8 +34,10 @@
   <!-- ===== Category titles / captions ===== -->
   <x:String x:Key="Text.Category.Update" xml:space="preserve">Оновлення та безпека</x:String>
   <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">Оновлення застосунків і Windows Defender, а також відновлення коректних налаштувань безпеки.</x:String>
-  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Очищення та відновлення</x:String>
-  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Звільнення місця на диску та очищення або відновлення пошкоджених реєстрацій.</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Очищення</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Звільняє місце на диску, видаляючи непотрібні файли та реєстрації.</x:String>
+  <x:String x:Key="Text.Category.Repair" xml:space="preserve">Відновлення</x:String>
+  <x:String x:Key="Text.Category.Repair.Caption" xml:space="preserve">Виправляє пошкоджені реєстрації та збої відображення шляхом повторної реєстрації або відновлення.</x:String>
   <x:String x:Key="Text.Category.Performance" xml:space="preserve">Продуктивність</x:String>
   <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">Оптимізація памʼяті, процесів і відтворення. Зазвичай перемикачі: УВІМК = застосувати оптимізацію, ВИМК = повернути значення Windows за замовчуванням (лише пункти MMAgent використовують УВІМК = увімкнути цю функцію; рекомендоване значення див. в описі кожного пункту).</x:String>
   <x:String x:Key="Text.Category.System" xml:space="preserve">Система</x:String>
@@ -101,7 +104,7 @@
   <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">Видалити кеші та журнали програм</x:String>
   <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">Видаляє кеші програм на основі Electron (Claude, Cursor, Discord, Antigravity та інших), кеші шейдерів GPU (NVIDIA DXCache, AMD), похідні дані Unreal Engine і журнали фонових утиліт. Налаштування та вхід в облікові записи зберігаються, кожна програма створює кеш заново під час наступного запуску. Невстановлені програми просто пропускаються.</x:String>
   <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">Видалити кеші пакетів засобів розробки</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Видаляє кеші завантажених пакетів npm, NuGet, pip, Yarn, Gradle, Maven, Bun та uv, що може вивільнити десятки ГБ. Папки з обліковими даними та налаштуваннями (.gnupg, .aws, .config тощо) ніколи не входять до переліку. Пакети буде завантажено знову під час наступного збирання чи відновлення, тож додатковий час і трафік знадобляться лише один раз.</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Видаляє кеші завантажених пакетів npm, NuGet, pip, Yarn, Gradle, Maven, Bun та uv, що може вивільнити десятки ГБ. Папки з обліковими даними та налаштуваннями (.gnupg, .aws, .config тощо) ніколи не входять до переліку. Уся папка .cache в домашньому каталозі також входить до переліку, тож до неї можуть потрапити кеші, для відновлення яких доведеться завантажити десятки ГБ, — наприклад моделі huggingface. Пакети буде завантажено знову під час наступного збирання чи відновлення, тож додатковий час і трафік знадобляться лише один раз.</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">Видалити кеші браузерів</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Виявляє встановлені браузери на основі Chromium (Edge, Chrome, Brave, Vivaldi, Comet) і видаляє в усіх профілях вебкеш, кеш шейдерів GPU, службові процеси, звіти про збої та тимчасові дані розширень. Зазвичай вивільняє кілька ГБ. Закладки, паролі та вхід в облікові записи зберігаються. Якщо спершу закрити браузери, видалення буде повнішим.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">Перебудувати кеші піктограм, ескізів і шрифтів</x:String>
@@ -114,8 +117,12 @@
   <x:String x:Key="Text.Action.cleanup-drive-root-leftovers.Desc" xml:space="preserve">Видаляє папки, які інсталятори драйверів і оновлення системи залишають у корені системного диска (AMD, Intel, SWSetup, PerfLogs, OneDriveTemp, $SysReset, Windows.old). Сама лише Windows.old може займати десятки ГБ, тому цей пункт вивільняє найбільше місця. Примітка: після видалення Windows.old повернутися до попередньої версії після великого оновлення вже не вдасться, тому не запускайте це одразу після оновлення.</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Label" xml:space="preserve">Видалити автономний кеш Outlook</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Desc" xml:space="preserve">Видаляє автономні дані (.ost) і дані пошуку (.nst), які Outlook зберігає як локальну копію поштової скриньки. Один файл може займати від кількох до десятків ГБ. Пошта на сервері не видаляється й синхронізується знову під час наступного запуску Outlook. Примітка: доки синхронізація не завершиться, старі листи не відображаються, а на повільному з'єднанні це може тривати години. Дані .pst, що існують лише локально, не зачіпаються.</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Label" xml:space="preserve">Видалити загублені файли nul</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Desc" xml:space="preserve">Видаляє порожні файли з іменем nul, які накопичуються по всьому системному диску, коли Git Bash або деякі інструменти розробки зберігають перенаправлення виводу команди (&gt; nul) як справжній файл замість того, щоб відкинути його. Пошук охоплює всі папки на диску, а не лише папку користувача. Оскільки це ім'я збігається із зарезервованим іменем пристрою Windows, такі файли не можна видалити звичайним способом — для цього використовується окрема процедура. Сканування всього диска може тривати кілька хвилин або довше на системах із великою кількістю файлів.</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Label" xml:space="preserve">Очистити кошик</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Desc" xml:space="preserve">Очищає кошик на всіх дисках і вивільняє місце, зайняте видаленими файлами. Підтвердження не запитується, а скасувати видалення неможливо, тому спершу перевірте вміст.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">Зареєструвати завдання для автоматичного видалення %TEMP% і загублених файлів nul під час входу</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Реєструє завдання в Планувальнику завдань Windows, яке видаляє вміст %TEMP% (тимчасової папки користувача) і загублені файли з іменем nul по всьому системному диску, під час кожного входу в систему. Завдання виконується з правами користувача, який увійшов, — права адміністратора чи підтвердження UAC не потрібні. Видалення файлів nul вручну може не вдатися, бо інструмент розробки, який їх створив, ще тримає їх відкритими; одразу після входу такі інструменти зазвичай ще не запущені, тому видалення проходить успішніше. Оскільки щоразу сканується весь диск, на системах із великою кількістю файлів кожен вхід може тривати кілька хвилин або довше. Файли, що використовуються, автоматично пропускаються. Вимкнення видаляє завдання.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Стиснення памʼяті</x:String>

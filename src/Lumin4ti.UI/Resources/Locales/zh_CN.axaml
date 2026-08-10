@@ -5,7 +5,8 @@
 
   <!-- ===== Tabs ===== -->
   <x:String x:Key="Text.Tab.Update" xml:space="preserve">更新与安全</x:String>
-  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">清理与修复</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">清理</x:String>
+  <x:String x:Key="Text.Tab.Repair" xml:space="preserve">修复</x:String>
   <x:String x:Key="Text.Tab.Performance" xml:space="preserve">性能</x:String>
   <x:String x:Key="Text.Tab.System" xml:space="preserve">系统</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">整理</x:String>
@@ -33,8 +34,10 @@
   <!-- ===== Category titles / captions ===== -->
   <x:String x:Key="Text.Category.Update" xml:space="preserve">更新与安全</x:String>
   <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">更新应用和 Windows Defender，并恢复正常的安全设置。</x:String>
-  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">清理与修复</x:String>
-  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">回收磁盘空间，清理或修复损坏的注册项。</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">清理</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">删除不需要的文件和注册项，回收磁盘空间。</x:String>
+  <x:String x:Key="Text.Category.Repair" xml:space="preserve">修复</x:String>
+  <x:String x:Key="Text.Category.Repair.Caption" xml:space="preserve">通过重新注册或重建来修复损坏的注册项和显示故障。</x:String>
   <x:String x:Key="Text.Category.Performance" xml:space="preserve">性能</x:String>
   <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">优化内存、进程和渲染。开关一般为 ON = 应用优化，OFF = 还原为 Windows 默认（仅 MMAgent 项目为 ON = 启用该功能；推荐值请参见各项说明）。</x:String>
   <x:String x:Key="Text.Category.System" xml:space="preserve">系统</x:String>
@@ -101,7 +104,7 @@
   <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">删除应用缓存和日志</x:String>
   <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">删除基于 Electron 的应用（Claude、Cursor、Discord、Antigravity 等）的缓存、GPU 着色器缓存（NVIDIA DXCache、AMD）、Unreal Engine 的派生数据以及常驻工具的日志。设置和登录状态不会丢失，各应用会在下次启动时重新生成缓存。未安装的应用会直接跳过。</x:String>
   <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">删除开发工具的包缓存</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">删除 npm、NuGet、pip、Yarn、Gradle、Maven、Bun、uv 积累的已下载包缓存，有时可释放数十 GB。凭据和配置文件夹（.gnupg、.aws、.config 等）不在删除范围内。删除后各项目在下次构建或还原时会重新下载依赖包，因此仅那一次会额外花费时间和流量。</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">删除 npm、NuGet、pip、Yarn、Gradle、Maven、Bun、uv 积累的已下载包缓存，有时可释放数十 GB。凭据和配置文件夹（.gnupg、.aws、.config 等）不在删除范围内。主目录下的整个 .cache 文件夹也在删除范围内，因此其中可能包含 huggingface 模型等需要重新下载数十 GB 的缓存。删除后各项目在下次构建或还原时会重新下载依赖包，因此仅那一次会额外花费时间和流量。</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">删除浏览器缓存</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">检测已安装的 Chromium 系浏览器（Edge、Chrome、Brave、Vivaldi、Comet），删除全部配置文件中的网页缓存、GPU 着色器缓存、Service Worker、崩溃报告和扩展的临时数据。通常可释放数 GB 空间。书签、密码和登录状态不会被删除。执行前先关闭浏览器可以删除得更彻底。</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">重建图标、缩略图和字体缓存</x:String>
@@ -114,8 +117,12 @@
   <x:String x:Key="Text.Action.cleanup-drive-root-leftovers.Desc" xml:space="preserve">删除驱动程序安装包和系统升级在系统盘根目录留下的文件夹（AMD、Intel、SWSetup、PerfLogs、OneDriveTemp、$SysReset、Windows.old）。仅 Windows.old 就可能占用数十 GB，是释放空间最多的一项。注意：删除 Windows.old 后将无法在大版本更新后回退到旧版本，升级刚完成时请勿执行。</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Label" xml:space="preserve">删除 Outlook 的脱机缓存</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Desc" xml:space="preserve">删除 Outlook 在本地保存的邮箱副本，即脱机数据（.ost）和搜索数据（.nst）。单个文件可能达到数 GB 至数十 GB。服务器上的邮件不会被删除，下次启动 Outlook 时会重新同步。注意：在重新同步完成前看不到过往邮件，网络较慢时可能需要数小时。仅存在于本地的 .pst 数据不在删除范围内。</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Label" xml:space="preserve">删除迷失的 nul 文件</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Desc" xml:space="preserve">当 Git Bash 或某些开发工具将命令的输出重定向（&gt; nul）保存为真实文件而不是丢弃时，系统驱动器各处会积累名为 nul 的空文件，本项会搜索驱动器上的所有文件夹（不仅限于用户文件夹）并将其删除。由于该名称与 Windows 保留设备名相同，无法用常规方式删除，因此使用专门的处理方式安全删除。扫描整个驱动器在文件较多的系统上可能需要数分钟甚至更久。</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Label" xml:space="preserve">清空回收站</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Desc" xml:space="preserve">清空所有驱动器的回收站，释放已删除文件占用的空间。不会弹出确认对话框，执行后无法恢复，请先确认回收站中没有需要的文件。</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">注册登录时自动清空 %TEMP% 和迷失的 nul 文件的任务</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">在 Windows 任务计划程序中注册一个任务，每次登录时清空 %TEMP%（用户临时文件夹）的内容，并删除系统驱动器上散落的 nul 文件。该任务仅以登录用户的权限运行，无需管理员权限或 UAC 确认。手动删除 nul 文件可能会失败，因为创建它的开发工具当时仍占用着它；登录后不久这些工具通常还没启动，所以删除更容易成功。由于每次都会扫描整个驱动器，在文件较多的系统上每次登录可能需要数分钟甚至更久。正在使用的文件会自动跳过。关闭后将删除该任务。</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">内存压缩</x:String>

@@ -5,7 +5,8 @@
 
   <!-- ===== Tabs ===== -->
   <x:String x:Key="Text.Tab.Update" xml:space="preserve">更新與安全性</x:String>
-  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">清理與修復</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">清理</x:String>
+  <x:String x:Key="Text.Tab.Repair" xml:space="preserve">修復</x:String>
   <x:String x:Key="Text.Tab.Performance" xml:space="preserve">效能</x:String>
   <x:String x:Key="Text.Tab.System" xml:space="preserve">系統</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">整理</x:String>
@@ -33,8 +34,10 @@
   <!-- ===== Category titles / captions ===== -->
   <x:String x:Key="Text.Category.Update" xml:space="preserve">更新與安全性</x:String>
   <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">更新應用程式與 Windows Defender，並還原正常的安全性設定。</x:String>
-  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">清理與修復</x:String>
-  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">回收磁碟空間，清理或修復損毀的登錄項目。</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">清理</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">刪除不需要的檔案和登錄項目，回收磁碟空間。</x:String>
+  <x:String x:Key="Text.Category.Repair" xml:space="preserve">修復</x:String>
+  <x:String x:Key="Text.Category.Repair.Caption" xml:space="preserve">透過重新登錄或重建來修復損毀的登錄項目和顯示故障。</x:String>
   <x:String x:Key="Text.Category.Performance" xml:space="preserve">效能</x:String>
   <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">最佳化記憶體、處理程序與繪製。開關一般為 ON = 套用最佳化，OFF = 還原為 Windows 預設（僅 MMAgent 項目為 ON = 啟用該功能；建議值請參閱各項說明）。</x:String>
   <x:String x:Key="Text.Category.System" xml:space="preserve">系統</x:String>
@@ -101,7 +104,7 @@
   <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">刪除應用程式快取與記錄檔</x:String>
   <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">刪除以 Electron 為基礎的應用程式（Claude、Cursor、Discord、Antigravity 等）的快取、GPU 著色器快取（NVIDIA DXCache、AMD）、Unreal Engine 的衍生資料，以及常駐工具的記錄檔。設定與登入狀態都會保留，各應用程式會在下次啟動時重新建立快取。未安裝的應用程式會直接略過。</x:String>
   <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">刪除開發工具的套件快取</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">刪除 npm、NuGet、pip、Yarn、Gradle、Maven、Bun、uv 累積的已下載套件快取，有時可釋出數十 GB。認證資訊與設定資料夾（.gnupg、.aws、.config 等）不在刪除範圍內。刪除後各專案在下次建置或還原時會重新下載套件，因此僅該次會額外花費時間與流量。</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">刪除 npm、NuGet、pip、Yarn、Gradle、Maven、Bun、uv 累積的已下載套件快取，有時可釋出數十 GB。認證資訊與設定資料夾（.gnupg、.aws、.config 等）不在刪除範圍內。主目錄下的整個 .cache 資料夾也在刪除範圍內，因此其中可能包含 huggingface 模型等需要重新下載數十 GB 的快取。刪除後各專案在下次建置或還原時會重新下載套件，因此僅該次會額外花費時間與流量。</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">刪除瀏覽器快取</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">偵測已安裝的 Chromium 系瀏覽器（Edge、Chrome、Brave、Vivaldi、Comet），刪除所有設定檔中的網頁快取、GPU 著色器快取、Service Worker、當機報告與擴充功能的暫存資料。通常可釋出數 GB 空間。書籤、密碼與登入狀態不會被刪除。執行前先關閉瀏覽器可以刪得更徹底。</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">重建圖示、縮圖與字型快取</x:String>
@@ -114,8 +117,12 @@
   <x:String x:Key="Text.Action.cleanup-drive-root-leftovers.Desc" xml:space="preserve">刪除驅動程式安裝程式與作業系統升級在系統磁碟根目錄留下的資料夾（AMD、Intel、SWSetup、PerfLogs、OneDriveTemp、$SysReset、Windows.old）。光是 Windows.old 就可能達到數十 GB，是釋出空間最多的一項。注意：刪除 Windows.old 後，大型更新後將無法回復到先前版本，剛升級完成時請勿執行。</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Label" xml:space="preserve">刪除 Outlook 的離線快取</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Desc" xml:space="preserve">刪除 Outlook 在本機保存的信箱副本，也就是離線資料（.ost）與搜尋資料（.nst）。單一檔案可能達到數 GB 至數十 GB。伺服器上的郵件不會被刪除，下次啟動 Outlook 時會重新同步。注意：在重新同步完成前看不到過往郵件，網路較慢時可能需要數小時。僅存在於本機的 .pst 資料不在刪除範圍內。</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Label" xml:space="preserve">刪除迷失的 nul 檔案</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Desc" xml:space="preserve">當 Git Bash 或部分開發工具將指令的輸出重新導向（&gt; nul）儲存為真實檔案而非捨棄時，系統磁碟機各處會累積名為 nul 的空檔案，本項會搜尋磁碟機上的所有資料夾（不僅限於使用者資料夾）並將其刪除。由於該名稱與 Windows 保留裝置名稱相同，無法用一般方式刪除，因此使用專門的處理方式安全刪除。掃描整個磁碟機在檔案較多的系統上可能需要數分鐘甚至更久。</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Label" xml:space="preserve">清空資源回收筒</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Desc" xml:space="preserve">清空所有磁碟機的資源回收筒，釋出已刪除檔案占用的空間。不會出現確認對話方塊，執行後即無法復原，請先確認裡面沒有需要的檔案。</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">註冊登入時自動清空 %TEMP% 和迷失的 nul 檔案的工作</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">在 Windows 工作排程器中註冊一個工作，每次登入時清空 %TEMP%（使用者暫存資料夾）的內容，並刪除系統磁碟機上散落的 nul 檔案。此工作僅以登入使用者的權限執行，不需要系統管理員權限或 UAC 確認。手動刪除 nul 檔案可能會失敗，因為建立它的開發工具當時仍占用著它；登入後不久這些工具通常還沒啟動，因此刪除更容易成功。由於每次都會掃描整個磁碟機，在檔案較多的系統上每次登入可能需要數分鐘甚至更久。使用中的檔案會自動略過。關閉後將刪除該工作。</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">記憶體壓縮</x:String>

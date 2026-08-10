@@ -31,6 +31,14 @@ internal static class Program
             Console.Error.WriteLine($"[Lumin4ti] ログを記録できない状態で起動します: {logFailure}");
         }
 
+        // タスクスケジューラーからのスケジュール実行はここで即終了する。
+        // 自己昇格・多重起動ガード・UI 起動を一切経由しないため、ログオンのたびに
+        // UAC プロンプトを出さず無人で完走できる (%TEMP% の削除はユーザー権限で足りる)。
+        if (OperatingSystem.IsWindows() && args.Contains(ScheduledTempCleanup.CommandLineArgument))
+        {
+            return ScheduledTempCleanup.Run();
+        }
+
         // Velopack のブートストラップを最初に走らせる
         // (--veloapp-install / --veloapp-updated 等の internal hook を捌くため、Avalonia 起動・多重起動ガードより前に必須)
         var velopackApp = VelopackApp.Build();

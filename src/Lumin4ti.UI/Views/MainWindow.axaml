@@ -19,9 +19,7 @@
       <ExperimentalAcrylicBorder.Material>
         <ExperimentalAcrylicMaterial
             BackgroundSource="Digger"
-            MaterialOpacity="0.85"
-            TintColor="{DynamicResource Color.Window}"
-            TintOpacity="0.9" />
+            TintColor="{DynamicResource Color.Window}" />
       </ExperimentalAcrylicBorder.Material>
     </ExperimentalAcrylicBorder>
 
@@ -53,6 +51,20 @@
             </StackPanel>
           </TabItem.Header>
           <views:CommandCategoryView DataContext="{Binding Cleanup}" />
+        </TabItem>
+        <TabItem>
+          <TabItem.Header>
+            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+              <!--  レンチアイコン (修復)  -->
+              <Canvas Width="16" Height="16">
+                <Path Data="M 4.2,4.2 A 3,3 0 1 0 8.6,8.6"
+                      Stroke="{DynamicResource Brush.FG1}" StrokeThickness="1.4" StrokeLineCap="Round" />
+                <Line StartPoint="7.5,7.5" EndPoint="14,14" Stroke="{DynamicResource Brush.FG1}" StrokeThickness="1.6" StrokeLineCap="Round" />
+              </Canvas>
+              <TextBlock Text="{DynamicResource Text.Tab.Repair}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+          </TabItem.Header>
+          <views:CommandCategoryView DataContext="{Binding Repair}" />
         </TabItem>
         <TabItem>
           <TabItem.Header>

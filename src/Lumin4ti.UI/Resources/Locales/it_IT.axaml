@@ -5,7 +5,8 @@
 
   <!-- ===== Tabs ===== -->
   <x:String x:Key="Text.Tab.Update" xml:space="preserve">Aggiornamento &amp; Sicurezza</x:String>
-  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Pulizia &amp; Riparazione</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Pulizia</x:String>
+  <x:String x:Key="Text.Tab.Repair" xml:space="preserve">Riparazione</x:String>
   <x:String x:Key="Text.Tab.Performance" xml:space="preserve">Prestazioni</x:String>
   <x:String x:Key="Text.Tab.System" xml:space="preserve">Sistema</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Organizza</x:String>
@@ -33,8 +34,10 @@
   <!-- ===== Category titles / captions ===== -->
   <x:String x:Key="Text.Category.Update" xml:space="preserve">Aggiornamento &amp; Sicurezza</x:String>
   <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">Aggiorna le app e Windows Defender e ripristina impostazioni di sicurezza integre.</x:String>
-  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Pulizia &amp; Riparazione</x:String>
-  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Recupera spazio su disco e pulisci o ripara le registrazioni danneggiate.</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Pulizia</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Recupera spazio su disco rimuovendo file e registrazioni non necessari.</x:String>
+  <x:String x:Key="Text.Category.Repair" xml:space="preserve">Riparazione</x:String>
+  <x:String x:Key="Text.Category.Repair.Caption" xml:space="preserve">Ripara le registrazioni danneggiate e i problemi di visualizzazione ripetendo la registrazione o ricostruendoli.</x:String>
   <x:String x:Key="Text.Category.Performance" xml:space="preserve">Prestazioni</x:String>
   <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">Ottimizza memoria, processi e rendering. Gli interruttori indicano generalmente ON = applica l'ottimizzazione, OFF = ripristina l'impostazione predefinita di Windows (solo gli elementi MMAgent usano ON = abilita quella funzione; vedi ogni descrizione per il valore consigliato).</x:String>
   <x:String x:Key="Text.Category.System" xml:space="preserve">Sistema</x:String>
@@ -101,7 +104,7 @@
   <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">Elimina cache e registri delle applicazioni</x:String>
   <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">Elimina le cache delle applicazioni basate su Electron (Claude, Cursor, Discord, Antigravity e altre), le cache degli shader della GPU (NVIDIA DXCache, AMD), i dati derivati di Unreal Engine e i registri degli strumenti residenti. Impostazioni e accessi restano invariati e ogni applicazione ricrea la propria cache al successivo avvio. Le applicazioni non installate vengono semplicemente saltate.</x:String>
   <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">Elimina le cache dei pacchetti degli strumenti di sviluppo</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Elimina le cache dei pacchetti scaricati mantenute da npm, NuGet, pip, Yarn, Gradle, Maven, Bun e uv, liberando anche decine di GB. Le cartelle con credenziali e configurazioni (.gnupg, .aws, .config e simili) non sono mai incluse. I pacchetti verranno riscaricati alla successiva compilazione o al successivo ripristino, quindi solo quella volta serviranno tempo e traffico aggiuntivi.</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Elimina le cache dei pacchetti scaricati mantenute da npm, NuGet, pip, Yarn, Gradle, Maven, Bun e uv, liberando anche decine di GB. Le cartelle con credenziali e configurazioni (.gnupg, .aws, .config e simili) non sono mai incluse. È inclusa anche l'intera cartella .cache nella directory home, quindi possono farne parte cache che richiedono il riscaricamento di decine di GB, come i modelli di huggingface. I pacchetti verranno riscaricati alla successiva compilazione o al successivo ripristino, quindi solo quella volta serviranno tempo e traffico aggiuntivi.</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">Elimina le cache dei browser</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Rileva i browser basati su Chromium installati (Edge, Chrome, Brave, Vivaldi, Comet) ed elimina, per tutti i profili, la cache web, la cache degli shader della GPU, i service worker, i rapporti di arresto anomalo e i dati temporanei delle estensioni. Di solito libera diversi GB. Preferiti, password e sessioni restano intatti. Chiudere prima i browser rende la pulizia più completa.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">Ricostruisci le cache di icone, anteprime e caratteri</x:String>
@@ -114,8 +117,12 @@
   <x:String x:Key="Text.Action.cleanup-drive-root-leftovers.Desc" xml:space="preserve">Elimina le cartelle che gli installer dei driver e gli aggiornamenti del sistema operativo lasciano nella radice dell'unità di sistema (AMD, Intel, SWSetup, PerfLogs, OneDriveTemp, $SysReset, Windows.old). La sola Windows.old può occupare decine di GB, il che rende questa la voce che libera più spazio. Nota: rimuovendo Windows.old non sarà più possibile tornare alla versione precedente dopo un aggiornamento delle funzionalità, quindi non eseguirla subito dopo un aggiornamento.</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Label" xml:space="preserve">Elimina la cache offline di Outlook</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Desc" xml:space="preserve">Elimina i dati offline (.ost) e i dati di ricerca (.nst) che Outlook conserva come copia locale della cassetta postale. Un singolo file può occupare da alcuni a decine di GB. La posta sul server non viene eliminata e viene sincronizzata di nuovo al successivo avvio di Outlook. Nota: finché la sincronizzazione non è completata la posta più vecchia non è visibile e con una connessione lenta può richiedere ore. I dati .pst presenti solo in locale non vengono toccati.</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Label" xml:space="preserve">Elimina i file nul dispersi</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Desc" xml:space="preserve">Elimina i file vuoti denominati letteralmente nul che si accumulano in tutta l'unità di sistema quando Git Bash o alcuni strumenti di sviluppo salvano il reindirizzamento dell'output di un comando (&gt; nul) come file reale invece di scartarlo. La ricerca copre ogni cartella dell'unità, non solo la cartella utente. Poiché il nome corrisponde a un nome di dispositivo riservato di Windows, questi file non possono essere rimossi nel modo normale e vengono eliminati con una routine dedicata. La scansione dell'intera unità può richiedere diversi minuti o più sui sistemi con molti file.</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Label" xml:space="preserve">Svuota il Cestino</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Desc" xml:space="preserve">Svuota il Cestino di tutte le unità per recuperare lo spazio occupato dai file eliminati. Non compare alcuna finestra di conferma e l'eliminazione non è annullabile, quindi controlla prima il contenuto.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">Registra un'attività per eliminare automaticamente %TEMP% e i file nul dispersi all'accesso</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Registra un'attività nell'Utilità di pianificazione di Windows che elimina il contenuto di %TEMP% (la cartella temporanea dell'utente) e i file denominati nul dispersi in tutta l'unità di sistema, a ogni accesso. L'attività viene eseguita con i permessi dell'utente collegato, senza bisogno di diritti amministrativi né conferma UAC. L'eliminazione manuale dei file nul può fallire perché lo strumento di sviluppo che li ha creati li tiene ancora aperti; subito dopo l'accesso questi strumenti di solito non sono ancora avviati, quindi l'eliminazione riesce più spesso. Poiché ogni volta viene analizzata l'intera unità, nei sistemi con molti file l'operazione può richiedere diversi minuti a ogni accesso. I file attualmente in uso vengono saltati automaticamente. Disattivandola l'attività viene rimossa.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Compressione della memoria</x:String>

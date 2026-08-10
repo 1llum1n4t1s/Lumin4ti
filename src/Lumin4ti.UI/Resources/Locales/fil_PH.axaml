@@ -5,7 +5,8 @@
 
   <!-- ===== Tabs ===== -->
   <x:String x:Key="Text.Tab.Update" xml:space="preserve">Update at Seguridad</x:String>
-  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Paglilinis at Pag-aayos</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Paglilinis</x:String>
+  <x:String x:Key="Text.Tab.Repair" xml:space="preserve">Pag-aayos</x:String>
   <x:String x:Key="Text.Tab.Performance" xml:space="preserve">Performance</x:String>
   <x:String x:Key="Text.Tab.System" xml:space="preserve">System</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Ayusin</x:String>
@@ -33,8 +34,10 @@
   <!-- ===== Category titles / captions ===== -->
   <x:String x:Key="Text.Category.Update" xml:space="preserve">Update at Seguridad</x:String>
   <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">I-update ang mga app at Windows Defender, at ibalik ang wastong mga setting ng seguridad.</x:String>
-  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Paglilinis at Pag-aayos</x:String>
-  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Magbawi ng espasyo sa disk at maglinis o mag-ayos ng mga sirang rehistrasyon.</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Paglilinis</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Bawiin ang espasyo sa disk sa pamamagitan ng pag-alis ng mga hindi kailangang file at rehistrasyon.</x:String>
+  <x:String x:Key="Text.Category.Repair" xml:space="preserve">Pag-aayos</x:String>
+  <x:String x:Key="Text.Category.Repair.Caption" xml:space="preserve">Ayusin ang mga sirang rehistrasyon at glitch sa display sa pamamagitan ng muling pagrehistro o muling pagbuo.</x:String>
   <x:String x:Key="Text.Category.Performance" xml:space="preserve">Performance</x:String>
   <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">I-optimize ang memory, mga proseso, at rendering. Karaniwan, ang mga switch ay ON = ilapat ang optimization, OFF = ibalik sa default ng Windows (ang mga item lamang ng MMAgent ang gumagamit ng ON = paganahin ang feature na iyon; tingnan ang bawat paglalarawan para sa inirerekomendang halaga).</x:String>
   <x:String x:Key="Text.Category.System" xml:space="preserve">System</x:String>
@@ -101,7 +104,7 @@
   <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">Burahin ang mga cache at log ng app</x:String>
   <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">Binubura ang cache ng mga app na nakabase sa Electron (Claude, Cursor, Discord, Antigravity at iba pa), ang shader cache ng GPU (NVIDIA DXCache, AMD), ang derived data ng Unreal Engine, at ang mga log ng mga tool na palaging bukas. Nananatili ang mga setting at naka-sign in na estado, at muling bubuuin ng bawat app ang cache nito sa susunod na pagbukas. Basta nilalaktawan ang mga app na hindi naka-install.</x:String>
   <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">Burahin ang mga package cache ng mga tool sa pag-develop</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Binubura ang cache ng mga na-download na package na iniingatan ng npm, NuGet, pip, Yarn, Gradle, Maven, Bun, at uv, na maaaring magpalaya ng sampu-sampung GB. Hindi kailanman kasama ang mga folder ng kredensyal at configuration (.gnupg, .aws, .config at katulad). Muling ida-download ang mga package sa susunod na build o restore, kaya sa isang beses na iyon lang magkakaroon ng dagdag na oras at data.</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Binubura ang cache ng mga na-download na package na iniingatan ng npm, NuGet, pip, Yarn, Gradle, Maven, Bun, at uv, na maaaring magpalaya ng sampu-sampung GB. Hindi kailanman kasama ang mga folder ng kredensyal at configuration (.gnupg, .aws, .config at katulad). Kasama rin ang buong .cache folder sa iyong home directory, kaya maaaring mapaloob dito ang mga cache na nangangailangan ng sampu-sampung GB na muling pag-download, gaya ng mga modelo ng huggingface. Muling ida-download ang mga package sa susunod na build o restore, kaya sa isang beses na iyon lang magkakaroon ng dagdag na oras at data.</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">Burahin ang mga cache ng browser</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Tinutukoy ang mga naka-install na browser na nakabase sa Chromium (Edge, Chrome, Brave, Vivaldi, Comet) at binubura sa lahat ng profile ang web cache, shader cache ng GPU, mga service worker, ulat ng crash, at pansamantalang data ng mga extension. Karaniwang nagpapalaya ito ng ilang GB. Nananatili ang mga bookmark, password, at naka-sign in na estado. Mas ganap ang paglilinis kung isasara mo muna ang mga browser.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">Muling buuin ang cache ng icon, thumbnail, at font</x:String>
@@ -114,8 +117,12 @@
   <x:String x:Key="Text.Action.cleanup-drive-root-leftovers.Desc" xml:space="preserve">Binubura ang mga folder na iniiwan ng mga installer ng driver at ng pag-upgrade ng OS sa ugat ng system drive (AMD, Intel, SWSetup, PerfLogs, OneDriveTemp, $SysReset, Windows.old). Ang Windows.old lamang ay maaaring umabot sa sampu-sampung GB, kaya ito ang pinakamalaking nagpapalaya ng espasyo. Paalala: kapag inalis ang Windows.old ay hindi na maibabalik ang naunang bersyon pagkatapos ng feature update, kaya huwag itong patakbuhin agad pagkatapos mag-upgrade.</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Label" xml:space="preserve">Burahin ang offline cache ng Outlook</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Desc" xml:space="preserve">Binubura ang offline data (.ost) at search data (.nst) na iniingatan ng Outlook bilang lokal na kopya ng iyong mailbox. Ang isang file ay maaaring umabot sa ilan hanggang sampu-sampung GB. Hindi binubura ang mga mensahe sa server at muling isi-synchronize ang mga ito sa susunod na pagbukas ng Outlook. Paalala: hangga't hindi tapos ang pag-synchronize ay hindi makikita ang mga lumang mensahe, at sa mabagal na koneksyon ay maaari itong tumagal nang ilang oras. Hindi apektado ang .pst na nasa lokal lamang.</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Label" xml:space="preserve">Tanggalin ang naliligaw na mga nul file</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Desc" xml:space="preserve">Tinatanggal ang mga walang-lamang file na literal na pinangalanang nul na naiipon sa buong system drive kapag ang Git Bash o ilang dev tool ay nagse-save ng output redirect ng isang command (&gt; nul) bilang tunay na file sa halip na itapon ito. Sinasaklaw ng paghahanap ang bawat folder sa drive, hindi lamang ang iyong user folder. Dahil tumutugma ang pangalan sa isang nakalaang device name ng Windows, hindi matatanggal ang mga file na ito sa karaniwang paraan at tinatanggal gamit ang espesyal na rutina. Ang pag-scan sa buong drive ay maaaring tumagal ng ilang minuto o higit pa sa mga sistemang maraming file.</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Label" xml:space="preserve">Walisin ang Recycle Bin</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Desc" xml:space="preserve">Winawalis ang Recycle Bin sa lahat ng drive upang mabawi ang espasyong ginagamit ng mga binurang file. Walang lalabas na kumpirmasyon at hindi na maibabalik ang pagbura, kaya suriin muna ang laman nito.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">Magrehistro ng task para awtomatikong burahin ang %TEMP% at ang naliligaw na mga nul file sa pag-sign in</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Nagrerehistro ng task sa Windows Task Scheduler na nagbubura ng laman ng %TEMP% (temp folder ng iyong user) at ng mga file na literal na pinangalanang nul na naliligaw sa buong system drive, tuwing mag-sign in ka. Tumatakbo ang task gamit lang ang karapatan ng naka-sign in na user, walang kailangang admin rights o UAC prompt. Maaaring mabigo ang manual na pagbura ng nul file dahil hawak pa rin ito ng dev tool na gumawa nito; karaniwan nang hindi pa tumatakbo ang mga tool na iyon nang sign-in ka lang, kaya mas madalas magtagumpay ang pagbura. Dahil hinahanap ang buong drive sa tuwing tatakbo ito, maaaring umabot ng ilang minuto o higit pa ang bawat pag-sign in sa mga sistemang maraming file. Awtomatikong nililiktawan ang mga file na ginagamit. Kapag OFF, aalisin ang task.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Memory Compression</x:String>

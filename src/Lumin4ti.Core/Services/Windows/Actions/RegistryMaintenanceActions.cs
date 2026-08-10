@@ -22,7 +22,7 @@ public sealed class TrayIconResetAction : IMaintenanceAction
         "タスクバー右下の通知領域 (システムトレイ) のアイコンキャッシュを削除します。" +
         "アンインストールしたはずのアプリのアイコンが「隠れているインジケーター」に残り続ける現象を解消できます。トレイの表示/非表示のカスタマイズ設定は一度リセットされます。";
 
-    public CommandCategory Category => CommandCategory.Cleanup;
+    public CommandCategory Category => CommandCategory.Repair;
 
     public bool RequiresReboot => false;
 
@@ -159,13 +159,19 @@ public sealed class GameDvrResetAction : IMaintenanceAction
 
     public bool RequiresReboot => false;
 
+    /// <summary>サービスの起動設定が壊れないよう、無効化されているときだけ戻す既定の起動種別 (需要開始)。</summary>
+    private const int ServiceStartDemand = 3;
+
+    /// <summary>最適化ツールが Game DVR 無効化のために書き込む起動種別 (無効)。</summary>
+    private const int ServiceStartDisabled = 4;
+
     public Task<MaintenanceActionResult> ExecuteAsync(CancellationToken ct = default)
     {
         var lines = new List<string>();
 
         DeleteValue(Registry.CurrentUser, @"SOFTWARE\Microsoft\Windows\CurrentVersion\GameDVR", "AppCaptureEnabled", lines);
         DeleteValue(Registry.LocalMachine, @"SOFTWARE\Policies\Microsoft\Windows\GameDVR", "AllowGameDVR", lines);
-        DeleteValue(Registry.LocalMachine, @"SYSTEM\CurrentControlSet\Services\BcastDVRUserService", "Start", lines);
+        RestoreServiceStart(Registry.LocalMachine, @"SYSTEM\CurrentControlSet\Services\BcastDVRUserService", lines);
 
         if (lines.Count == 0)
         {
@@ -183,6 +189,21 @@ public sealed class GameDvrResetAction : IMaintenanceAction
         {
             key.DeleteValue(name, throwOnMissingValue: false);
             lines.Add($"  - {name} を削除しました");
+        }
+    }
+
+    /// <summary>
+    /// Start は Type / ImagePath と並ぶサービスキーの必須値のため、削除すると SCM がサービスを
+    /// 正しく扱えなくなる恐れがある。無効化 (4) されているときだけ Windows 既定の需要開始 (3) へ
+    /// 書き戻し、既に既定や他の値の場合は触らない。
+    /// </summary>
+    private static void RestoreServiceStart(RegistryKey root, string keyPath, List<string> lines)
+    {
+        using var key = root.OpenSubKey(keyPath, writable: true);
+        if (key?.GetValue("Start") is int start && start == ServiceStartDisabled)
+        {
+            key.SetValue("Start", ServiceStartDemand, RegistryValueKind.DWord);
+            lines.Add("  - BcastDVRUserService の起動設定を既定 (需要開始) に戻しました");
         }
     }
 }

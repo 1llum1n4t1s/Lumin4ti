@@ -5,7 +5,8 @@
 
   <!-- ===== Tabs ===== -->
   <x:String x:Key="Text.Tab.Update" xml:space="preserve">Update &amp; Sicherheit</x:String>
-  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Bereinigen &amp; Reparieren</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Bereinigen</x:String>
+  <x:String x:Key="Text.Tab.Repair" xml:space="preserve">Reparieren</x:String>
   <x:String x:Key="Text.Tab.Performance" xml:space="preserve">Leistung</x:String>
   <x:String x:Key="Text.Tab.System" xml:space="preserve">System</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Organisieren</x:String>
@@ -33,8 +34,10 @@
   <!-- ===== Category titles / captions ===== -->
   <x:String x:Key="Text.Category.Update" xml:space="preserve">Update &amp; Sicherheit</x:String>
   <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">Apps und Windows Defender aktualisieren und intakte Sicherheitseinstellungen wiederherstellen.</x:String>
-  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Bereinigen &amp; Reparieren</x:String>
-  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Speicherplatz freigeben und defekte Registrierungen bereinigen oder reparieren.</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Bereinigen</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Speicherplatz freigeben, indem nicht benötigte Dateien und Registrierungen entfernt werden.</x:String>
+  <x:String x:Key="Text.Category.Repair" xml:space="preserve">Reparieren</x:String>
+  <x:String x:Key="Text.Category.Repair.Caption" xml:space="preserve">Defekte Registrierungen und Anzeigefehler durch erneute Registrierung oder Neuaufbau beheben.</x:String>
   <x:String x:Key="Text.Category.Performance" xml:space="preserve">Leistung</x:String>
   <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">Speicher, Prozesse und Rendering optimieren. Schalter bedeuten in der Regel EIN = Optimierung anwenden, AUS = auf den Windows-Standard zurücksetzen (nur die MMAgent-Elemente nutzen EIN = diese Funktion aktivieren; siehe jede Beschreibung für den empfohlenen Wert).</x:String>
   <x:String x:Key="Text.Category.System" xml:space="preserve">System</x:String>
@@ -101,7 +104,7 @@
   <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">App-Caches und Protokolle löschen</x:String>
   <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">Löscht Caches von Electron-basierten Apps (Claude, Cursor, Discord, Antigravity und andere), GPU-Shader-Caches (NVIDIA DXCache, AMD), abgeleitete Daten von Unreal Engine sowie Protokolle von Hintergrundprogrammen. Einstellungen und Anmeldestatus bleiben erhalten, jede App baut ihren Cache beim nächsten Start neu auf. Nicht installierte Apps werden einfach übersprungen.</x:String>
   <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">Paket-Caches der Entwicklungswerkzeuge löschen</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Löscht die Caches heruntergeladener Pakete von npm, NuGet, pip, Yarn, Gradle, Maven, Bun und uv, was zehn GB und mehr freigeben kann. Ordner mit Anmeldeinformationen und Konfiguration (.gnupg, .aws, .config und ähnliche) sind niemals enthalten. Pakete werden beim nächsten Build oder Wiederherstellen erneut geladen, dieser eine Durchlauf kostet also zusätzlich Zeit und Datenvolumen.</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Löscht die Caches heruntergeladener Pakete von npm, NuGet, pip, Yarn, Gradle, Maven, Bun und uv, was zehn GB und mehr freigeben kann. Ordner mit Anmeldeinformationen und Konfiguration (.gnupg, .aws, .config und ähnliche) sind niemals enthalten. Auch der komplette .cache-Ordner im Benutzerverzeichnis ist betroffen, daher können Caches darin liegen, deren erneuter Download zehn GB und mehr umfasst — etwa huggingface-Modelle. Pakete werden beim nächsten Build oder Wiederherstellen erneut geladen, dieser eine Durchlauf kostet also zusätzlich Zeit und Datenvolumen.</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">Browser-Caches löschen</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Erkennt installierte Chromium-basierte Browser (Edge, Chrome, Brave, Vivaldi, Comet) und löscht in allen Profilen den Web-Cache, den GPU-Shader-Cache, Service Worker, Absturzberichte und temporäre Daten von Erweiterungen. Häufig werden dabei mehrere GB frei. Lesezeichen, Kennwörter und Anmeldestatus bleiben erhalten. Wenn Sie die Browser vorher schließen, gelingt die Löschung vollständiger.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">Symbol-, Miniaturansicht- und Schriftart-Caches neu aufbauen</x:String>
@@ -114,8 +117,12 @@
   <x:String x:Key="Text.Action.cleanup-drive-root-leftovers.Desc" xml:space="preserve">Löscht Ordner, die Treiberinstallationen und Betriebssystem-Upgrades im Stammverzeichnis des Systemlaufwerks zurücklassen (AMD, Intel, SWSetup, PerfLogs, OneDriveTemp, $SysReset, Windows.old). Allein Windows.old kann mehrere zehn GB groß sein, weshalb dies am meisten Platz schafft. Hinweis: Nach dem Entfernen von Windows.old ist eine Rückkehr zur vorherigen Version nach einem Funktionsupdate nicht mehr möglich, führen Sie dies also nicht direkt nach einem Upgrade aus.</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Label" xml:space="preserve">Offlinecache von Outlook löschen</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Desc" xml:space="preserve">Löscht die Offlinedaten (.ost) und Suchdaten (.nst), die Outlook als lokale Kopie Ihres Postfachs vorhält. Eine einzelne Datei kann mehrere bis mehrere zehn GB groß sein. E-Mails auf dem Server werden nicht gelöscht und beim nächsten Start von Outlook erneut synchronisiert. Hinweis: Bis diese Synchronisierung abgeschlossen ist, sind ältere E-Mails nicht sichtbar, was bei langsamer Verbindung Stunden dauern kann. Nur lokal vorhandene .pst-Daten sind nicht betroffen.</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Label" xml:space="preserve">Verirrte nul-Dateien löschen</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Desc" xml:space="preserve">Löscht leere Dateien mit dem Namen nul, die sich auf dem gesamten Systemlaufwerk ansammeln, wenn Git Bash oder bestimmte Entwicklertools die Ausgabeumleitung eines Befehls (&gt; nul) als echte Datei statt sie zu verwerfen speichern. Die Suche durchsucht jeden Ordner auf dem Laufwerk, nicht nur Ihren Benutzerordner. Da der Name mit einem reservierten Windows-Gerätenamen übereinstimmt, können diese Dateien nicht auf normalem Weg entfernt werden und werden mit einer speziellen Routine gelöscht. Die Suche über das gesamte Laufwerk kann bei vielen Dateien mehrere Minuten oder länger dauern.</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Label" xml:space="preserve">Papierkorb leeren</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Desc" xml:space="preserve">Leert den Papierkorb auf allen Laufwerken und gibt den von gelöschten Dateien belegten Speicherplatz frei. Es erscheint keine Bestätigung und die Löschung lässt sich nicht rückgängig machen, prüfen Sie den Inhalt daher vorher.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">Aufgabe zum automatischen Löschen von %TEMP% und verirrten nul-Dateien bei der Anmeldung registrieren</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Registriert eine Aufgabe in der Windows-Aufgabenplanung, die bei jeder Anmeldung den Inhalt von %TEMP% (Ihrem Benutzer-Temp-Ordner) sowie verirrte Dateien mit dem Namen nul auf dem gesamten Systemlaufwerk löscht. Die Aufgabe läuft mit den Rechten des angemeldeten Benutzers — es sind keine Administratorrechte oder UAC-Bestätigung nötig. Das manuelle Löschen von nul-Dateien kann fehlschlagen, weil das Entwicklertool, das die Datei erzeugt hat, sie noch offen hält; direkt nach der Anmeldung laufen diese Tools meist noch nicht, sodass das Löschen zuverlässiger klappt. Da jedes Mal das gesamte Laufwerk durchsucht wird, kann die Anmeldung auf Systemen mit sehr vielen Dateien mehrere Minuten oder länger dauern. Aktuell verwendete Dateien werden automatisch übersprungen. Bei OFF wird die Aufgabe entfernt.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Speicherkomprimierung</x:String>

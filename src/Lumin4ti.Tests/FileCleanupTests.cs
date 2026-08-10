@@ -41,13 +41,15 @@ public sealed class FileCleanupTests
     /// <summary>
     /// ジャンクションを辿らずに消す。Directory.Delete(recursive) は再解析ポイントに
     /// 入ろうとして失敗するため、テストの後始末では使えない。
+    /// \\?\ 拡張パス経由で消すため、テストが残した nul 等の予約名ファイルも掃除できる。
     /// </summary>
     private static void DeleteTree(DirectoryInfo directory)
     {
         foreach (var file in directory.GetFiles())
         {
-            file.Attributes = FileAttributes.Normal;
-            file.Delete();
+            var extended = new FileInfo(@"\\?\" + file.FullName);
+            extended.Attributes = FileAttributes.Normal;
+            extended.Delete();
         }
 
         foreach (var subdirectory in directory.GetDirectories())
@@ -93,6 +95,18 @@ public sealed class FileCleanupTests
         var full = Path.Combine(_root, relativePath);
         Directory.CreateDirectory(Path.GetDirectoryName(full)!);
         File.WriteAllText(full, content);
+        return full;
+    }
+
+    /// <summary>
+    /// nul 等の予約デバイス名と同じ名前のファイルを作る。通常の File.WriteAllText は
+    /// デバイス名として解釈されて書き込めないため、\\?\ 拡張パス経由で作成する。
+    /// </summary>
+    private string CreateReservedNameFile(string relativePath, string content = "x")
+    {
+        var full = Path.Combine(_root, relativePath);
+        Directory.CreateDirectory(Path.GetDirectoryName(full)!);
+        File.WriteAllText(@"\\?\" + full, content);
         return full;
     }
 
@@ -151,6 +165,64 @@ public sealed class FileCleanupTests
         Assert.IsFalse(File.Exists(Path.Combine(target, "mail.ost")));
         Assert.IsTrue(File.Exists(Path.Combine(target, "keep.pst")), "パターン外は残す");
         Assert.IsTrue(File.Exists(Path.Combine(target, "sub", "nested.ost")), "サブフォルダは辿らない");
+    }
+
+    [TestMethod]
+    public void 再帰探索は全階層のパターン一致ファイルを削除する()
+    {
+        CreateFile("a.tmp");
+        CreateFile(@"sub\a.tmp");
+        CreateFile(@"sub\deeper\a.tmp");
+        CreateFile(@"sub\keep.txt");
+
+        var outcome = FileCleanupEngine.Run(
+            [CleanupTarget.RecursiveFiles(_root, "a.tmp")],
+            scheduleBlockedForReboot: false,
+            progress: null,
+            ct: CancellationToken.None);
+
+        Assert.AreEqual(3, outcome.DeletedFiles);
+        Assert.IsTrue(File.Exists(Path.Combine(_root, "sub", "keep.txt")), "パターン外は残す");
+    }
+
+    [TestMethod]
+    public void 再帰探索でもリンクのサブフォルダは辿らない()
+    {
+        var real = Path.Combine(_root, "real");
+        Directory.CreateDirectory(real);
+        var keep = CreateFile(@"real\a.tmp");
+        var cache = Path.Combine(_root, "cache");
+        Directory.CreateDirectory(cache);
+        CreateJunction(Path.Combine(cache, "link"), real);
+
+        // 探索起点を cache に絞る (real を _root 直下に置くと、リンクを介さず直接到達できてしまうため)。
+        var outcome = FileCleanupEngine.Run(
+            [CleanupTarget.RecursiveFiles(cache, "a.tmp")],
+            scheduleBlockedForReboot: false,
+            progress: null,
+            ct: CancellationToken.None);
+
+        Assert.AreEqual(0, outcome.DeletedFiles, "リンク先の実体は辿らない");
+        Assert.IsTrue(File.Exists(keep), "リンク先の実体は残す");
+    }
+
+    [TestMethod]
+    public void 再帰探索は予約デバイス名と同じ名前のファイルも削除できる()
+    {
+        var nulDir = Path.Combine(_root, "sub");
+        CreateReservedNameFile(@"sub\nul", "junk");
+        CreateFile(@"sub\keep.txt");
+
+        var outcome = FileCleanupEngine.Run(
+            [CleanupTarget.RecursiveFiles(_root, "nul")],
+            scheduleBlockedForReboot: false,
+            progress: null,
+            ct: CancellationToken.None);
+
+        Assert.AreEqual(1, outcome.DeletedFiles);
+        Assert.AreEqual(4, outcome.FreedBytes);
+        Assert.IsFalse(Directory.GetFiles(nulDir, "nul").Length > 0, "nul ファイルは削除されている");
+        Assert.IsTrue(File.Exists(Path.Combine(nulDir, "keep.txt")), "パターン外は残す");
     }
 
     [TestMethod]
@@ -303,6 +375,7 @@ public sealed class FileCleanupTests
         .. FileCleanupGroups.OsIndexTargets,
         .. FileCleanupGroups.DriveRootLeftoverTargets,
         .. FileCleanupGroups.OutlookOfflineCacheTargets,
+        .. FileCleanupGroups.NulFileTargets,
     ];
 
     [TestMethod]
@@ -310,9 +383,10 @@ public sealed class FileCleanupTests
     {
         foreach (var target in AllStaticTargets())
         {
-            var allowProtectedDirectory = target.Kind == CleanupTargetKind.Files;
+            var allowProtectedDirectory = target.Kind is CleanupTargetKind.Files or CleanupTargetKind.RecursiveFiles;
+            var allowDriveRoot = target.Kind == CleanupTargetKind.RecursiveFiles;
             Assert.IsTrue(
-                FileCleanupEngine.TryResolve(target.RawPath, allowProtectedDirectory, out _, out var reason),
+                FileCleanupEngine.TryResolve(target.RawPath, allowProtectedDirectory, allowDriveRoot, out _, out var reason),
                 $"{target.RawPath}: {reason}");
         }
     }
@@ -329,11 +403,23 @@ public sealed class FileCleanupTests
     }
 
     [TestMethod]
+    public void ドライブ直下を対象にできるのは再帰ファイル名指定のときだけ()
+    {
+        // nul のような迷子ファイルをドライブ全体から拾うため、RecursiveFiles だけドライブ直下を許可する。
+        // 一致した個々のファイルしか触らないため、フォルダを丸ごと消す指定より安全。
+        Assert.IsTrue(
+            FileCleanupEngine.TryResolve(@"C:\", allowProtectedDirectory: true, allowDriveRoot: true, out _, out _));
+        Assert.IsFalse(
+            FileCleanupEngine.TryResolve(@"C:\", allowProtectedDirectory: true, allowDriveRoot: false, out _, out var reason));
+        StringAssert.Contains(reason, "ドライブ直下");
+    }
+
+    [TestMethod]
     public void パターン指定の対象だけがパターンを持つ()
     {
         foreach (var target in AllStaticTargets())
         {
-            if (target.Kind == CleanupTargetKind.Files)
+            if (target.Kind is CleanupTargetKind.Files or CleanupTargetKind.RecursiveFiles)
             {
                 Assert.IsFalse(string.IsNullOrWhiteSpace(target.Pattern), target.RawPath);
             }
@@ -375,11 +461,40 @@ public sealed class FileCleanupTests
     }
 
     [TestMethod]
+    public void AMDのキャッシュ削除はシェーダーキャッシュのサブフォルダに限定する()
+    {
+        // %LOCALAPPDATA%\AMD 全体を消すと設定・プロファイルまで巻き添えにするため、
+        // 既知のシェーダーキャッシュのサブフォルダだけを対象にする (回帰防止)。
+        Assert.IsFalse(
+            FileCleanupGroups.AppCacheTargets.Any(t =>
+                t.RawPath.Equals(@"%LOCALAPPDATA%\AMD", StringComparison.OrdinalIgnoreCase)));
+        Assert.IsTrue(
+            FileCleanupGroups.AppCacheTargets.Any(t =>
+                t.RawPath.Equals(@"%LOCALAPPDATA%\AMD\DxCache", StringComparison.OrdinalIgnoreCase)));
+    }
+
+    [TestMethod]
+    public void ブラウザキャッシュの対象はサイトデータ相当を含まない()
+    {
+        // IndexedDB / WebStorage / File System / Extension State はログイン状態等を保持する
+        // サイトデータであり、「ログイン状態は消えません」という説明と矛盾するため対象外にする (回帰防止)。
+        string[] forbiddenLeafNames = ["IndexedDB", "WebStorage", "File System", "Extension State"];
+
+        foreach (var target in FileCleanupGroups.EnumerateBrowserTargets())
+        {
+            var leaf = Path.GetFileName(target.RawPath);
+            Assert.IsFalse(
+                forbiddenLeafNames.Contains(leaf, StringComparer.OrdinalIgnoreCase),
+                target.RawPath);
+        }
+    }
+
+    [TestMethod]
     public void グループは全てクリーンアップカテゴリの実行型項目になる()
     {
         var groups = FileCleanupGroups.CreateAll(new NoopExecutor()).ToList();
 
-        Assert.AreEqual(11, groups.Count);
+        Assert.AreEqual(12, groups.Count);
         foreach (var group in groups)
         {
             Assert.IsInstanceOfType<IMaintenanceAction>(group, group.Id);

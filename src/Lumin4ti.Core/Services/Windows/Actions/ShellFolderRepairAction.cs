@@ -15,7 +15,7 @@ public sealed class ShellFolderRepairAction(ICommandExecutor executor) : IMainte
 
     public string Description => "「ダウンロード」等のシステムフォルダ名が英語表記に化けた場合などの表示破損を shell32.dll の再登録で修復します。";
 
-    public CommandCategory Category => CommandCategory.Cleanup;
+    public CommandCategory Category => CommandCategory.Repair;
 
     public bool RequiresReboot => false;
 

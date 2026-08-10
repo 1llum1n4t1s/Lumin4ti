@@ -5,7 +5,8 @@
 
   <!-- ===== Tabs ===== -->
   <x:String x:Key="Text.Tab.Update" xml:space="preserve">Renovatio &amp; Securitas</x:String>
-  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Purgatio &amp; Reparatio</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Purgatio</x:String>
+  <x:String x:Key="Text.Tab.Repair" xml:space="preserve">Reparatio</x:String>
   <x:String x:Key="Text.Tab.Performance" xml:space="preserve">Efficientia</x:String>
   <x:String x:Key="Text.Tab.System" xml:space="preserve">Systema</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Ordinatio</x:String>
@@ -33,8 +34,10 @@
   <!-- ===== Category titles / captions ===== -->
   <x:String x:Key="Text.Category.Update" xml:space="preserve">Renovatio &amp; Securitas</x:String>
   <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">Applicationes et Windows Defender renova, et sanas securitatis rationes restitue.</x:String>
-  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Purgatio &amp; Reparatio</x:String>
-  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Spatium disci recupera et registrationes fractas purga vel repara.</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Purgatio</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Spatium disci recuperat fasciculis et registrationibus non necessariis sublatis.</x:String>
+  <x:String x:Key="Text.Category.Repair" xml:space="preserve">Reparatio</x:String>
+  <x:String x:Key="Text.Category.Repair.Caption" xml:space="preserve">Registrationes fractas et vitia monstrandi reparat iterum inscribendo vel reficiendo.</x:String>
   <x:String x:Key="Text.Category.Performance" xml:space="preserve">Efficientia</x:String>
   <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">Memoriam, processus et depictionem optima. Plerumque interruptores ON = optimizationem applica, OFF = ad statum Windows praedefinitum reverte (sola MMAgent-elementa utuntur ON = illam facultatem activa; pro valore commendato singulas descriptiones vide).</x:String>
   <x:String x:Key="Text.Category.System" xml:space="preserve">Systema</x:String>
@@ -101,7 +104,7 @@
   <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">Cellas et acta applicationum delere</x:String>
   <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">Cellas applicationum in Electron fundatarum (Claude, Cursor, Discord, Antigravity aliarumque), cellas adumbratorum GPU (NVIDIA DXCache, AMD), data derivata Unreal Engine et acta instrumentorum residentium delet. Configurationes et status inscriptionis manent, et unaquaeque applicatio cellam suam in proximo initio reficit. Applicationes non institutae simpliciter praetermittuntur.</x:String>
   <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">Cellas fasciculorum instrumentorum evolutionis delere</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Cellas fasciculorum descriptorum quas npm, NuGet, pip, Yarn, Gradle, Maven, Bun et uv servant delet, quod decem et plura GB liberare potest. Plicae cum credentialibus et configurationibus (.gnupg, .aws, .config similesque) numquam includuntur. Fasciculi in proxima constructione vel restitutione iterum descendentur, quare illa una vice tantum tempus et transmissio addentur.</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Cellas fasciculorum descriptorum quas npm, NuGet, pip, Yarn, Gradle, Maven, Bun et uv servant delet, quod decem et plura GB liberare potest. Plicae cum credentialibus et configurationibus (.gnupg, .aws, .config similesque) numquam includuntur. Tota quoque plica .cache in directorio domestico includitur, quare cellae inesse possunt quarum decem et plura GB denuo descendentur, ut exemplaria huggingface. Fasciculi in proxima constructione vel restitutione iterum descendentur, quare illa una vice tantum tempus et transmissio addentur.</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">Cellas navigatrorum delere</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Navigatra in Chromium fundata instituta (Edge, Chrome, Brave, Vivaldi, Comet) invenit et in omnibus prospectis cellam interretialem, cellam adumbratorum GPU, ministros officii, relationes ruinarum et data temporaria extensionum delet. Plerumque aliquot GB liberat. Signacula, tesserae et status inscriptionis servantur. Si navigatra prius claudis, deletio plenior fit.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">Cellas iconum, imagunculae et litterarum formarum reficere</x:String>
@@ -114,8 +117,12 @@
   <x:String x:Key="Text.Action.cleanup-drive-root-leftovers.Desc" xml:space="preserve">Plicas quas institutores agitatrorum et upgradationes systematis in radice instrumenti systematis relinquunt (AMD, Intel, SWSetup, PerfLogs, OneDriveTemp, $SysReset, Windows.old) delet. Sola Windows.old decem et plura GB occupare potest, quare hoc plurimum spatii liberat. Nota: Windows.old sublata, post renovationem magnam ad versionem priorem redire non licebit, quare noli hoc statim post upgradationem exsequi.</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Label" xml:space="preserve">Cellam sine rete Outlook delere</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Desc" xml:space="preserve">Data sine rete (.ost) et data quaerendi (.nst), quae Outlook ut exemplar locale cistae epistularum servat, delet. Unum documentum a paucis ad decem GB pertinere potest. Epistulae in servitore non delentur et in proximo initio Outlook denuo synchronizantur. Nota: donec illa synchronizatio perficiatur, epistulae antiquiores non apparent, quod per nexum tardum aliquot horas durare potest. Data .pst quae tantum localiter exstant non tanguntur.</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Label" xml:space="preserve">Fasciculos nul erraticos delere</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Desc" xml:space="preserve">Fasciculos vacuos nomine nul, qui per totum instrumentum systematis colliguntur cum Git Bash vel instrumenta quaedam evolutionis redirectionem exitus mandati (&gt; nul) ut fasciculum verum servant potius quam abiciunt, delet; quaestio omnes plicas instrumenti percurrit, non solum plicam usoris. Quia hoc nomen instrumenti Windows reservato congruit, hi fasciculi more usitato tolli non possunt et ratione propria delentur. Quaestio totius instrumenti in systematis multis fasciculis aliquot minuta vel diutius durare potest.</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Label" xml:space="preserve">Scrinium reciclationis vacuare</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Desc" xml:space="preserve">Scrinium reciclationis in omnibus instrumentis vacuat ut spatium a documentis deletis occupatum recuperetur. Nulla confirmatio petitur et deletio revocari non potest, quare contenta prius inspice.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">Munus pro %TEMP% et fasciculis nul erraticis automatice delendis in ingressu inscribere</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Munus in Ordinatore Munerum Windows inscribit quod contenta %TEMP% (plicam temporariam usoris) et fasciculos nomine nul per totum instrumentum systematis errantes quolibet ingressu delet. Munus iuribus usoris ingressi tantum curritur, sine iuribus administratoris vel confirmatione UAC. Deletio fasciculorum nul manu facta saepe deficit quia instrumentum evolutionis quod eos fecit adhuc tenet; statim post ingressum illa instrumenta plerumque nondum currunt, quare deletio saepius succedit. Quia totum instrumentum quolibet ingressu perscrutatur, ubi fasciculi permulti sunt id singulis ingressibus complura minuta vel plura consumere potest. Fasciculi nunc usurpati sponte omittuntur. OFF munus removet.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Memory Compression</x:String>

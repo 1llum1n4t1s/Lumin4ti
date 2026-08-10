@@ -5,7 +5,8 @@
 
   <!-- ===== Tabs ===== -->
   <x:String x:Key="Text.Tab.Update" xml:space="preserve">புதுப்பிப்பு &amp; பாதுகாப்பு</x:String>
-  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">சுத்தம் &amp; பழுதுநீக்கம்</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">சுத்தம்</x:String>
+  <x:String x:Key="Text.Tab.Repair" xml:space="preserve">பழுதுநீக்கம்</x:String>
   <x:String x:Key="Text.Tab.Performance" xml:space="preserve">செயல்திறன்</x:String>
   <x:String x:Key="Text.Tab.System" xml:space="preserve">அமைப்பு</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">ஒழுங்குபடுத்து</x:String>
@@ -33,8 +34,10 @@
   <!-- ===== Category titles / captions ===== -->
   <x:String x:Key="Text.Category.Update" xml:space="preserve">புதுப்பிப்பு &amp; பாதுகாப்பு</x:String>
   <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">பயன்பாடுகளையும் Windows Defender-ஐயும் புதுப்பித்து, ஆரோக்கியமான பாதுகாப்பு அமைப்புகளை மீட்டமைக்கவும்.</x:String>
-  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">சுத்தம் &amp; பழுதுநீக்கம்</x:String>
-  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">வட்டு இடத்தை மீட்டு, பழுதடைந்த பதிவுகளைச் சுத்தம் செய்யவும் அல்லது சரிசெய்யவும்.</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">சுத்தம்</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">தேவையற்ற கோப்புகளையும் பதிவுகளையும் நீக்கி வட்டு இடத்தை மீட்கிறது.</x:String>
+  <x:String x:Key="Text.Category.Repair" xml:space="preserve">பழுதுநீக்கம்</x:String>
+  <x:String x:Key="Text.Category.Repair.Caption" xml:space="preserve">பழுதடைந்த பதிவுகளையும் காட்சிக் கோளாறுகளையும் மீண்டும் பதிவு செய்து அல்லது மறுகட்டமைத்து சரிசெய்கிறது.</x:String>
   <x:String x:Key="Text.Category.Performance" xml:space="preserve">செயல்திறன்</x:String>
   <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">நினைவகம், செயல்முறைகள் மற்றும் ரெண்டரிங்கை மேம்படுத்தவும். பொதுவாக நிலைமாற்றிகள் ON = மேம்படுத்தலைப் பயன்படுத்து, OFF = Windows இயல்புநிலைக்குத் திரும்பு (MMAgent உருப்படிகள் மட்டும் ON = அந்த அம்சத்தை இயக்கு; பரிந்துரைக்கப்பட்ட மதிப்புக்கு ஒவ்வொரு விளக்கத்தையும் பார்க்கவும்).</x:String>
   <x:String x:Key="Text.Category.System" xml:space="preserve">அமைப்பு</x:String>
@@ -101,7 +104,7 @@
   <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">செயலிகளின் தேக்ககங்களையும் பதிவுகளையும் நீக்கு</x:String>
   <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">Electron அடிப்படையிலான செயலிகளின் (Claude, Cursor, Discord, Antigravity போன்றவை) தேக்ககங்கள், GPU ஷேடர் தேக்ககங்கள் (NVIDIA DXCache, AMD), Unreal Engine-இன் வழி வரும் தரவு, நிரந்தரமாக இயங்கும் கருவிகளின் பதிவுகள் ஆகியவை நீக்கப்படும். அமைப்புகளும் உள்நுழைவு நிலையும் அப்படியே இருக்கும், ஒவ்வொரு செயலியும் அடுத்த முறை தொடங்கும்போது தேக்ககத்தை மீண்டும் உருவாக்கும். நிறுவப்படாத செயலிகள் வெறுமனே தவிர்க்கப்படும்.</x:String>
   <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">மேம்பாட்டுக் கருவிகளின் தொகுப்புத் தேக்ககங்களை நீக்கு</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">npm, NuGet, pip, Yarn, Gradle, Maven, Bun, uv ஆகியவை சேமித்து வைத்துள்ள பதிவிறக்கிய தொகுப்புத் தேக்ககங்களை நீக்குகிறது; பல்லாயிரம் GB வரை இடம் விடுவிக்கப்படலாம். சான்றுகள் மற்றும் அமைவுக் கோப்புறைகள் (.gnupg, .aws, .config போன்றவை) ஒருபோதும் சேர்க்கப்படுவதில்லை. அடுத்த உருவாக்கம் அல்லது மீட்டெடுப்பின்போது தொகுப்புகள் மீண்டும் பதிவிறக்கப்படும், எனவே அந்த ஒரு முறை மட்டும் கூடுதல் நேரமும் தரவும் தேவைப்படும்.</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">npm, NuGet, pip, Yarn, Gradle, Maven, Bun, uv ஆகியவை சேமித்து வைத்துள்ள பதிவிறக்கிய தொகுப்புத் தேக்ககங்களை நீக்குகிறது; பல்லாயிரம் GB வரை இடம் விடுவிக்கப்படலாம். சான்றுகள் மற்றும் அமைவுக் கோப்புறைகள் (.gnupg, .aws, .config போன்றவை) ஒருபோதும் சேர்க்கப்படுவதில்லை. உங்கள் முகப்புக் கோப்புறையில் உள்ள .cache கோப்புறை முழுவதும் இதில் அடங்குவதால், huggingface மாதிரிகள் போன்ற பல்லாயிரம் GB மீண்டும் பதிவிறக்க வேண்டிய தேக்ககங்களும் அதில் இருக்கக்கூடும். அடுத்த உருவாக்கம் அல்லது மீட்டெடுப்பின்போது தொகுப்புகள் மீண்டும் பதிவிறக்கப்படும், எனவே அந்த ஒரு முறை மட்டும் கூடுதல் நேரமும் தரவும் தேவைப்படும்.</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">உலாவித் தேக்ககங்களை நீக்கு</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">நிறுவப்பட்ட Chromium அடிப்படையிலான உலாவிகளை (Edge, Chrome, Brave, Vivaldi, Comet) கண்டறிந்து, அனைத்து சுயவிவரங்களிலும் இணையத் தேக்ககம், GPU ஷேடர் தேக்ககம், service worker, செயலிழப்பு அறிக்கைகள், நீட்டிப்புகளின் தற்காலிகத் தரவு ஆகியவற்றை நீக்குகிறது. வழக்கமாக பல GB இடம் விடுவிக்கப்படும். புத்தகக்குறிகள், கடவுச்சொற்கள், உள்நுழைவு நிலை ஆகியவை அழியாது. முதலில் உலாவிகளை மூடிவிட்டால் நீக்கம் இன்னும் முழுமையாக நடக்கும்.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">சின்னம், சிறுபடம், எழுத்துரு தேக்ககங்களை மீண்டும் உருவாக்கு</x:String>
@@ -114,8 +117,12 @@
   <x:String x:Key="Text.Action.cleanup-drive-root-leftovers.Desc" xml:space="preserve">இயக்கி நிறுவிகளும் இயங்குதள மேம்படுத்தல்களும் கணினி இயக்கியின் மூலத்தில் விட்டுச்செல்லும் கோப்புறைகளை (AMD, Intel, SWSetup, PerfLogs, OneDriveTemp, $SysReset, Windows.old) நீக்குகிறது. Windows.old மட்டுமே பல்லாயிரம் GB ஆக இருக்கக்கூடும், எனவே இதுவே மிக அதிக இடத்தை விடுவிக்கும். குறிப்பு: Windows.old நீக்கப்பட்டால், பெரிய புதுப்பிப்புக்குப் பிறகு முந்தைய பதிப்புக்குத் திரும்ப முடியாது, எனவே மேம்படுத்தலுக்குப் பிறகு உடனே இதை இயக்க வேண்டாம்.</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Label" xml:space="preserve">Outlook-இன் ஆஃப்லைன் தேக்ககத்தை நீக்கு</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Desc" xml:space="preserve">உங்கள் அஞ்சல் பெட்டியின் உள்ளூர் நகலாக Outlook வைத்திருக்கும் ஆஃப்லைன் தரவையும் (.ost) தேடல் தரவையும் (.nst) நீக்குகிறது. ஒரு கோப்பே சில GB முதல் பல்லாயிரம் GB வரை இருக்கலாம். சேவையகத்தில் உள்ள அஞ்சல்கள் அழியாது, அடுத்த முறை Outlook தொடங்கும்போது மீண்டும் ஒத்திசைக்கப்படும். குறிப்பு: அந்த ஒத்திசைவு முடியும் வரை பழைய அஞ்சல்கள் தெரியாது, மெதுவான இணைப்பில் இது சில மணிநேரம் ஆகலாம். உள்ளூரில் மட்டும் உள்ள .pst தரவு பாதிக்கப்படாது.</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Label" xml:space="preserve">வழிதவறிய nul கோப்புகளை நீக்கு</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Desc" xml:space="preserve">Git Bash அல்லது சில டெவ் கருவிகள் ஒரு கட்டளையின் வெளியீட்டு திசைமாற்றத்தை (&gt; nul) நிராகரிக்காமல் உண்மையான கோப்பாக சேமிக்கும்போது கணினி இயக்கி முழுவதும் குவியும், nul எனப் பெயரிடப்பட்ட காலி கோப்புகளை, உங்கள் பயனர் கோப்புறை மட்டுமல்லாமல் இயக்கியின் ஒவ்வொரு கோப்புறையிலும் தேடி நீக்குகிறது. இந்தப் பெயர் Windows இன் ஒதுக்கப்பட்ட சாதனப் பெயருடன் பொருந்துவதால், இந்தக் கோப்புகளை வழக்கமான முறையில் நீக்க முடியாது; இதற்கென தனி செயல்முறை மூலம் நீக்கப்படுகின்றன. முழு இயக்கியையும் தேடுவதால், கோப்புகள் அதிகமுள்ள கணினிகளில் இது சில நிமிடங்கள் அல்லது அதற்கும் மேல் ஆகலாம்.</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Label" xml:space="preserve">மறுசுழற்சிக் கூடையைக் காலி செய்</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Desc" xml:space="preserve">அனைத்து இயக்கிகளிலும் உள்ள மறுசுழற்சிக் கூடையைக் காலி செய்து, நீக்கப்பட்ட கோப்புகள் ஆக்கிரமித்திருந்த இடத்தை மீட்கிறது. உறுதிப்படுத்தல் உரையாடல் தோன்றாது, நீக்கியதை மீட்க முடியாது, எனவே முதலில் உள்ளடக்கத்தைச் சரிபார்க்கவும்.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">உள்நுழையும்போது %TEMP% மற்றும் வழிதவறிய nul கோப்புகளை தானாக நீக்கும் பணியைப் பதிவு செய்</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">நீங்கள் உள்நுழையும் ஒவ்வொரு முறையும் %TEMP% (உங்கள் பயனர் தற்காலிக கோப்புறை) உள்ளடக்கத்தையும், கணினி இயக்கி முழுவதும் வழிதவறிய nul எனப் பெயரிடப்பட்ட கோப்புகளையும் நீக்கும் பணியை Windows பணி திட்டமிடலில் பதிவு செய்கிறது. இந்தப் பணி உள்நுழைந்த பயனரின் அனுமதிகளுடன் மட்டுமே இயங்கும், நிர்வாக உரிமைகளோ UAC உறுதிப்படுத்தலோ தேவையில்லை. nul கோப்புகளை கைமுறையாக நீக்குவது தோல்வியடையலாம், ஏனெனில் அதை உருவாக்கிய டெவ் கருவி இன்னும் அதைப் பிடித்திருக்கும்; உள்நுழைந்தவுடன் அந்தக் கருவிகள் பொதுவாக இன்னும் இயங்கத் தொடங்கியிருக்காது, எனவே நீக்கம் அதிக வெற்றி பெறும். ஒவ்வொரு முறையும் முழு இயக்கியையும் தேடுவதால், கோப்புகள் அதிகமுள்ள கணினிகளில் ஒவ்வொரு உள்நுழைவும் சில நிமிடங்கள் அல்லது அதற்கும் மேல் ஆகலாம். பயன்பாட்டிலுள்ள கோப்புகள் தானாகத் தவிர்க்கப்படும். OFF செய்தால் பணி நீக்கப்படும்.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Memory Compression</x:String>

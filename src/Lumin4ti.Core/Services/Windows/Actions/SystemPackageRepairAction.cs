@@ -55,7 +55,7 @@ public sealed class SystemPackageRepairAction : IMaintenanceAction
 
     public string Description { get; }
 
-    public CommandCategory Category => CommandCategory.Cleanup;
+    public CommandCategory Category => CommandCategory.Repair;
 
     public bool RequiresReboot => false;
 

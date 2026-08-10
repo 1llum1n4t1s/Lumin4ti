@@ -5,7 +5,8 @@
     (Category/Status/Result/Action.* は App.Text のフォールバックで日本語になる)
   -->
   <x:String x:Key="Text.Tab.Update" xml:space="preserve">更新・セキュリティ</x:String>
-  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">クリーンアップ・修復</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">クリーンアップ</x:String>
+  <x:String x:Key="Text.Tab.Repair" xml:space="preserve">修復</x:String>
   <x:String x:Key="Text.Tab.Performance" xml:space="preserve">パフォーマンス</x:String>
   <x:String x:Key="Text.Tab.System" xml:space="preserve">システム設定</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">整理・ソート</x:String>

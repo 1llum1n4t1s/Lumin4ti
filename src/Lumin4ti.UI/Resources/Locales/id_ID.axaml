@@ -5,7 +5,8 @@
 
   <!-- ===== Tabs ===== -->
   <x:String x:Key="Text.Tab.Update" xml:space="preserve">Pembaruan &amp; Keamanan</x:String>
-  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Pembersihan &amp; Perbaikan</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Pembersihan</x:String>
+  <x:String x:Key="Text.Tab.Repair" xml:space="preserve">Perbaikan</x:String>
   <x:String x:Key="Text.Tab.Performance" xml:space="preserve">Performa</x:String>
   <x:String x:Key="Text.Tab.System" xml:space="preserve">Sistem</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Rapikan</x:String>
@@ -33,8 +34,10 @@
   <!-- ===== Category titles / captions ===== -->
   <x:String x:Key="Text.Category.Update" xml:space="preserve">Pembaruan &amp; Keamanan</x:String>
   <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">Perbarui aplikasi dan Windows Defender, serta pulihkan pengaturan keamanan yang sehat.</x:String>
-  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Pembersihan &amp; Perbaikan</x:String>
-  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Bebaskan ruang disk dan bersihkan atau perbaiki registrasi yang rusak.</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Pembersihan</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Membebaskan ruang disk dengan menghapus file dan registrasi yang tidak diperlukan.</x:String>
+  <x:String x:Key="Text.Category.Repair" xml:space="preserve">Perbaikan</x:String>
+  <x:String x:Key="Text.Category.Repair.Caption" xml:space="preserve">Memperbaiki registrasi rusak dan gangguan tampilan dengan mendaftarkan ulang atau membangun ulang.</x:String>
   <x:String x:Key="Text.Category.Performance" xml:space="preserve">Performa</x:String>
   <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">Optimalkan memori, proses, dan rendering. Umumnya sakelar ON = terapkan optimasi, OFF = kembali ke bawaan Windows (hanya item MMAgent yang memakai ON = aktifkan fitur tersebut; lihat tiap deskripsi untuk nilai yang disarankan).</x:String>
   <x:String x:Key="Text.Category.System" xml:space="preserve">Sistem</x:String>
@@ -101,7 +104,7 @@
   <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">Hapus cache dan log aplikasi</x:String>
   <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">Menghapus cache aplikasi berbasis Electron (Claude, Cursor, Discord, Antigravity, dan lainnya), cache shader GPU (NVIDIA DXCache, AMD), data turunan Unreal Engine, serta log alat yang berjalan di latar belakang. Pengaturan dan status masuk tetap tersimpan, dan setiap aplikasi membangun ulang cache-nya saat dijalankan berikutnya. Aplikasi yang tidak terpasang cukup dilewati.</x:String>
   <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">Hapus cache paket alat pengembangan</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Menghapus cache paket unduhan yang disimpan npm, NuGet, pip, Yarn, Gradle, Maven, Bun, dan uv, yang bisa membebaskan puluhan GB. Folder kredensial dan konfigurasi (.gnupg, .aws, .config, dan sejenisnya) tidak pernah disertakan. Paket akan diunduh lagi pada build atau restore berikutnya, jadi sekali itu saja perlu waktu dan kuota tambahan.</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Menghapus cache paket unduhan yang disimpan npm, NuGet, pip, Yarn, Gradle, Maven, Bun, dan uv, yang bisa membebaskan puluhan GB. Folder kredensial dan konfigurasi (.gnupg, .aws, .config, dan sejenisnya) tidak pernah disertakan. Seluruh folder .cache di direktori home Anda juga termasuk, jadi cache yang perlu diunduh ulang sampai puluhan GB, seperti model huggingface, bisa ikut di dalamnya. Paket akan diunduh lagi pada build atau restore berikutnya, jadi sekali itu saja perlu waktu dan kuota tambahan.</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">Hapus cache peramban</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Mendeteksi peramban berbasis Chromium yang terpasang (Edge, Chrome, Brave, Vivaldi, Comet) lalu menghapus cache web, cache shader GPU, service worker, laporan crash, dan data sementara ekstensi pada seluruh profil. Biasanya membebaskan beberapa GB. Markah, kata sandi, dan status masuk tetap aman. Menutup peramban lebih dulu membuat pembersihan lebih tuntas.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">Bangun ulang cache ikon, gambar mini, dan fon</x:String>
@@ -114,8 +117,12 @@
   <x:String x:Key="Text.Action.cleanup-drive-root-leftovers.Desc" xml:space="preserve">Menghapus folder yang ditinggalkan pemasang driver dan peningkatan sistem di akar drive sistem (AMD, Intel, SWSetup, PerfLogs, OneDriveTemp, $SysReset, Windows.old). Windows.old sendiri bisa mencapai puluhan GB sehingga menjadikan opsi ini paling banyak membebaskan ruang. Catatan: menghapus Windows.old membuat Anda tidak bisa kembali ke versi sebelumnya setelah pembaruan fitur, jadi jangan jalankan tepat setelah peningkatan.</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Label" xml:space="preserve">Hapus cache luring Outlook</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Desc" xml:space="preserve">Menghapus data luring (.ost) dan data pencarian (.nst) yang disimpan Outlook sebagai salinan lokal kotak surat Anda. Satu berkas saja bisa berukuran beberapa hingga puluhan GB. Surel di server tidak terhapus dan akan disinkronkan lagi saat Outlook berikutnya dibuka. Catatan: sampai sinkronisasi itu selesai, surel lama tidak tampil, dan pada koneksi lambat bisa memakan waktu berjam-jam. Data .pst yang hanya ada secara lokal tidak terpengaruh.</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Label" xml:space="preserve">Hapus file nul yang tersesat</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Desc" xml:space="preserve">Menghapus file kosong yang bernama literal nul yang menumpuk di seluruh drive sistem ketika Git Bash atau beberapa alat pengembangan menyimpan pengalihan output perintah (&gt; nul) sebagai file sungguhan alih-alih membuangnya. Pencarian mencakup setiap folder di drive, bukan hanya folder pengguna Anda. Karena namanya sama dengan nama perangkat Windows yang dicadangkan, file ini tidak dapat dihapus dengan cara biasa dan dihapus menggunakan rutin khusus. Memindai seluruh drive dapat memakan waktu beberapa menit atau lebih pada sistem dengan banyak file.</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Label" xml:space="preserve">Kosongkan Recycle Bin</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Desc" xml:space="preserve">Mengosongkan Recycle Bin di seluruh drive untuk memulihkan ruang yang dipakai berkas terhapus. Tidak ada dialog konfirmasi dan penghapusan tidak dapat dibatalkan, jadi periksa dulu isinya.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">Daftarkan tugas untuk menghapus %TEMP% dan file nul yang tersesat secara otomatis saat masuk</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Mendaftarkan tugas di Penjadwal Tugas Windows yang menghapus isi %TEMP% (folder temp pengguna Anda) dan berkas bernama nul yang tersesat di seluruh drive sistem, setiap kali Anda masuk. Tugas berjalan dengan hak akses pengguna yang masuk, tanpa memerlukan hak administrator atau konfirmasi UAC. Penghapusan berkas nul secara manual bisa gagal karena alat pengembangan yang membuatnya masih menahannya tetap terbuka; tepat setelah masuk, alat-alat tersebut biasanya belum berjalan sehingga penghapusan lebih berhasil. Karena seluruh drive dicari setiap kali, pada sistem dengan banyak berkas prosesnya bisa memakan waktu beberapa menit atau lebih setiap kali Anda masuk. Berkas yang sedang digunakan otomatis dilewati. Menonaktifkannya akan menghapus tugas.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Kompresi Memori</x:String>

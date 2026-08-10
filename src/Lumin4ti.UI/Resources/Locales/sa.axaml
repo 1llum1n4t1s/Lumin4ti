@@ -5,7 +5,8 @@
 
   <!-- ===== Tabs ===== -->
   <x:String x:Key="Text.Tab.Update" xml:space="preserve">नवीकरणम् &amp; सुरक्षा</x:String>
-  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">परिष्करणम् &amp; संस्करणम्</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">परिष्करणम्</x:String>
+  <x:String x:Key="Text.Tab.Repair" xml:space="preserve">संस्करणम्</x:String>
   <x:String x:Key="Text.Tab.Performance" xml:space="preserve">कार्यक्षमता</x:String>
   <x:String x:Key="Text.Tab.System" xml:space="preserve">तन्त्रम्</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">व्यवस्थापनम्</x:String>
@@ -33,8 +34,10 @@
   <!-- ===== Category titles / captions ===== -->
   <x:String x:Key="Text.Category.Update" xml:space="preserve">नवीकरणम् &amp; सुरक्षा</x:String>
   <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">अनुप्रयोगान् Windows Defender च नवीकुरु, स्वस्थसुरक्षाविन्यासान् च प्रत्यानय।</x:String>
-  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">परिष्करणम् &amp; संस्करणम्</x:String>
-  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">चक्रस्थानं पुनः प्राप्नुहि, भग्नपञ्जीकरणानि परिष्कुरु संस्कुरु वा।</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">परिष्करणम्</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">अनावश्यकसञ्चिकाः पञ्जीकरणानि च अपनीय चक्रस्थानं पुनः प्राप्नोति।</x:String>
+  <x:String x:Key="Text.Category.Repair" xml:space="preserve">संस्करणम्</x:String>
+  <x:String x:Key="Text.Category.Repair.Caption" xml:space="preserve">भग्नपञ्जीकरणानि प्रदर्शनदोषान् च पुनः पञ्जीकृत्य पुनर्निर्माय वा संस्करोति।</x:String>
   <x:String x:Key="Text.Category.Performance" xml:space="preserve">कार्यक्षमता</x:String>
   <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">स्मृतिं, प्रक्रियाः, रेखाङ्कनं च अनुकूलय। प्रायः स्विचाः ON = अनुकूलनं प्रयोजय, OFF = Windows-प्रामाणिकस्थितिं प्रत्यानय (केवलं MMAgent-वस्तूनि ON = तत् वैशिष्ट्यं सक्रियं कुर्वन्ति; अनुशंसितमूल्याय प्रत्येकं वर्णनं पश्य)।</x:String>
   <x:String x:Key="Text.Category.System" xml:space="preserve">तन्त्रम्</x:String>
@@ -101,7 +104,7 @@
   <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">अनुप्रयोगसंग्रहान् लेखांश्च लोपयतु</x:String>
   <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">Electron-आधारितानाम् अनुप्रयोगानां (Claude, Cursor, Discord, Antigravity इत्यादीनां) संग्रहान्, GPU-छायाकसंग्रहान् (NVIDIA DXCache, AMD), Unreal Engine इत्यस्य व्युत्पन्नदत्तांशान्, स्थायिसाधनानां लेखांश्च लोपयति। विन्यासाः प्रवेशस्थितिश्च रक्ष्यन्ते, प्रत्येकम् अनुप्रयोगः अग्रिमारम्भे स्वसंग्रहं पुनः रचयति। असंस्थापिताः अनुप्रयोगाः केवलं त्यज्यन्ते।</x:String>
   <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">विकाससाधनानां संपुटसंग्रहान् लोपयतु</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">npm, NuGet, pip, Yarn, Gradle, Maven, Bun, uv इत्येतैः संचितान् अवतारितसंपुटसंग्रहान् लोपयति, येन दशाधिकानि GB मुक्तानि भवितुम् अर्हन्ति। प्रमाणपत्रविन्यासपुटानि (.gnupg, .aws, .config इत्यादीनि) कदापि न सम्मील्यन्ते। अग्रिमनिर्माणे प्रत्यानयने वा संपुटाः पुनः अवतार्यन्ते, अतः तस्मिन् एकवारम् एव अधिककालः दत्तांशव्ययश्च भवति।</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">npm, NuGet, pip, Yarn, Gradle, Maven, Bun, uv इत्येतैः संचितान् अवतारितसंपुटसंग्रहान् लोपयति, येन दशाधिकानि GB मुक्तानि भवितुम् अर्हन्ति। प्रमाणपत्रविन्यासपुटानि (.gnupg, .aws, .config इत्यादीनि) कदापि न सम्मील्यन्ते। गृहनिर्देशिकायाः सम्पूर्णं .cache पुटम् अपि लक्ष्ये अन्तर्भवति, अतः huggingface-प्रतिरूपाणि इव दशाधिक-GB-मात्रं पुनः अवतारणम् अपेक्षमाणाः संग्रहाः तत्र स्युः। अग्रिमनिर्माणे प्रत्यानयने वा संपुटाः पुनः अवतार्यन्ते, अतः तस्मिन् एकवारम् एव अधिककालः दत्तांशव्ययश्च भवति।</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">विचरकसंग्रहान् लोपयतु</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">संस्थापितान् Chromium-आधारितान् विचरकान् (Edge, Chrome, Brave, Vivaldi, Comet) अन्विष्य सर्वेषु प्रोफाइलेषु जालसंग्रहं, GPU-छायाकसंग्रहं, सेवाकर्मकान्, भङ्गप्रतिवेदनानि, विस्तारकाणाम् अस्थायिदत्तांशान् च लोपयति। प्रायः बहूनि GB मुक्तानि भवन्ति। चिह्नकाः, कूटशब्दाः, प्रवेशस्थितिश्च रक्ष्यन्ते। पूर्वं विचरकान् पिधाय चालने लोपः पूर्णतरः भवति।</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">प्रतीक-लघुचित्र-अक्षरसंग्रहान् पुनः रचयतु</x:String>
@@ -114,8 +117,12 @@
   <x:String x:Key="Text.Action.cleanup-drive-root-leftovers.Desc" xml:space="preserve">चालकसंस्थापकैः तन्त्रोन्नयनैश्च तन्त्रचालकस्य मूले त्यक्तानि पुटानि (AMD, Intel, SWSetup, PerfLogs, OneDriveTemp, $SysReset, Windows.old) लोपयति। केवलं Windows.old दशाधिकानि GB व्याप्नोतुम् अर्हति, अतः एतत् सर्वाधिकम् अवकाशं मुञ्चति। सूचना: Windows.old लोपिते सति महदद्यतनानन्तरं पूर्वसंस्करणं प्रति प्रत्यागन्तुं न शक्यते, अतः उन्नयनानन्तरं सद्यः एतत् मा चालयतु।</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Label" xml:space="preserve">Outlook इत्यस्य अपसंयोगसंग्रहं लोपयतु</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Desc" xml:space="preserve">Outlook यत् पत्रपेटिकायाः स्थानीयप्रतिलिपिरूपेण रक्षति तम् अपसंयोगदत्तांशं (.ost) अन्वेषणदत्तांशं (.nst) च लोपयति। एका सञ्चिका कतिपयेभ्यः दशाधिकेभ्यः GB यावत् भवितुम् अर्हति। सेवके स्थिताः पत्राणि न लोप्यन्ते, अग्रिमे Outlook-आरम्भे च पुनः समकालीक्रियन्ते। सूचना: तस्याः समकालीकरणस्य समाप्तेः पूर्वं पुरातनपत्राणि न दृश्यन्ते, मन्दसंयोगे च कतिपयघण्टाः लगेयुः। केवलं स्थानीयतया विद्यमानः .pst दत्तांशः न स्पृश्यते।</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Label" xml:space="preserve">भ्रान्ताः nul सञ्चिकाः लोपयतु</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Desc" xml:space="preserve">यदा Git Bash कानिचन विकाससाधनानि वा आदेशस्य निर्गमपुनर्निर्देशं (&gt; nul) त्यक्त्वा वास्तविकसञ्चिकारूपेण रक्षन्ति, तदा सम्पूर्णतन्त्रचालके सर्वत्र संचिताः nul-नामिकाः रिक्तसञ्चिकाः, केवलं प्रयोक्तृपुटं न अपि तु चालकस्य सर्वाणि पुटानि व्याप्य, अन्विष्य लोपयति। इदं नाम Windows-आरक्षितयन्त्रनाम्ना सह तुल्यत्वात् एताः सञ्चिकाः सामान्यरीत्या लोप्तुं न शक्यन्ते, अतः विशिष्टप्रक्रियया सुरक्षितरूपेण लोप्यन्ते। सम्पूर्णचालकस्य अन्वेषणं बहुसञ्चिकायुक्ते तन्त्रे कतिपयनिमेषान् अधिकं वा स्थातुम् अर्हति।</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Label" xml:space="preserve">पुनर्चक्रणपेटिकां रिक्तां करोतु</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Desc" xml:space="preserve">सर्वेषु चालकेषु पुनर्चक्रणपेटिकां रिक्तां कृत्वा लोपितसञ्चिकाभिः व्याप्तम् अवकाशं पुनः प्राप्नोति। पुष्टिसंवादः न प्रकटते, लोपश्च प्रत्यावर्तयितुं न शक्यते, अतः पूर्वं तस्याः विषयं परीक्षतु।</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">प्रवेशकाले %TEMP% भ्रान्तान् nul सञ्चिकाश्च स्वयमेव लोपयितुं कार्यं पञ्जीकुरु</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">यत् कार्यं प्रत्येकं प्रवेशे %TEMP% (प्रयोक्तृतात्कालिकपुटस्य) विषयवस्तु सम्पूर्णतन्त्रचालके भ्रान्तान् nul-नामिकान् सञ्चिकाश्च लोपयति तत् Windows कार्यसूचकयन्त्रे पञ्जीकरोति। कार्यं केवलं प्रविष्टस्य प्रयोक्तुः अधिकारेण चलति, प्रशासकाधिकारः UAC-अनुमोदनं वा न आवश्यकम्। हस्तेन nul सञ्चिकालोपः प्रायः विफलति यतः तां निर्मितं विकाससाधनं तदा अपि गृहीत्वा तिष्ठति; प्रवेशानन्तरं तानि साधनानि प्रायः अद्यापि न चलन्ति, अतः लोपः अधिकतया सफलति। प्रतिवारं सम्पूर्णचालकस्य अन्वेषणात्, बहुसञ्चिकायुक्ते परिवेशे प्रतिप्रवेशं कतिपयनिमेषाधिकः कालः लगेत्। सम्प्रति प्रयुज्यमानाः सञ्चिकाः स्वयमेव त्यज्यन्ते। OFF इति कृते कार्यं लुप्यते।</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Memory Compression</x:String>

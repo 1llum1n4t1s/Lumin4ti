@@ -3,7 +3,8 @@
 
   <!-- ===== Tabs ===== -->
   <x:String x:Key="Text.Tab.Update" xml:space="preserve">Update &amp; Security</x:String>
-  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Cleanup &amp; Repair</x:String>
+  <x:String x:Key="Text.Tab.Cleanup" xml:space="preserve">Cleanup</x:String>
+  <x:String x:Key="Text.Tab.Repair" xml:space="preserve">Repair</x:String>
   <x:String x:Key="Text.Tab.Performance" xml:space="preserve">Performance</x:String>
   <x:String x:Key="Text.Tab.System" xml:space="preserve">System</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Organize</x:String>
@@ -31,8 +32,10 @@
   <!-- ===== Category titles / captions ===== -->
   <x:String x:Key="Text.Category.Update" xml:space="preserve">Update &amp; Security</x:String>
   <x:String x:Key="Text.Category.Update.Caption" xml:space="preserve">Update apps and Windows Defender, and restore healthy security settings.</x:String>
-  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Cleanup &amp; Repair</x:String>
-  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Reclaim disk space and clean up or repair broken registrations.</x:String>
+  <x:String x:Key="Text.Category.Cleanup" xml:space="preserve">Cleanup</x:String>
+  <x:String x:Key="Text.Category.Cleanup.Caption" xml:space="preserve">Reclaim disk space by removing unneeded files and registrations.</x:String>
+  <x:String x:Key="Text.Category.Repair" xml:space="preserve">Repair</x:String>
+  <x:String x:Key="Text.Category.Repair.Caption" xml:space="preserve">Fix broken registrations and display glitches by re-registering or rebuilding them.</x:String>
   <x:String x:Key="Text.Category.Performance" xml:space="preserve">Performance</x:String>
   <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">Optimize memory, processes, and rendering. Switches are generally ON = apply optimization, OFF = revert to Windows default (only the MMAgent items use ON = enable that feature; see each description for the recommended value).</x:String>
   <x:String x:Key="Text.Category.System" xml:space="preserve">System</x:String>
@@ -99,7 +102,7 @@
   <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">Delete app caches and logs</x:String>
   <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">Deletes caches of Electron-based apps (Claude, Cursor, Discord, Antigravity and others), GPU shader caches (NVIDIA DXCache, AMD), Unreal Engine derived data, and resident tool logs. Settings and sign-in state are kept, and each app rebuilds its cache on the next launch. Apps that are not installed are simply skipped.</x:String>
   <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">Delete developer package caches</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Deletes the downloaded-package caches kept by npm, NuGet, pip, Yarn, Gradle, Maven, Bun, and uv, which can free tens of GB. Credential and configuration folders (.gnupg, .aws, .config and the like) are never included. Packages are downloaded again on the next build or restore, so that one run costs extra time and bandwidth.</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Deletes the downloaded-package caches kept by npm, NuGet, pip, Yarn, Gradle, Maven, Bun, and uv, which can free tens of GB. Credential and configuration folders (.gnupg, .aws, .config and the like) are never included. The home directory's entire .cache folder is also included, so caches that need tens of GB re-downloaded — such as huggingface models — can be part of it. Packages are downloaded again on the next build or restore, so that one run costs extra time and bandwidth.</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">Delete browser caches</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Detects installed Chromium-based browsers (Edge, Chrome, Brave, Vivaldi, Comet) and deletes every profile's web cache, GPU shader cache, service workers, crash reports, and extension temporary data. It commonly frees several GB. Bookmarks, passwords, and sign-in state are kept. Closing the browsers first makes the deletion more complete.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">Rebuild icon, thumbnail, and font caches</x:String>
@@ -112,8 +115,12 @@
   <x:String x:Key="Text.Action.cleanup-drive-root-leftovers.Desc" xml:space="preserve">Deletes folders that driver installers and OS upgrades leave in the root of the system drive (AMD, Intel, SWSetup, PerfLogs, OneDriveTemp, $SysReset, Windows.old). Windows.old alone can be tens of GB, which makes this the biggest space saver. Note: removing Windows.old makes it impossible to go back to the previous version after a feature update, so do not run it right after an upgrade.</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Label" xml:space="preserve">Delete the Outlook offline cache</x:String>
   <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Desc" xml:space="preserve">Deletes the offline data (.ost) and search data (.nst) that Outlook keeps as a local copy of your mailbox. A single file can be several to tens of GB. Mail on the server is not deleted and is synchronized again the next time Outlook starts. Note: older mail is not visible until that re-sync finishes, which can take hours on a slow connection. Local-only .pst data is not affected.</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Label" xml:space="preserve">Delete stray nul files</x:String>
+  <x:String x:Key="Text.Action.cleanup-nul-files.Desc" xml:space="preserve">Deletes empty files literally named nul that pile up across the system drive when Git Bash or certain dev tools save a command's output redirect (&gt; nul) as a real file instead of discarding it. The search covers every folder on the drive, not just your user folder. Because the name matches a reserved Windows device name, these files cannot be removed the normal way and are deleted with a dedicated routine. Scanning the whole drive can take several minutes or more on systems with many files.</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Label" xml:space="preserve">Empty the Recycle Bin</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Desc" xml:space="preserve">Empties the Recycle Bin on every drive to reclaim the space used by deleted files. There is no confirmation dialog and the deletion cannot be undone, so check the contents first.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">Register a task to auto-delete %TEMP% and stray nul files at sign-in</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Registers a Windows Task Scheduler task that deletes the contents of %TEMP% (your user temp folder) and stray files literally named nul across the system drive, every time you sign in. The task runs with your signed-in user's own permissions — no administrator rights or UAC prompt are needed. Running the nul cleanup manually can fail because the dev tool that created the file is still holding it open; right after sign-in those tools usually aren't running yet, so deletion succeeds more reliably. Because the whole drive is searched every time, each sign-in can take several minutes or more on systems with a large number of files. Files currently in use are skipped automatically. Turning this OFF removes the task.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Memory Compression</x:String>

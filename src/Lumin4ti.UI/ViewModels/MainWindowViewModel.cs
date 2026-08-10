@@ -13,6 +13,8 @@ public class MainWindowViewModel
 
     public CommandCategoryViewModel Cleanup { get; }
 
+    public CommandCategoryViewModel Repair { get; }
+
     public CommandCategoryViewModel Performance { get; }
 
     public CommandCategoryViewModel System { get; }
@@ -39,8 +41,14 @@ public class MainWindowViewModel
             catalog,
             operationCoordinator,
             CommandCategory.Cleanup,
-            "クリーンアップ・修復",
-            "ディスク領域の回収と、壊れた登録情報の掃除・修復を行います。");
+            "クリーンアップ",
+            "ディスク領域の回収と、不要なファイル・登録情報の削除を行います。");
+        Repair = new CommandCategoryViewModel(
+            catalog,
+            operationCoordinator,
+            CommandCategory.Repair,
+            "修復",
+            "壊れた登録状態や表示の不具合を、再登録・再構築して直します。");
         Performance = new CommandCategoryViewModel(
             catalog,
             operationCoordinator,
@@ -79,6 +87,7 @@ public class MainWindowViewModel
     private Task ReloadAllStatesAsync() => Task.WhenAll(
         Update.LoadToggleStatesAsync(),
         Cleanup.LoadToggleStatesAsync(),
+        Repair.LoadToggleStatesAsync(),
         Performance.LoadToggleStatesAsync(),
         System.LoadToggleStatesAsync(),
         Organize.LoadToggleStatesAsync());

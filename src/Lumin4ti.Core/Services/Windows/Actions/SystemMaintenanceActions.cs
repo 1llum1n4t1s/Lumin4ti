@@ -331,7 +331,7 @@ public sealed class StoreCacheResetAction(ICommandExecutor executor) : IMaintena
         "Microsoft Store のキャッシュを WSReset でリセットします。ストアが開かない・ダウンロードが進まない・「再試行してください」が続くといった不調の定番対処です。" +
         "アプリ本体やアカウント情報は消えません。完了時に Store アプリが自動的に開くことがあります。";
 
-    public CommandCategory Category => CommandCategory.Cleanup;
+    public CommandCategory Category => CommandCategory.Repair;
 
     public bool RequiresReboot => false;
 

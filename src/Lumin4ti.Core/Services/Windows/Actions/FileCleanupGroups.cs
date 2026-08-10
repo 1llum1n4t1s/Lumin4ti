@@ -27,6 +27,7 @@ public static class FileCleanupGroups
         yield return CreateOsIndex(executor);
         yield return CreateDriveRootLeftovers();
         yield return CreateOutlookOfflineCache();
+        yield return CreateNulFiles();
         yield return new RecycleBinCleanupAction();
     }
 
@@ -114,7 +115,10 @@ public static class FileCleanupGroups
         CleanupTarget.Contents(@"%APPDATA%\discord\Code Cache"),
         CleanupTarget.Contents(@"%APPDATA%\discord\GPUCache"),
         CleanupTarget.Contents(@"%APPDATA%\discord\VideoDecodeStats"),
-        CleanupTarget.Contents(@"%LOCALAPPDATA%\AMD"),
+        CleanupTarget.Contents(@"%LOCALAPPDATA%\AMD\DxCache"),
+        CleanupTarget.Contents(@"%LOCALAPPDATA%\AMD\DxcCache"),
+        CleanupTarget.Contents(@"%LOCALAPPDATA%\AMD\VkCache"),
+        CleanupTarget.Contents(@"%LOCALAPPDATA%\Ati\GLCache"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\NVIDIA\DXCache"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\UnrealEngine"),
         CleanupTarget.Contents(@"%ProgramData%\LGHUB\cache"),
@@ -159,6 +163,7 @@ public static class FileCleanupGroups
         description:
             "npm / NuGet / pip / Yarn / Gradle / Maven / Bun / uv がダウンロード済みパッケージを溜め込んでいるキャッシュを削除します。数十 GB 単位で空くことがあります。" +
             "認証情報や設定ファイル (.gnupg / .aws / .config 等) は対象に含みません。" +
+            "ホームディレクトリの .cache フォルダ全体も対象のため、huggingface のモデルなど数十 GB 規模の再ダウンロードが必要なキャッシュが含まれることがあります。" +
             "削除後、各プロジェクトの次回ビルドや復元でパッケージが再ダウンロードされるため、その 1 回だけ時間と通信量がかかります。",
         targetProvider: () => PackageCacheTargets);
 
@@ -193,24 +198,25 @@ public static class FileCleanupGroups
         @"User Data\WidevineCdm",
     ];
 
-    /// <summary>プロファイル (Default / Profile 1 …) ごとのキャッシュ。</summary>
+    /// <summary>
+    /// プロファイル (Default / Profile 1 …) ごとのキャッシュ。File System / IndexedDB / WebStorage /
+    /// Extension State は Cookie 非依存 (localStorage 等) でログイン状態を保持するサイト・拡張機能の
+    /// 永続データであり、「キャッシュ」ではなく実質サイトデータのため、消えないと説明している
+    /// ログイン状態を壊さないよう対象から除外する。
+    /// </summary>
     private static readonly string[] BrowserProfileCaches =
     [
         "Cache",
         "Code Cache",
         "Service Worker",
-        "File System",
         "GPUCache",
         "JumpListIconsRecentClosed",
         "JumpListIconsTopSites",
-        "IndexedDB",
-        "WebStorage",
         "DawnGraphiteCache",
         "DawnWebGPUCache",
         "Shared Dictionary",
         "screen_ai",
         "CRXTelemetry",
-        "Extension State",
         "VideoDecodeStats",
         "blob_storage",
         "Media Cache",
@@ -377,4 +383,21 @@ public static class FileCleanupGroups
             "サーバー上のメールは消えず、次回 Outlook を起動したときに再同期されます。" +
             "注意: 再同期が終わるまで過去のメールが表示されず、回線によっては数時間かかります。ローカルにしかない .pst のデータは対象外なので消えません。",
         targetProvider: () => OutlookOfflineCacheTargets);
+
+    // ═══ 迷子の nul ファイル ═══
+
+    internal static readonly CleanupTarget[] NulFileTargets =
+    [
+        CleanupTarget.RecursiveFiles(@"%SystemDrive%\", "nul"),
+    ];
+
+    internal static FileCleanupAction CreateNulFiles() => new(
+        id: "cleanup-nul-files",
+        label: "迷子の nul ファイルを削除",
+        description:
+            "Git Bash や一部の開発ツールがコマンドのリダイレクト (> nul) をファイル名としてそのまま作成してしまうことで、" +
+            "システムドライブのあちこちに残る「nul」という名前の空ファイルを、フォルダを問わず検索して削除します。" +
+            "Windows の予約デバイス名と同じ名前のため通常の方法では削除できず、専用の処理で安全に削除します。" +
+            "ドライブ全体を検索するため、ファイル数の多い環境では完了まで数分以上かかることがあります。",
+        targetProvider: () => NulFileTargets);
 }

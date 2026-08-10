@@ -855,7 +855,11 @@ public static class WindowsPerMachineMigration
                && !Path.IsPathRooted(relative);
     }
 
-    private static bool IsCurrentProcessPerMachine(
+    /// <summary>
+    /// 実行中のプロセスが、署名済み・Program Files 配下・MSI インストール済みの正規実行ファイルかを判定する。
+    /// タスクスケジューラー等へ <see cref="Environment.ProcessPath"/> を登録する前の信頼確認にも使う。
+    /// </summary>
+    internal static bool IsCurrentProcessPerMachine(
         string processPath,
         string? installedExecutable = null)
     {

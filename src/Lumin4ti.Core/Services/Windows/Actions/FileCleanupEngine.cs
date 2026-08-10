@@ -15,6 +15,12 @@ public enum CleanupTargetKind
 
     /// <summary>フォルダ内のパターン一致ファイルだけ削除する (del 相当)。サブフォルダは辿らない。</summary>
     Files,
+
+    /// <summary>
+    /// フォルダ配下を再帰的に辿り、パターン一致ファイルだけ削除する。
+    /// nul 等の予約デバイス名と同名のファイルも \\?\ 拡張パスで安全に削除する。
+    /// </summary>
+    RecursiveFiles,
 }
 
 /// <summary>
@@ -35,6 +41,10 @@ public sealed record CleanupTarget(string RawPath, CleanupTargetKind Kind, strin
     /// <summary>フォルダ直下のパターン一致ファイルだけ消す。</summary>
     public static CleanupTarget Files(string rawDirectory, string pattern) =>
         new(rawDirectory, CleanupTargetKind.Files, pattern);
+
+    /// <summary>フォルダ配下を再帰的に辿り、パターン一致ファイルだけ消す。</summary>
+    public static CleanupTarget RecursiveFiles(string rawDirectory, string pattern) =>
+        new(rawDirectory, CleanupTargetKind.RecursiveFiles, pattern);
 }
 
 /// <summary>削除処理の集計。</summary>
@@ -106,8 +116,14 @@ public static class FileCleanupEngine
 
             // ファイル名指定は保護フォルダ直下でも安全 (IconCache.db / FNTCACHE.DAT 等)。
             // フォルダの中身ごと消す指定だけ基点フォルダを禁止する。
-            var allowProtectedDirectory = target.Kind == CleanupTargetKind.Files;
-            if (!TryResolve(target.RawPath, allowProtectedDirectory, out var fullPath, out var rejection))
+            var allowProtectedDirectory = target.Kind is CleanupTargetKind.Files or CleanupTargetKind.RecursiveFiles;
+
+            // 再帰的なファイル名検索はドライブ直下を起点にしても、一致した個々のファイルしか
+            // 触らないため安全 (フォルダの中身ごと消す指定とは異なる)。ドライブ全体から
+            // nul のような迷子ファイルを拾うのに使う。
+            var allowDriveRoot = target.Kind == CleanupTargetKind.RecursiveFiles;
+
+            if (!TryResolve(target.RawPath, allowProtectedDirectory, allowDriveRoot, out var fullPath, out var rejection))
             {
                 outcome.RejectedTargets.Add($"{target.RawPath} ({rejection})");
                 LoggerBootstrap.Log.Error($"cleanup: 対象を拒否しました {target.RawPath}: {rejection}");
@@ -143,6 +159,9 @@ public static class FileCleanupEngine
                 case CleanupTargetKind.Files:
                     DeleteMatchingFiles(fullPath, target.Pattern!, outcome, scheduleBlockedForReboot, ct);
                     break;
+                case CleanupTargetKind.RecursiveFiles:
+                    DeleteMatchingFilesRecursive(fullPath, target.Pattern!, outcome, depth: 0, ct);
+                    break;
             }
         }
 
@@ -165,6 +184,19 @@ public static class FileCleanupEngine
     internal static bool TryResolve(
         string rawPath,
         bool allowProtectedDirectory,
+        out string fullPath,
+        out string rejection) =>
+        TryResolve(rawPath, allowProtectedDirectory, allowDriveRoot: false, out fullPath, out rejection);
+
+    /// <param name="allowDriveRoot">
+    /// ドライブ直下自体を対象として許可するか。<see cref="CleanupTargetKind.RecursiveFiles"/> のように
+    /// 一致した個々のファイルしか触らない指定でのみ true にする。
+    /// </param>
+    /// <inheritdoc cref="TryResolve(string, bool, out string, out string)"/>
+    internal static bool TryResolve(
+        string rawPath,
+        bool allowProtectedDirectory,
+        bool allowDriveRoot,
         out string fullPath,
         out string rejection)
     {
@@ -202,7 +234,14 @@ public static class FileCleanupEngine
         }
 
         var root = Path.GetPathRoot(normalized);
-        if (root is null || normalized.Equals(Path.TrimEndingDirectorySeparator(root), StringComparison.OrdinalIgnoreCase))
+        if (root is null)
+        {
+            rejection = "ドライブ直下は対象にできません";
+            return false;
+        }
+
+        var isDriveRoot = normalized.Equals(Path.TrimEndingDirectorySeparator(root), StringComparison.OrdinalIgnoreCase);
+        if (isDriveRoot && !allowDriveRoot)
         {
             rejection = "ドライブ直下は対象にできません";
             return false;
@@ -330,6 +369,110 @@ public static class FileCleanupEngine
         {
             ct.ThrowIfCancellationRequested();
             TryDeleteFile(file, outcome, scheduleBlockedForReboot);
+        }
+    }
+
+    /// <summary>
+    /// 基点フォルダ配下を再帰的に辿り、パターン一致ファイルだけを削除する。
+    /// nul のような予約デバイス名は通常のパスだと Win32 API がデバイスとして解釈してしまうため、
+    /// ファイル自体は <see cref="TryDeleteReservedNameFile"/> で \\?\ 拡張パスを使って削除する。
+    /// </summary>
+    private static void DeleteMatchingFilesRecursive(
+        string directory,
+        string pattern,
+        CleanupOutcome outcome,
+        int depth,
+        CancellationToken ct)
+    {
+        if (depth > MaxDepth)
+        {
+            outcome.Blocked++;
+            return;
+        }
+
+        string[] matchingFiles;
+        string[] subdirectories;
+        try
+        {
+            matchingFiles = Directory.GetFiles(directory, pattern, SearchOption.TopDirectoryOnly);
+            subdirectories = Directory.GetDirectories(directory);
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+        {
+            outcome.Blocked++;
+            return;
+        }
+
+        foreach (var filePath in matchingFiles)
+        {
+            ct.ThrowIfCancellationRequested();
+            TryDeleteReservedNameFile(filePath, outcome);
+        }
+
+        foreach (var subdirectory in subdirectories)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            DirectoryInfo subdirectoryInfo;
+            try
+            {
+                subdirectoryInfo = new DirectoryInfo(subdirectory);
+                if (!subdirectoryInfo.Exists)
+                {
+                    continue;
+                }
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+            {
+                outcome.Blocked++;
+                continue;
+            }
+
+            // ジャンクション・シンボリックリンクは辿らない。キャッシュ等を別ドライブへ
+            // 逃がしている環境で、リンク先の実体を誤って巻き込まないため。
+            if ((subdirectoryInfo.Attributes & FileAttributes.ReparsePoint) != 0)
+            {
+                continue;
+            }
+
+            DeleteMatchingFilesRecursive(subdirectory, pattern, outcome, depth + 1, ct);
+        }
+    }
+
+    /// <summary>
+    /// nul 等の予約デバイス名と同名のファイルを \\?\ 拡張パスプレフィックス経由で削除する。
+    /// 拡張パスを付けないと CreateFile がデバイス名として解釈し、Exists/Length/Delete が
+    /// 実ファイルではなく NUL デバイス相手に失敗する。
+    /// </summary>
+    private static void TryDeleteReservedNameFile(string path, CleanupOutcome outcome)
+    {
+        var extendedPath = path.StartsWith(@"\\?\", StringComparison.Ordinal) ? path : @"\\?\" + path;
+        var file = new FileInfo(extendedPath);
+
+        long length;
+        try
+        {
+            length = file.Length;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            length = 0;
+        }
+
+        try
+        {
+            if ((file.Attributes & (FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System)) != 0)
+            {
+                file.Attributes = FileAttributes.Normal;
+            }
+
+            file.Delete();
+            outcome.DeletedFiles++;
+            outcome.FreedBytes += length;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            outcome.Blocked++;
         }
     }
 
