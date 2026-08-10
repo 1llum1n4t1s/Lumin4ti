@@ -1,0 +1,17 @@
+version: 2
+updates:
+  - package-ecosystem: "nuget"
+    directories:
+      - "/src/Lumin4ti.Core"
+      - "/src/Lumin4ti.UI"
+      - "/src/Lumin4ti.Tests"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Tokyo"
+    open-pull-requests-limit: 5
+    groups:
+      nuget-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
