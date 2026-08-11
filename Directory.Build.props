@@ -8,7 +8,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <!-- リリースバージョン。更新は /vava スキル経由のみ (手動で上げない)。 -->
-    <Version>1.0.26</Version>
+    <Version>1.0.27</Version>
     <!-- 製作者情報。Company は exe のプロパティに載るので屋号で統一する。 -->
     <Authors>Kagayoi</Authors>
     <Company>Kagayoi</Company>
