@@ -73,7 +73,14 @@ public sealed class NtpConfigAction : IMaintenanceAction
         {
             if (wasRunning)
             {
-                var stop = await _executor.RunAsync("net.exe", "stop w32time", ct);
+                // 停止要求にはキャンセルトークンを渡さない。実行中に打ち切ると停止できたかが
+                // 確定せず、stoppedByThisAction が false のまま finally の再起動補償から漏れて
+                // w32time が停止したまま残る。キャンセル境界は停止の前後 (下の判定) に置く。
+                var stop = await _executor.RunAsync(
+                    "net.exe",
+                    "stop w32time",
+                    CancellationToken.None,
+                    timeout: WindowsServiceControl.ServiceStopTimeout);
                 if (!stop.Success)
                 {
                     var reason = FailureReason(stop);

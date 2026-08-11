@@ -32,6 +32,12 @@ public static class WindowsServiceControl
     private const int ScStatusProcessInfo = 0;
     private const int ErrorServiceDoesNotExist = 1060;
 
+    /// <summary>
+    /// net stop 1 件あたりの上限。停止要求自体はキャンセルさせない代わりに、
+    /// 応答しないサービスでキャンセル不能な待ちが際限なく延びるのを防ぐ。
+    /// </summary>
+    internal static readonly TimeSpan ServiceStopTimeout = TimeSpan.FromMinutes(2);
+
     /// <summary>サービスの状態を取得する。SCM を開けない場合は例外を投げる。</summary>
     public static WindowsServiceState QueryState(string serviceName)
     {
@@ -118,7 +124,14 @@ public static class WindowsServiceControl
             }
 
             progress?.Report($"  - {name} サービスを停止しています…");
-            var stop = await executor.RunAsync("net.exe", $"stop \"{name}\" /y", ct);
+            // 停止要求そのものにはキャンセルトークンを渡さない。実行中に net.exe を打ち切ると
+            // SCM への停止要求だけが残って「停止したか」が確定せず、stopped から漏れたサービスが
+            // 再開されないまま残る。キャンセルはサービスとサービスの間 (ループ先頭) で効かせる。
+            var stop = await executor.RunAsync(
+                "net.exe",
+                $"stop \"{name}\" /y",
+                CancellationToken.None,
+                timeout: ServiceStopTimeout);
             if (stop.Success)
             {
                 stopped.Add(name);

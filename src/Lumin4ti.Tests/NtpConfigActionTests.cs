@@ -1,5 +1,6 @@
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
+using Lumin4ti.Core.Services.Windows;
 using Lumin4ti.Core.Services.Windows.Actions;
 using Microsoft.Win32;
 
@@ -72,6 +73,39 @@ public sealed class NtpConfigActionTests
     }
 
     [TestMethod]
+    public async Task 停止コマンドの実行中にキャンセルされても再起動してから伝播する()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var writes = 0;
+        var executor = new RecordingExecutor((call, _, _, ct) =>
+        {
+            if (call == 1)
+            {
+                // 停止コマンドの実行中に利用者がキャンセルした状況を再現する。
+                cancellation.Cancel();
+            }
+
+            // ProcessCommandExecutor は呼び出し元トークンがキャンセル済みなら
+            // Fail 結果ではなく OperationCanceledException を伝播する。
+            ct.ThrowIfCancellationRequested();
+            return Result(success: true);
+        });
+        var action = new NtpConfigAction(executor, () => true, () => writes++);
+
+        await Assert.ThrowsAsync<OperationCanceledException>(
+            () => action.ExecuteAsync(cancellation.Token));
+
+        Assert.AreEqual(0, writes, "キャンセル後に設定を書き始めてはいけません");
+        Assert.HasCount(2, executor.Invocations);
+        Assert.AreEqual("stop w32time", executor.Invocations[0].Arguments);
+        Assert.IsFalse(
+            executor.Invocations[0].Token.CanBeCanceled,
+            "停止コマンドを打ち切ると停止できたか確定せず、再起動補償から漏れます");
+        Assert.AreEqual(WindowsServiceControl.ServiceStopTimeout, executor.Invocations[0].Timeout);
+        Assert.AreEqual("start w32time", executor.Invocations[1].Arguments);
+    }
+
+    [TestMethod]
     public async Task 設定書き込みが失敗しても再起動してから元の例外を伝播する()
     {
         var executor = new RecordingExecutor((_, _, _, _) => Result(success: true));
@@ -124,7 +158,8 @@ public sealed class NtpConfigActionTests
     private sealed record Invocation(
         string FileName,
         string Arguments,
-        CancellationToken Token);
+        CancellationToken Token,
+        TimeSpan? Timeout);
 
     private sealed class RecordingExecutor(
         Func<int, string, string, CancellationToken, CommandExecutionResult> callback) : ICommandExecutor
@@ -141,7 +176,7 @@ public sealed class NtpConfigActionTests
             TimeSpan? timeout = null)
         {
             var call = Interlocked.Increment(ref _callCount);
-            Invocations.Add(new Invocation(fileName, arguments, ct));
+            Invocations.Add(new Invocation(fileName, arguments, ct, timeout));
             return Task.FromResult(callback(call, fileName, arguments, ct));
         }
     }
