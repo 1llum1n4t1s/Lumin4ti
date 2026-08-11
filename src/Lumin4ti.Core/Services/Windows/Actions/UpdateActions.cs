@@ -106,11 +106,11 @@ public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanc
             }
 
             var catalogName = catalogPackages[0].Name;
-            if (!string.Equals(candidate.Name, catalogName, StringComparison.Ordinal))
+            if (!IsConsistentPackageName(candidate.Name, catalogName))
             {
                 skipped++;
                 details.Add(
-                    $"  - {candidate.Name} [{candidate.Id}]: カタログ名「{catalogName}」と一致しないため除外");
+                    $"  - {candidate.Name} [{candidate.Id}]: カタログ名「{catalogName}」と一致しないため除外 (他のパッケージは続行)");
                 LoggerBootstrap.Log.Error(
                     $"{Id}: 名前不一致の候補を除外 installed={candidate.Name}, catalog={catalogName}, package={candidate.Id}");
                 continue;
@@ -144,7 +144,9 @@ public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanc
             return MaintenanceActionResult.Ok(details);
         }
 
-        if (succeeded > 0)
+        // 安全確認による除外は「意図して更新を見送った」であって失敗ではない。
+        // 更新に失敗した候補が 1 件も無ければ、除外だけを理由に全体を失敗扱いにしない。
+        if (succeeded > 0 || failed == 0)
         {
             return MaintenanceActionResult.Partial(details);
         }
@@ -250,6 +252,38 @@ public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanc
         }
 
         return tokens;
+    }
+
+    /// <summary>
+    /// インストール済み表示名とカタログ名が同じアプリを指しているかを判定する。
+    /// winget の list は ARP の表示名、search はカタログ名を返すため、エディション表記
+    /// (「Brave Origin」と「Brave Origin Nightly」)・記号・大小文字の差で正当に食い違う。
+    /// 対象パッケージは既に --id --exact で完全一致を確認済みなので、ここでは
+    /// 「まったく別のアプリを指していないか」だけを見て、表記ゆれでの取りこぼしを防ぐ。
+    /// </summary>
+    internal static bool IsConsistentPackageName(string installedName, string catalogName)
+    {
+        var installed = NormalizePackageName(installedName);
+        var catalog = NormalizePackageName(catalogName);
+        return installed.Length > 0
+               && catalog.Length > 0
+               && (installed.Contains(catalog, StringComparison.Ordinal)
+                   || catalog.Contains(installed, StringComparison.Ordinal));
+    }
+
+    /// <summary>表記ゆれを吸収するため、英数字だけを残して小文字化する。</summary>
+    private static string NormalizePackageName(string name)
+    {
+        var builder = new StringBuilder(name.Length);
+        foreach (var character in name)
+        {
+            if (char.IsLetterOrDigit(character))
+            {
+                builder.Append(char.ToLowerInvariant(character));
+            }
+        }
+
+        return builder.ToString();
     }
 
     private static bool IsSafePackageId(string? packageId) =>

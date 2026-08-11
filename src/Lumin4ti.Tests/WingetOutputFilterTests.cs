@@ -159,22 +159,84 @@ public sealed class WingetOutputFilterTests
     }
 
     [TestMethod]
-    public async Task インストール名とカタログ名が違う候補は更新しない()
+    public async Task 別アプリを指す名前の候補は更新しない()
     {
         var executor = new RecordingExecutor(
             Success(OfficialSource),
-            Success(PackageTable(("Brave Origin", "Brave.BraveOrigin.Nightly"))),
-            Success(PackageTable(("Brave Origin Nightly", "Brave.BraveOrigin.Nightly"))));
+            Success(PackageTable(("Git", "Git.Git"))),
+            Success(PackageTable(("Coin Miner", "Git.Git"))));
         var action = new WingetUpgradeAction(executor);
 
         var result = await action.ExecuteAsync();
 
-        Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
         Assert.AreEqual(3, executor.Calls.Count);
         Assert.IsFalse(executor.Calls.Any(call =>
             call.Arguments.StartsWith("upgrade ", StringComparison.Ordinal)));
-        StringAssert.Contains(result.Detail, "カタログ名「Brave Origin Nightly」と一致しないため除外");
+        StringAssert.Contains(result.Detail, "カタログ名「Coin Miner」と一致しないため除外");
     }
+
+    [TestMethod]
+    public async Task エディション表記の差だけの候補は更新する()
+    {
+        var executor = new RecordingExecutor(
+            Success(OfficialSource),
+            Success(PackageTable(("Brave Origin", "Brave.BraveOrigin.Nightly"))),
+            Success(PackageTable(("Brave Origin Nightly", "Brave.BraveOrigin.Nightly"))),
+            Success("Successfully installed"));
+        var action = new WingetUpgradeAction(executor);
+
+        var result = await action.ExecuteAsync();
+
+        Assert.IsTrue(result.Success);
+        Assert.AreEqual(
+            WingetUpgradeAction.BuildUpgradeArguments("Brave.BraveOrigin.Nightly"),
+            executor.Calls[3].Arguments);
+    }
+
+    [TestMethod]
+    public async Task 安全確認の除外だけなら失敗扱いにしない()
+    {
+        var executor = new RecordingExecutor(
+            Success(OfficialSource),
+            Success(PackageTable(("Git", "Git.Git"))),
+            Success(PackageTable(("Coin Miner", "Git.Git"))));
+        var action = new WingetUpgradeAction(executor);
+
+        var result = await action.ExecuteAsync();
+
+        Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
+        StringAssert.Contains(result.Detail, "成功 0 件 / 失敗 0 件 / 安全確認で除外 1 件");
+    }
+
+    [TestMethod]
+    public async Task 除外があっても残りのpackageは更新する()
+    {
+        var executor = new RecordingExecutor(
+            Success(OfficialSource),
+            Success(PackageTable(("Git", "Git.Git"), ("uv", "astral-sh.uv"))),
+            Success(PackageTable(("Coin Miner", "Git.Git"))),
+            Success(PackageTable(("uv", "astral-sh.uv"))),
+            Success("Successfully installed"));
+        var action = new WingetUpgradeAction(executor);
+
+        var result = await action.ExecuteAsync();
+
+        Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
+        StringAssert.Contains(result.Detail, "成功 1 件 / 失敗 0 件 / 安全確認で除外 1 件");
+        Assert.AreEqual(
+            WingetUpgradeAction.BuildUpgradeArguments("astral-sh.uv"),
+            executor.Calls[4].Arguments);
+    }
+
+    [TestMethod]
+    [DataRow("Brave Origin", "Brave Origin Nightly", true)]
+    [DataRow("Microsoft Visual Studio Code", "Visual Studio Code", true)]
+    [DataRow("7-Zip 24.09 (x64)", "7-Zip", true)]
+    [DataRow("git", "Git", true)]
+    [DataRow("Git", "Coin Miner", false)]
+    [DataRow("Git", "", false)]
+    public void 表記ゆれは許容し別名は拒否する(string installed, string catalog, bool expected) =>
+        Assert.AreEqual(expected, WingetUpgradeAction.IsConsistentPackageName(installed, catalog));
 
     [TestMethod]
     public async Task 公式ソースと不一致なら更新を実行しない()
