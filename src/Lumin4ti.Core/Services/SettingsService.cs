@@ -12,6 +12,9 @@ public sealed class SettingsService : ISettingsService
 
     public AppSettings Current { get; }
 
+    /// <inheritdoc />
+    public object SyncRoot { get; } = new();
+
     public SettingsService() : this(AppPaths.AppDataDirectory, AppPaths.SettingsFilePath)
     {
     }
@@ -104,7 +107,16 @@ public sealed class SettingsService : ISettingsService
         {
             ct.ThrowIfCancellationRequested();
             Directory.CreateDirectory(_appDataDirectory);
-            var json = Lumin4tiJson.Serialize(Current);
+
+            // 保存は先行保存の完了後にスレッドプールで走るため、シリアライズ中に画面側が
+            // 除外リストを書き換えられる。ファイル書き込みはロックの外に出したまま、
+            // JSON 化だけを更新側と同じロックで挟んでスナップショットにする。
+            string json;
+            lock (SyncRoot)
+            {
+                json = Lumin4tiJson.Serialize(Current);
+            }
+
             var tempPath = _settingsFilePath + ".tmp";
             await File.WriteAllTextAsync(tempPath, json, ct).ConfigureAwait(false);
             File.Move(tempPath, _settingsFilePath, overwrite: true);

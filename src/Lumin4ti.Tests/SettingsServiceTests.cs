@@ -142,6 +142,44 @@ public sealed class SettingsServiceTests
         }
     }
 
+    [TestMethod]
+    public async Task 保存はSyncRootを取ってからシリアライズする()
+    {
+        // 保存は先行保存の完了後にスレッドプールで走るため、シリアライズ中に画面側が
+        // 除外リストを書き換えられる。同じロックで挟んでおかないと「列挙中に変更された」で
+        // 保存が落ち、利用者の除外設定が失われる。
+        var directory = CreateTemporaryDirectory();
+        try
+        {
+            var service = new SettingsService(directory, Path.Combine(directory, "settings.json"));
+            using var lockTaken = new ManualResetEventSlim();
+            using var release = new ManualResetEventSlim();
+            var holder = Task.Run(() =>
+            {
+                lock (service.SyncRoot)
+                {
+                    lockTaken.Set();
+                    release.Wait(TimeSpan.FromSeconds(30));
+                }
+            });
+
+            Assert.IsTrue(lockTaken.Wait(TimeSpan.FromSeconds(5)));
+            var save = Task.Run(() => service.SaveAsync());
+
+            Assert.IsFalse(
+                save.Wait(TimeSpan.FromMilliseconds(300)),
+                "SyncRoot を取っている間はシリアライズが進んではいけません");
+
+            release.Set();
+            await save;
+            await holder;
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
     private static string CreateTemporaryDirectory()
     {
         var directory = Path.Combine(Path.GetTempPath(), "Lumin4ti.Tests", Guid.NewGuid().ToString("N"));

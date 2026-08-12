@@ -104,7 +104,7 @@
   <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">앱 캐시와 로그 삭제</x:String>
   <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">Electron 기반 앱(Claude, Cursor, Discord, Antigravity 등)의 캐시, GPU 셰이더 캐시(NVIDIA DXCache, AMD), Unreal Engine 파생 데이터, 상주 도구의 로그를 삭제합니다. 설정과 로그인 상태는 유지되며 각 앱이 다음 실행 때 캐시를 다시 만듭니다. 설치되지 않은 앱은 그대로 건너뜁니다.</x:String>
   <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">개발 도구의 패키지 캐시 삭제</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">npm, NuGet, pip, Yarn, Gradle, Maven, Bun, uv가 쌓아 둔 다운로드 패키지 캐시를 삭제합니다. 수십 GB가 비워지기도 합니다. 자격 증명과 설정 폴더(.gnupg, .aws, .config 등)는 대상에 포함하지 않습니다. 홈 디렉터리의 .cache 폴더 전체도 대상이므로 huggingface 모델처럼 수십 GB를 다시 내려받아야 하는 캐시가 포함될 수 있습니다. 삭제 후 각 프로젝트의 다음 빌드나 복원에서 패키지를 다시 내려받으므로 그 한 번만 시간과 통신량이 듭니다.</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">npm, pnpm, NuGet, pip, Yarn, Gradle, Maven, Bun, uv, Cargo가 쌓아 둔 다운로드 패키지 캐시를 삭제합니다. 수십 GB가 비워지기도 합니다. 자격 증명과 설정 폴더(.gnupg, .aws, .config 등)는 대상에 포함하지 않습니다. 홈 디렉터리의 .cache 폴더 전체도 대상이므로 huggingface 모델처럼 수십 GB를 다시 내려받아야 하는 캐시가 포함될 수 있습니다. 삭제 후 각 프로젝트의 다음 빌드나 복원에서 패키지를 다시 내려받으므로 그 한 번만 시간과 통신량이 듭니다.</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">브라우저 캐시 삭제</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">설치된 Chromium 계열 브라우저(Edge, Chrome, Brave, Vivaldi, Comet)를 찾아 모든 프로필의 웹 캐시, GPU 셰이더 캐시, 서비스 워커, 크래시 보고서, 확장 프로그램 임시 데이터를 삭제합니다. 보통 수 GB가 비워집니다. 북마크, 비밀번호, 로그인 상태는 지워지지 않습니다. 브라우저를 먼저 종료하면 더 확실하게 삭제됩니다.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">아이콘·썸네일·글꼴 캐시 다시 만들기</x:String>
@@ -121,8 +121,8 @@
   <x:String x:Key="Text.Action.cleanup-nul-files.Desc" xml:space="preserve">Git Bash나 일부 개발 도구가 명령어의 출력 리다이렉션(&gt; nul)을 버리지 않고 실제 파일로 저장할 때 시스템 드라이브 곳곳에 쌓이는, 이름이 그대로 nul인 빈 파일을 사용자 폴더뿐 아니라 드라이브의 모든 폴더에서 검색하여 삭제합니다. 이 이름은 Windows의 예약된 장치 이름과 같아 일반적인 방법으로는 삭제할 수 없으므로 전용 처리로 안전하게 삭제합니다. 드라이브 전체를 검색하므로 파일이 많은 환경에서는 완료까지 몇 분 이상 걸릴 수 있습니다.</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Label" xml:space="preserve">휴지통 비우기</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Desc" xml:space="preserve">모든 드라이브의 휴지통을 비워 삭제된 파일이 차지하던 공간을 되찾습니다. 확인 창이 뜨지 않고 실행한 시점에 되돌릴 수 없으므로 필요한 파일이 없는지 먼저 확인하세요.</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">로그인 시 %TEMP%와 떠도는 nul 파일을 자동 삭제하는 작업 등록</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">로그인할 때마다 %TEMP%(사용자 임시 폴더)의 내용과 시스템 드라이브 전체에 남은 nul이라는 이름의 떠도는 파일을 삭제하는 작업을 Windows 작업 스케줄러에 등록합니다. 작업은 로그인한 사용자 권한만으로 실행되며 관리자 권한이나 UAC 확인이 필요하지 않습니다. nul 파일을 수동으로 지우면 그 파일을 만든 개발 도구가 아직 붙잡고 있어 실패하는 경우가 있는데, 로그인 직후에는 그런 도구들이 아직 실행되지 않은 경우가 많아 삭제가 더 잘 됩니다. 매번 드라이브 전체를 검색하므로 파일이 많은 환경에서는 로그인할 때마다 몇 분 이상 걸릴 수 있습니다. 사용 중인 파일은 자동으로 건너뜁니다. OFF로 하면 작업을 삭제합니다.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">로그인 시 정리를 자동 실행하는 작업 등록</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">로그인할 때마다 정리를 실행하는 작업을 Windows 작업 스케줄러에 등록합니다. 실행할 항목은 아래 목록에서 고르며, 각 항목은 자신의 체크리스트에 있는 대상만 삭제합니다. 즉 예약 실행은 해당 항목의 실행 버튼을 누른 것과 완전히 같습니다. 작업은 로그인한 사용자 권한으로만 동작하여 관리자 권한이나 UAC 확인이 필요 없으므로, 관리자 권한이나 서비스 중지가 필요한 항목(시스템 임시 파일, Windows Update 캐시)은 실패 또는 건너뜀으로 기록됩니다. nul 파일 정리는 수동 실행 시 이를 만든 개발 도구가 아직 파일을 잡고 있어 실패할 수 있는데, 로그인 직후에는 그런 도구가 아직 실행되지 않은 경우가 많습니다. 고른 항목에 따라 로그인마다 수 분 이상 걸릴 수 있습니다. 사용 중인 파일은 자동으로 건너뜁니다. OFF로 하면 작업을 삭제합니다.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">메모리 압축</x:String>
@@ -186,4 +186,7 @@
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">사용자 및 시스템 Path 환경 변수의 항목을 중복 제거하고 오름차순으로 정렬합니다.</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Edge 백그라운드 프로세스 끄기(100~300 MB 절약)</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">정책으로 Edge 백그라운드 모드와 Startup Boost를 비활성화합니다. Edge를 거의 사용하지 않는다면 약 100~300 MB의 메모리를 확보할 수 있습니다. Edge 시작이 조금 느려지고 확장 프로그램 알림이 중단될 수 있습니다. OFF로 전환하면 정책을 제거하고 Edge 기본값으로 복원합니다.</x:String>
+  <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">삭제할 대상 선택</x:String>
+  <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">로그인 시 실행할 항목 선택</x:String>
+  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">선택을 저장하지 못했습니다 (로그를 확인하세요)</x:String>
 </ResourceDictionary>

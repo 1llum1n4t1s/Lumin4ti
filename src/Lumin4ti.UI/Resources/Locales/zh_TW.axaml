@@ -104,7 +104,7 @@
   <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">刪除應用程式快取與記錄檔</x:String>
   <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">刪除以 Electron 為基礎的應用程式（Claude、Cursor、Discord、Antigravity 等）的快取、GPU 著色器快取（NVIDIA DXCache、AMD）、Unreal Engine 的衍生資料，以及常駐工具的記錄檔。設定與登入狀態都會保留，各應用程式會在下次啟動時重新建立快取。未安裝的應用程式會直接略過。</x:String>
   <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">刪除開發工具的套件快取</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">刪除 npm、NuGet、pip、Yarn、Gradle、Maven、Bun、uv 累積的已下載套件快取，有時可釋出數十 GB。認證資訊與設定資料夾（.gnupg、.aws、.config 等）不在刪除範圍內。主目錄下的整個 .cache 資料夾也在刪除範圍內，因此其中可能包含 huggingface 模型等需要重新下載數十 GB 的快取。刪除後各專案在下次建置或還原時會重新下載套件，因此僅該次會額外花費時間與流量。</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">刪除 npm、pnpm、NuGet、pip、Yarn、Gradle、Maven、Bun、uv、Cargo 累積的已下載套件快取，有時可釋出數十 GB。認證資訊與設定資料夾（.gnupg、.aws、.config 等）不在刪除範圍內。主目錄下的整個 .cache 資料夾也在刪除範圍內，因此其中可能包含 huggingface 模型等需要重新下載數十 GB 的快取。刪除後各專案在下次建置或還原時會重新下載套件，因此僅該次會額外花費時間與流量。</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">刪除瀏覽器快取</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">偵測已安裝的 Chromium 系瀏覽器（Edge、Chrome、Brave、Vivaldi、Comet），刪除所有設定檔中的網頁快取、GPU 著色器快取、Service Worker、當機報告與擴充功能的暫存資料。通常可釋出數 GB 空間。書籤、密碼與登入狀態不會被刪除。執行前先關閉瀏覽器可以刪得更徹底。</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">重建圖示、縮圖與字型快取</x:String>
@@ -121,8 +121,8 @@
   <x:String x:Key="Text.Action.cleanup-nul-files.Desc" xml:space="preserve">當 Git Bash 或部分開發工具將指令的輸出重新導向（&gt; nul）儲存為真實檔案而非捨棄時，系統磁碟機各處會累積名為 nul 的空檔案，本項會搜尋磁碟機上的所有資料夾（不僅限於使用者資料夾）並將其刪除。由於該名稱與 Windows 保留裝置名稱相同，無法用一般方式刪除，因此使用專門的處理方式安全刪除。掃描整個磁碟機在檔案較多的系統上可能需要數分鐘甚至更久。</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Label" xml:space="preserve">清空資源回收筒</x:String>
   <x:String x:Key="Text.Action.cleanup-recycle-bin.Desc" xml:space="preserve">清空所有磁碟機的資源回收筒，釋出已刪除檔案占用的空間。不會出現確認對話方塊，執行後即無法復原，請先確認裡面沒有需要的檔案。</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">註冊登入時自動清空 %TEMP% 和迷失的 nul 檔案的工作</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">在 Windows 工作排程器中註冊一個工作，每次登入時清空 %TEMP%（使用者暫存資料夾）的內容，並刪除系統磁碟機上散落的 nul 檔案。此工作僅以登入使用者的權限執行，不需要系統管理員權限或 UAC 確認。手動刪除 nul 檔案可能會失敗，因為建立它的開發工具當時仍占用著它；登入後不久這些工具通常還沒啟動，因此刪除更容易成功。由於每次都會掃描整個磁碟機，在檔案較多的系統上每次登入可能需要數分鐘甚至更久。使用中的檔案會自動略過。關閉後將刪除該工作。</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">註冊登入時自動執行清理的工作</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">在 Windows 工作排程器中註冊一個工作，每次登入時執行清理。要執行哪些項目可在下方清單中選擇；每個項目只刪除它自己的清單中列出的對象，因此排程執行與按下該項目的「執行」按鈕完全相同。工作僅以登入使用者的權限執行，不需要系統管理員權限，也不會出現 UAC，因此需要系統管理員權限或停止服務的項目（系統暫存檔案、Windows Update 快取）會被記錄為失敗或略過。手動清理 nul 檔案時常因建立它的開發工具仍占用該檔案而失敗，而登入後不久這些工具通常尚未啟動。依所選項目，每次登入可能需要數分鐘以上。使用中的檔案會自動略過。關閉後將刪除該工作。</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">記憶體壓縮</x:String>
@@ -186,4 +186,7 @@
   <x:String x:Key="Text.Action.env-path-sort.Desc" xml:space="preserve">將使用者與系統 Path 環境變數的項目去除重複並依遞增排序。</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">停用 Edge 背景處理程序（節省 100–300 MB）</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">透過原則停用 Edge 背景模式與 Startup Boost。若很少使用 Edge，可釋放約 100–300 MB 記憶體。Edge 啟動可能稍慢，擴充功能通知也可能停止。將此項設為 OFF 可移除原則並還原 Edge 預設值。</x:String>
+  <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">選擇要刪除的對象</x:String>
+  <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">選擇登入時執行的項目</x:String>
+  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">無法儲存選擇（請查看記錄）</x:String>
 </ResourceDictionary>

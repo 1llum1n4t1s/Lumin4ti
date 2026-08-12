@@ -16,7 +16,7 @@
             <Border Background="{DynamicResource Brush.Container}"
                     BorderBrush="{DynamicResource Brush.Border}"
                     BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,0,0,8">
-              <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto">
+              <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
                 <StackPanel Grid.Row="0" Grid.Column="0" Spacing="2" VerticalAlignment="Center" Margin="0,0,12,0">
                   <TextBlock Text="{Binding Label}" FontWeight="SemiBold" TextWrapping="Wrap" />
                   <TextBlock Text="{Binding Description}" Classes="caption" TextWrapping="Wrap" />
@@ -77,8 +77,39 @@
                     </SelectableTextBlock.Styles>
                   </SelectableTextBlock>
                 </Border>
+                <!--  削除対象 / 実行項目のチェックリスト。既定は畳んでおき、必要なときだけ開く  -->
+                <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="-8,6,0,0"
+                            IsVisible="{Binding HasCheckList}" Spacing="0">
+                  <ToggleButton Classes="disclosure" IsChecked="{Binding IsCheckListExpanded}">
+                    <StackPanel Orientation="Horizontal" Spacing="7">
+                      <TextBlock Text="{Binding CheckListChevron}" FontSize="10" Width="10"
+                                 VerticalAlignment="Center" />
+                      <TextBlock Text="{Binding CheckListCaption}" FontSize="12" FontWeight="SemiBold"
+                                 VerticalAlignment="Center" />
+                      <Border Classes="badge">
+                        <TextBlock Text="{Binding CheckListSummary}" />
+                      </Border>
+                    </StackPanel>
+                  </ToggleButton>
+                  <Border Classes="checklist" Margin="8,2,0,0" IsVisible="{Binding IsCheckListExpanded}">
+                    <ScrollViewer MaxHeight="240" VerticalScrollBarVisibility="Auto">
+                      <ItemsControl ItemsSource="{Binding CheckListEntries}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate x:DataType="vm:CheckListEntryViewModel">
+                            <CheckBox Classes="entry" IsChecked="{Binding IsSelected}"
+                                      ToolTip.Tip="{Binding Display}">
+                              <TextBlock Text="{Binding Display}" FontSize="12"
+                                         TextTrimming="CharacterEllipsis"
+                                         VerticalAlignment="Center" />
+                            </CheckBox>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </ScrollViewer>
+                  </Border>
+                </StackPanel>
                 <!--  子項目 (前提設定に連動する子設定)。親カードの中へインデントして描画する  -->
-                <ItemsControl Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="16,10,0,0"
+                <ItemsControl Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="16,10,0,0"
                               ItemsSource="{Binding Children}" IsVisible="{Binding HasChildren}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:CommandItemViewModel">

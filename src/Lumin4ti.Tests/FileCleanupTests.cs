@@ -392,6 +392,20 @@ public sealed class FileCleanupTests
     }
 
     [TestMethod]
+    public void ドライブ直下の残骸は説明に列挙した名前だけを消す()
+    {
+        // このグループだけはフォルダを丸ごと消すため、説明に無い名前が黙って増えると
+        // 利用者が把握できないまま実データを失う (復元手段も無い)。
+        var description = FileCleanupGroups.CreateDriveRootLeftovers().Description;
+
+        foreach (var target in FileCleanupGroups.DriveRootLeftoverTargets)
+        {
+            var name = Path.GetFileName(target.RawPath.TrimEnd('\\'));
+            StringAssert.Contains(description, name, $"{name} が説明に列挙されていません");
+        }
+    }
+
+    [TestMethod]
     public void 基点フォルダを対象にできるのはファイル名指定のときだけ()
     {
         // IconCache.db / FNTCACHE.DAT のように保護フォルダ直下の単一ファイルは許可し、

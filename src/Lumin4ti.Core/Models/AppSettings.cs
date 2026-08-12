@@ -16,6 +16,19 @@ public sealed class AppSettings
     public string? IgnoreUpdateTag { get; set; }
 
     /// <summary>
+    /// 削除対象からの除外 (キー = 項目 Id、値 = 未展開のパス)。
+    /// 「有効なもの」ではなく「外したもの」を保存することで、更新で対象が増えても
+    /// 既存の設定ファイルがそれを黙って無効化しない。
+    /// </summary>
+    public Dictionary<string, List<string>> CleanupExclusions { get; set; } = [];
+
+    /// <summary>
+    /// サインイン時のクリーンアップで実行する項目 Id。null = 未設定 (既定セットを使う)。
+    /// 空リストは「1 つも実行しない」という利用者の選択なので、null と区別する。
+    /// </summary>
+    public List<string>? ScheduledCleanupGroupIds { get; set; }
+
+    /// <summary>
     /// Velopack 自動更新の配信元。Cloudflare R2 (カスタムドメイン) をハードコード固定する。
     /// <see cref="JsonIgnore"/> なので settings.json から書き換え不可 (悪意ある第三者ホストへの誘導を防ぐ)。
     /// </summary>

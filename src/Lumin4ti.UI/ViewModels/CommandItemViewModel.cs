@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
+using Lumin4ti.Core.Services;
 
 namespace Lumin4ti.UI.ViewModels;
 
@@ -46,6 +47,28 @@ public partial class CommandItemViewModel : ObservableObject
 
     /// <summary>ドロップダウンの選択肢 (選択式のときのみ非空)。</summary>
     public ObservableCollection<ChoiceOptionViewModel> ChoiceOptions { get; }
+
+    /// <summary>アコーディオンに畳んで出すチェックボックス一覧 (対応しない項目では空)。</summary>
+    public ObservableCollection<CheckListEntryViewModel> CheckListEntries { get; }
+
+    /// <summary>チェックボックス一覧を持つか (アコーディオンの表示可否)。</summary>
+    public bool HasCheckList => CheckListEntries.Count > 0;
+
+    /// <summary>アコーディオンが開いているか。</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CheckListChevron))]
+    private bool isCheckListExpanded;
+
+    /// <summary>開閉を示す三角。アイコン資産を増やさず、フォント非依存の記号で向きを示す。</summary>
+    public string CheckListChevron => IsCheckListExpanded ? "▾" : "▸";
+
+    /// <summary>アコーディオンの見出し (ローカライズ済み)。</summary>
+    public string CheckListCaption => Item is IMaintenanceCheckList checkList
+        ? App.Text(checkList.CheckListCaptionKey, checkList.CheckListCaption)
+        : string.Empty;
+
+    /// <summary>選択中の件数バッジ (例: 15/18)。</summary>
+    public string CheckListSummary => $"{CheckListEntries.Count(e => e.IsSelected)}/{CheckListEntries.Count}";
 
     /// <summary>選択中の項目。ユーザー操作で変わったときだけ適用処理を走らせる。</summary>
     [ObservableProperty]
@@ -156,6 +179,9 @@ public partial class CommandItemViewModel : ObservableObject
         ChoiceOptions = item is IMaintenanceChoice choice
             ? [.. choice.Options.Select(o => new ChoiceOptionViewModel(o))]
             : [];
+        CheckListEntries = item is IMaintenanceCheckList checkList
+            ? [.. checkList.GetCheckListEntries().Select(e => new CheckListEntryViewModel(e, ApplyCheckListEntryAsync))]
+            : [];
         RunCommand = new AsyncRelayCommand(() => _run(this), () => !IsRunning);
         CancelCommand = new RelayCommand(Cancel, () => CanCancel);
 
@@ -167,10 +193,36 @@ public partial class CommandItemViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(Label));
         OnPropertyChanged(nameof(Description));
+        OnPropertyChanged(nameof(CheckListCaption));
         foreach (var option in ChoiceOptions)
         {
             option.NotifyLocaleChanged();
         }
+
+        foreach (var entry in CheckListEntries)
+        {
+            entry.NotifyLocaleChanged();
+        }
+    }
+
+    /// <summary>
+    /// チェックの変更を項目へ渡して保存する。保存に失敗しても操作は続けられるよう、
+    /// 例外はログへ残して結果表示に理由を出すだけに留める。
+    /// </summary>
+    private async Task ApplyCheckListEntryAsync(CheckListEntryViewModel entry, bool selected)
+    {
+        try
+        {
+            await ((IMaintenanceCheckList)Item).SetCheckListEntrySelectedAsync(entry.Value, selected);
+        }
+        catch (Exception ex)
+        {
+            LoggerBootstrap.Log.Error($"{Item.Id}: 削除対象の選択を保存できませんでした ({entry.Value})", ex);
+            ResultText = App.Text("CheckList.SaveFailed", "選択を保存できませんでした (ログを確認してください)");
+            ApplyResultStatus(MaintenanceActionStatus.Failed);
+        }
+
+        OnPropertyChanged(nameof(CheckListSummary));
     }
 
     /// <summary>実行開始時に呼ぶ。キャンセル用トークンを生成して返す。</summary>
@@ -297,6 +349,49 @@ public partial class CommandItemViewModel : ObservableObject
     partial void OnIsRunningChanged(bool value) => RunCommand.NotifyCanExecuteChanged();
 
     partial void OnCanCancelChanged(bool value) => CancelCommand.NotifyCanExecuteChanged();
+}
+
+/// <summary>
+/// チェックボックス一覧の 1 行分。削除対象のパス、またはサインイン時に実行する項目 1 件を表す。
+/// チェックの変更はその場で設定へ保存する (「適用」ボタンを挟まない)。
+/// </summary>
+public sealed partial class CheckListEntryViewModel : ObservableObject
+{
+    private readonly MaintenanceCheckListEntry _entry;
+    private readonly Func<CheckListEntryViewModel, bool, Task> _apply;
+    private bool _suppressWrite;
+
+    public CheckListEntryViewModel(
+        MaintenanceCheckListEntry entry,
+        Func<CheckListEntryViewModel, bool, Task> apply)
+    {
+        _entry = entry;
+        _apply = apply;
+        _suppressWrite = true;
+        IsSelected = entry.IsSelected;
+        _suppressWrite = false;
+    }
+
+    /// <summary>設定へ保存する識別子 (パス、またはクリーンアップ項目の Id)。</summary>
+    public string Value => _entry.Value;
+
+    /// <summary>表示名。翻訳キーを持つ行だけ辞書から引き、パスのような言語非依存の値はそのまま出す。</summary>
+    public string Display => _entry.LabelKey is { } key ? App.Text(key, _entry.Label) : _entry.Label;
+
+    [ObservableProperty]
+    private bool isSelected;
+
+    public void NotifyLocaleChanged() => OnPropertyChanged(nameof(Display));
+
+    partial void OnIsSelectedChanged(bool value)
+    {
+        if (_suppressWrite)
+        {
+            return;
+        }
+
+        _ = _apply(this, value);
+    }
 }
 
 /// <summary>ドロップダウンの選択肢 1 つ分。表示名は言語切替で再評価する。</summary>

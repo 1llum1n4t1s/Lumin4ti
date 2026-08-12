@@ -122,11 +122,15 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
                 "復元情報を安全に保存できなかったため、個別設定は変更しませんでした。");
         }
 
+        // ここから先は複数パッケージの設定を順次書き換えるクリティカル区間。途中で打ち切ると
+        // 「キャンセルしたのに一部だけ常にオフ」という部分適用が残る。開始前の最後の境界で
+        // キャンセルを反映し、開始後は CancellationToken.None で完了まで継続する。
+        ct.ThrowIfCancellationRequested();
         _settings.WriteMany(
             pending.Select(familyName =>
                     new KeyValuePair<string, UwpBackgroundValues>(familyName, UwpBackgroundValues.Applied))
                 .ToArray(),
-            ct);
+            CancellationToken.None);
 
         LoggerBootstrap.Log.Info($"{Id}: {pending.Count} パッケージを常にオフに設定");
         return MaintenanceActionResult.Ok($"  - 「常にオフ」設定: {pending.Count} パッケージ");
@@ -170,7 +174,10 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
             restored++;
         }
 
-        _settings.WriteMany(pending, ct);
+        // 復元も適用と同じクリティカル区間にする。途中で打ち切ると一部だけ元へ戻った状態になり、
+        // どこまで戻したかを利用者が判別できない。
+        ct.ThrowIfCancellationRequested();
+        _settings.WriteMany(pending, CancellationToken.None);
 
         var journalDeleted = UwpBackgroundJournalStore.TryDelete(_journalPath);
         LoggerBootstrap.Log.Info($"{Id}: 元の個別設定 {restored} 件を復元 / 外部変更 {conflicts} 件を保持");

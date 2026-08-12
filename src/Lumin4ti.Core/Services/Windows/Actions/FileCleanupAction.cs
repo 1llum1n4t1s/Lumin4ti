@@ -10,12 +10,14 @@ namespace Lumin4ti.Core.Services.Windows.Actions;
 /// 削除ロジックは <see cref="FileCleanupEngine"/> に集約している。
 /// </summary>
 [SupportedOSPlatform("windows")]
-public class FileCleanupAction : IMaintenanceAction
+public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
 {
     private readonly Func<IEnumerable<CleanupTarget>> _targetProvider;
     private readonly ICommandExecutor? _executor;
     private readonly IReadOnlyList<string> _servicesToStop;
     private readonly bool _scheduleBlockedForReboot;
+    private readonly ICleanupPreferences? _preferences;
+    private readonly Func<CleanupTarget, string> _checkListKeySelector;
 
     /// <param name="id">項目 Id (ローカライズキーの基点)。</param>
     /// <param name="label">日本語マスターのラベル。</param>
@@ -26,6 +28,11 @@ public class FileCleanupAction : IMaintenanceAction
     /// <param name="requiresReboot">反映に再起動が必要か。</param>
     /// <param name="affectsExplorer">シェルの再起動が必要か。</param>
     /// <param name="scheduleBlockedForReboot">使用中のファイルを再起動時削除として予約するか。</param>
+    /// <param name="preferences">利用者が外した対象を除くための設定 (null なら全対象を消す)。</param>
+    /// <param name="checkListKeySelector">
+    /// チェックリストの粒度。既定は対象 1 件 = 1 チェックだが、対象が数百〜数千件になるグループ
+    /// (ブラウザのプロファイル別キャッシュ等) は上位のまとまりを返して件数を畳む。
+    /// </param>
     public FileCleanupAction(
         string id,
         string label,
@@ -35,7 +42,9 @@ public class FileCleanupAction : IMaintenanceAction
         IReadOnlyList<string>? servicesToStop = null,
         bool requiresReboot = false,
         bool affectsExplorer = false,
-        bool scheduleBlockedForReboot = false)
+        bool scheduleBlockedForReboot = false,
+        ICleanupPreferences? preferences = null,
+        Func<CleanupTarget, string>? checkListKeySelector = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         ArgumentException.ThrowIfNullOrWhiteSpace(label);
@@ -56,6 +65,65 @@ public class FileCleanupAction : IMaintenanceAction
         RequiresReboot = requiresReboot;
         AffectsExplorer = affectsExplorer;
         _scheduleBlockedForReboot = scheduleBlockedForReboot;
+        _preferences = preferences;
+        _checkListKeySelector = checkListKeySelector ?? DescribeTarget;
+    }
+
+    /// <summary>
+    /// 対象 1 件を一意に表す文字列。設定への保存キーと画面表示を兼ねるため、
+    /// パターン指定は「フォルダ + パターン」まで含めて別対象として区別する
+    /// (同じフォルダに対する複数パターンを 1 つのチェックに潰さない)。
+    /// </summary>
+    public static string DescribeTarget(CleanupTarget target)
+    {
+        ArgumentNullException.ThrowIfNull(target);
+
+        return target.Kind switch
+        {
+            CleanupTargetKind.Files => $@"{target.RawPath.TrimEnd('\\')}\{target.Pattern}",
+            CleanupTargetKind.RecursiveFiles => $@"{target.RawPath.TrimEnd('\\')}\**\{target.Pattern}",
+            _ => target.RawPath,
+        };
+    }
+
+    /// <summary>設定で外されたものを含む、この項目が扱う全対象。</summary>
+    public IReadOnlyList<CleanupTarget> EnumerateAllTargets() => [.. _targetProvider()];
+
+    /// <summary>実際に削除する対象 (利用者が外したものを除く)。</summary>
+    public IReadOnlyList<CleanupTarget> EnumerateSelectedTargets() =>
+        [.. _targetProvider().Where(IsTargetSelected)];
+
+    /// <summary>この対象がチェックリストのどの行に属するか。</summary>
+    public string GetCheckListKey(CleanupTarget target) => _checkListKeySelector(target);
+
+    private bool IsTargetSelected(CleanupTarget target) =>
+        _preferences?.IsTargetEnabled(Id, _checkListKeySelector(target)) ?? true;
+
+    public string CheckListCaption => "削除する対象を選ぶ";
+
+    /// <summary>見出しは全グループ共通なので、項目ごとに翻訳キーを増やさず 1 つを共有する。</summary>
+    public string CheckListCaptionKey => "CheckList.Targets";
+
+    public IReadOnlyList<MaintenanceCheckListEntry> GetCheckListEntries() =>
+    [
+        .. EnumerateAllTargets()
+            .Select(_checkListKeySelector)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Select(key => new MaintenanceCheckListEntry(
+                key,
+                key,
+                _preferences?.IsTargetEnabled(Id, key) ?? true)),
+    ];
+
+    public async Task SetCheckListEntrySelectedAsync(string value, bool selected, CancellationToken ct = default)
+    {
+        if (_preferences is null)
+        {
+            return;
+        }
+
+        _preferences.SetTargetEnabled(Id, value, selected);
+        await _preferences.SaveAsync(ct);
     }
 
     public string Id { get; }
@@ -81,6 +149,14 @@ public class FileCleanupAction : IMaintenanceAction
         IReadOnlyList<string> resumeFailures = [];
         CleanupOutcome? outcome = null;
 
+        var targets = EnumerateSelectedTargets();
+        if (targets.Count == 0)
+        {
+            // 全対象のチェックが外れている状態。サービスを止める意味も無いのでここで返す。
+            LoggerBootstrap.Log.Info($"{Id}: 対象が 1 件も選ばれていないため何もしませんでした");
+            return MaintenanceActionResult.Ok("  - 対象が選ばれていないため、何も削除しませんでした");
+        }
+
         try
         {
             if (_servicesToStop.Count > 0)
@@ -88,7 +164,6 @@ public class FileCleanupAction : IMaintenanceAction
                 suspension = await WindowsServiceControl.SuspendAsync(_executor!, _servicesToStop, progress, ct);
             }
 
-            var targets = _targetProvider().ToList();
             outcome = await Task.Run(
                 () => FileCleanupEngine.Run(targets, _scheduleBlockedForReboot, progress, ct),
                 ct);

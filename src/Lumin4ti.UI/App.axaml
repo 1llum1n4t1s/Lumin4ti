@@ -210,6 +210,74 @@
       <Setter Property="Foreground" Value="{DynamicResource Brush.FG2}" />
     </Style>
 
+    <!--  ═══ 削除対象のチェックリスト (カード内アコーディオン) ═══  -->
+    <!--  Fluent 既定の Expander はカードの中でもう 1 枚の枠に見えるため使わず、  -->
+    <!--  文字リンクに近い軽い開閉ボタン + 薄い内側パネルで構成する。  -->
+
+    <!--  開閉ボタン：枠も塗りも持たず、ホバーだけで反応する  -->
+    <Style Selector="ToggleButton.disclosure">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="8,4" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+      <Setter Property="Foreground" Value="{DynamicResource Brush.FG2}" />
+    </Style>
+    <Style Selector="ToggleButton.disclosure /template/ ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="ToggleButton.disclosure:checked /template/ ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="ToggleButton.disclosure:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Brush.SidebarHover}" />
+    </Style>
+    <Style Selector="ToggleButton.disclosure:checked:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Brush.SidebarHover}" />
+    </Style>
+    <Style Selector="ToggleButton.disclosure:pressed /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Brush.SidebarSelected}" />
+    </Style>
+
+    <!--  件数バッジ (15/18)  -->
+    <Style Selector="Border.badge">
+      <Setter Property="Background" Value="{DynamicResource Brush.SidebarSelected}" />
+      <Setter Property="CornerRadius" Value="7" />
+      <Setter Property="Padding" Value="7,1" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.badge &gt; TextBlock">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{DynamicResource Brush.FG2}" />
+    </Style>
+
+    <!--  一覧パネル：結果表示と同じ沈んだ面にして、カードとの階層を出す  -->
+    <Style Selector="Border.checklist">
+      <Setter Property="Background" Value="{DynamicResource Brush.Window}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="6,4" />
+      <Setter Property="Margin" Value="0,2,0,0" />
+    </Style>
+
+    <!--  一覧の各行。子孫セレクタ (Border.checklist CheckBox) は環境によって当たらないため、  -->
+    <!--  行そのものにクラスを付けて狙う。  -->
+    <Style Selector="CheckBox.entry">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <!--  Fluent 既定の MinHeight(32) は Height より優先されるため、両方を下げてパス一覧として詰める  -->
+      <Setter Property="MinHeight" Value="26" />
+      <Setter Property="Height" Value="26" />
+      <Setter Property="Padding" Value="6,0,0,0" />
+      <Setter Property="CornerRadius" Value="6" />
+    </Style>
+    <!--  外した対象は行ごと淡くして、チェックの有無をひと目で分かるようにする  -->
+    <Style Selector="CheckBox.entry:unchecked">
+      <Setter Property="Opacity" Value="0.5" />
+    </Style>
+
     <!--  カード (HeaderedContentControl を使わない単純な区画用)  -->
     <Style Selector="Border.card">
       <Setter Property="Background" Value="{DynamicResource Brush.Container}" />

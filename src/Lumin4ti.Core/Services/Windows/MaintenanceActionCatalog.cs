@@ -16,14 +16,15 @@ public sealed class MaintenanceActionCatalog
 {
     public IReadOnlyList<IMaintenanceItem> Items { get; }
 
-    public MaintenanceActionCatalog(ICommandExecutor executor)
-        : this(executor, new UnelevatedCommandExecutor())
+    public MaintenanceActionCatalog(ICommandExecutor executor, ICleanupPreferences? preferences = null)
+        : this(executor, new UnelevatedCommandExecutor(), preferences)
     {
     }
 
     internal MaintenanceActionCatalog(
         ICommandExecutor executor,
-        IUnelevatedCommandExecutor unelevatedExecutor)
+        IUnelevatedCommandExecutor unelevatedExecutor,
+        ICleanupPreferences? preferences = null)
     {
         Items =
         [
@@ -42,8 +43,8 @@ public sealed class MaintenanceActionCatalog
             new EventLogClearAction(),
             new TrimOptimizeAction(executor),
             // 一時ファイル・キャッシュの削除は用途ごとのグループに分けて、消したいものだけ選べるようにする
-            .. FileCleanupGroups.CreateAll(executor),
-            new ScheduledTempCleanupToggle(executor),
+            .. FileCleanupGroups.CreateAll(executor, preferences),
+            new ScheduledTempCleanupToggle(executor, preferences),
 
             // ═══ 修復 ═══
             new ShellFolderRepairAction(executor),
