@@ -50,6 +50,16 @@ public static class WindowsElevationHelper
     }
 
     /// <summary>
+    /// 起動時に自己昇格すべきか。昇格は「自分自身を起動し直して元プロセスは終了する」方式のため、
+    /// デバッガが付いた状態でこれを行うとデバッグセッションがその場で切れてしまう
+    /// (昇格した子プロセスにはデバッガが付かない)。そのためデバッガ接続中は昇格せずに続行する。
+    /// 非昇格のままなので HKLM 系の操作と Explorer トークン経由の実行は権限エラーになる。
+    /// そこまで含めて確認したいときは IDE 自体を管理者として起動する (最初から昇格済みで起動される)。
+    /// </summary>
+    public static bool ShouldRelaunchElevated(bool isElevated, bool isDebuggerAttached) =>
+        !isElevated && !isDebuggerAttached;
+
+    /// <summary>
     /// ShellExecute + runas で昇格した自分自身を起動する (CreateProcess は昇格プロンプトを出せない)。
     /// UAC で拒否された場合は false を返す。
     /// </summary>

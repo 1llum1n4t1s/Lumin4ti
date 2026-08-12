@@ -70,12 +70,24 @@ internal static class Program
         // app.manifest は asInvoker のまま、ここで自己再起動して昇格する (詳細は app.manifest のコメント参照)。
         // SingleInstanceGuard より前に行う: 非昇格プロセスがロックを握ったまま昇格版を起動すると
         // 昇格版が二重起動判定で弾かれてしまうため。
-        // Debug版もHKLM操作と、Explorerのmedium tokenから安全な子プロセスを生成するため昇格する。
-        // デバッガを接続したまま確認する場合は、IDE自体を管理者として起動する。
-        if (!Services.WindowsElevationHelper.IsRunningAsAdministrator())
+        // 昇格は自分自身を起動し直して元プロセスを終了させる方式なので、デバッガ接続中に行うと
+        // デバッグセッションが即座に切れる。判断は ShouldRelaunchElevated に集約する。
+        var isElevated = Services.WindowsElevationHelper.IsRunningAsAdministrator();
+        if (Services.WindowsElevationHelper.ShouldRelaunchElevated(
+                isElevated,
+                System.Diagnostics.Debugger.IsAttached))
         {
             // 昇格できなかった理由は TryRelaunchElevated 側がログへ残す。
             return Services.WindowsElevationHelper.TryRelaunchElevated(args) ? 0 : 1;
+        }
+
+        if (!isElevated)
+        {
+            // 権限エラーを「不具合」と誤解しないよう、非昇格で続行したことを必ず残す。
+            LoggerBootstrap.Log.Info(
+                "起動: デバッガ接続中のため昇格せず続行します " +
+                "(HKLM 系の操作と Explorer トークン経由の実行は権限エラーになります。" +
+                "管理者権限まで確認するなら IDE 自体を管理者として起動してください)");
         }
 
         if (OperatingSystem.IsWindows())
