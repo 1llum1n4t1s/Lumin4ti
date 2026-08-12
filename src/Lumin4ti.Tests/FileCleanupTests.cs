@@ -392,6 +392,27 @@ public sealed class FileCleanupTests
     }
 
     [TestMethod]
+    public void 最近使ったファイルの履歴は実体パスの履歴ショートカットだけを消す()
+    {
+        // %USERPROFILE%\Recent は Windows 標準のジャンクションで、リンク先の実体を消さない
+        // ガードに毎回弾かれる。説明文が約束している履歴を実際に消すには実体を直接指定する。
+        // ただし同じフォルダの AutomaticDestinations にはクイックアクセスのピン留め
+        // (再生成できない利用者データ) が入るため、中身ごとの削除にはしない。
+        var recent = FileCleanupGroups.UserTempTargets
+            .Where(t => t.RawPath.Contains(@"Windows\Recent", StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+
+        Assert.HasCount(1, recent);
+        Assert.AreEqual(@"%APPDATA%\Microsoft\Windows\Recent", recent[0].RawPath);
+        Assert.AreEqual(CleanupTargetKind.Files, recent[0].Kind, "中身ごと消すとピン留めを巻き込みます");
+        Assert.AreEqual("*.lnk", recent[0].Pattern);
+        Assert.IsFalse(
+            FileCleanupGroups.UserTempTargets.Any(
+                t => t.RawPath.Equals(@"%USERPROFILE%\Recent", StringComparison.OrdinalIgnoreCase)),
+            "ジャンクションを対象にすると毎回リンク保護で除外され、履歴が消えません");
+    }
+
+    [TestMethod]
     public void ドライブ直下の残骸は説明に列挙した名前だけを消す()
     {
         // このグループだけはフォルダを丸ごと消すため、説明に無い名前が黙って増えると

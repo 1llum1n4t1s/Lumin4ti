@@ -63,7 +63,14 @@ public static class FileCleanupGroups
         CleanupTarget.Contents(@"%LOCALAPPDATA%\Microsoft\Office\SolutionPackages"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\Microsoft\Outlook\HubAppFileCache"),
         CleanupTarget.Contents(@"%APPDATA%\Microsoft\Office\Recent"),
-        CleanupTarget.Contents(@"%USERPROFILE%\Recent"),
+
+        // 最近使ったファイルの履歴。%USERPROFILE%\Recent は実体ではなく Windows 標準の
+        // ジャンクションで、リンク先の実体を消さないガードに毎回弾かれて一度も消えていなかったため、
+        // 実体のパスを直接指定する。ただし中身ごとは消さない: 同じフォルダの AutomaticDestinations には
+        // クイックアクセスとタスクバーのピン留め (QuickAccessSortAction が扱う
+        // f01b4d95cf55d32a.automaticDestinations-ms) が入っていて、再生成できない利用者データのため。
+        // 説明文が約束している「最近使ったファイルの履歴」は直下の .lnk なので、それだけを対象にする。
+        CleanupTarget.Files(@"%APPDATA%\Microsoft\Windows\Recent", "*.lnk"),
         CleanupTarget.Contents(@"%USERPROFILE%\AppData\LocalLow\Microsoft\CryptnetUrlCache"),
         CleanupTarget.Contents(@"%USERPROFILE%\AppData\LocalLow\webviewdata"),
         CleanupTarget.Contents(@"%USERPROFILE%\AppData\LocalLow\Intel"),
