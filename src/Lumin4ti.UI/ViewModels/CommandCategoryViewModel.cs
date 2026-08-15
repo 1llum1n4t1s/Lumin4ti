@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -88,14 +89,15 @@ public partial class CommandCategoryViewModel : ObservableObject
     /// 呼び出し側 (MainWindowViewModel) が Task.Run で UI スレッド外から呼ぶ前提。
     /// 状態反映 (ApplyState) は UI バインディングに触れるため UI スレッドへ marshal する。
     /// </summary>
-    public async Task LoadToggleStatesAsync()
+    public async Task LoadToggleStatesAsync(CancellationToken ct = default)
     {
         var toggles = AllItems.Where(i => i.Item is IMaintenanceToggle).ToList();
         var choices = AllItems.Where(i => i.Item is IMaintenanceChoice).ToList();
 
         // 状態取得は外部プロセス (Get-MMAgent / dism / bcdedit) を伴い、環境によっては返ってこない。
         // 適用後の検証と同じ上限を課し、ハングした子プロセスに最大 1 時間居座られないようにする。
-        using var loadCts = new CancellationTokenSource(StateVerificationTimeout);
+        using var loadCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        loadCts.CancelAfter(StateVerificationTimeout);
         await Task.WhenAll(toggles.Select(async item =>
         {
             bool? state;
@@ -103,6 +105,10 @@ public partial class CommandCategoryViewModel : ObservableObject
             {
                 state = await ((IMaintenanceToggle)item.Item).GetStateAsync(loadCts.Token);
             }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                return;
+            }
             catch (OperationCanceledException) when (loadCts.IsCancellationRequested)
             {
                 LoggerBootstrap.Log.Error(
@@ -115,7 +121,13 @@ public partial class CommandCategoryViewModel : ObservableObject
                 state = null;
             }
 
-            await Dispatcher.UIThread.InvokeAsync(() => item.ApplyState(state));
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                if (!ct.IsCancellationRequested)
+                {
+                    item.ApplyState(state);
+                }
+            });
         }).Concat(choices.Select(async item =>
         {
             string? value;
@@ -123,6 +135,10 @@ public partial class CommandCategoryViewModel : ObservableObject
             {
                 value = await ((IMaintenanceChoice)item.Item).GetSelectedValueAsync(loadCts.Token);
             }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                return;
+            }
             catch (OperationCanceledException) when (loadCts.IsCancellationRequested)
             {
                 LoggerBootstrap.Log.Error(
@@ -135,7 +151,13 @@ public partial class CommandCategoryViewModel : ObservableObject
                 value = null;
             }
 
-            await Dispatcher.UIThread.InvokeAsync(() => item.ApplySelectedValue(value));
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                if (!ct.IsCancellationRequested)
+                {
+                    item.ApplySelectedValue(value);
+                }
+            });
         })));
     }
 

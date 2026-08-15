@@ -1,4 +1,5 @@
 using Lumin4ti.UI.Services;
+using Lumin4ti.UI.ViewModels;
 
 namespace Lumin4ti.Tests;
 
@@ -45,5 +46,46 @@ public sealed class MaintenanceOperationCoordinatorTests
         await coordinator.WaitForIdleAsync();
 
         Assert.AreEqual(0, coordinator.ActiveCount);
+    }
+
+    [TestMethod]
+    public async Task 状態再読込中は状態変更操作を開始できない()
+    {
+        var coordinator = new MaintenanceOperationCoordinator();
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        var reload = MainWindowViewModel.RunStateReloadAsync(coordinator, async _ =>
+        {
+            started.TrySetResult();
+            await release.Task;
+        });
+
+        await started.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        Assert.AreEqual(1, coordinator.ActiveCount);
+        Assert.IsFalse(coordinator.TryBegin(out var competingOperation));
+        Assert.IsNull(competingOperation);
+
+        release.TrySetResult();
+        Assert.IsTrue(await reload);
+        Assert.AreEqual(0, coordinator.ActiveCount);
+    }
+
+    [TestMethod]
+    public async Task 状態変更中は状態再読込を開始しない()
+    {
+        var coordinator = new MaintenanceOperationCoordinator();
+        Assert.IsTrue(coordinator.TryBegin(out var operation));
+        var invoked = false;
+
+        var loaded = await MainWindowViewModel.RunStateReloadAsync(coordinator, _ =>
+        {
+            invoked = true;
+            return Task.CompletedTask;
+        });
+
+        Assert.IsFalse(loaded);
+        Assert.IsFalse(invoked);
+        operation!.Dispose();
     }
 }

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services;
 
 namespace Lumin4ti.Tests;
@@ -6,6 +7,26 @@ namespace Lumin4ti.Tests;
 [TestClass]
 public sealed class SettingsServiceTests
 {
+    [TestMethod]
+    public void 正常な設定ファイルは読込済みとして扱う()
+    {
+        var directory = CreateTemporaryDirectory();
+        try
+        {
+            var settingsPath = Path.Combine(directory, "settings.json");
+            File.WriteAllText(settingsPath, "{\"Locale\":\"en_US\"}");
+
+            var service = new SettingsService(directory, settingsPath);
+
+            Assert.AreEqual("en_US", service.Current.Locale);
+            Assert.AreEqual(SettingsLoadStatus.Loaded, service.LoadStatus);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
     [TestMethod]
     public void 破損した設定は既定値へフォールバックする()
     {
@@ -19,6 +40,7 @@ public sealed class SettingsServiceTests
 
             Assert.AreEqual(string.Empty, service.Current.Locale);
             Assert.IsTrue(service.Current.CheckForUpdatesOnStartup);
+            Assert.AreEqual(SettingsLoadStatus.Failed, service.LoadStatus);
         }
         finally
         {
@@ -39,6 +61,7 @@ public sealed class SettingsServiceTests
 
             Assert.AreEqual(string.Empty, service.Current.Locale);
             Assert.IsTrue(service.Current.CheckForUpdatesOnStartup);
+            Assert.AreEqual(SettingsLoadStatus.Failed, service.LoadStatus);
         }
         finally
         {
@@ -55,6 +78,7 @@ public sealed class SettingsServiceTests
             var service = new SettingsService(directory, Path.Combine(directory, "settings.json"));
 
             Assert.AreEqual(string.Empty, service.Current.Locale);
+            Assert.AreEqual(SettingsLoadStatus.Missing, service.LoadStatus);
         }
         finally
         {
@@ -77,6 +101,31 @@ public sealed class SettingsServiceTests
             var service = new SettingsService(directory, settingsPath);
 
             Assert.AreEqual(string.Empty, service.Current.Locale);
+            Assert.AreEqual(SettingsLoadStatus.Failed, service.LoadStatus);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public async Task 読込失敗後の保存は元の設定ファイルを上書きしない()
+    {
+        var directory = CreateTemporaryDirectory();
+        try
+        {
+            var settingsPath = Path.Combine(directory, "settings.json");
+            const string original = "{ invalid json";
+            await File.WriteAllTextAsync(settingsPath, original);
+            var service = new SettingsService(directory, settingsPath);
+
+            service.Current.Locale = "en_US";
+            await service.SaveAsync();
+            await service.FlushAsync();
+
+            Assert.AreEqual(SettingsLoadStatus.Failed, service.LoadStatus);
+            Assert.AreEqual(original, await File.ReadAllTextAsync(settingsPath));
         }
         finally
         {

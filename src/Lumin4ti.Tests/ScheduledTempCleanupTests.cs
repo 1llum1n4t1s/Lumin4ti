@@ -10,6 +10,19 @@ namespace Lumin4ti.Tests;
 [TestClass]
 public sealed class ScheduledTempCleanupTests
 {
+    private sealed class FailedSettingsService : ISettingsService
+    {
+        public AppSettings Current { get; } = new() { ScheduledCleanupGroupIds = [] };
+
+        public SettingsLoadStatus LoadStatus => SettingsLoadStatus.Failed;
+
+        public object SyncRoot { get; } = new();
+
+        public Task SaveAsync(CancellationToken ct = default) => Task.CompletedTask;
+
+        public Task FlushAsync(CancellationToken ct = default) => Task.CompletedTask;
+    }
+
     private sealed class RecordingExecutor : ICommandExecutor
     {
         public string? LastFileName { get; private set; }
@@ -256,6 +269,17 @@ public sealed class ScheduledTempCleanupTests
             new[] { "cleanup-user-temp", "cleanup-browser-cache" },
             selected.Select(a => a.Id).ToArray(),
             "設定の並びではなくカタログの並び順で実行し、未知の Id は無視する必要があります");
+    }
+
+    [TestMethod]
+    public void 設定読込失敗時は既定対象を推測して削除しない()
+    {
+        var executor = new RecordingExecutor();
+
+        var exitCode = ScheduledTempCleanup.Run(new FailedSettingsService(), executor);
+
+        Assert.AreEqual(1, exitCode);
+        Assert.IsNull(executor.LastFileName);
     }
 
     [TestMethod]

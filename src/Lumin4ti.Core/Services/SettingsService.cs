@@ -9,8 +9,12 @@ public sealed class SettingsService : ISettingsService
     private readonly string _appDataDirectory;
     private readonly string _settingsFilePath;
     private Task _pendingSave = Task.CompletedTask;
+    private int _failedLoadSaveWarningLogged;
 
     public AppSettings Current { get; }
+
+    /// <inheritdoc />
+    public SettingsLoadStatus LoadStatus { get; }
 
     /// <inheritdoc />
     public object SyncRoot { get; } = new();
@@ -23,14 +27,16 @@ public sealed class SettingsService : ISettingsService
     {
         _appDataDirectory = appDataDirectory;
         _settingsFilePath = settingsFilePath;
-        Current = Load(settingsFilePath);
+        var loaded = Load(settingsFilePath);
+        Current = loaded.Settings;
+        LoadStatus = loaded.Status;
     }
 
     /// <summary>
     /// 設定を読み込む。どの経路でも既定値へ落とせるが、「初回起動で無い」「壊れている」
     /// 「権限が無い」を後から区別できるよう、理由を必ずログへ残す。
     /// </summary>
-    private static AppSettings Load(string settingsFilePath)
+    private static SettingsLoadResult Load(string settingsFilePath)
     {
         try
         {
@@ -38,7 +44,7 @@ public sealed class SettingsService : ISettingsService
             {
                 // 初回起動では正常。異常時と区別できるよう、探した場所を残す。
                 LoggerBootstrap.Log.Info($"設定ファイルが無いため既定値で開始します: {settingsFilePath}");
-                return new AppSettings();
+                return new SettingsLoadResult(new AppSettings(), SettingsLoadStatus.Missing);
             }
 
             var json = File.ReadAllText(settingsFilePath);
@@ -46,7 +52,7 @@ public sealed class SettingsService : ISettingsService
             if (settings is not null)
             {
                 LoggerBootstrap.Log.Info($"設定ファイルを読み込みました: {settingsFilePath}");
-                return settings;
+                return new SettingsLoadResult(settings, SettingsLoadStatus.Loaded);
             }
 
             LoggerBootstrap.Log.Error(
@@ -68,11 +74,24 @@ public sealed class SettingsService : ISettingsService
                 ex);
         }
 
-        return new AppSettings();
+        return new SettingsLoadResult(new AppSettings(), SettingsLoadStatus.Failed);
     }
 
     public Task SaveAsync(CancellationToken ct = default)
     {
+        // 読み込めなかった既存ファイルを、フォールバックした既定値で上書きしない。
+        // UI は利用可能なままにし、元ファイルを利用者が復旧できる状態で保護する。
+        if (LoadStatus == SettingsLoadStatus.Failed)
+        {
+            if (Interlocked.Exchange(ref _failedLoadSaveWarningLogged, 1) == 0)
+            {
+                LoggerBootstrap.Log.Error(
+                    $"設定ファイルの読込に失敗しているため、上書きを中止しました: {_settingsFilePath}");
+            }
+
+            return ct.IsCancellationRequested ? Task.FromCanceled(ct) : Task.CompletedTask;
+        }
+
         lock (_saveQueueLock)
         {
             _pendingSave = SaveAfterAsync(_pendingSave, ct);
@@ -133,4 +152,6 @@ public sealed class SettingsService : ISettingsService
             throw;
         }
     }
+
+    private readonly record struct SettingsLoadResult(AppSettings Settings, SettingsLoadStatus Status);
 }

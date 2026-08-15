@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Lumin4ti.Core.Interfaces;
+using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services;
 using Lumin4ti.Core.Services.Windows;
 using Lumin4ti.UI.Services;
@@ -42,13 +43,18 @@ public partial class App : Application
         if (!string.Equals(settings.Locale, localeKey, StringComparison.Ordinal))
         {
             settings.Locale = localeKey;
-            try
+            // 読めなかった既存ファイルは SettingsService 側でも保護するが、ここでも
+            // 起動直後の自動正規化を明示的に止め、破損・ロック中の原本を上書きしない。
+            if (settingsService.LoadStatus != SettingsLoadStatus.Failed)
             {
-                settingsService.SaveAsync().GetAwaiter().GetResult();
-            }
-            catch (Exception ex)
-            {
-                LoggerBootstrap.Log.Error("未対応ロケールの正規化を保存できませんでした", ex);
+                try
+                {
+                    settingsService.SaveAsync().GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    LoggerBootstrap.Log.Error("未対応ロケールの正規化を保存できませんでした", ex);
+                }
             }
         }
 

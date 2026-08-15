@@ -7,6 +7,11 @@ public interface ISettingsService
     AppSettings Current { get; }
 
     /// <summary>
+    /// 起動時の読込結果。既存実装との互換性のため、テスト用などの簡易実装は正常読込として扱う。
+    /// </summary>
+    SettingsLoadStatus LoadStatus => SettingsLoadStatus.Loaded;
+
+    /// <summary>
     /// <see cref="Current"/> の可変コレクション (除外リスト等) を読み書きする間に取る排他ロック。
     /// 保存側もシリアライズ中はこのロックを取るため、チェックの連続操作と保存が重なっても
     /// 「列挙中に変更された」で保存が落ちたり、書きかけの内容が出力されたりしない。

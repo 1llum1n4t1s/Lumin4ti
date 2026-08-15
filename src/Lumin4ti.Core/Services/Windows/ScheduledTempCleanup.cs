@@ -12,8 +12,7 @@ namespace Lumin4ti.Core.Services.Windows;
 /// 経由しないため、サインインのたびに UAC を出さず無人で完走できる。
 /// 実行する項目と、項目ごとに消す対象は settings.json の利用者設定 (<see cref="ICleanupPreferences"/>) が唯一の正本で、
 /// 画面のボタンで走る処理とまったく同じコードを通る。
-/// 手動実行だと nul ファイルを作った開発ツール (Git Bash 等) がまだファイルを掴んでいて消せないことがあるが、
-/// サインイン直後ならそれらのプロセスは起動していないことが多く、削除が成功しやすい。
+/// 対象は再生成可能なキャッシュ・ログ・一時領域だけに限定し、使用中のファイルはスキップする。
 /// </summary>
 [SupportedOSPlatform("windows")]
 public static class ScheduledTempCleanup
@@ -29,18 +28,37 @@ public static class ScheduledTempCleanup
     {
         try
         {
-            var preferences = new CleanupPreferences(new SettingsService());
-            var actions = SelectActions(
-                FileCleanupGroups.CreateCleanupActions(new ProcessCommandExecutor(), preferences),
-                preferences.ScheduledGroupIds);
-
-            return RunAsync(actions).GetAwaiter().GetResult();
+            return Run(new SettingsService(), new ProcessCommandExecutor());
         }
         catch (Exception ex)
         {
             LoggerBootstrap.Log.Error("scheduled-cleanup: 失敗しました", ex);
             return 1;
         }
+    }
+
+    /// <summary>
+    /// 設定を正常に読めた場合だけ無人削除を行う。設定が無い、または読めない状態では
+    /// 利用者が選んだ除外対象を再現できないため、既定値で推測して削除しない。
+    /// </summary>
+    internal static int Run(ISettingsService settingsService, ICommandExecutor executor)
+    {
+        ArgumentNullException.ThrowIfNull(settingsService);
+        ArgumentNullException.ThrowIfNull(executor);
+
+        if (settingsService.LoadStatus != SettingsLoadStatus.Loaded)
+        {
+            LoggerBootstrap.Log.Error(
+                $"scheduled-cleanup: 設定を正常に読み込めないため削除を中止しました ({settingsService.LoadStatus})");
+            return 1;
+        }
+
+        var preferences = new CleanupPreferences(settingsService);
+        var actions = SelectActions(
+            FileCleanupGroups.CreateCleanupActions(executor, preferences),
+            preferences.ScheduledGroupIds);
+
+        return RunAsync(actions).GetAwaiter().GetResult();
     }
 
     /// <summary>

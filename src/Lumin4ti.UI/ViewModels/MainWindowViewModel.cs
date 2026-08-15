@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services.Windows;
@@ -79,18 +80,51 @@ public class MainWindowViewModel
     }
 
     /// <summary>状態を読み直した直近時刻 (再アクティブのたびに外部プロセスを起こさないための間隔管理)。</summary>
-    private long _lastStateLoadAt = Stopwatch.GetTimestamp();
+    private long _lastStateLoadAt;
 
     /// <summary>再読込を許す最短間隔。</summary>
     private static readonly TimeSpan StateReloadInterval = TimeSpan.FromMinutes(1);
 
-    private Task ReloadAllStatesAsync() => Task.WhenAll(
-        Update.LoadToggleStatesAsync(),
-        Cleanup.LoadToggleStatesAsync(),
-        Repair.LoadToggleStatesAsync(),
-        Performance.LoadToggleStatesAsync(),
-        System.LoadToggleStatesAsync(),
-        Organize.LoadToggleStatesAsync());
+    private async Task<bool> ReloadAllStatesAsync()
+    {
+        var loaded = await RunStateReloadAsync(
+            _operationCoordinator,
+            token => Task.WhenAll(
+                Update.LoadToggleStatesAsync(token),
+                Cleanup.LoadToggleStatesAsync(token),
+                Repair.LoadToggleStatesAsync(token),
+                Performance.LoadToggleStatesAsync(token),
+                System.LoadToggleStatesAsync(token),
+                Organize.LoadToggleStatesAsync(token))).ConfigureAwait(false);
+
+        if (loaded)
+        {
+            Interlocked.Exchange(ref _lastStateLoadAt, Stopwatch.GetTimestamp());
+        }
+
+        return loaded;
+    }
+
+    /// <summary>
+    /// 状態再読込も変更操作と同じ排他リースへ入れる。再読込の古い結果が、後から始まった
+    /// トグル／選択操作の検証結果を上書きしないよう、取得から UI 反映までを一つの操作として扱う。
+    /// </summary>
+    internal static async Task<bool> RunStateReloadAsync(
+        MaintenanceOperationCoordinator coordinator,
+        Func<CancellationToken, Task> reload)
+    {
+        ArgumentNullException.ThrowIfNull(coordinator);
+        ArgumentNullException.ThrowIfNull(reload);
+
+        if (!coordinator.TryBegin(out var operation))
+        {
+            return false;
+        }
+
+        using var activeOperation = operation!;
+        await reload(activeOperation.Token).ConfigureAwait(false);
+        return true;
+    }
 
     /// <summary>
     /// ウィンドウが再びアクティブになったときに状態を読み直す。設定アプリやポリシー更新など
@@ -99,13 +133,13 @@ public class MainWindowViewModel
     /// </summary>
     public void RefreshStatesOnActivated()
     {
+        var lastStateLoadAt = Interlocked.Read(ref _lastStateLoadAt);
         if (_operationCoordinator.ActiveCount != 0 ||
-            Stopwatch.GetElapsedTime(_lastStateLoadAt) < StateReloadInterval)
+            (lastStateLoadAt != 0 && Stopwatch.GetElapsedTime(lastStateLoadAt) < StateReloadInterval))
         {
             return;
         }
 
-        _lastStateLoadAt = Stopwatch.GetTimestamp();
         _ = Task.Run(ReloadAllStatesAsync);
     }
 }
