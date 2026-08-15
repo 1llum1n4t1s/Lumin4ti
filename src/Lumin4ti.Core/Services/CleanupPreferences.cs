@@ -17,7 +17,6 @@ public sealed class CleanupPreferences(ISettingsService settings) : ICleanupPref
     public static readonly IReadOnlyList<string> DefaultScheduledGroupIds =
     [
         "cleanup-user-temp",
-        "cleanup-nul-files",
         "cleanup-package-cache",
         "cleanup-browser-cache",
     ];

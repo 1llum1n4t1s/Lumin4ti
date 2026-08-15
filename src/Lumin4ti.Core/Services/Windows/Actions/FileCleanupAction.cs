@@ -18,6 +18,7 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
     private readonly bool _scheduleBlockedForReboot;
     private readonly ICleanupPreferences? _preferences;
     private readonly Func<CleanupTarget, string> _checkListKeySelector;
+    private readonly Func<CleanupTarget, string> _checkListLabelSelector;
 
     /// <param name="id">項目 Id (ローカライズキーの基点)。</param>
     /// <param name="label">日本語マスターのラベル。</param>
@@ -33,6 +34,10 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
     /// チェックリストの粒度。既定は対象 1 件 = 1 チェックだが、対象が数百〜数千件になるグループ
     /// (ブラウザのプロファイル別キャッシュ等) は上位のまとまりを返して件数を畳む。
     /// </param>
+    /// <param name="checkListLabelSelector">
+    /// チェックリストへ表示する名前。保存キーと表示を分けたい場合に指定する
+    /// (ブラウザは未展開のルートを保存し、製品名を表示する)。
+    /// </param>
     public FileCleanupAction(
         string id,
         string label,
@@ -44,7 +49,8 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
         bool affectsExplorer = false,
         bool scheduleBlockedForReboot = false,
         ICleanupPreferences? preferences = null,
-        Func<CleanupTarget, string>? checkListKeySelector = null)
+        Func<CleanupTarget, string>? checkListKeySelector = null,
+        Func<CleanupTarget, string>? checkListLabelSelector = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         ArgumentException.ThrowIfNullOrWhiteSpace(label);
@@ -67,6 +73,7 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
         _scheduleBlockedForReboot = scheduleBlockedForReboot;
         _preferences = preferences;
         _checkListKeySelector = checkListKeySelector ?? DescribeTarget;
+        _checkListLabelSelector = checkListLabelSelector ?? _checkListKeySelector;
     }
 
     /// <summary>
@@ -81,7 +88,6 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
         return target.Kind switch
         {
             CleanupTargetKind.Files => $@"{target.RawPath.TrimEnd('\\')}\{target.Pattern}",
-            CleanupTargetKind.RecursiveFiles => $@"{target.RawPath.TrimEnd('\\')}\**\{target.Pattern}",
             _ => target.RawPath,
         };
     }
@@ -90,14 +96,27 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
     public IReadOnlyList<CleanupTarget> EnumerateAllTargets() => [.. _targetProvider()];
 
     /// <summary>実際に削除する対象 (利用者が外したものを除く)。</summary>
-    public IReadOnlyList<CleanupTarget> EnumerateSelectedTargets() =>
-        [.. _targetProvider().Where(IsTargetSelected)];
+    public IReadOnlyList<CleanupTarget> EnumerateSelectedTargets()
+    {
+        var targets = _targetProvider().ToList();
+        var selectedGroups = targets
+            .GroupBy(_checkListKeySelector, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.All(IsTargetSelected))
+            .Select(group => group.Key)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        // 画面は group.All(IsTargetSelected) で 1 行へ畳んでいるため、旧パス単位の除外が
+        // 1 件でも残るグループは実行時も全体を外す。表示が OFF なのに一部だけ消す状態を作らない。
+        return [.. targets.Where(target => selectedGroups.Contains(_checkListKeySelector(target)))];
+    }
 
     /// <summary>この対象がチェックリストのどの行に属するか。</summary>
     public string GetCheckListKey(CleanupTarget target) => _checkListKeySelector(target);
 
     private bool IsTargetSelected(CleanupTarget target) =>
-        _preferences?.IsTargetEnabled(Id, _checkListKeySelector(target)) ?? true;
+        _preferences is null ||
+        (_preferences.IsTargetEnabled(Id, _checkListKeySelector(target)) &&
+         _preferences.IsTargetEnabled(Id, DescribeTarget(target)));
 
     public string CheckListCaption => "削除する対象を選ぶ";
 
@@ -107,12 +126,11 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
     public IReadOnlyList<MaintenanceCheckListEntry> GetCheckListEntries() =>
     [
         .. EnumerateAllTargets()
-            .Select(_checkListKeySelector)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .Select(key => new MaintenanceCheckListEntry(
-                key,
-                key,
-                _preferences?.IsTargetEnabled(Id, key) ?? true)),
+            .GroupBy(_checkListKeySelector, StringComparer.OrdinalIgnoreCase)
+            .Select(group => new MaintenanceCheckListEntry(
+                group.Key,
+                _checkListLabelSelector(group.First()),
+                group.All(IsTargetSelected))),
     ];
 
     public async Task SetCheckListEntrySelectedAsync(string value, bool selected, CancellationToken ct = default)
@@ -123,6 +141,20 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
         }
 
         _preferences.SetTargetEnabled(Id, value, selected);
+
+        // 以前は対象パス単位で保存していた項目も、現在はブラウザ／アプリ／用途単位に畳める。
+        // グループを明示的に操作した時点で、その配下に残る旧形式の除外値を消し、
+        // 画面のチェック状態と実際の削除対象が一致するようにする。
+        foreach (var target in EnumerateAllTargets().Where(t =>
+                     string.Equals(_checkListKeySelector(t), value, StringComparison.OrdinalIgnoreCase)))
+        {
+            var legacyKey = DescribeTarget(target);
+            if (!string.Equals(legacyKey, value, StringComparison.OrdinalIgnoreCase))
+            {
+                _preferences.SetTargetEnabled(Id, legacyKey, enabled: true);
+            }
+        }
+
         await _preferences.SaveAsync(ct);
     }
 

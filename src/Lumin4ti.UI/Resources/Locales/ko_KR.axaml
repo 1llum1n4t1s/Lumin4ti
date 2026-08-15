@@ -75,54 +75,34 @@
   <x:String x:Key="Text.Action.security-app-reset.Desc" xml:space="preserve">Windows 보안 앱이 열리지 않거나 손상되어 보이거나 항목이 누락되었을 때 초기 상태로 재설정하고 다시 등록합니다. Defender의 보호 상태나 정의 파일에는 영향을 주지 않습니다.</x:String>
 
   <!-- ===== Actions: Cleanup &amp; Repair ===== -->
-  <x:String x:Key="Text.Action.wu-component-cleanup.Label" xml:space="preserve">Windows Update가 사용한 공간 제거</x:String>
-  <x:String x:Key="Text.Action.wu-component-cleanup.Desc" xml:space="preserve">구성 요소 저장소(WinSxS 폴더)에 쌓인 대체된 이전 업데이트 세대를 영구적으로 제거해 수 GB의 디스크 공간을 확보합니다. 실행 후에는 적용된 업데이트를 제거할 수 없게 됩니다(대개 문제되지 않음). 몇 분에서 수십 분이 걸립니다.</x:String>
   <x:String x:Key="Text.Action.repair-shell-folder-names.Label" xml:space="preserve">손상된 시스템 폴더 이름 복구</x:String>
   <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">시스템 폴더 이름(예: 다운로드)이 영어로 표시되는 등의 표시 손상을 shell32.dll을 다시 등록해 복구합니다.</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">시스템 트레이 아이콘 캐시 초기화</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">알림 영역(시스템 트레이)의 아이콘 캐시를 지웁니다. 제거된 앱의 아이콘이 숨겨진 아이콘 영역에 남아 있는 문제를 해결합니다. 트레이 표시/숨김 사용자 지정은 한 번 초기화됩니다.</x:String>
-  <x:String x:Key="Text.Action.gpu-preference-reset.Label" xml:space="preserve">앱별 그래픽 설정 (GPU 지정) 을 모두 삭제</x:String>
-  <x:String x:Key="Text.Action.gpu-preference-reset.Desc" xml:space="preserve">「설정 &gt; 시스템 &gt; 디스플레이 &gt; 그래픽」에서 앱마다 개별 지정한 GPU 설정(고성능 / 절전)의 등록을 모두 삭제하여 모든 앱을 Windows 자동 판단으로 되돌립니다. 제거한 앱의 등록이 계속 남아 있거나, 의도하지 않은 GPU로 실행되는 경우의 정리에 사용합니다. 데스크톱 앱과 스토어 앱 모두가 대상입니다. 전체 설정(자동 HDR, 가변 새로 고침 빈도, 창 모드 게임 최적화)은 삭제하지 않습니다. 각 앱의 다음 실행부터 반영됩니다.</x:String>
-  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">손상된 시작 프로그램 항목 제거</x:String>
-  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">실행 파일이 더 이상 존재하지 않는 시작 프로그램 항목(현재 사용자)을 해당 고아 항목과 함께 제거합니다.</x:String>
-  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">연결 프로그램에서 존재하지 않는 앱 제거</x:String>
-  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">실행 파일이 더 이상 존재하지 않는 앱을 연결 프로그램 후보 목록과 Applications 등록에서 제거합니다.</x:String>
-  <x:String x:Key="Text.Action.remove-ghost-packages.Label" xml:space="preserve">시작 메뉴의 깨진(고스트) 앱 항목 복구</x:String>
-  <x:String x:Key="Text.Action.remove-ghost-packages.Desc" xml:space="preserve">설치 폴더가 이미 없는데도 시작 메뉴에 표시되는 앱(고스트 등록)을 찾아 복구합니다. Windows 대규모 업그레이드에서 시스템 앱의 파일만 삭제될 때 발생하며, 표시 이름을 확인할 수 없어 시작 메뉴에 "ms-resource:ProductNameWindowsStore" 같은 원본 문자열이 나타나고 클릭해도 실행되지 않습니다. 기본적으로 모든 사용자에서 등록을 해제하지만, Windows가 삭제를 막는 시스템 앱은 해당 선택적 기능을 다시 설치해 원래 상태로 되돌립니다. 잘못된 삭제를 막기 위해 실제로 시작 메뉴에 보이는 항목만 처리하며, 준비된 고정 드라이브에서 폴더가 없음을 확인할 수 없는 항목은 그대로 둡니다.</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Label" xml:space="preserve">검색·입력·위젯 문제 복구 (셸 시스템 앱 다시 등록)</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Desc" xml:space="preserve">Windows 검색(SearchHost), 텍스트 입력과 이모지 패널(TextInputHost), 위젯(WebExperienceHost)을 함께 제공하는 시스템 앱 MicrosoftWindows.Client.CBS를 다시 등록합니다. 파일은 멀쩡한데 등록 정보만 손상된 경우, 즉 검색 상자가 멈추거나 입력 후보가 나오지 않거나 위젯이 빈 화면이 되는 증상에 효과가 있습니다. 제거하지 않으며 설정이나 기록도 사라지지 않습니다. 다시 등록하는 동안 상주 프로세스가 종료되고, 필요할 때 Windows가 다시 시작합니다.</x:String>
-  <x:String x:Key="Text.Action.event-log-clear.Label" xml:space="preserve">이벤트 뷰어 로그 모두 삭제</x:String>
-  <x:String x:Key="Text.Action.event-log-clear.Desc" xml:space="preserve">이벤트 뷰어에 쌓인 모든 채널의 로그를 삭제해 로그 저장 영역(대개 수백 MB)을 확보합니다. 과거의 문제 해결 정보도 사라지므로 최근 문제를 조사하는 중에는 실행하지 마세요. 일부 보호된 시스템 로그는 건너뜁니다.</x:String>
   <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">Microsoft Store 캐시 지우기</x:String>
   <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">WSReset로 Microsoft Store 캐시를 초기화합니다. Store가 열리지 않거나 다운로드가 진행되지 않거나 “다시 시도” 오류가 반복될 때의 표준 해결 방법입니다. 앱과 계정 정보는 제거되지 않습니다. 완료되면 Store 앱이 자동으로 열릴 수 있습니다.</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">SSD TRIM 및 빈 공간 통합</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">SSD 쓰기 성능을 유지하고 빈 공간을 조각 모음하기 위해 모든 볼륨에서 SSD에 대한 TRIM 알림(/L)과 빈 공간 통합(/X)을 실행합니다. 드라이브 구성에 따라 몇 분에서 수십 분이 걸릴 수 있습니다. 실행 중에도 PC를 계속 사용할 수 있습니다.</x:String>
   <x:String x:Key="Text.Action.cleanup-user-temp.Label" xml:space="preserve">사용자 임시 파일과 캐시 삭제</x:String>
-  <x:String x:Key="Text.Action.cleanup-user-temp.Desc" xml:space="preserve">로그인한 사용자의 임시 폴더(%LOCALAPPDATA%\Temp), 크래시 덤프, 셰이더 캐시, Internet Explorer 및 WebView 캐시, 최근 파일 기록, IME 변환 캐시를 한꺼번에 삭제합니다. 보통 수 GB의 여유 공간이 생깁니다. 앱이 사용 중인 파일은 자동으로 건너뛰므로 작업 중에도 안전하게 실행할 수 있습니다.</x:String>
+  <x:String x:Key="Text.Action.cleanup-user-temp.Desc" xml:space="preserve">임시 파일, 충돌 덤프, 셰이더 및 인터넷 캐시와 다시 만들 수 있는 IME, Office, Outlook 캐시를 삭제합니다. 브라우징 기록, 최근 파일 기록, 앱 설정은 삭제하지 않습니다. 사용 중인 파일은 건너뜁니다.</x:String>
   <x:String x:Key="Text.Action.cleanup-system-temp.Label" xml:space="preserve">시스템 임시 파일과 로그 삭제</x:String>
-  <x:String x:Key="Text.Action.cleanup-system-temp.Desc" xml:space="preserve">Windows 자체의 임시 폴더, 설치 및 서비스 로그, BITS 전송 큐, 전송 최적화 캐시, Windows Defender의 오래된 정의 백업과 검사 기록을 삭제합니다. 실행 중에는 BITS와 전송 최적화 서비스를 잠시 중지하고 완료 후 원래 상태로 되돌립니다. 과거 문제 조사에 쓰는 로그도 함께 사라지므로 장애를 조사하는 중에는 실행하지 마세요.</x:String>
+  <x:String x:Key="Text.Action.cleanup-system-temp.Desc" xml:space="preserve">Windows 임시 폴더, 알려진 Windows 로그 위치의 ETL 추적 로그, 설치 및 서비스 로그, 배달 최적화 캐시, Microsoft Defender 진단 로그를 삭제합니다. Defender의 탐지 및 조치 기록은 보존합니다. ETL은 Windows Logs, LogFiles, Panther, Diagnosis 아래의 *.etl로 제한하며 드라이브 전체를 검색하지 않습니다. 배달 최적화 서비스는 잠시 중지한 뒤 복원합니다. 문제를 조사 중일 때는 실행하지 마세요.</x:String>
   <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">앱 캐시와 로그 삭제</x:String>
-  <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">Electron 기반 앱(Claude, Cursor, Discord, Antigravity 등)의 캐시, GPU 셰이더 캐시(NVIDIA DXCache, AMD), Unreal Engine 파생 데이터, 상주 도구의 로그를 삭제합니다. 설정과 로그인 상태는 유지되며 각 앱이 다음 실행 때 캐시를 다시 만듭니다. 설치되지 않은 앱은 그대로 건너뜁니다.</x:String>
+  <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">앱 캐시, GPU 셰이더 캐시, 충돌 보고서와 도구 로그를 삭제합니다. WebStorage, 가상 머신 번들, 설정과 로그인 상태는 삭제하지 않습니다.</x:String>
   <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">개발 도구의 패키지 캐시 삭제</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">npm, pnpm, NuGet, pip, Yarn, Gradle, Maven, Bun, uv, Cargo가 쌓아 둔 다운로드 패키지 캐시를 삭제합니다. 수십 GB가 비워지기도 합니다. 자격 증명과 설정 폴더(.gnupg, .aws, .config 등)는 대상에 포함하지 않습니다. 홈 디렉터리의 .cache 폴더 전체도 대상이므로 huggingface 모델처럼 수십 GB를 다시 내려받아야 하는 캐시가 포함될 수 있습니다. 삭제 후 각 프로젝트의 다음 빌드나 복원에서 패키지를 다시 내려받으므로 그 한 번만 시간과 통신량이 듭니다.</x:String>
+  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">npm, pnpm, NuGet, pip, Yarn, Gradle, Bun, uv, Cargo의 다시 다운로드 가능한 캐시만 삭제합니다. uv 관리 Python, Maven 로컬 결과물, 자격 증명, 설정과 일반 .cache 폴더는 삭제하지 않습니다.</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">브라우저 캐시 삭제</x:String>
-  <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">설치된 Chromium 계열 브라우저(Edge, Chrome, Brave, Vivaldi, Comet)를 찾아 모든 프로필의 웹 캐시, GPU 셰이더 캐시, 서비스 워커, 크래시 보고서, 확장 프로그램 임시 데이터를 삭제합니다. 보통 수 GB가 비워집니다. 북마크, 비밀번호, 로그인 상태는 지워지지 않습니다. 브라우저를 먼저 종료하면 더 확실하게 삭제됩니다.</x:String>
+  <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Chromium 웹 및 셰이더 캐시, Service Worker 캐시 저장소, 충돌 보고서와 확장 프로그램 임시 데이터를 삭제합니다. Service Worker 등록, DRM 구성 요소, 북마크, 암호와 로그인 상태는 삭제하지 않습니다.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">아이콘·썸네일·글꼴 캐시 다시 만들기</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">파일 탐색기의 아이콘 캐시, 썸네일 캐시, 글꼴 캐시를 삭제해 Windows가 다시 만들도록 합니다. 아이콘이 비어 있거나 엉뚱하게 보이는 경우, 썸네일이 갱신되지 않는 경우, 글자가 깨지는 경우의 표준 복구 방법입니다. 실행 후 탐색기를 다시 시작하며, 셸이 계속 열고 있어 삭제하지 못한 파일은 다음 재부팅 때 삭제됩니다. 캐시를 다시 만드는 동안에는 표시가 일시적으로 느려집니다.</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">Windows Update 다운로드 캐시 삭제</x:String>
-  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">이미 적용된 업데이트의 다운로드 파일(SoftwareDistribution), 업데이트 기록 데이터 저장소, 서명 카탈로그 캐시(catroot2)를 삭제합니다. 업데이트가 도중에 멈추거나 같은 업데이트가 반복해서 실패할 때의 표준 대처이며 수 GB의 여유 공간이 생깁니다. 관련 서비스를 잠시 중지한 뒤 삭제하고 완료 후 원래대로 되돌립니다. Windows Update의 업데이트 기록 표시는 사라집니다.</x:String>
+  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">SoftwareDistribution\Download에서 다시 받을 수 있는 파일만 삭제합니다. 업데이트 기록과 catroot2는 삭제하지 않습니다. 관련 서비스는 복원됩니다.</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">미리 읽기 데이터와 검색 인덱스 삭제 후 다시 만들기</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">앱 실행을 빠르게 하는 미리 읽기 데이터(Prefetch)와 파일 탐색기의 검색 인덱스를 삭제하고 Windows가 다시 만들게 합니다. 검색 결과가 나오지 않거나 오래된 파일만 걸릴 때 사용합니다. 다시 만드는 동안(수십 분에서 몇 시간) 앱 실행과 검색이 느려지고 백그라운드 CPU 사용량이 올라갑니다.</x:String>
-  <x:String x:Key="Text.Action.cleanup-drive-root-leftovers.Label" xml:space="preserve">드라이브 루트에 남은 잔여 폴더 삭제</x:String>
-  <x:String x:Key="Text.Action.cleanup-drive-root-leftovers.Desc" xml:space="preserve">드라이버 설치 프로그램과 OS 업그레이드가 시스템 드라이브 최상위에 남기는 폴더(AMD, Intel, SWSetup, PerfLogs, OneDriveTemp, $SysReset, Windows.old)를 삭제합니다. 특히 Windows.old는 수십 GB에 이르기도 해 가장 큰 공간 확보 수단입니다. 주의: Windows.old를 삭제하면 대규모 업데이트 후 이전 버전으로 되돌릴 수 없게 되므로 업그레이드 직후에는 실행하지 마세요.</x:String>
-  <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Label" xml:space="preserve">Outlook 오프라인 캐시 삭제</x:String>
-  <x:String x:Key="Text.Action.cleanup-outlook-offline-cache.Desc" xml:space="preserve">Outlook이 사서함의 로컬 복사본으로 보관하는 오프라인 데이터(.ost)와 검색 데이터(.nst)를 삭제합니다. 파일 하나가 수 GB에서 수십 GB에 이르기도 합니다. 서버의 메일은 지워지지 않으며 다음에 Outlook을 실행할 때 다시 동기화됩니다. 주의: 동기화가 끝날 때까지 지난 메일이 보이지 않으며 회선에 따라 몇 시간이 걸릴 수 있습니다. 로컬에만 있는 .pst 데이터는 대상이 아니므로 지워지지 않습니다.</x:String>
-  <x:String x:Key="Text.Action.cleanup-nul-files.Label" xml:space="preserve">떠도는 nul 파일 삭제</x:String>
-  <x:String x:Key="Text.Action.cleanup-nul-files.Desc" xml:space="preserve">Git Bash나 일부 개발 도구가 명령어의 출력 리다이렉션(&gt; nul)을 버리지 않고 실제 파일로 저장할 때 시스템 드라이브 곳곳에 쌓이는, 이름이 그대로 nul인 빈 파일을 사용자 폴더뿐 아니라 드라이브의 모든 폴더에서 검색하여 삭제합니다. 이 이름은 Windows의 예약된 장치 이름과 같아 일반적인 방법으로는 삭제할 수 없으므로 전용 처리로 안전하게 삭제합니다. 드라이브 전체를 검색하므로 파일이 많은 환경에서는 완료까지 몇 분 이상 걸릴 수 있습니다.</x:String>
-  <x:String x:Key="Text.Action.cleanup-recycle-bin.Label" xml:space="preserve">휴지통 비우기</x:String>
-  <x:String x:Key="Text.Action.cleanup-recycle-bin.Desc" xml:space="preserve">모든 드라이브의 휴지통을 비워 삭제된 파일이 차지하던 공간을 되찾습니다. 확인 창이 뜨지 않고 실행한 시점에 되돌릴 수 없으므로 필요한 파일이 없는지 먼저 확인하세요.</x:String>
   <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">로그인 시 정리를 자동 실행하는 작업 등록</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">로그인할 때마다 정리를 실행하는 작업을 Windows 작업 스케줄러에 등록합니다. 실행할 항목은 아래 목록에서 고르며, 각 항목은 자신의 체크리스트에 있는 대상만 삭제합니다. 즉 예약 실행은 해당 항목의 실행 버튼을 누른 것과 완전히 같습니다. 작업은 로그인한 사용자 권한으로만 동작하여 관리자 권한이나 UAC 확인이 필요 없으므로, 관리자 권한이나 서비스 중지가 필요한 항목(시스템 임시 파일, Windows Update 캐시)은 실패 또는 건너뜀으로 기록됩니다. nul 파일 정리는 수동 실행 시 이를 만든 개발 도구가 아직 파일을 잡고 있어 실패할 수 있는데, 로그인 직후에는 그런 도구가 아직 실행되지 않은 경우가 많습니다. 고른 항목에 따라 로그인마다 수 분 이상 걸릴 수 있습니다. 사용 중인 파일은 자동으로 건너뜁니다. OFF로 하면 작업을 삭제합니다.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">로그인할 때 선택한 캐시와 로그 정리를 실행 버튼과 같은 목록으로 실행합니다. 관리자 권한이 필요한 항목은 건너뛸 수 있습니다. 사용 중인 파일은 건너뜁니다. OFF는 작업을 제거합니다.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">메모리 압축</x:String>

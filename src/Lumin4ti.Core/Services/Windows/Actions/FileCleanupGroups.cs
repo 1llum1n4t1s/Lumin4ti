@@ -38,10 +38,6 @@ public static class FileCleanupGroups
             CreateShellCache(executor, preferences),
             CreateWindowsUpdateCache(executor, preferences),
             CreateOsIndex(executor, preferences),
-            CreateDriveRootLeftovers(preferences),
-            CreateOutlookOfflineCache(preferences),
-            CreateNulFiles(preferences),
-            new RecycleBinCleanupAction(),
         ];
     }
 
@@ -54,37 +50,44 @@ public static class FileCleanupGroups
         CleanupTarget.Contents(@"%LOCALAPPDATA%\D3DSCache"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\Microsoft\Windows\INetCache"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\Microsoft\Windows\Temporary Internet Files"),
-        CleanupTarget.Contents(@"%LOCALAPPDATA%\Microsoft\Windows\WebCache"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\Microsoft\Windows\AppCache"),
-        CleanupTarget.Contents(@"%LOCALAPPDATA%\Microsoft\Internet Explorer"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\Microsoft\IME\15.0\IMEJP\Cache"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\Microsoft\IME\15.0\IMEJP\Watson"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\Microsoft\Office\16.0\Wef"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\Microsoft\Office\SolutionPackages"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\Microsoft\Outlook\HubAppFileCache"),
-        CleanupTarget.Contents(@"%APPDATA%\Microsoft\Office\Recent"),
-
-        // 最近使ったファイルの履歴。%USERPROFILE%\Recent は実体ではなく Windows 標準の
-        // ジャンクションで、リンク先の実体を消さないガードに毎回弾かれて一度も消えていなかったため、
-        // 実体のパスを直接指定する。ただし中身ごとは消さない: 同じフォルダの AutomaticDestinations には
-        // クイックアクセスとタスクバーのピン留め (QuickAccessSortAction が扱う
-        // f01b4d95cf55d32a.automaticDestinations-ms) が入っていて、再生成できない利用者データのため。
-        // 説明文が約束している「最近使ったファイルの履歴」は直下の .lnk なので、それだけを対象にする。
-        CleanupTarget.Files(@"%APPDATA%\Microsoft\Windows\Recent", "*.lnk"),
         CleanupTarget.Contents(@"%USERPROFILE%\AppData\LocalLow\Microsoft\CryptnetUrlCache"),
-        CleanupTarget.Contents(@"%USERPROFILE%\AppData\LocalLow\webviewdata"),
-        CleanupTarget.Contents(@"%USERPROFILE%\AppData\LocalLow\Intel"),
     ];
+
+    internal static string GetUserTempGroupName(CleanupTarget target)
+    {
+        var path = target.RawPath;
+        return path switch
+        {
+            @"%LOCALAPPDATA%\Temp" => "Windows Temp",
+            @"%LOCALAPPDATA%\CrashDumps" => "CrashDumps",
+            @"%LOCALAPPDATA%\D3DSCache" => "Direct3D Shader Cache",
+            _ when path.Contains(@"\Microsoft\Windows\INetCache", StringComparison.OrdinalIgnoreCase) ||
+                   path.Contains(@"\Microsoft\Windows\Temporary Internet Files", StringComparison.OrdinalIgnoreCase) ||
+                   path.Contains(@"\Microsoft\Windows\AppCache", StringComparison.OrdinalIgnoreCase) => "Internet Cache",
+            _ when path.Contains(@"\Microsoft\IME\", StringComparison.OrdinalIgnoreCase) => "Microsoft IME",
+            _ when path.Contains(@"\Microsoft\Office\", StringComparison.OrdinalIgnoreCase) ||
+                   path.Contains(@"\Microsoft\Outlook\", StringComparison.OrdinalIgnoreCase) => "Microsoft Office / Outlook",
+            _ when path.EndsWith(@"\CryptnetUrlCache", StringComparison.OrdinalIgnoreCase) => "CryptnetUrlCache",
+            _ => FileCleanupAction.DescribeTarget(target),
+        };
+    }
 
     internal static FileCleanupAction CreateUserTemp(ICleanupPreferences? preferences = null) => new(
         id: "cleanup-user-temp",
         label: "ユーザーの一時ファイルとキャッシュを削除",
         description:
             "サインイン中のユーザー用の一時フォルダ (%LOCALAPPDATA%\\Temp)、クラッシュダンプ、シェーダーキャッシュ、Internet Explorer / WebView 系のキャッシュ、" +
-            "最近使ったファイルの履歴、IME の変換キャッシュなどをまとめて削除します。数 GB 単位の空き容量になることがあります。" +
+            "IME・Office・Outlook の再生成可能なキャッシュをまとめて削除します。閲覧履歴や最近使ったファイル、アプリ設定は削除しません。数 GB 単位の空き容量になることがあります。" +
             "アプリが使用中のファイルは自動的にスキップされるため、作業中でも安全に実行できます。",
         targetProvider: () => UserTempTargets,
-        preferences: preferences);
+        preferences: preferences,
+        checkListKeySelector: GetUserTempGroupName);
 
     // ═══ システムの一時ファイル・ログ ═══
 
@@ -92,31 +95,131 @@ public static class FileCleanupGroups
     [
         CleanupTarget.Contents(@"%SystemRoot%\Temp"),
         CleanupTarget.Contents(@"%SystemRoot%\SystemTemp"),
-        CleanupTarget.Contents(@"%SystemRoot%\Logs"),
-        CleanupTarget.Contents(@"%SystemRoot%\System32\LogFiles"),
         CleanupTarget.Contents(@"%ProgramData%\USOShared\Logs"),
         CleanupTarget.Contents(@"%ProgramData%\Microsoft\EdgeUpdate\Log"),
-        CleanupTarget.Contents(@"%ProgramData%\Microsoft\Network\Downloader"),
         CleanupTarget.Contents(@"%SystemRoot%\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\DeliveryOptimization\Cache"),
-        CleanupTarget.Contents(@"%ProgramData%\Microsoft\Windows Defender\Definition Updates\Backup"),
-        CleanupTarget.Contents(@"%ProgramData%\Microsoft\Windows Defender\Scans\History\Results\Resource"),
         CleanupTarget.Contents(@"%ProgramData%\Microsoft\Windows Defender\Support"),
     ];
 
-    /// <summary>BITS の転送キューと配信最適化キャッシュはサービスが握っているため停止してから消す。</summary>
-    internal static readonly string[] SystemTempServices = ["bits", "DoSvc"];
+    /// <summary>
+    /// Windows が ETL トレースログを置く既知のログ基点。ドライブ全体は走査せず、
+    /// この配下にある *.etl だけを実行時に列挙する。
+    /// </summary>
+    internal static readonly string[] SystemEtlRoots =
+    [
+        @"%SystemRoot%\Logs",
+        @"%SystemRoot%\System32\LogFiles",
+        @"%SystemRoot%\Panther",
+        @"%ProgramData%\Microsoft\Diagnosis\ETLLogs",
+    ];
+
+    internal static IEnumerable<CleanupTarget> EnumerateSystemTempTargets()
+    {
+        foreach (var target in SystemTempTargets)
+        {
+            yield return target;
+        }
+
+        foreach (var root in SystemEtlRoots)
+        {
+            foreach (var target in EnumerateKnownTreeEtlTargets(root))
+            {
+                yield return target;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 許可済みの基点配下をリンク非追従で列挙し、各フォルダ直下のパターン一致だけを
+    /// FileCleanupEngine に渡す。汎用の再帰削除機能を復活させないため、対象作成側で
+    /// フォルダを固定して展開する。
+    /// </summary>
+    internal static IReadOnlyList<CleanupTarget> EnumerateKnownTreeEtlTargets(
+        string rawRoot,
+        int maxDepth = 32)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(rawRoot);
+        ArgumentOutOfRangeException.ThrowIfNegative(maxDepth);
+
+        const string etlPattern = "*.etl";
+        var targets = new List<CleanupTarget> { CleanupTarget.Files(rawRoot, etlPattern) };
+        if (!FileCleanupEngine.TryResolve(rawRoot, out var fullRoot, out _) || !Directory.Exists(fullRoot))
+        {
+            return targets;
+        }
+
+        var pending = new Stack<(DirectoryInfo Directory, int Depth)>();
+        pending.Push((new DirectoryInfo(fullRoot), 0));
+
+        while (pending.TryPop(out var entry))
+        {
+            if (entry.Depth >= maxDepth)
+            {
+                continue;
+            }
+
+            DirectoryInfo[] children;
+            try
+            {
+                children = entry.Directory.GetDirectories();
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+            {
+                continue;
+            }
+
+            foreach (var child in children)
+            {
+                try
+                {
+                    if ((child.Attributes & FileAttributes.ReparsePoint) != 0)
+                    {
+                        continue;
+                    }
+                }
+                catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+                {
+                    continue;
+                }
+
+                targets.Add(CleanupTarget.Files(child.FullName, etlPattern));
+                pending.Push((child, entry.Depth + 1));
+            }
+        }
+
+        return targets;
+    }
+
+    internal static string GetSystemTempGroupName(CleanupTarget target)
+    {
+        var path = target.RawPath;
+        return path switch
+        {
+            _ when string.Equals(target.Pattern, "*.etl", StringComparison.OrdinalIgnoreCase) => "ETL Trace Logs",
+            @"%SystemRoot%\Temp" or @"%SystemRoot%\SystemTemp" => "Windows Temp",
+            @"%ProgramData%\USOShared\Logs" => "Windows Update Logs",
+            @"%ProgramData%\Microsoft\EdgeUpdate\Log" => "Microsoft Edge Update",
+            _ when path.Contains(@"\DeliveryOptimization\Cache", StringComparison.OrdinalIgnoreCase) => "Delivery Optimization",
+            _ when path.Contains(@"\Microsoft\Windows Defender\", StringComparison.OrdinalIgnoreCase) => "Microsoft Defender",
+            _ => FileCleanupAction.DescribeTarget(target),
+        };
+    }
+
+    /// <summary>配信最適化キャッシュはサービスが握っているため停止してから消す。</summary>
+    internal static readonly string[] SystemTempServices = ["DoSvc"];
 
     internal static FileCleanupAction CreateSystemTemp(ICommandExecutor executor, ICleanupPreferences? preferences = null) => new(
         id: "cleanup-system-temp",
         label: "システムの一時ファイルとログを削除",
         description:
-            "Windows 本体の一時フォルダ、セットアップ・サービスの各種ログ、BITS の転送キュー、配信最適化 (他 PC への更新配布) のキャッシュ、" +
-            "Windows Defender の古い定義バックアップとスキャン履歴を削除します。実行中は BITS と配信最適化サービスを一時停止し、完了後に元の状態へ戻します。" +
-            "過去のトラブル調査に使うログも消えるため、不具合を調査中の場合は実行を控えてください。",
-        targetProvider: () => SystemTempTargets,
+            "Windows 本体の一時フォルダ、既知の Windows ログ領域にある ETL トレースログ、セットアップ・サービスの各種ログ、配信最適化 (他 PC への更新配布) のキャッシュ、" +
+            "Windows Defender の診断ログを削除します。検出・対処履歴は削除しません。実行中は配信最適化サービスを一時停止し、完了後に元の状態へ戻します。" +
+            "ETL はドライブ全体を検索せず、Windows Logs・LogFiles・Panther・Diagnosis の配下にある *.etl だけを対象にします。過去のトラブル調査に使うログも消えるため、不具合を調査中の場合は実行を控えてください。",
+        targetProvider: EnumerateSystemTempTargets,
         executor: executor,
         servicesToStop: SystemTempServices,
-        preferences: preferences);
+        preferences: preferences,
+        checkListKeySelector: GetSystemTempGroupName);
 
     // ═══ アプリのキャッシュ ═══
 
@@ -125,12 +228,10 @@ public static class FileCleanupGroups
         CleanupTarget.Contents(@"%APPDATA%\Antigravity\Cache"),
         CleanupTarget.Contents(@"%APPDATA%\Antigravity\CachedData"),
         CleanupTarget.Contents(@"%APPDATA%\Antigravity\Crashpad"),
-        CleanupTarget.Contents(@"%APPDATA%\Antigravity\WebStorage"),
         CleanupTarget.Contents(@"%APPDATA%\Aqua Voice\Cache"),
         CleanupTarget.Contents(@"%APPDATA%\Claude\Cache"),
         CleanupTarget.Contents(@"%APPDATA%\Claude\Code Cache"),
         CleanupTarget.Contents(@"%APPDATA%\Claude\logs"),
-        CleanupTarget.Contents(@"%APPDATA%\Claude\vm_bundles"),
         CleanupTarget.Contents(@"%APPDATA%\Cursor\Cache"),
         CleanupTarget.Contents(@"%APPDATA%\Cursor\CachedData"),
         CleanupTarget.Contents(@"%APPDATA%\Cursor\GPUCache"),
@@ -143,7 +244,6 @@ public static class FileCleanupGroups
         CleanupTarget.Contents(@"%LOCALAPPDATA%\AMD\VkCache"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\Ati\GLCache"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\NVIDIA\DXCache"),
-        CleanupTarget.Contents(@"%LOCALAPPDATA%\UnrealEngine"),
         CleanupTarget.Contents(@"%ProgramData%\LGHUB\cache"),
         CleanupTarget.Contents(@"%USERPROFILE%\AppData\LocalLow\NVIDIA\PerDriverVersion\DXCache"),
         CleanupTarget.Contents(@"%USERPROFILE%\.claude\debug"),
@@ -151,15 +251,41 @@ public static class FileCleanupGroups
         CleanupTarget.Contents(@"%USERPROFILE%\.claude-mem\logs"),
     ];
 
+    /// <summary>
+    /// アプリキャッシュの各パスを、画面で選択するアプリ名へ畳む。
+    /// 保存キーもこの名前になるため、パスが増えても同じアプリの選択状態を引き継げる。
+    /// </summary>
+    internal static string GetAppCacheGroupName(CleanupTarget target)
+    {
+        var path = target.RawPath;
+        return path switch
+        {
+            _ when path.StartsWith(@"%APPDATA%\Antigravity\", StringComparison.OrdinalIgnoreCase) => "Antigravity",
+            _ when path.StartsWith(@"%APPDATA%\Aqua Voice\", StringComparison.OrdinalIgnoreCase) => "Aqua Voice",
+            _ when path.StartsWith(@"%APPDATA%\Claude\", StringComparison.OrdinalIgnoreCase) ||
+                   path.StartsWith(@"%USERPROFILE%\.claude\", StringComparison.OrdinalIgnoreCase) ||
+                   path.StartsWith(@"%USERPROFILE%\.claude-mem\", StringComparison.OrdinalIgnoreCase) => "Claude",
+            _ when path.StartsWith(@"%APPDATA%\Cursor\", StringComparison.OrdinalIgnoreCase) => "Cursor",
+            _ when path.StartsWith(@"%APPDATA%\discord\", StringComparison.OrdinalIgnoreCase) => "Discord",
+            _ when path.StartsWith(@"%LOCALAPPDATA%\AMD\", StringComparison.OrdinalIgnoreCase) ||
+                   path.StartsWith(@"%LOCALAPPDATA%\Ati\", StringComparison.OrdinalIgnoreCase) => "AMD",
+            _ when path.StartsWith(@"%LOCALAPPDATA%\NVIDIA\", StringComparison.OrdinalIgnoreCase) ||
+                   path.StartsWith(@"%USERPROFILE%\AppData\LocalLow\NVIDIA\", StringComparison.OrdinalIgnoreCase) => "NVIDIA",
+            _ when path.StartsWith(@"%ProgramData%\LGHUB\", StringComparison.OrdinalIgnoreCase) => "Logitech G HUB",
+            _ => FileCleanupAction.DescribeTarget(target),
+        };
+    }
+
     internal static FileCleanupAction CreateAppCache(ICleanupPreferences? preferences = null) => new(
         id: "cleanup-app-cache",
         label: "アプリのキャッシュとログを削除",
         description:
             "Electron 系アプリ (Claude / Cursor / Discord / Antigravity 等) のキャッシュ、GPU のシェーダーキャッシュ (NVIDIA DXCache / AMD)、" +
-            "Unreal Engine の派生データ、常駐ツールのログを削除します。設定やログイン状態は消えず、各アプリが次の起動で作り直します。" +
+            "クラッシュレポートや常駐ツールのログを削除します。WebStorage、仮想マシン本体、アプリ設定やログイン状態は削除しません。各アプリが必要なキャッシュを次の起動で作り直します。" +
             "対象のアプリが入っていない環境では、その分だけスキップされます。",
         targetProvider: () => AppCacheTargets,
-        preferences: preferences);
+        preferences: preferences,
+        checkListKeySelector: GetAppCacheGroupName);
 
     // ═══ 開発ツールのパッケージキャッシュ ═══
 
@@ -179,31 +305,46 @@ public static class FileCleanupGroups
     [
         CleanupTarget.Contents(@"%LOCALAPPDATA%\pip\Cache"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\Yarn\Cache"),
-        CleanupTarget.Contents(@"%LOCALAPPDATA%\NuGet"),
-        CleanupTarget.Contents(@"%APPDATA%\uv\python"),
-        CleanupTarget.Contents(@"%USERPROFILE%\.npm"),
-        CleanupTarget.Contents(@"%USERPROFILE%\.nuget"),
+        CleanupTarget.Contents(@"%LOCALAPPDATA%\NuGet\v3-cache"),
+        CleanupTarget.Contents(@"%USERPROFILE%\.npm\_cacache"),
+        CleanupTarget.Contents(@"%USERPROFILE%\.npm\_logs"),
+        CleanupTarget.Contents(@"%USERPROFILE%\.npm\_npx"),
+        CleanupTarget.Contents(@"%USERPROFILE%\.nuget\packages"),
         CleanupTarget.Contents(@"%USERPROFILE%\.gradle\caches"),
-        CleanupTarget.Contents(@"%USERPROFILE%\.m2\repository"),
         CleanupTarget.Contents(@"%USERPROFILE%\.bun\install\cache"),
-        CleanupTarget.Contents(@"%USERPROFILE%\.cache"),
-        CleanupTarget.Contents(@"%USERPROFILE%\.matplotlib"),
-        CleanupTarget.Contents(@"%USERPROFILE%\.templateengine"),
-        CleanupTarget.Contents(@"%USERPROFILE%\.omnisharp"),
-        CleanupTarget.Contents(@"%USERPROFILE%\.crossnote"),
         .. StoreCacheTargets,
     ];
+
+    internal static string GetPackageCacheGroupName(CleanupTarget target)
+    {
+        var path = target.RawPath;
+        return path switch
+        {
+            _ when path.Contains(@"\pip\", StringComparison.OrdinalIgnoreCase) => "pip",
+            _ when path.Contains(@"\Yarn\", StringComparison.OrdinalIgnoreCase) => "Yarn",
+            _ when path.Contains(@"\NuGet\", StringComparison.OrdinalIgnoreCase) ||
+                   path.Contains(@"\.nuget\", StringComparison.OrdinalIgnoreCase) => "NuGet",
+            _ when path.Contains(@"\uv\", StringComparison.OrdinalIgnoreCase) => "uv",
+            _ when path.EndsWith(@"\npm-cache", StringComparison.OrdinalIgnoreCase) ||
+                   path.Contains(@"\.npm\", StringComparison.OrdinalIgnoreCase) => "npm",
+            _ when path.Contains(@"\pnpm\", StringComparison.OrdinalIgnoreCase) => "pnpm",
+            _ when path.Contains(@"\.cargo\", StringComparison.OrdinalIgnoreCase) => "Cargo",
+            _ when path.Contains(@"\.gradle\", StringComparison.OrdinalIgnoreCase) => "Gradle",
+            _ when path.Contains(@"\.bun\", StringComparison.OrdinalIgnoreCase) => "Bun",
+            _ => FileCleanupAction.DescribeTarget(target),
+        };
+    }
 
     internal static FileCleanupAction CreatePackageCache(ICleanupPreferences? preferences = null) => new(
         id: "cleanup-package-cache",
         label: "開発ツールのパッケージキャッシュを削除",
         description:
-            "npm / pnpm / NuGet / pip / Yarn / Gradle / Maven / Bun / uv / Cargo がダウンロード済みパッケージを溜め込んでいるキャッシュを削除します。数十 GB 単位で空くことがあります。" +
-            "認証情報や設定ファイル (.gnupg / .aws / .config 等) は対象に含みません。" +
-            "ホームディレクトリの .cache フォルダ全体も対象のため、huggingface のモデルなど数十 GB 規模の再ダウンロードが必要なキャッシュが含まれることがあります。" +
+            "npm / pnpm / NuGet / pip / Yarn / Gradle / Bun / uv / Cargo がダウンロード済みパッケージを溜め込んでいる、再取得可能なキャッシュだけを削除します。数十 GB 単位で空くことがあります。" +
+            "uv 管理 Python、Maven のローカル成果物、認証情報、設定ファイル、汎用の .cache フォルダは対象に含みません。" +
             "削除後、各プロジェクトの次回ビルドや復元でパッケージが再ダウンロードされるため、その 1 回だけ時間と通信量がかかります。",
         targetProvider: () => PackageCacheTargets,
-        preferences: preferences);
+        preferences: preferences,
+        checkListKeySelector: GetPackageCacheGroupName);
 
     // ═══ ブラウザキャッシュ ═══
 
@@ -220,7 +361,7 @@ public static class FileCleanupGroups
     ];
 
     /// <summary>ブラウザ基点の直下にある、プロファイル共通のキャッシュ。</summary>
-    private static readonly string[] BrowserSharedCaches =
+    internal static readonly string[] BrowserSharedCaches =
     [
         "Temp",
         @"User Data\Safe Browsing",
@@ -233,7 +374,6 @@ public static class FileCleanupGroups
         @"User Data\GraphiteDawnCache",
         @"User Data\GrShaderCache",
         @"User Data\ShaderCache",
-        @"User Data\WidevineCdm",
     ];
 
     /// <summary>
@@ -242,18 +382,18 @@ public static class FileCleanupGroups
     /// 永続データであり、「キャッシュ」ではなく実質サイトデータのため、消えないと説明している
     /// ログイン状態を壊さないよう対象から除外する。
     /// </summary>
-    private static readonly string[] BrowserProfileCaches =
+    internal static readonly string[] BrowserProfileCaches =
     [
         "Cache",
         "Code Cache",
-        "Service Worker",
+        @"Service Worker\CacheStorage",
+        @"Service Worker\ScriptCache",
         "GPUCache",
         "JumpListIconsRecentClosed",
         "JumpListIconsTopSites",
         "DawnGraphiteCache",
         "DawnWebGPUCache",
         "Shared Dictionary",
-        "screen_ai",
         "CRXTelemetry",
         "VideoDecodeStats",
         "blob_storage",
@@ -324,16 +464,30 @@ public static class FileCleanupGroups
         return FileCleanupAction.DescribeTarget(target);
     }
 
+    internal static string GetBrowserDisplayName(CleanupTarget target) =>
+        DescribeBrowserTarget(target) switch
+        {
+            @"%LOCALAPPDATA%\BraveSoftware\Brave-Browser" => "Brave",
+            @"%LOCALAPPDATA%\Microsoft\Edge" => "Microsoft Edge",
+            @"%LOCALAPPDATA%\Google\Chrome" => "Google Chrome",
+            @"%LOCALAPPDATA%\Google\Chrome Beta" => "Google Chrome Beta",
+            @"%LOCALAPPDATA%\Google\Chrome Dev" => "Google Chrome Dev",
+            @"%LOCALAPPDATA%\Vivaldi" => "Vivaldi",
+            @"%LOCALAPPDATA%\Perplexity\Comet" => "Comet",
+            var fallback => fallback,
+        };
+
     internal static FileCleanupAction CreateBrowserCache(ICleanupPreferences? preferences = null) => new(
         id: "cleanup-browser-cache",
         label: "ブラウザのキャッシュを削除",
         description:
             "インストール済みの Chromium 系ブラウザ (Edge / Chrome / Brave / Vivaldi / Comet) を検出し、全プロファイルの Web キャッシュ、" +
-            "GPU シェーダーキャッシュ、Service Worker、クラッシュレポート、拡張機能の一時データを削除します。数 GB 単位で空くことが多い項目です。" +
-            "ブックマーク・パスワード・ログイン状態は消えません。実行前にブラウザを終了しておくと、より確実に削除できます。",
+            "GPU シェーダーキャッシュ、Service Worker のキャッシュ領域、クラッシュレポート、拡張機能の一時データを削除します。数 GB 単位で空くことが多い項目です。" +
+            "Service Worker の登録 DB、DRM コンポーネント、ブックマーク・パスワード・ログイン状態は削除しません。実行前にブラウザを終了しておくと、より確実に削除できます。",
         targetProvider: () => EnumerateBrowserTargets(),
         preferences: preferences,
-        checkListKeySelector: DescribeBrowserTarget);
+        checkListKeySelector: DescribeBrowserTarget,
+        checkListLabelSelector: GetBrowserDisplayName);
 
     // ═══ アイコン・サムネイル・フォントのキャッシュ ═══
 
@@ -345,6 +499,12 @@ public static class FileCleanupGroups
         CleanupTarget.Contents(@"%SystemRoot%\ServiceProfiles\LocalService\AppData\Local\FontCache"),
         CleanupTarget.Files(@"%SystemRoot%\System32", "FNTCACHE.DAT"),
     ];
+
+    internal static string GetShellCacheGroupName(CleanupTarget target) =>
+        target.RawPath.Contains(@"\Microsoft\Windows\Explorer", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(target.Pattern, "IconCache.db", StringComparison.OrdinalIgnoreCase)
+            ? "Windows Explorer"
+            : "Windows Font Cache";
 
     /// <summary>フォントキャッシュのファイルはフォントサービスが常時開いている。</summary>
     internal static readonly string[] ShellCacheServices = ["FontCache", "FontCache3.0.0.0"];
@@ -362,30 +522,36 @@ public static class FileCleanupGroups
         requiresReboot: true,
         affectsExplorer: true,
         scheduleBlockedForReboot: true,
-        preferences: preferences);
+        preferences: preferences,
+        checkListKeySelector: GetShellCacheGroupName);
 
     // ═══ Windows Update のキャッシュ ═══
 
     internal static readonly CleanupTarget[] WindowsUpdateCacheTargets =
     [
         CleanupTarget.Contents(@"%SystemRoot%\SoftwareDistribution\Download"),
-        CleanupTarget.Contents(@"%SystemRoot%\SoftwareDistribution\DataStore"),
-        CleanupTarget.Contents(@"%SystemRoot%\System32\catroot2"),
     ];
 
-    internal static readonly string[] WindowsUpdateCacheServices = ["wuauserv", "bits", "usosvc", "cryptsvc"];
+    internal static string GetWindowsUpdateCacheGroupName(CleanupTarget target) =>
+        target.RawPath switch
+        {
+            @"%SystemRoot%\SoftwareDistribution\Download" => "Update Downloads",
+            _ => FileCleanupAction.DescribeTarget(target),
+        };
+
+    internal static readonly string[] WindowsUpdateCacheServices = ["wuauserv", "bits"];
 
     internal static FileCleanupAction CreateWindowsUpdateCache(ICommandExecutor executor, ICleanupPreferences? preferences = null) => new(
         id: "cleanup-windows-update-cache",
         label: "Windows Update のダウンロードキャッシュを削除",
         description:
-            "適用済みの更新プログラムのダウンロード済みファイル (SoftwareDistribution)、更新履歴のデータストア、署名カタログのキャッシュ (catroot2) を削除します。" +
-            "更新が途中で止まる・同じ更新が繰り返し失敗するといった不調の定番対処で、数 GB の空き容量にもなります。" +
-            "関連サービスを一時停止してから削除し、完了後に元の状態へ戻します。Windows Update の更新履歴の表示は消えます。",
+            "Windows Update が再取得できるダウンロード済みファイル (SoftwareDistribution\\Download) だけを削除します。数 GB の空き容量になることがあります。" +
+            "更新履歴のデータストアと署名カタログ (catroot2) は削除しません。関連サービスを一時停止してから削除し、完了後に元の状態へ戻します。",
         targetProvider: () => WindowsUpdateCacheTargets,
         executor: executor,
         servicesToStop: WindowsUpdateCacheServices,
-        preferences: preferences);
+        preferences: preferences,
+        checkListKeySelector: GetWindowsUpdateCacheGroupName);
 
     // ═══ 先読み・検索インデックス ═══
 
@@ -394,6 +560,14 @@ public static class FileCleanupGroups
         CleanupTarget.Contents(@"%SystemRoot%\Prefetch"),
         CleanupTarget.Contents(@"%ProgramData%\Microsoft\Search\Data\Applications\Windows"),
     ];
+
+    internal static string GetOsIndexGroupName(CleanupTarget target) =>
+        target.RawPath switch
+        {
+            @"%SystemRoot%\Prefetch" => "Prefetch",
+            @"%ProgramData%\Microsoft\Search\Data\Applications\Windows" => "Windows Search",
+            _ => FileCleanupAction.DescribeTarget(target),
+        };
 
     internal static readonly string[] OsIndexServices = ["SysMain", "wsearch"];
 
@@ -407,69 +581,7 @@ public static class FileCleanupGroups
         targetProvider: () => OsIndexTargets,
         executor: executor,
         servicesToStop: OsIndexServices,
-        preferences: preferences);
+        preferences: preferences,
+        checkListKeySelector: GetOsIndexGroupName);
 
-    // ═══ ドライブ直下の残骸 ═══
-
-    /// <summary>
-    /// ドライブ直下に残る残骸フォルダ。フォルダごと消すため、作った主体を名前で断定できるものだけを載せる
-    /// (%SystemDrive%\log のような汎用名は、利用者やアプリが正規の置き場として作っている可能性があるので入れない)。
-    /// 説明文に列挙した名前と一致させること (ドライブ直下の残骸フォルダは説明に列挙した名前だけを消す)。
-    /// </summary>
-    internal static readonly CleanupTarget[] DriveRootLeftoverTargets =
-    [
-        CleanupTarget.Remove(@"%SystemDrive%\$SysReset"),
-        CleanupTarget.Remove(@"%SystemDrive%\AMD"),
-        CleanupTarget.Remove(@"%SystemDrive%\Intel"),
-        CleanupTarget.Remove(@"%SystemDrive%\OneDriveTemp"),
-        CleanupTarget.Remove(@"%SystemDrive%\PerfLogs"),
-        CleanupTarget.Remove(@"%SystemDrive%\SWSetup"),
-        CleanupTarget.Remove(@"%SystemDrive%\Windows.old"),
-    ];
-
-    internal static FileCleanupAction CreateDriveRootLeftovers(ICleanupPreferences? preferences = null) => new(
-        id: "cleanup-drive-root-leftovers",
-        label: "ドライブ直下に残った残骸フォルダを削除",
-        description:
-            "ドライバのインストーラーや OS のアップグレードがシステムドライブの直下に残していくフォルダ (AMD / Intel / SWSetup / PerfLogs / OneDriveTemp / $SysReset / Windows.old) を削除します。" +
-            "特に Windows.old は数十 GB になることがあり、最大の空き容量になります。" +
-            "注意: Windows.old を消すと、大型アップデート後に「以前のバージョンに戻す」ことができなくなります。アップグレード直後は実行しないでください。",
-        targetProvider: () => DriveRootLeftoverTargets,
-        preferences: preferences);
-
-    // ═══ Outlook のオフラインキャッシュ ═══
-
-    internal static readonly CleanupTarget[] OutlookOfflineCacheTargets =
-    [
-        CleanupTarget.Files(@"%LOCALAPPDATA%\Microsoft\Outlook", "*.ost"),
-        CleanupTarget.Files(@"%LOCALAPPDATA%\Microsoft\Outlook", "*.nst"),
-    ];
-
-    internal static FileCleanupAction CreateOutlookOfflineCache(ICleanupPreferences? preferences = null) => new(
-        id: "cleanup-outlook-offline-cache",
-        label: "Outlook のオフラインキャッシュを削除",
-        description:
-            "Outlook がサーバーのメールを手元に複製しているオフラインデータ (.ost) と検索用データ (.nst) を削除します。1 つで数 GB〜数十 GB になることがあります。" +
-            "サーバー上のメールは消えず、次回 Outlook を起動したときに再同期されます。" +
-            "注意: 再同期が終わるまで過去のメールが表示されず、回線によっては数時間かかります。ローカルにしかない .pst のデータは対象外なので消えません。",
-        targetProvider: () => OutlookOfflineCacheTargets,
-        preferences: preferences);
-
-    // ═══ 迷子の nul ファイル ═══
-
-    internal static readonly CleanupTarget[] NulFileTargets =
-    [
-        CleanupTarget.RecursiveFiles(@"%SystemDrive%\", "nul"),
-    ];
-
-    internal static FileCleanupAction CreateNulFiles(ICleanupPreferences? preferences = null) => new(
-        id: "cleanup-nul-files",
-        label: "迷子の nul ファイルを削除",
-        description:
-            "Git Bash や一部の開発ツールがコマンドのリダイレクト (> nul) をファイル名としてそのまま作成してしまうことで、" +
-            "システムドライブのあちこちに残る「nul」という名前の空ファイルを、フォルダを問わず検索して削除します。" +
-            "Windows の予約デバイス名と同じ名前のため通常の方法では削除できず、専用の処理で安全に削除します。" +
-            "ドライブ全体を検索するため、ファイル数の多い環境では完了まで数分以上かかることがあります。",
-        targetProvider: () => NulFileTargets,
-        preferences: preferences);
 }

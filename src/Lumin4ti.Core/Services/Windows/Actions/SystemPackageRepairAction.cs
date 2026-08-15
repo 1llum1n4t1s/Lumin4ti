@@ -92,7 +92,7 @@ public sealed class SystemPackageRepairAction : IMaintenanceAction
         {
             ct.ThrowIfCancellationRequested();
 
-            // 実体が消えている場合は再登録できない (ゴースト登録の修復は remove-ghost-packages の担当)。
+            // 実体が消えている場合は再登録できないため、安全に失敗として返す。
             if (package.InstalledPath is { Length: > 0 } path && _isConfirmedMissing(path))
             {
                 failed++;

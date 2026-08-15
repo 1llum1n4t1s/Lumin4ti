@@ -1,4 +1,3 @@
-using System.Diagnostics.Eventing.Reader;
 using System.Runtime.ExceptionServices;
 using System.Runtime.Versioning;
 using Lumin4ti.Core.Interfaces;
@@ -245,83 +244,6 @@ internal sealed class TransactionalNtpConfigurationStore(IRegistryValueAccessor 
                 applyError);
         }
     }
-}
-
-/// <summary>
-/// イベントビューアーの全ログをクリアする。
-/// wevtutil を使わず EventLogSession (Windows Event Log API) で C# ネイティブに実装する。
-/// </summary>
-[SupportedOSPlatform("windows")]
-public sealed class EventLogClearAction : IMaintenanceAction
-{
-    public string Id => "event-log-clear";
-
-    public string Label => "イベントビューアーの全ログを削除";
-
-    public string Description =>
-        "イベントビューアーに蓄積された全チャンネルのログを削除して、ログ格納領域 (通常数百 MB) を解放します。" +
-        "過去のトラブルシューティング情報も消えるため、直近の不具合を調査中の場合は実行しないでください。一部の保護されたシステムログは削除できずスキップされます。";
-
-    public CommandCategory Category => CommandCategory.Cleanup;
-
-    public bool RequiresReboot => false;
-
-    public bool IsLongRunning => true;
-
-    public Task<MaintenanceActionResult> ExecuteAsync(CancellationToken ct = default) =>
-        Task.Run(() =>
-        {
-            var session = EventLogSession.GlobalSession;
-            var cleared = 0;
-            var accessDenied = 0;
-            var protectedLogs = 0;
-
-            foreach (var logName in session.GetLogNames())
-            {
-                ct.ThrowIfCancellationRequested();
-                try
-                {
-                    session.ClearLog(logName);
-                    cleared++;
-                }
-                catch (UnauthorizedAccessException)
-                {
-                    accessDenied++;
-                }
-                catch (EventLogException ex) when (ex.Message.Contains("Access is denied", StringComparison.OrdinalIgnoreCase) || ex.Message.Contains("アクセスが拒否", StringComparison.Ordinal))
-                {
-                    accessDenied++;
-                }
-                catch (EventLogException)
-                {
-                    // 有効化された Analytic/Debug チャンネル等はクリア不可
-                    protectedLogs++;
-                }
-            }
-
-            LoggerBootstrap.Log.Info($"{Id}: {cleared} 件クリア / 権限不足 {accessDenied} 件 / 保護 {protectedLogs} 件");
-
-            var lines = new List<string> { $"  - {cleared} 件のログをクリアしました" };
-            if (protectedLogs > 0)
-            {
-                lines.Add($"  - 保護されたログ {protectedLogs} 件はスキップしました (有効化中の Analytic/Debug チャンネル等)");
-            }
-
-            if (accessDenied == 0)
-            {
-                return MaintenanceActionResult.Ok(lines);
-            }
-
-            lines.Add($"  - 権限不足で {accessDenied} 件をスキップしました");
-            // 権限不足が支配的なら非昇格実行 (デバッグ起動等) の可能性が高いので失敗として案内する
-            if (accessDenied > cleared)
-            {
-                lines.Add("  - 管理者権限で起動し直してから再実行してください (通常起動なら UAC 昇格されます)");
-                return MaintenanceActionResult.Fail(string.Join(Environment.NewLine, lines));
-            }
-
-            return MaintenanceActionResult.Ok(lines);
-        }, ct);
 }
 
 /// <summary>

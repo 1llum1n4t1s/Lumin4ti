@@ -79,18 +79,40 @@ public sealed class MaintenanceActionCatalogTests
     }
 
     [TestMethod]
+    public void 復元不能な削除アクションはカタログへ登録しない()
+    {
+        var ids = CreateCatalog().Items.Select(item => item.Id).ToHashSet(StringComparer.Ordinal);
+        string[] removedIds =
+        [
+            "gpu-preference-reset",
+            "remove-broken-startup",
+            "remove-dead-associations",
+            "remove-ghost-packages",
+            "event-log-clear",
+            "wu-component-cleanup",
+            "cleanup-drive-root-leftovers",
+            "cleanup-outlook-offline-cache",
+            "cleanup-nul-files",
+            "cleanup-recycle-bin",
+        ];
+
+        foreach (var id in removedIds)
+        {
+            Assert.IsFalse(ids.Contains(id), id);
+        }
+    }
+
+    [TestMethod]
     public void エクスプローラー影響フラグはシェル系項目に付いている()
     {
         var items = CreateCatalog().Items.ToDictionary(a => a.Id);
 
         Assert.IsTrue(items["repair-shell-folder-names"].AffectsExplorer);
-        Assert.IsTrue(items["remove-dead-associations"].AffectsExplorer);
         Assert.IsTrue(items["tray-icon-reset"].AffectsExplorer);
         Assert.IsTrue(items["folder-template-general"].AffectsExplorer);
         Assert.IsTrue(items["menu-delay-zero"].AffectsExplorer);
-        // レジストリ tweak や DISM 系は Explorer 再起動では反映されないので付けない
+        // レジストリ tweak 等は Explorer 再起動では反映されないので付けない
         Assert.IsFalse(items["svchost-split-threshold"].AffectsExplorer);
-        Assert.IsFalse(items["wu-component-cleanup"].AffectsExplorer);
         Assert.IsFalse(items["quick-access-sort"].AffectsExplorer);
     }
 
