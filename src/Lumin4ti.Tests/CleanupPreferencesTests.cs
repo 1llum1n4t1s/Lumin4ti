@@ -187,14 +187,17 @@ public sealed class CleanupPreferencesTests
     public void ブラウザのチェックリストはブラウザ単位に畳む()
     {
         // プロファイル数 × キャッシュ種別で対象は数千件になるため、チェックは
-        // インストール済みブラウザの数までしか増えてはいけない。
+        // 実際にキャッシュを検出したブラウザの数までしか増えてはいけない。
         var action = FileCleanupGroups.CreateBrowserCache();
-        var installedRoots = FileCleanupGroups.BrowserRoots
-            .Count(raw => FileCleanupEngine.TryResolve(raw, out var root, out _) && Directory.Exists(root));
+        var detectedRoots = action.EnumerateAllTargets()
+            .Where(FileCleanupEngine.HasCleanupCandidates)
+            .Select(action.GetCheckListKey)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
 
         var entries = action.GetCheckListEntries();
 
-        Assert.AreEqual(installedRoots, entries.Count);
+        CollectionAssert.AreEquivalent(detectedRoots, entries.Select(e => e.Value).ToArray());
         CollectionAssert.IsSubsetOf(
             entries.Select(e => e.Value).ToArray(),
             FileCleanupGroups.BrowserRoots,
@@ -230,6 +233,15 @@ public sealed class CleanupPreferencesTests
     public void アプリキャッシュのチェックリストはアプリ単位に畳む()
     {
         var action = FileCleanupGroups.CreateAppCache();
+        var allGroups = FileCleanupGroups.AppCacheTargets
+            .Select(FileCleanupGroups.GetAppCacheGroupName)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        var detectedGroups = action.EnumerateAllTargets()
+            .Where(FileCleanupEngine.HasCleanupCandidates)
+            .Select(action.GetCheckListKey)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
 
         var entries = action.GetCheckListEntries();
 
@@ -239,15 +251,9 @@ public sealed class CleanupPreferencesTests
                 "Antigravity", "Aqua Voice", "Claude", "Cursor", "Discord",
                 "AMD", "NVIDIA", "Logitech G HUB",
             },
-            entries.Select(e => e.Value).ToArray());
+            allGroups);
+        CollectionAssert.AreEquivalent(detectedGroups, entries.Select(e => e.Value).ToArray());
         Assert.IsTrue(entries.All(e => e.Label == e.Value));
-        Assert.IsTrue(
-            FileCleanupGroups.AppCacheTargets.All(t =>
-                entries.Any(e => string.Equals(
-                    e.Value,
-                    FileCleanupGroups.GetAppCacheGroupName(t),
-                    StringComparison.OrdinalIgnoreCase))),
-            "すべての削除対象がアプリ名へ分類されている必要があります");
     }
 
     [TestMethod]
@@ -270,24 +276,42 @@ public sealed class CleanupPreferencesTests
     public async Task アプリ単位の選択時に旧パス単位の除外を整理する()
     {
         var preferences = new CleanupPreferences(new FakeSettingsService());
-        var action = FileCleanupGroups.CreateAppCache(preferences);
-        var claudeTargets = FileCleanupGroups.AppCacheTargets.Where(t =>
-            FileCleanupGroups.GetAppCacheGroupName(t) == "Claude").ToArray();
-        Assert.IsTrue(claudeTargets.Length > 1, "複数パスを 1 アプリへ畳む回帰ケースが必要です");
-        var claudeTarget = claudeTargets[0];
-        var legacyKey = FileCleanupAction.DescribeTarget(claudeTarget);
-        preferences.SetTargetEnabled(action.Id, legacyKey, enabled: false);
+        var root = Path.Combine(Path.GetTempPath(), "Lumin4tiCleanupPreferencesTests", Guid.NewGuid().ToString("N"));
+        try
+        {
+            var targets = new[]
+            {
+                CleanupTarget.Contents(Path.Combine(root, "Cache")),
+                CleanupTarget.Contents(Path.Combine(root, "logs")),
+            };
+            Directory.CreateDirectory(targets[0].RawPath);
+            await File.WriteAllTextAsync(Path.Combine(targets[0].RawPath, "data.bin"), "x");
+            var action = new FileCleanupAction(
+                "test-app-cache",
+                "アプリキャッシュ",
+                "アプリキャッシュ",
+                () => targets,
+                preferences: preferences,
+                checkListKeySelector: _ => "Claude");
+            var legacyKey = FileCleanupAction.DescribeTarget(targets[0]);
+            preferences.SetTargetEnabled(action.Id, legacyKey, enabled: false);
 
-        Assert.IsFalse(action.GetCheckListEntries().Single(e => e.Value == "Claude").IsSelected);
-        Assert.IsFalse(
-            action.EnumerateSelectedTargets().Any(t =>
-                FileCleanupGroups.GetAppCacheGroupName(t) == "Claude"),
-            "画面で OFF のアプリは、旧形式の除外が一部だけでもアプリ全体を削除対象から外してください");
+            Assert.IsFalse(action.GetCheckListEntries().Single(e => e.Value == "Claude").IsSelected);
+            Assert.HasCount(0, action.EnumerateSelectedTargets(),
+                "画面で OFF のアプリは、旧形式の除外が一部だけでもアプリ全体を削除対象から外してください");
 
-        await action.SetCheckListEntrySelectedAsync("Claude", selected: true);
+            await action.SetCheckListEntrySelectedAsync("Claude", selected: true);
 
-        Assert.IsTrue(preferences.IsTargetEnabled(action.Id, legacyKey));
-        Assert.IsTrue(action.EnumerateSelectedTargets().Contains(claudeTarget));
+            Assert.IsTrue(preferences.IsTargetEnabled(action.Id, legacyKey));
+            Assert.IsTrue(action.EnumerateSelectedTargets().Contains(targets[0]));
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
     }
 
     [TestMethod]
@@ -318,7 +342,19 @@ public sealed class CleanupPreferencesTests
         foreach (var (action, expectedLabels) in expected)
         {
             var entries = action.GetCheckListEntries();
-            CollectionAssert.AreEquivalent(expectedLabels, entries.Select(e => e.Label).ToArray(), action.Id);
+            var allLabels = action.EnumerateAllTargets()
+                .Select(action.GetCheckListKey)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+            var detectedLabels = action.EnumerateAllTargets()
+                .Where(FileCleanupEngine.HasCleanupCandidates)
+                .Select(action.GetCheckListKey)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+
+            CollectionAssert.AreEquivalent(expectedLabels, allLabels, $"{action.Id}: 全対象の分類");
+            CollectionAssert.AreEquivalent(detectedLabels, entries.Select(e => e.Label).ToArray(),
+                $"{action.Id}: 検出済み対象だけを表示");
             Assert.IsTrue(
                 entries.All(e => !e.Label.Contains('%') && !Path.IsPathFullyQualified(e.Label)),
                 $"{action.Id}: 画面へフルパスを表示しないでください");

@@ -329,6 +329,7 @@ public partial class CommandCategoryViewModel : ObservableObject
             }
 
             result = await RestartExplorerIfNeededAsync(item, result);
+            item.RefreshCheckListEntries();
             LogOperationFinished(item, "実行", result, startedAt);
             ShowResult(
                 item,

@@ -59,6 +59,14 @@ public partial class CommandItemViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(CheckListChevron))]
     private bool isCheckListExpanded;
 
+    partial void OnIsCheckListExpandedChanged(bool value)
+    {
+        if (value)
+        {
+            RefreshCheckListEntries();
+        }
+    }
+
     /// <summary>開閉を示す三角。アイコン資産を増やさず、フォント非依存の記号で向きを示す。</summary>
     public string CheckListChevron => IsCheckListExpanded ? "▾" : "▸";
 
@@ -179,14 +187,39 @@ public partial class CommandItemViewModel : ObservableObject
         ChoiceOptions = item is IMaintenanceChoice choice
             ? [.. choice.Options.Select(o => new ChoiceOptionViewModel(o))]
             : [];
-        CheckListEntries = item is IMaintenanceCheckList checkList
-            ? [.. checkList.GetCheckListEntries().Select(e => new CheckListEntryViewModel(e, ApplyCheckListEntryAsync))]
-            : [];
+        CheckListEntries = [];
+        RefreshCheckListEntries();
         RunCommand = new AsyncRelayCommand(() => _run(this), () => !IsRunning);
         CancelCommand = new RelayCommand(Cancel, () => CanCancel);
 
         // 言語切替時にローカライズ済みプロパティを再評価する
         App.LocaleChanged += OnLocaleChanged;
+    }
+
+    /// <summary>
+    /// 現在検出できるチェック項目で一覧を作り直す。
+    /// キャッシュはアプリ起動中にも生成・削除されるため、開いた時と削除完了後に再評価する。
+    /// </summary>
+    internal void RefreshCheckListEntries()
+    {
+        if (Item is not IMaintenanceCheckList checkList)
+        {
+            return;
+        }
+
+        CheckListEntries.Clear();
+        foreach (var entry in checkList.GetCheckListEntries())
+        {
+            CheckListEntries.Add(new CheckListEntryViewModel(entry, ApplyCheckListEntryAsync));
+        }
+
+        if (CheckListEntries.Count == 0)
+        {
+            IsCheckListExpanded = false;
+        }
+
+        OnPropertyChanged(nameof(HasCheckList));
+        OnPropertyChanged(nameof(CheckListSummary));
     }
 
     private void OnLocaleChanged()

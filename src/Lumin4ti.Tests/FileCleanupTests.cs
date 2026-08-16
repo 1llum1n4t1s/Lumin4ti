@@ -139,6 +139,48 @@ public sealed class FileCleanupTests
     }
 
     [TestMethod]
+    public void 削除候補の検出は存在だけでなく実際の中身を見る()
+    {
+        var contents = CleanupTarget.Contents(Path.Combine(_root, "cache"));
+        var files = CleanupTarget.Files(Path.Combine(_root, "logs"), "*.etl");
+
+        Assert.IsFalse(FileCleanupEngine.HasCleanupCandidates(contents), "未作成フォルダは検出しない");
+        Directory.CreateDirectory(Path.Combine(_root, "cache"));
+        Assert.IsFalse(FileCleanupEngine.HasCleanupCandidates(contents), "空フォルダは削除対象として表示しない");
+
+        CreateFile(@"cache\data.bin");
+        Assert.IsTrue(FileCleanupEngine.HasCleanupCandidates(contents));
+
+        CreateFile(@"logs\keep.txt");
+        Assert.IsFalse(FileCleanupEngine.HasCleanupCandidates(files), "パターン外のファイルだけなら検出しない");
+        CreateFile(@"logs\trace.etl");
+        Assert.IsTrue(FileCleanupEngine.HasCleanupCandidates(files));
+    }
+
+    [TestMethod]
+    public void チェックリストは削除候補を検出したグループだけを返す()
+    {
+        var detected = CleanupTarget.Contents(Path.Combine(_root, "installed", "Cache"));
+        var sameGroupMissing = CleanupTarget.Contents(Path.Combine(_root, "installed", "logs"));
+        var missing = CleanupTarget.Contents(Path.Combine(_root, "not-installed", "Cache"));
+        CreateFile(@"installed\Cache\data.bin");
+        var action = new FileCleanupAction(
+            "test-detected",
+            "検出テスト",
+            "検出テスト",
+            () => [detected, sameGroupMissing, missing],
+            checkListKeySelector: target => target == missing ? "未インストール" : "インストール済み");
+
+        var entries = action.GetCheckListEntries();
+
+        Assert.HasCount(1, entries);
+        Assert.AreEqual("インストール済み", entries[0].Label);
+
+        File.Delete(Path.Combine(_root, "installed", "Cache", "data.bin"));
+        Assert.HasCount(0, action.GetCheckListEntries(), "削除後に再検出すると行も消える必要があります");
+    }
+
+    [TestMethod]
     public void 読み取り専用ファイルも削除できる()
     {
         var file = CreateFile(@"cache\readonly.tmp");
@@ -173,6 +215,29 @@ public sealed class FileCleanupTests
         Assert.AreEqual(1, outcome.RejectedTargets.Count);
         Assert.AreEqual(0, outcome.DeletedFiles);
         Assert.IsTrue(File.Exists(keep), "リンク先の実体は残す");
+    }
+
+    [TestMethod]
+    public void パターン指定でもリンクになっている対象は辿らない()
+    {
+        var real = Path.Combine(_root, "real");
+        Directory.CreateDirectory(real);
+        var keep = CreateFile(@"real\trace.etl");
+        var link = Path.Combine(_root, "link");
+        CreateJunction(link, real);
+        var target = CleanupTarget.Files(link, "*.etl");
+
+        Assert.IsFalse(FileCleanupEngine.HasCleanupCandidates(target));
+
+        var outcome = FileCleanupEngine.Run(
+            [target],
+            scheduleBlockedForReboot: false,
+            progress: null,
+            ct: CancellationToken.None);
+
+        Assert.AreEqual(1, outcome.RejectedTargets.Count);
+        Assert.AreEqual(0, outcome.DeletedFiles);
+        Assert.IsTrue(File.Exists(keep), "リンク先のパターン一致ファイルも残す");
     }
 
     [TestMethod]

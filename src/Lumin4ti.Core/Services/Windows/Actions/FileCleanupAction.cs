@@ -127,6 +127,7 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
     [
         .. EnumerateAllTargets()
             .GroupBy(_checkListKeySelector, StringComparer.OrdinalIgnoreCase)
+            .Where(group => group.Any(FileCleanupEngine.HasCleanupCandidates))
             .Select(group => new MaintenanceCheckListEntry(
                 group.Key,
                 _checkListLabelSelector(group.First()),

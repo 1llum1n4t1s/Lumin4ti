@@ -118,8 +118,13 @@ public static class FileCleanupEngine
 
             // 対象そのものがジャンクション・シンボリックリンクなら、リンク先の実体を
             // 消してしまうため触らない (掃除対象のフォルダを別ドライブへ逃がしている環境がある)。
-            if (target.Kind != CleanupTargetKind.Files &&
-                (new DirectoryInfo(fullPath).Attributes & FileAttributes.ReparsePoint) != 0)
+            if (!TryGetAttributes(new DirectoryInfo(fullPath), out var targetAttributes))
+            {
+                outcome.Blocked++;
+                continue;
+            }
+
+            if ((targetAttributes & FileAttributes.ReparsePoint) != 0)
             {
                 outcome.RejectedTargets.Add($"{fullPath} (リンク先の実体を消さないため)");
                 continue;
@@ -139,6 +144,70 @@ public static class FileCleanupEngine
         }
 
         return outcome;
+    }
+
+    /// <summary>
+    /// 対象に、現在削除できるファイルまたはフォルダが 1 件以上あるかを安全に確認する。
+    /// チェックリストへ「この PC で実際に検出できた対象」だけを表示するための軽量な事前判定で、
+    /// <see cref="CleanupTargetKind.Contents"/> は直下に削除可能な項目があるか、
+    /// <see cref="CleanupTargetKind.Files"/> は直下にパターン一致ファイルがあるかだけを見る。
+    /// </summary>
+    internal static bool HasCleanupCandidates(CleanupTarget target)
+    {
+        ArgumentNullException.ThrowIfNull(target);
+
+        var allowProtectedDirectory = target.Kind == CleanupTargetKind.Files;
+        if (!TryResolve(target.RawPath, allowProtectedDirectory, out var fullPath, out _) ||
+            !Directory.Exists(fullPath))
+        {
+            return false;
+        }
+
+        try
+        {
+            var directory = new DirectoryInfo(fullPath);
+            if (!TryGetAttributes(directory, out var directoryAttributes) ||
+                (directoryAttributes & FileAttributes.ReparsePoint) != 0)
+            {
+                return false;
+            }
+
+            return target.Kind switch
+            {
+                CleanupTargetKind.Contents => directory
+                    .EnumerateFileSystemInfos("*", SearchOption.TopDirectoryOnly)
+                    .Any(IsRemovableEntry),
+                CleanupTargetKind.Files => directory
+                    .EnumerateFiles(target.Pattern!, SearchOption.TopDirectoryOnly)
+                    .Any(file => IsRemovableEntry(file)),
+                _ => false,
+            };
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+        {
+            // 読み取れない対象は「検出済み」と断定せず、チェックリストから隠す。
+            return false;
+        }
+    }
+
+    private static bool IsRemovableEntry(FileSystemInfo entry)
+    {
+        return TryGetAttributes(entry, out var attributes) &&
+               (attributes & FileAttributes.ReparsePoint) == 0;
+    }
+
+    private static bool TryGetAttributes(FileSystemInfo entry, out FileAttributes attributes)
+    {
+        try
+        {
+            attributes = entry.Attributes;
+            return true;
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+        {
+            attributes = default;
+            return false;
+        }
     }
 
     /// <summary>
