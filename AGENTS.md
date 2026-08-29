@@ -19,10 +19,12 @@ dotnet test Lumin4ti.slnx --filter "Name=既定値に戻せるトグルの既定
 ```
 
 - TFM は `net10.0-windows10.0.20348.0` ([Directory.Build.props](Directory.Build.props))。UWP パッケージ列挙 (WinRT `PackageManager`) のため Windows SDK 付き。
-- **`.github/` は存在せず CI は無い**。ローカルの `dotnet build` (0 warnings) と `dotnet test` が唯一の検証ゲートなので、変更後は必ず両方通す。
+- **`.github/workflows/` は存在せず CI は無い**。`.github/dependabot.yml` は NuGet 更新の監視だけを担う。ローカルの `dotnet build` (0 warnings) と `dotnet test` が唯一の検証ゲートなので、変更後は必ず両方通す。
 - **バージョン (`Directory.Build.props` の `<Version>`) は `/vava` 経由でのみ更新**。コード修正のついでに触らない。
 
 ## アーキテクチャ
+
+システム全体の構造と設計判断は [DESIGN.md](DESIGN.md) を正本とし、この節では実装時に守る規約を扱う。
 
 3 プロジェクト構成 (Avalonia MVVM + CommunityToolkit.Mvvm + Microsoft.Extensions.DI + Velopack 自動更新)。
 
