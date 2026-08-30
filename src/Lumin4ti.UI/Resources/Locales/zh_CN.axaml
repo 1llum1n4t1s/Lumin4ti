@@ -99,6 +99,10 @@
   <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">通过重新注册 shell32.dll，修复系统文件夹名称（例如下载）显示为英文等显示异常。</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">重置系统托盘图标缓存</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">清除通知区域（系统托盘）的图标缓存。解决已卸载应用的图标残留在隐藏图标区域的问题。你的托盘显示/隐藏自定义会被重置一次。</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">删除损坏的启动项</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">删除可执行文件已不存在的启动项（当前用户），以及对应的孤立条目。</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">从“打开方式”中删除不存在的应用</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">从“打开方式”候选列表和 Applications 注册中删除可执行文件已不存在的应用。</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Label" xml:space="preserve">修复搜索、输入和小组件（重新注册 Shell 系统应用）</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Desc" xml:space="preserve">重新注册 MicrosoftWindows.Client.CBS —— 提供 Windows 搜索（SearchHost）、文本输入与表情面板（TextInputHost）以及小组件（WebExperienceHost）的系统应用。适用于文件完好但注册信息损坏的情况：搜索框卡住、输入候选不再出现、小组件一片空白。不会卸载任何东西，设置和历史记录也不会丢失。重新注册时常驻进程会先结束，Windows 会在需要时再次启动它们。</x:String>
   <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">清除 Microsoft Store 缓存</x:String>

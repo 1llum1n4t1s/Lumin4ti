@@ -77,7 +77,7 @@ dotnet test Lumin4ti.slnx --filter "Name=既定値に戻せるトグルの既定
 - `TryResolve` が、環境変数の未解決 (`%ProgramData%` 未定義で `\LGHUB\cache` になる等)、相対パス、ドライブ直下、`%LOCALAPPDATA%` 等の基点フォルダを拒否する。基点フォルダは `Files` 指定 (`IconCache.db` / `FNTCACHE.DAT`) のときだけ許可する。
 - ジャンクション・シンボリックリンクは辿らず、リンク自体も削除しない。キャッシュを別ドライブへ逃がしている利用者の配置設定と、リンク先の実体を保護するため。
 - 認証情報・鍵・アプリ設定のフォルダ (`.gnupg` / `.aws` / `.config` / `.codex` 等) はどのグループにも入れない。再生成できないので掃除の巻き添えにしない。[FileCleanupTests](src/Lumin4ti.Tests/FileCleanupTests.cs) が回帰を検出する。
-- Windows のイベントログ、Defender の検出履歴、GPU 設定、スタートアップ登録、ファイル関連付け、アプリのパッケージ登録、WinSxS の旧コンポーネントは、診断情報・利用者設定・ロールバック資産であってキャッシュではないため削除アクションを設けない。
+- Windows のイベントログ、Defender の検出履歴、GPU 設定、スタートアップ登録、ファイル関連付け、アプリのパッケージ登録、WinSxS の旧コンポーネントはキャッシュではないため `FileCleanupGroups` では扱わない。リンク切れスタートアップと関連付け候補だけは専用アクションで扱い、`StartupCommandParser.IsConfirmedMissing` が準備済み固定ドライブ上の欠損を確定できた登録だけを削除する。UNC、リムーバブル、未準備ドライブ、再解析点配下、アクセス不能、解決不能なコマンドは保持する。
 - ETL トレースログは `%SystemRoot%\Logs`、`System32\LogFiles`、`Panther`、`%ProgramData%\Microsoft\Diagnosis\ETLLogs` の既知基点だけをリンク非追従で列挙し、`*.etl` のみ削除する。ドライブ全体を対象にする再帰パターン削除は復活させない。
 - シェルが握って離さないファイル (アイコン・フォントキャッシュ) は `MoveFileEx(MOVEFILE_DELAY_UNTIL_REBOOT)` で再起動時削除に回す。Explorer を kill しないのは、失敗時に利用者がシェル無しで取り残されるのを避けるため。
 

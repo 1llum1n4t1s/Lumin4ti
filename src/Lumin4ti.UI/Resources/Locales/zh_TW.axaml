@@ -99,6 +99,10 @@
   <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">透過重新註冊 shell32.dll，修復系統資料夾名稱（例如下載）顯示為英文等顯示異常。</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">重設系統匣圖示快取</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">清除通知區域（系統匣）的圖示快取。解決已解除安裝應用程式的圖示殘留在隱藏圖示區域的問題。你的系統匣顯示/隱藏自訂會被重設一次。</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">移除損毀的啟動項目</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">移除執行檔已不存在的啟動項目（目前使用者），以及對應的孤立項目。</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">從「開啟方式」中移除不存在的應用程式</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">從「開啟方式」候選清單與 Applications 登錄中移除執行檔已不存在的應用程式。</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Label" xml:space="preserve">修復搜尋、輸入與小工具（重新註冊 Shell 系統應用程式）</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Desc" xml:space="preserve">重新註冊 MicrosoftWindows.Client.CBS —— 提供 Windows 搜尋（SearchHost）、文字輸入與表情符號面板（TextInputHost）以及小工具（WebExperienceHost）的系統應用程式。適用於檔案完好但註冊資訊損毀的情況：搜尋方塊卡住、輸入候選不再出現、小工具一片空白。不會解除安裝任何東西，設定與紀錄也不會遺失。重新註冊時常駐處理程序會先結束，Windows 會在需要時再次啟動它們。</x:String>
   <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">清除 Microsoft Store 快取</x:String>

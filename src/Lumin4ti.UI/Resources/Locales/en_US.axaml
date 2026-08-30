@@ -97,6 +97,10 @@
   <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">Repairs display corruption such as system folder names (e.g. Downloads) showing in English, by re-registering shell32.dll.</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">Reset the system tray icon cache</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">Clears the notification area (system tray) icon cache. Resolves cases where icons of uninstalled apps linger in the hidden-icons area. Your show/hide tray customization is reset once.</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">Remove broken startup entries</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">Removes startup entries (current user) whose executable no longer exists, along with the corresponding orphaned entries.</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">Remove nonexistent apps from Open-with</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">Removes apps whose executable no longer exists from the Open-with candidate list and the Applications registration.</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Label" xml:space="preserve">Repair search, input and widgets (re-register the shell system app)</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Desc" xml:space="preserve">Re-registers MicrosoftWindows.Client.CBS, the system app that provides Windows Search (SearchHost), text input and the emoji panel (TextInputHost) and widgets (WebExperienceHost). It helps when the files are fine but the registration is broken: the search box freezes, input suggestions stop appearing, or widgets show up blank. Nothing is uninstalled and no settings or history are lost. Resident processes are shut down during re-registration and Windows starts them again when they are next needed.</x:String>
   <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">Clear the Microsoft Store cache</x:String>

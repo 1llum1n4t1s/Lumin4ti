@@ -99,6 +99,10 @@
   <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">시스템 폴더 이름(예: 다운로드)이 영어로 표시되는 등의 표시 손상을 shell32.dll을 다시 등록해 복구합니다.</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">시스템 트레이 아이콘 캐시 초기화</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">알림 영역(시스템 트레이)의 아이콘 캐시를 지웁니다. 제거된 앱의 아이콘이 숨겨진 아이콘 영역에 남아 있는 문제를 해결합니다. 트레이 표시/숨김 사용자 지정은 한 번 초기화됩니다.</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">손상된 시작 프로그램 항목 제거</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">실행 파일이 더 이상 존재하지 않는 시작 프로그램 항목(현재 사용자)을 해당 고아 항목과 함께 제거합니다.</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">연결 프로그램에서 존재하지 않는 앱 제거</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">실행 파일이 더 이상 존재하지 않는 앱을 연결 프로그램 후보 목록과 Applications 등록에서 제거합니다.</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Label" xml:space="preserve">검색·입력·위젯 문제 복구 (셸 시스템 앱 다시 등록)</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Desc" xml:space="preserve">Windows 검색(SearchHost), 텍스트 입력과 이모지 패널(TextInputHost), 위젯(WebExperienceHost)을 함께 제공하는 시스템 앱 MicrosoftWindows.Client.CBS를 다시 등록합니다. 파일은 멀쩡한데 등록 정보만 손상된 경우, 즉 검색 상자가 멈추거나 입력 후보가 나오지 않거나 위젯이 빈 화면이 되는 증상에 효과가 있습니다. 제거하지 않으며 설정이나 기록도 사라지지 않습니다. 다시 등록하는 동안 상주 프로세스가 종료되고, 필요할 때 Windows가 다시 시작합니다.</x:String>
   <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">Microsoft Store 캐시 지우기</x:String>

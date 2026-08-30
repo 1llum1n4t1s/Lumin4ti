@@ -35,6 +35,8 @@ public sealed class MaintenanceActionCatalog
             new SecurityAppResetAction(executor),
 
             // ═══ クリーンアップ ═══
+            new BrokenStartupCleanupAction(),
+            new DeadAssociationCleanupAction(),
             new TrimOptimizeAction(executor),
             // 一時ファイル・キャッシュの削除は用途ごとのグループに分けて、消したいものだけ選べるようにする
             .. FileCleanupGroups.CreateAll(executor, preferences),

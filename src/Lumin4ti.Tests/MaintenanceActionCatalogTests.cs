@@ -79,14 +79,12 @@ public sealed class MaintenanceActionCatalogTests
     }
 
     [TestMethod]
-    public void 復元不能な削除アクションはカタログへ登録しない()
+    public void 復活対象以外の復元不能な削除アクションはカタログへ登録しない()
     {
         var ids = CreateCatalog().Items.Select(item => item.Id).ToHashSet(StringComparer.Ordinal);
         string[] removedIds =
         [
             "gpu-preference-reset",
-            "remove-broken-startup",
-            "remove-dead-associations",
             "remove-ghost-packages",
             "event-log-clear",
             "wu-component-cleanup",
@@ -103,12 +101,22 @@ public sealed class MaintenanceActionCatalogTests
     }
 
     [TestMethod]
+    public void リンク切れ整理アクションはカタログに登録されている()
+    {
+        var items = CreateCatalog().Items.ToDictionary(item => item.Id);
+
+        Assert.IsInstanceOfType<BrokenStartupCleanupAction>(items["remove-broken-startup"]);
+        Assert.IsInstanceOfType<DeadAssociationCleanupAction>(items["remove-dead-associations"]);
+    }
+
+    [TestMethod]
     public void エクスプローラー影響フラグはシェル系項目に付いている()
     {
         var items = CreateCatalog().Items.ToDictionary(a => a.Id);
 
         Assert.IsTrue(items["repair-shell-folder-names"].AffectsExplorer);
         Assert.IsTrue(items["tray-icon-reset"].AffectsExplorer);
+        Assert.IsTrue(items["remove-dead-associations"].AffectsExplorer);
         Assert.IsTrue(items["folder-template-general"].AffectsExplorer);
         Assert.IsTrue(items["menu-delay-zero"].AffectsExplorer);
         // レジストリ tweak 等は Explorer 再起動では反映されないので付けない

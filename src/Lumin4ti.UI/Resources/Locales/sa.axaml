@@ -99,6 +99,10 @@
   <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">shell32.dll पुनः पञ्जीकृत्य, तन्त्रसंपुटनामानि (यथा Downloads) आङ्ग्लभाषायां प्रदर्श्यन्ते इत्यादिकं प्रदर्शनभ्रष्टतां संस्करोति।</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">तन्त्रफलक-प्रतीकनिधिं प्रत्यानय</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">सूचनाक्षेत्रस्य (तन्त्रफलकस्य) प्रतीकनिधिं परिमार्ष्टि। विस्थापितानाम् अनुप्रयोगानां प्रतीकानि गुप्तप्रतीकक्षेत्रे तिष्ठन्ति इति स्थितीः निवारयति। तव फलक-प्रदर्शन/गोपन-अनुकूलनम् एकवारं प्रत्यानीयते।</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">भग्नप्रारम्भप्रविष्टीः अपनय</x:String>
+  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">यासां निष्पादनसञ्चिका न अस्ति ताः प्रारम्भप्रविष्टीः (वर्तमानप्रयोक्तुः) तत्संबद्धानाथप्रविष्टिभिः सह अपनयति।</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">Open-with-तः अविद्यमानान् अनुप्रयोगान् अपनय</x:String>
+  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">यासां निष्पादनसञ्चिका न अस्ति तान् अनुप्रयोगान् Open-with-प्रत्याशिसूचीतः Applications-पञ्जीकरणाच्च अपनयति।</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Label" xml:space="preserve">अन्वेषणम् आदानं विजेट् च संस्कुरुताम् (शेल-प्रणाल्यनुप्रयोगस्य पुनःपञ्जीकरणम्)</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Desc" xml:space="preserve">Windows-अन्वेषणम् (SearchHost), पाठादानम् एमोजिफलकं च (TextInputHost), विजेट् (WebExperienceHost) इति सर्वं यः प्रणाल्यनुप्रयोगः प्रयच्छति तं MicrosoftWindows.Client.CBS पुनः पञ्जीकरोति। सञ्चिकाः सुस्थिताः सन्ति परं पञ्जीकरणमेव भग्नम् अस्ति इति स्थितौ उपयुज्यते: अन्वेषणपेटिका स्तब्धा भवति, आदानसूचनाः न दृश्यन्ते, विजेट् रिक्तानि दृश्यन्ते। किमपि न अपनीयते, न च विन्यासः इतिहासो वा नश्यति। पुनःपञ्जीकरणकाले स्थायिनः प्रक्रियाः समाप्यन्ते, आवश्यकतायां Windows ताः पुनः आरभते।</x:String>
   <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">Microsoft Store-निधिं परिमार्ष्टु</x:String>
