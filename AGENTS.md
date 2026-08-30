@@ -57,6 +57,12 @@ dotnet test Lumin4ti.slnx --filter "Name=既定値に戻せるトグルの既定
 
 「OFF で Windows 既定に戻す」を謳う以上、ハードコード既定値でなく**ユーザーの元の値**へ戻す。`RegistryToggle` は ON 適用前に [RegistryValueBackup](src/Lumin4ti.Core/Services/Windows/Actions/RegistryValueBackup.cs) で `%APPDATA%\Lumin4ti\backups\` にスナップショットし、OFF で復元 (UWP・Defender も同様のバックアップを持つ)。不可逆操作を足すときは同様のバックアップを検討する。
 
+### 未接続 PnP デバイスの削除
+
+[WindowsDisconnectedDeviceService](src/Lumin4ti.Core/Services/Windows/WindowsDisconnectedDeviceService.cs) は SetupAPI で接続中 ID とインストール済み ID の差を列挙し、削除直前にも再接続を確認してから `DiUninstallDevice` を呼ぶ。`HTREE\ROOT\`、`ROOT\`、`SWD\`、`SW\`、`UMB\`、`STORAGE\VOLUMESNAPSHOT\` は再生成性が不明な保護対象なので、一覧・削除の両方から除外する。
+
+専用 UI は [DeviceCleanupViewModel](src/Lumin4ti.UI/ViewModels/DeviceCleanupViewModel.cs) が個別／全選択、二段階確認、削除結果の集計を担当し、`MaintenanceOperationCoordinator` の排他制御へ参加する。検証は [DisconnectedDeviceTests](src/Lumin4ti.Tests/DisconnectedDeviceTests.cs) とモックサービスで行い、実機デバイスを削除して確認しない。
+
 ### 一時ファイル・キャッシュの削除 (グループ実行)
 
 旧バッチのファイル削除は、対象を用途別にまとめた「グループ 1 つ = ボタン 1 つ」として実装している。ロジックは 3 ファイルに分かれ、**掃除対象を増やすときは [FileCleanupGroups.cs](src/Lumin4ti.Core/Services/Windows/Actions/FileCleanupGroups.cs) のパス表へ 1 行足すだけ**でよい (個別クラスを作らない)。
