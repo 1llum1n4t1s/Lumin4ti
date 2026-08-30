@@ -14,11 +14,11 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.1" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.10" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.11" />
     <!-- Velopack 本体は Program.cs / UpdateService が直接使うため、VelopackUpdateDialog 経由の
          transitive 参照に頼らず直接参照する (バージョンは両者で 1.2.0 に一致)。 -->
     <PackageReference Include="Velopack" Version="1.2.0" />
-    <PackageReference Include="VelopackUpdateDialog.Avalonia" Version="1.0.14" />
+    <PackageReference Include="VelopackUpdateDialog.Avalonia" Version="1.0.16" />
   </ItemGroup>
 
   <ItemGroup>
