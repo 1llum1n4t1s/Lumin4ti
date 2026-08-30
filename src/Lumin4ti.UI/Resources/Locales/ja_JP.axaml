@@ -11,6 +11,26 @@
   <x:String x:Key="Text.Tab.System" xml:space="preserve">システム設定</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">整理・ソート</x:String>
   <x:String x:Key="Text.Tab.Version" xml:space="preserve">バージョン情報</x:String>
+  <x:String x:Key="Text.Tab.Devices" xml:space="preserve">未接続デバイス</x:String>
+
+  <!-- ===== 未接続デバイス ===== -->
+  <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">未接続デバイス</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">過去にインストールされたものの、現在は接続されていない Plug and Play デバイスを一覧表示します。個別選択または全選択して削除できます。</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">安全のためソフトウェア／仮想デバイスは表示しません。再接続時にドライバーは再検出されますが、デバイス固有の設定は初期化される場合があります。</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">再読み込み</x:String>
+  <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">すべて選択</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">選択解除</x:String>
+  <x:String x:Key="Text.DeviceCleanup.RemoveSelected" xml:space="preserve">選択項目を削除</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Empty" xml:space="preserve">未接続のハードウェアデバイスは見つかりませんでした。</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmRemove" xml:space="preserve">デバイスを削除</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loading" xml:space="preserve">未接続デバイスを検索しています…</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Selection" xml:space="preserve">{0} / {1} 件を選択中</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmText" xml:space="preserve">選択した {0} 件のデバイスを削除しますか？ 再接続するとドライバーは再検出されますが、デバイス固有の設定は初期化される場合があります。</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loaded" xml:space="preserve">未接続デバイスを {0} 件検出しました。</x:String>
+  <x:String x:Key="Text.DeviceCleanup.LoadFailed" xml:space="preserve">未接続デバイスを読み込めませんでした (ログを確認してください)。</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Removing" xml:space="preserve">削除中 {0} / {1}: {2}</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Completed" xml:space="preserve">{0} 件を削除、{1} 件をスキップ、{2} 件失敗しました。</x:String>
+  <x:String x:Key="Text.DeviceCleanup.CompletedRestart" xml:space="preserve">{0} 件を削除、{1} 件をスキップ、{2} 件失敗しました。反映には PC の再起動が必要です。</x:String>
 
   <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">※ 反映には PC の再起動が必要です</x:String>
   <x:String x:Key="Text.Note.LongRunning" xml:space="preserve">※ 実行に数分かかることがあります</x:String>

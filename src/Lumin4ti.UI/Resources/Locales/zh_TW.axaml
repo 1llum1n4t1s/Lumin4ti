@@ -11,6 +11,26 @@
   <x:String x:Key="Text.Tab.System" xml:space="preserve">系統</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">整理</x:String>
   <x:String x:Key="Text.Tab.Version" xml:space="preserve">關於</x:String>
+  <x:String x:Key="Text.Tab.Devices" xml:space="preserve">未連線裝置</x:String>
+
+  <!-- ===== 未連線裝置 ===== -->
+  <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">未連線裝置</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">列出先前已安裝但目前未連線的隨插即用裝置。可逐項選取或全選後移除。</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">為了安全，軟體與虛擬裝置不會顯示。重新連線時 Windows 會重新偵測驅動程式，但裝置專用設定可能會重設。</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">重新整理</x:String>
+  <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">全選</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">清除選取</x:String>
+  <x:String x:Key="Text.DeviceCleanup.RemoveSelected" xml:space="preserve">移除所選裝置</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Empty" xml:space="preserve">找不到未連線的硬體裝置。</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmRemove" xml:space="preserve">移除裝置</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loading" xml:space="preserve">正在搜尋未連線裝置…</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Selection" xml:space="preserve">已選取 {0} / {1} 項</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmText" xml:space="preserve">要移除所選的 {0} 個裝置嗎？重新連線時 Windows 會重新偵測驅動程式，但裝置專用設定可能會重設。</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loaded" xml:space="preserve">找到 {0} 個未連線裝置。</x:String>
+  <x:String x:Key="Text.DeviceCleanup.LoadFailed" xml:space="preserve">無法載入未連線裝置（請查看記錄）。</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Removing" xml:space="preserve">正在移除 {0} / {1}: {2}</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Completed" xml:space="preserve">已移除 {0} 個，略過 {1} 個，失敗 {2} 個。</x:String>
+  <x:String x:Key="Text.DeviceCleanup.CompletedRestart" xml:space="preserve">已移除 {0} 個，略過 {1} 個，失敗 {2} 個。請重新啟動電腦以完成變更。</x:String>
 
   <!-- ===== Notes / buttons ===== -->
   <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* 需要重新啟動電腦才會生效</x:String>

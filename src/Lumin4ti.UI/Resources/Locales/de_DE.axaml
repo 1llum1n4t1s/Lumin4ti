@@ -11,6 +11,26 @@
   <x:String x:Key="Text.Tab.System" xml:space="preserve">System</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Organisieren</x:String>
   <x:String x:Key="Text.Tab.Version" xml:space="preserve">Über</x:String>
+  <x:String x:Key="Text.Tab.Devices" xml:space="preserve">Getrennte Geräte</x:String>
+
+  <!-- ===== Getrennte Geräte ===== -->
+  <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">Nicht verbundene Geräte</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">Listet zuvor installierte Plug-and-Play-Geräte auf, die derzeit nicht verbunden sind. Wählen Sie einzelne oder alle Einträge zum Entfernen aus.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Software- und virtuelle Geräte werden aus Sicherheitsgründen ausgeblendet. Windows erkennt den Treiber nach dem Wiederanschließen erneut; gerätespezifische Einstellungen können zurückgesetzt werden.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">Aktualisieren</x:String>
+  <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">Alle auswählen</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">Auswahl aufheben</x:String>
+  <x:String x:Key="Text.DeviceCleanup.RemoveSelected" xml:space="preserve">Auswahl entfernen</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Empty" xml:space="preserve">Keine nicht verbundenen Hardwaregeräte gefunden.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmRemove" xml:space="preserve">Geräte entfernen</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loading" xml:space="preserve">Nicht verbundene Geräte werden gesucht…</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Selection" xml:space="preserve">{0} von {1} ausgewählt</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmText" xml:space="preserve">Die ausgewählten {0} Geräte entfernen? Windows erkennt den Treiber nach dem Wiederanschließen erneut; gerätespezifische Einstellungen können zurückgesetzt werden.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loaded" xml:space="preserve">{0} nicht verbundene Geräte gefunden.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.LoadFailed" xml:space="preserve">Nicht verbundene Geräte konnten nicht geladen werden (Protokoll prüfen).</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Removing" xml:space="preserve">Entfernen {0} von {1}: {2}</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Completed" xml:space="preserve">{0} entfernt, {1} übersprungen, {2} fehlgeschlagen.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.CompletedRestart" xml:space="preserve">{0} entfernt, {1} übersprungen, {2} fehlgeschlagen. Starten Sie den PC neu, um die Änderungen abzuschließen.</x:String>
 
   <!-- ===== Notes / buttons ===== -->
   <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* Erfordert einen PC-Neustart, um wirksam zu werden</x:String>

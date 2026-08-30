@@ -11,6 +11,26 @@
   <x:String x:Key="Text.Tab.System" xml:space="preserve">Система</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Упорядочивание</x:String>
   <x:String x:Key="Text.Tab.Version" xml:space="preserve">О программе</x:String>
+  <x:String x:Key="Text.Tab.Devices" xml:space="preserve">Отключённые устройства</x:String>
+
+  <!-- ===== Отключённые устройства ===== -->
+  <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">Отключённые устройства</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">Показывает ранее установленные устройства Plug and Play, которые сейчас не подключены. Перед удалением выберите отдельные записи или все сразу.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Программные и виртуальные устройства скрыты для безопасности. После повторного подключения Windows заново обнаружит драйвер, но настройки устройства могут быть сброшены.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">Обновить</x:String>
+  <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">Выбрать все</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">Снять выделение</x:String>
+  <x:String x:Key="Text.DeviceCleanup.RemoveSelected" xml:space="preserve">Удалить выбранные</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Empty" xml:space="preserve">Отключённые аппаратные устройства не найдены.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmRemove" xml:space="preserve">Удалить устройства</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loading" xml:space="preserve">Поиск отключённых устройств…</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Selection" xml:space="preserve">Выбрано {0} из {1}</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmText" xml:space="preserve">Удалить выбранные устройства ({0})? После повторного подключения Windows заново обнаружит драйвер, но настройки устройства могут быть сброшены.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loaded" xml:space="preserve">Найдено отключённых устройств: {0}.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.LoadFailed" xml:space="preserve">Не удалось загрузить отключённые устройства (проверьте журнал).</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Removing" xml:space="preserve">Удаление {0} из {1}: {2}</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Completed" xml:space="preserve">Удалено: {0}, пропущено: {1}, ошибок: {2}.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.CompletedRestart" xml:space="preserve">Удалено: {0}, пропущено: {1}, ошибок: {2}. Перезагрузите компьютер для завершения изменений.</x:String>
 
   <!-- ===== Notes / buttons ===== -->
   <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* Для применения требуется перезагрузка ПК</x:String>

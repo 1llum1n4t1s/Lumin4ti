@@ -11,6 +11,26 @@
   <x:String x:Key="Text.Tab.System" xml:space="preserve">तन्त्रम्</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">व्यवस्थापनम्</x:String>
   <x:String x:Key="Text.Tab.Version" xml:space="preserve">विषये</x:String>
+  <x:String x:Key="Text.Tab.Devices" xml:space="preserve">असंयुक्तानि उपकरणानि</x:String>
+
+  <!-- ===== असंयुक्तानि उपकरणानि ===== -->
+  <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">असंयुक्तानि उपकरणानि</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">पूर्वं स्थापितानि किन्तु अधुना असंयुक्तानि Plug and Play उपकरणानि दर्शयति। एकैकं वा सर्वाणि वा निष्कासनार्थं चिनुत।</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">सुरक्षार्थं आभासीयानि तन्त्रांशोपकरणानि च न दर्श्यन्ते। पुनः संयोजने Windows चालकं पुनः ज्ञास्यति, किन्तु उपकरणविशिष्टविन्यासाः पुनःस्थापिताः भवितुमर्हन्ति।</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">पुनः पठतु</x:String>
+  <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">सर्वाणि चिनुत</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">चयनं निरस्यतु</x:String>
+  <x:String x:Key="Text.DeviceCleanup.RemoveSelected" xml:space="preserve">चयनितानि निष्कासयतु</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Empty" xml:space="preserve">असंयुक्तं हार्डवेयर-उपकरणं न लब्धम्।</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmRemove" xml:space="preserve">उपकरणानि निष्कासयतु</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loading" xml:space="preserve">असंयुक्तानि उपकरणानि अन्विष्यन्ते…</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Selection" xml:space="preserve">{1} मध्ये {0} चयनितानि</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmText" xml:space="preserve">चयनितानि {0} उपकरणानि निष्कासयितुमिच्छति किम्? पुनः संयोजने चालकः पुनः ज्ञास्यते, किन्तु विन्यासाः पुनःस्थापिताः भवितुमर्हन्ति।</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loaded" xml:space="preserve">{0} असंयुक्तानि उपकरणानि लब्धानि।</x:String>
+  <x:String x:Key="Text.DeviceCleanup.LoadFailed" xml:space="preserve">असंयुक्तानि उपकरणानि पठितुं न शक्तम् (वृत्तलेखं पश्यतु)।</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Removing" xml:space="preserve">निष्कासनम् {0} / {1}: {2}</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Completed" xml:space="preserve">{0} निष्कासितानि, {1} त्यक्तानि, {2} विफलानि।</x:String>
+  <x:String x:Key="Text.DeviceCleanup.CompletedRestart" xml:space="preserve">{0} निष्कासितानि, {1} त्यक्तानि, {2} विफलानि। परिवर्तनसमाप्त्यर्थं PC पुनः आरभताम्।</x:String>
 
   <!-- ===== Notes / buttons ===== -->
   <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* प्रभावाय PC-पुनःप्रारम्भः आवश्यकः</x:String>

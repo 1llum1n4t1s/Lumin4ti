@@ -9,6 +9,26 @@
   <x:String x:Key="Text.Tab.System" xml:space="preserve">System</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Organize</x:String>
   <x:String x:Key="Text.Tab.Version" xml:space="preserve">About</x:String>
+  <x:String x:Key="Text.Tab.Devices" xml:space="preserve">Disconnected devices</x:String>
+
+  <!-- ===== Disconnected devices ===== -->
+  <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">Disconnected devices</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">Lists previously installed Plug and Play devices that are not currently connected. Select individual entries or select them all before removal.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Software and virtual devices are hidden for safety. Windows redetects the driver after reconnection, but device-specific settings may be reset.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">Refresh</x:String>
+  <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">Select all</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">Clear selection</x:String>
+  <x:String x:Key="Text.DeviceCleanup.RemoveSelected" xml:space="preserve">Remove selected</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Empty" xml:space="preserve">No disconnected hardware devices were found.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmRemove" xml:space="preserve">Remove devices</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loading" xml:space="preserve">Searching for disconnected devices…</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Selection" xml:space="preserve">{0} of {1} selected</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmText" xml:space="preserve">Remove the selected {0} device(s)? Windows redetects the driver after reconnection, but device-specific settings may be reset.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loaded" xml:space="preserve">Found {0} disconnected device(s).</x:String>
+  <x:String x:Key="Text.DeviceCleanup.LoadFailed" xml:space="preserve">Could not load disconnected devices (check the log).</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Removing" xml:space="preserve">Removing {0} of {1}: {2}</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Completed" xml:space="preserve">Removed {0}, skipped {1}, failed {2}.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.CompletedRestart" xml:space="preserve">Removed {0}, skipped {1}, failed {2}. Restart the PC to finish applying the changes.</x:String>
 
   <!-- ===== Notes / buttons ===== -->
   <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* Requires a PC restart to take effect</x:String>

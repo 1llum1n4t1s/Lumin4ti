@@ -11,6 +11,26 @@
   <x:String x:Key="Text.Tab.System" xml:space="preserve">Система</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Упорядкування</x:String>
   <x:String x:Key="Text.Tab.Version" xml:space="preserve">Про програму</x:String>
+  <x:String x:Key="Text.Tab.Devices" xml:space="preserve">Від’єднані пристрої</x:String>
+
+  <!-- ===== Від’єднані пристрої ===== -->
+  <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">Від’єднані пристрої</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">Показує раніше встановлені пристрої Plug and Play, які зараз не підключені. Виберіть окремі записи або всі одразу перед видаленням.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Програмні та віртуальні пристрої приховано задля безпеки. Після повторного підключення Windows знову виявить драйвер, але параметри пристрою можуть бути скинуті.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">Оновити</x:String>
+  <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">Вибрати все</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">Зняти вибір</x:String>
+  <x:String x:Key="Text.DeviceCleanup.RemoveSelected" xml:space="preserve">Видалити вибрані</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Empty" xml:space="preserve">Від’єднаних апаратних пристроїв не знайдено.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmRemove" xml:space="preserve">Видалити пристрої</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loading" xml:space="preserve">Пошук від’єднаних пристроїв…</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Selection" xml:space="preserve">Вибрано {0} із {1}</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmText" xml:space="preserve">Видалити вибрані пристрої ({0})? Після повторного підключення Windows знову виявить драйвер, але параметри пристрою можуть бути скинуті.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loaded" xml:space="preserve">Знайдено від’єднаних пристроїв: {0}.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.LoadFailed" xml:space="preserve">Не вдалося завантажити від’єднані пристрої (перевірте журнал).</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Removing" xml:space="preserve">Видалення {0} із {1}: {2}</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Completed" xml:space="preserve">Видалено: {0}, пропущено: {1}, помилок: {2}.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.CompletedRestart" xml:space="preserve">Видалено: {0}, пропущено: {1}, помилок: {2}. Перезавантажте ПК, щоб завершити зміни.</x:String>
 
   <!-- ===== Notes / buttons ===== -->
   <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* Для застосування потрібне перезавантаження ПК</x:String>

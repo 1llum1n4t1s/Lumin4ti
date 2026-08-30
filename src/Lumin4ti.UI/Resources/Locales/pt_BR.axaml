@@ -11,6 +11,26 @@
   <x:String x:Key="Text.Tab.System" xml:space="preserve">Sistema</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Organizar</x:String>
   <x:String x:Key="Text.Tab.Version" xml:space="preserve">Sobre</x:String>
+  <x:String x:Key="Text.Tab.Devices" xml:space="preserve">Dispositivos desconectados</x:String>
+
+  <!-- ===== Dispositivos desconectados ===== -->
+  <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">Dispositivos desconectados</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">Lista dispositivos Plug and Play instalados anteriormente que não estão conectados no momento. Selecione itens individuais ou todos antes de removê-los.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Dispositivos virtuais e de software ficam ocultos por segurança. O Windows detectará o driver novamente ao reconectar, mas as configurações específicas do dispositivo podem ser redefinidas.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">Atualizar</x:String>
+  <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">Selecionar tudo</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">Limpar seleção</x:String>
+  <x:String x:Key="Text.DeviceCleanup.RemoveSelected" xml:space="preserve">Remover selecionados</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Empty" xml:space="preserve">Nenhum dispositivo de hardware desconectado foi encontrado.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmRemove" xml:space="preserve">Remover dispositivos</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loading" xml:space="preserve">Procurando dispositivos desconectados…</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Selection" xml:space="preserve">{0} de {1} selecionados</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmText" xml:space="preserve">Remover os {0} dispositivos selecionados? O Windows detectará o driver novamente ao reconectar, mas as configurações específicas podem ser redefinidas.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loaded" xml:space="preserve">Foram encontrados {0} dispositivos desconectados.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.LoadFailed" xml:space="preserve">Não foi possível carregar os dispositivos desconectados (verifique o log).</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Removing" xml:space="preserve">Removendo {0} de {1}: {2}</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Completed" xml:space="preserve">{0} removidos, {1} ignorados, {2} com falha.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.CompletedRestart" xml:space="preserve">{0} removidos, {1} ignorados, {2} com falha. Reinicie o PC para concluir as alterações.</x:String>
 
   <!-- ===== Notes / buttons ===== -->
   <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* Requer reiniciar o PC para ter efeito</x:String>

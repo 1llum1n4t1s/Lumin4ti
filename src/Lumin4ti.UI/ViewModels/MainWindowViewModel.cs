@@ -22,12 +22,15 @@ public class MainWindowViewModel
 
     public CommandCategoryViewModel Organize { get; }
 
+    public DeviceCleanupViewModel DeviceCleanup { get; }
+
     public VersionViewModel Version { get; }
 
     private readonly MaintenanceOperationCoordinator _operationCoordinator;
 
     public MainWindowViewModel(
         MaintenanceActionCatalog catalog,
+        DeviceCleanupViewModel deviceCleanup,
         VersionViewModel version,
         MaintenanceOperationCoordinator operationCoordinator)
     {
@@ -70,6 +73,7 @@ public class MainWindowViewModel
             "整理・ソート",
             "ピン留めや環境変数などを整った並び順に揃えます。");
 
+        DeviceCleanup = deviceCleanup;
         Version = version;
         Version.Initialize();
 
@@ -95,7 +99,8 @@ public class MainWindowViewModel
                 Repair.LoadToggleStatesAsync(token),
                 Performance.LoadToggleStatesAsync(token),
                 System.LoadToggleStatesAsync(token),
-                Organize.LoadToggleStatesAsync(token))).ConfigureAwait(false);
+                Organize.LoadToggleStatesAsync(token),
+                DeviceCleanup.LoadDisconnectedDevicesAsync(token))).ConfigureAwait(false);
 
         if (loaded)
         {

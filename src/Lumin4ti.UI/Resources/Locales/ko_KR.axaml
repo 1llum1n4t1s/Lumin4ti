@@ -11,6 +11,26 @@
   <x:String x:Key="Text.Tab.System" xml:space="preserve">시스템</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">정돈</x:String>
   <x:String x:Key="Text.Tab.Version" xml:space="preserve">정보</x:String>
+  <x:String x:Key="Text.Tab.Devices" xml:space="preserve">연결 해제된 장치</x:String>
+
+  <!-- ===== 연결 해제된 장치 ===== -->
+  <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">연결되지 않은 장치</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">이전에 설치되었지만 현재 연결되지 않은 플러그 앤 플레이 장치를 표시합니다. 개별 항목 또는 전체를 선택하여 제거할 수 있습니다.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">안전을 위해 소프트웨어 및 가상 장치는 숨깁니다. 다시 연결하면 Windows가 드라이버를 다시 검색하지만 장치별 설정은 초기화될 수 있습니다.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">새로 고침</x:String>
+  <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">모두 선택</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">선택 해제</x:String>
+  <x:String x:Key="Text.DeviceCleanup.RemoveSelected" xml:space="preserve">선택 항목 제거</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Empty" xml:space="preserve">연결 해제된 하드웨어 장치를 찾지 못했습니다.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmRemove" xml:space="preserve">장치 제거</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loading" xml:space="preserve">연결 해제된 장치를 검색하는 중…</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Selection" xml:space="preserve">{1}개 중 {0}개 선택</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmText" xml:space="preserve">선택한 장치 {0}개를 제거하시겠습니까? 다시 연결하면 Windows가 드라이버를 다시 검색하지만 장치별 설정은 초기화될 수 있습니다.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loaded" xml:space="preserve">연결 해제된 장치 {0}개를 찾았습니다.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.LoadFailed" xml:space="preserve">연결 해제된 장치를 불러오지 못했습니다(로그를 확인하세요).</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Removing" xml:space="preserve">제거 중 {0} / {1}: {2}</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Completed" xml:space="preserve">{0}개 제거, {1}개 건너뜀, {2}개 실패.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.CompletedRestart" xml:space="preserve">{0}개 제거, {1}개 건너뜀, {2}개 실패. 변경을 완료하려면 PC를 다시 시작하세요.</x:String>
 
   <!-- ===== Notes / buttons ===== -->
   <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* 적용하려면 PC를 다시 시작해야 합니다</x:String>

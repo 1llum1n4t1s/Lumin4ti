@@ -11,6 +11,26 @@
   <x:String x:Key="Text.Tab.System" xml:space="preserve">System</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Ayusin</x:String>
   <x:String x:Key="Text.Tab.Version" xml:space="preserve">Tungkol Dito</x:String>
+  <x:String x:Key="Text.Tab.Devices" xml:space="preserve">Mga nakadiskonektang device</x:String>
+
+  <!-- ===== Mga nakadiskonektang device ===== -->
+  <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">Mga nakadiskonektang device</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">Inililista ang mga dating naka-install na Plug and Play device na hindi kasalukuyang nakakonekta. Pumili ng isa-isa o piliin lahat bago alisin.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Nakatago ang software at virtual device para sa kaligtasan. Muling hahanapin ng Windows ang driver kapag ikinonekta, ngunit maaaring ma-reset ang mga setting ng device.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">I-refresh</x:String>
+  <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">Piliin lahat</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">Alisin ang pagpili</x:String>
+  <x:String x:Key="Text.DeviceCleanup.RemoveSelected" xml:space="preserve">Alisin ang napili</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Empty" xml:space="preserve">Walang nakitang nakadiskonektang hardware device.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmRemove" xml:space="preserve">Alisin ang mga device</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loading" xml:space="preserve">Naghahanap ng mga nakadiskonektang device…</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Selection" xml:space="preserve">{0} sa {1} ang napili</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmText" xml:space="preserve">Alisin ang {0} napiling device? Muling hahanapin ng Windows ang driver kapag ikinonekta, ngunit maaaring ma-reset ang mga setting ng device.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loaded" xml:space="preserve">Nakakita ng {0} nakadiskonektang device.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.LoadFailed" xml:space="preserve">Hindi ma-load ang mga nakadiskonektang device (tingnan ang log).</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Removing" xml:space="preserve">Inaalis {0} sa {1}: {2}</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Completed" xml:space="preserve">{0} ang inalis, {1} ang nilaktawan, {2} ang nabigo.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.CompletedRestart" xml:space="preserve">{0} ang inalis, {1} ang nilaktawan, {2} ang nabigo. I-restart ang PC upang matapos ang mga pagbabago.</x:String>
 
   <!-- ===== Notes / buttons ===== -->
   <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* Kailangan i-restart ang PC para magkabisa</x:String>

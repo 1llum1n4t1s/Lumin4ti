@@ -11,6 +11,26 @@
   <x:String x:Key="Text.Tab.System" xml:space="preserve">அமைப்பு</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">ஒழுங்குபடுத்து</x:String>
   <x:String x:Key="Text.Tab.Version" xml:space="preserve">பற்றி</x:String>
+  <x:String x:Key="Text.Tab.Devices" xml:space="preserve">இணைப்பில்லா சாதனங்கள்</x:String>
+
+  <!-- ===== இணைப்பில்லா சாதனங்கள் ===== -->
+  <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">இணைக்கப்படாத சாதனங்கள்</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">முன்பு நிறுவப்பட்டு தற்போது இணைக்கப்படாத Plug and Play சாதனங்களைப் பட்டியலிடுகிறது. தனித்தனியாகவோ அனைத்தையுமோ தேர்ந்தெடுத்து அகற்றலாம்.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">பாதுகாப்பிற்காக மென்பொருள் மற்றும் மெய்நிகர் சாதனங்கள் மறைக்கப்படுகின்றன. மீண்டும் இணைக்கும்போது Windows இயக்கியை மீண்டும் கண்டறியும்; சாதனத்திற்கான அமைப்புகள் மீட்டமைக்கப்படலாம்.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">புதுப்பி</x:String>
+  <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">அனைத்தையும் தேர்ந்தெடு</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">தேர்வை நீக்கு</x:String>
+  <x:String x:Key="Text.DeviceCleanup.RemoveSelected" xml:space="preserve">தேர்ந்தவற்றை அகற்று</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Empty" xml:space="preserve">இணைக்கப்படாத வன்பொருள் சாதனங்கள் எதுவும் கிடைக்கவில்லை.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmRemove" xml:space="preserve">சாதனங்களை அகற்று</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loading" xml:space="preserve">இணைக்கப்படாத சாதனங்களைத் தேடுகிறது…</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Selection" xml:space="preserve">{1} இல் {0} தேர்ந்தெடுக்கப்பட்டன</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmText" xml:space="preserve">தேர்ந்தெடுத்த {0} சாதனங்களை அகற்றவா? மீண்டும் இணைக்கும்போது Windows இயக்கியை மீண்டும் கண்டறியும்; சாதனத்திற்கான அமைப்புகள் மீட்டமைக்கப்படலாம்.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loaded" xml:space="preserve">இணைக்கப்படாத {0} சாதனங்கள் கிடைத்தன.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.LoadFailed" xml:space="preserve">இணைக்கப்படாத சாதனங்களை ஏற்ற முடியவில்லை (பதிவைப் பார்க்கவும்).</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Removing" xml:space="preserve">அகற்றுகிறது {0} / {1}: {2}</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Completed" xml:space="preserve">{0} அகற்றப்பட்டன, {1} தவிர்க்கப்பட்டன, {2} தோல்வியடைந்தன.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.CompletedRestart" xml:space="preserve">{0} அகற்றப்பட்டன, {1} தவிர்க்கப்பட்டன, {2} தோல்வியடைந்தன. மாற்றங்களை முடிக்க PC-ஐ மறுதொடக்கம் செய்யவும்.</x:String>
 
   <!-- ===== Notes / buttons ===== -->
   <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* செயல்பட PC-ஐ மறுதொடக்கம் செய்ய வேண்டும்</x:String>

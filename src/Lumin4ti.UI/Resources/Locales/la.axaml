@@ -11,6 +11,26 @@
   <x:String x:Key="Text.Tab.System" xml:space="preserve">Systema</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Ordinatio</x:String>
   <x:String x:Key="Text.Tab.Version" xml:space="preserve">De programmate</x:String>
+  <x:String x:Key="Text.Tab.Devices" xml:space="preserve">Instrumenta disiuncta</x:String>
+
+  <!-- ===== Instrumenta disiuncta ===== -->
+  <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">Instrumenta non coniuncta</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">Instrumenta Plug and Play antea instituta sed nunc non coniuncta enumerat. Singula vel omnia ante remotionem elige.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Instrumenta virtualia et programmata causa securitatis celantur. Windows rectorem post reconnectionem denuo inveniet, sed proprietates instrumenti restitui possunt.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">Renova</x:String>
+  <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">Omnia elige</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">Electionem dele</x:String>
+  <x:String x:Key="Text.DeviceCleanup.RemoveSelected" xml:space="preserve">Electa remove</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Empty" xml:space="preserve">Nullum instrumentum corporeum disiunctum inventum est.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmRemove" xml:space="preserve">Instrumenta remove</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loading" xml:space="preserve">Instrumenta disiuncta quaeruntur…</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Selection" xml:space="preserve">{0} ex {1} electa</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmText" xml:space="preserve">Visne {0} instrumenta electa removere? Windows rectorem post reconnectionem denuo inveniet, sed proprietates instrumenti restitui possunt.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loaded" xml:space="preserve">{0} instrumenta disiuncta inventa sunt.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.LoadFailed" xml:space="preserve">Instrumenta disiuncta legi non potuerunt (commentarium inspice).</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Removing" xml:space="preserve">Removetur {0} ex {1}: {2}</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Completed" xml:space="preserve">{0} remota, {1} omissa, {2} non perfecta.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.CompletedRestart" xml:space="preserve">{0} remota, {1} omissa, {2} non perfecta. Computatrum renova ut mutationes absolvantur.</x:String>
 
   <!-- ===== Notes / buttons ===== -->
   <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* Ut valeat, PC restitui debet</x:String>

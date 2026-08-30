@@ -11,6 +11,26 @@
   <x:String x:Key="Text.Tab.System" xml:space="preserve">Sistem</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Rapikan</x:String>
   <x:String x:Key="Text.Tab.Version" xml:space="preserve">Tentang</x:String>
+  <x:String x:Key="Text.Tab.Devices" xml:space="preserve">Perangkat terputus</x:String>
+
+  <!-- ===== Perangkat terputus ===== -->
+  <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">Perangkat tidak terhubung</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">Menampilkan perangkat Plug and Play yang pernah dipasang tetapi saat ini tidak terhubung. Pilih satu per satu atau pilih semua sebelum menghapus.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Perangkat lunak dan virtual disembunyikan demi keamanan. Windows akan mendeteksi ulang driver saat perangkat disambungkan kembali, tetapi setelan khusus perangkat dapat direset.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">Muat ulang</x:String>
+  <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">Pilih semua</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">Hapus pilihan</x:String>
+  <x:String x:Key="Text.DeviceCleanup.RemoveSelected" xml:space="preserve">Hapus yang dipilih</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Empty" xml:space="preserve">Tidak ada perangkat keras terputus yang ditemukan.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmRemove" xml:space="preserve">Hapus perangkat</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loading" xml:space="preserve">Mencari perangkat terputus…</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Selection" xml:space="preserve">{0} dari {1} dipilih</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmText" xml:space="preserve">Hapus {0} perangkat yang dipilih? Windows akan mendeteksi ulang driver saat disambungkan kembali, tetapi setelan khusus perangkat dapat direset.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loaded" xml:space="preserve">Menemukan {0} perangkat terputus.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.LoadFailed" xml:space="preserve">Perangkat terputus tidak dapat dimuat (periksa log).</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Removing" xml:space="preserve">Menghapus {0} dari {1}: {2}</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Completed" xml:space="preserve">{0} dihapus, {1} dilewati, {2} gagal.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.CompletedRestart" xml:space="preserve">{0} dihapus, {1} dilewati, {2} gagal. Mulai ulang PC untuk menyelesaikan perubahan.</x:String>
 
   <!-- ===== Notes / buttons ===== -->
   <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* Perlu memulai ulang PC agar berlaku</x:String>

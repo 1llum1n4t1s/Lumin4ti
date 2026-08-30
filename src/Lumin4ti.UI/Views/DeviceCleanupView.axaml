@@ -1,0 +1,116 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Lumin4ti.UI.ViewModels"
+             x:Class="Lumin4ti.UI.Views.DeviceCleanupView"
+             x:DataType="vm:DeviceCleanupViewModel">
+
+  <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto" Margin="8,0">
+    <TextBlock Grid.Row="0" Classes="h1"
+               Text="{DynamicResource Text.DeviceCleanup.Title}" />
+    <TextBlock Grid.Row="1" Classes="caption" TextWrapping="Wrap" Margin="0,0,0,10"
+               Text="{DynamicResource Text.DeviceCleanup.Description}" />
+
+    <Border Grid.Row="2" Margin="0,0,0,10" Padding="10,7" CornerRadius="8"
+            Background="#18FF9500" BorderBrush="#66FF9500" BorderThickness="1">
+      <TextBlock FontSize="12" Foreground="#D97706" TextWrapping="Wrap"
+                 Text="{DynamicResource Text.DeviceCleanup.Warning}" />
+    </Border>
+
+    <WrapPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,8">
+      <Button Margin="0,0,8,6"
+              Content="{DynamicResource Text.DeviceCleanup.Refresh}"
+              Command="{Binding RefreshCommand}"
+              IsEnabled="{Binding CanRefresh}" />
+      <Button Margin="0,0,8,6"
+              Content="{DynamicResource Text.DeviceCleanup.SelectAll}"
+              Command="{Binding SelectAllCommand}"
+              IsEnabled="{Binding CanChangeSelection}" />
+      <Button Margin="0,0,8,6"
+              Content="{DynamicResource Text.DeviceCleanup.ClearSelection}"
+              Command="{Binding ClearSelectionCommand}"
+              IsEnabled="{Binding CanChangeSelection}" />
+      <Button Classes="danger" Margin="0,0,8,6"
+              Content="{DynamicResource Text.DeviceCleanup.RemoveSelected}"
+              Command="{Binding RequestRemovalCommand}"
+              IsEnabled="{Binding CanRemove}" />
+      <TextBlock Margin="0,0,0,6" VerticalAlignment="Center"
+                 Text="{Binding SelectionText}" Classes="caption" />
+    </WrapPanel>
+
+    <Grid Grid.Row="4">
+      <ListBox ItemsSource="{Binding Devices}"
+               IsVisible="{Binding HasDevices}"
+               IsEnabled="{Binding CanChangeSelection}"
+               Background="Transparent"
+               BorderThickness="0"
+               ScrollViewer.VerticalScrollBarVisibility="Auto">
+        <ListBox.Styles>
+          <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Background" Value="Transparent" />
+          </Style>
+          <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+          </Style>
+        </ListBox.Styles>
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:DisconnectedDeviceItemViewModel">
+            <Border Background="{DynamicResource Brush.Container}"
+                    BorderBrush="{DynamicResource Brush.Border}"
+                    BorderThickness="1" CornerRadius="10"
+                    Padding="12,9" Margin="0,0,0,7">
+              <CheckBox IsChecked="{Binding IsSelected}"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Stretch"
+                        ToolTip.Tip="{Binding InstanceId}">
+                <StackPanel Spacing="2" Margin="4,0,0,0">
+                  <TextBlock Text="{Binding DisplayName}"
+                             FontWeight="SemiBold" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding Details}" Classes="caption"
+                             TextWrapping="Wrap"
+                             IsVisible="{Binding Details, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                  <SelectableTextBlock Text="{Binding InstanceId}"
+                                       FontSize="11" TextWrapping="Wrap"
+                                       FontFamily="Cascadia Mono, Consolas, monospace"
+                                       Foreground="{DynamicResource Brush.FG2}" />
+                </StackPanel>
+              </CheckBox>
+            </Border>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8"
+                  IsVisible="{Binding IsLoading}">
+        <ProgressBar IsIndeterminate="True" Width="150" />
+        <TextBlock Text="{DynamicResource Text.DeviceCleanup.Loading}" Classes="caption" />
+      </StackPanel>
+
+      <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+                 TextAlignment="Center" TextWrapping="Wrap" MaxWidth="380"
+                 Text="{DynamicResource Text.DeviceCleanup.Empty}"
+                 Classes="caption" IsVisible="{Binding IsEmpty}" />
+    </Grid>
+
+    <Border Grid.Row="5" Margin="0,8,0,0" Padding="12,10" CornerRadius="10"
+            Background="#18FF3B30" BorderBrush="#66FF3B30" BorderThickness="1"
+            IsVisible="{Binding IsConfirmingRemoval}">
+      <StackPanel Spacing="8">
+        <TextBlock Text="{Binding ConfirmationText}" TextWrapping="Wrap" />
+        <WrapPanel Orientation="Horizontal">
+          <Button Classes="danger" Margin="0,0,8,0"
+                  Content="{DynamicResource Text.DeviceCleanup.ConfirmRemove}"
+                  Command="{Binding ConfirmRemovalCommand}" />
+          <Button Content="{DynamicResource Text.Button.Cancel}"
+                  Command="{Binding CancelRemovalCommand}" />
+        </WrapPanel>
+      </StackPanel>
+    </Border>
+
+    <TextBlock Grid.Row="6" Text="{Binding StatusText}" Classes="caption"
+               Margin="0,8,0,0" TextWrapping="Wrap"
+               IsVisible="{Binding StatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+  </Grid>
+</UserControl>

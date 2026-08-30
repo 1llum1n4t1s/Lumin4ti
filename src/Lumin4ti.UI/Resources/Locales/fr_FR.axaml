@@ -11,6 +11,26 @@
   <x:String x:Key="Text.Tab.System" xml:space="preserve">Système</x:String>
   <x:String x:Key="Text.Tab.Organize" xml:space="preserve">Organiser</x:String>
   <x:String x:Key="Text.Tab.Version" xml:space="preserve">À propos</x:String>
+  <x:String x:Key="Text.Tab.Devices" xml:space="preserve">Périphériques déconnectés</x:String>
+
+  <!-- ===== Périphériques déconnectés ===== -->
+  <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">Périphériques déconnectés</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">Répertorie les périphériques Plug-and-Play déjà installés mais actuellement déconnectés. Sélectionnez une ou toutes les entrées avant leur suppression.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Les périphériques logiciels et virtuels sont masqués par sécurité. Windows redétectera le pilote après reconnexion, mais les réglages propres au périphérique peuvent être réinitialisés.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">Actualiser</x:String>
+  <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">Tout sélectionner</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">Effacer la sélection</x:String>
+  <x:String x:Key="Text.DeviceCleanup.RemoveSelected" xml:space="preserve">Supprimer la sélection</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Empty" xml:space="preserve">Aucun périphérique matériel déconnecté n’a été trouvé.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmRemove" xml:space="preserve">Supprimer les périphériques</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loading" xml:space="preserve">Recherche des périphériques déconnectés…</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Selection" xml:space="preserve">{0} sur {1} sélectionnés</x:String>
+  <x:String x:Key="Text.DeviceCleanup.ConfirmText" xml:space="preserve">Supprimer les {0} périphériques sélectionnés ? Windows redétectera le pilote après reconnexion, mais les réglages propres au périphérique peuvent être réinitialisés.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Loaded" xml:space="preserve">{0} périphériques déconnectés trouvés.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.LoadFailed" xml:space="preserve">Impossible de charger les périphériques déconnectés (consultez le journal).</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Removing" xml:space="preserve">Suppression {0} sur {1} : {2}</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Completed" xml:space="preserve">{0} supprimés, {1} ignorés, {2} en échec.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.CompletedRestart" xml:space="preserve">{0} supprimés, {1} ignorés, {2} en échec. Redémarrez le PC pour terminer les modifications.</x:String>
 
   <!-- ===== Notes / buttons ===== -->
   <x:String x:Key="Text.Note.RequiresReboot" xml:space="preserve">* Nécessite un redémarrage du PC pour prendre effet</x:String>
