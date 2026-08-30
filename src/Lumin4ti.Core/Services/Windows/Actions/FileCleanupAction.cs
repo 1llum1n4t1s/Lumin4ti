@@ -232,12 +232,7 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
         }
 
         var lines = FileCleanupEngine.DescribeOutcome(outcome).ToList();
-        var degraded = false;
-
-        if (outcome.RejectedTargets.Count > 0)
-        {
-            degraded = true;
-        }
+        var degraded = outcome.Blocked > 0 || outcome.RejectedTargets.Count > 0;
 
         LoggerBootstrap.Log.Info(
             $"{Id}: files={outcome.DeletedFiles} dirs={outcome.DeletedDirectories} " +

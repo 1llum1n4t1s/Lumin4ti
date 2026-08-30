@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using Microsoft.Win32.SafeHandles;
 
 namespace Lumin4ti.Core.Services.Windows.Actions;
 
@@ -71,6 +72,9 @@ public static class FileCleanupEngine
 {
     private const int MaxDepth = 64;
     private const int MoveFileDelayUntilReboot = 0x00000004;
+    private const uint FileReadAttributes = 0x00000080;
+    private const uint FileFlagBackupSemantics = 0x02000000;
+    private const uint FileFlagOpenReparsePoint = 0x00200000;
 
     /// <summary>削除してはいけないフォルダ (これ自身、およびドライブ直下は対象にできない)。</summary>
     private static readonly Lazy<HashSet<string>> ProtectedPaths = new(BuildProtectedPaths);
@@ -116,30 +120,27 @@ public static class FileCleanupEngine
                 continue;
             }
 
-            // 対象そのものがジャンクション・シンボリックリンクなら、リンク先の実体を
-            // 消してしまうため触らない (掃除対象のフォルダを別ドライブへ逃がしている環境がある)。
-            if (!TryGetAttributes(new DirectoryInfo(fullPath), out var targetAttributes))
+            // 対象だけでなく全祖先を no-follow で開き、走査が終わるまで名前の差し替えを防ぐ。
+            // ブラウザプロファイル等の祖先がジャンクションでもリンク先へ入らない。
+            if (!DirectoryHandleGuard.TryOpenPath(fullPath, out var pathGuard, out var pathRejection))
             {
-                outcome.Blocked++;
+                outcome.RejectedTargets.Add($"{fullPath} ({pathRejection})");
                 continue;
             }
 
-            if ((targetAttributes & FileAttributes.ReparsePoint) != 0)
+            using (pathGuard)
             {
-                outcome.RejectedTargets.Add($"{fullPath} (リンク先の実体を消さないため)");
-                continue;
-            }
+                progress?.Report($"  - クリーンアップ: {fullPath}");
 
-            progress?.Report($"  - クリーンアップ: {fullPath}");
-
-            switch (target.Kind)
-            {
-                case CleanupTargetKind.Contents:
-                    DeleteContents(new DirectoryInfo(fullPath), outcome, scheduleBlockedForReboot, depth: 0, ct);
-                    break;
-                case CleanupTargetKind.Files:
-                    DeleteMatchingFiles(fullPath, target.Pattern!, outcome, scheduleBlockedForReboot, ct);
-                    break;
+                switch (target.Kind)
+                {
+                    case CleanupTargetKind.Contents:
+                        DeleteContents(new DirectoryInfo(fullPath), outcome, scheduleBlockedForReboot, depth: 0, ct);
+                        break;
+                    case CleanupTargetKind.Files:
+                        DeleteMatchingFiles(fullPath, target.Pattern!, outcome, scheduleBlockedForReboot, ct);
+                        break;
+                }
             }
         }
 
@@ -165,23 +166,25 @@ public static class FileCleanupEngine
 
         try
         {
-            var directory = new DirectoryInfo(fullPath);
-            if (!TryGetAttributes(directory, out var directoryAttributes) ||
-                (directoryAttributes & FileAttributes.ReparsePoint) != 0)
+            if (!DirectoryHandleGuard.TryOpenPath(fullPath, out var pathGuard, out _))
             {
                 return false;
             }
 
-            return target.Kind switch
+            using (pathGuard)
             {
-                CleanupTargetKind.Contents => directory
-                    .EnumerateFileSystemInfos("*", SearchOption.TopDirectoryOnly)
-                    .Any(IsRemovableEntry),
-                CleanupTargetKind.Files => directory
-                    .EnumerateFiles(target.Pattern!, SearchOption.TopDirectoryOnly)
-                    .Any(file => IsRemovableEntry(file)),
-                _ => false,
-            };
+                var directory = new DirectoryInfo(fullPath);
+                return target.Kind switch
+                {
+                    CleanupTargetKind.Contents => directory
+                        .EnumerateFileSystemInfos("*", SearchOption.TopDirectoryOnly)
+                        .Any(IsRemovableEntry),
+                    CleanupTargetKind.Files => directory
+                        .EnumerateFiles(target.Pattern!, SearchOption.TopDirectoryOnly)
+                        .Any(file => MatchesCleanupPattern(file.Name, target.Pattern!) && IsRemovableEntry(file)),
+                    _ => false,
+                };
+            }
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
         {
@@ -194,6 +197,22 @@ public static class FileCleanupEngine
     {
         return TryGetAttributes(entry, out var attributes) &&
                (attributes & FileAttributes.ReparsePoint) == 0;
+    }
+
+    /// <summary>
+    /// 列挙元が通常ディレクトリだけで構成されているかを no-follow で確認する。
+    /// 可変のブラウザプロファイルや ETL ツリーを組み立てる側の防御にも使う。
+    /// </summary>
+    internal static bool CanSafelyTraverseDirectory(string path)
+    {
+        if (!Directory.Exists(path) ||
+            !DirectoryHandleGuard.TryOpenPath(path, out var pathGuard, out _))
+        {
+            return false;
+        }
+
+        pathGuard.Dispose();
+        return true;
     }
 
     private static bool TryGetAttributes(FileSystemInfo entry, out FileAttributes attributes)
@@ -339,6 +358,16 @@ public static class FileCleanupEngine
             return;
         }
 
+        // 呼び出し元が祖先を固定したまま、現在の要素も no-follow で固定する。
+        // 属性検査と列挙の間に通常フォルダをジャンクションへ差し替える競合を防ぐ。
+        if (!DirectoryHandleGuard.TryOpenDirectory(directory.FullName, out var directoryGuard, out var rejection))
+        {
+            outcome.RejectedTargets.Add($"{directory.FullName} ({rejection})");
+            return;
+        }
+
+        using var pinnedDirectory = directoryGuard;
+
         FileInfo[] files;
         DirectoryInfo[] subdirectories;
         try
@@ -366,7 +395,13 @@ public static class FileCleanupEngine
             // キャッシュ配置設定かもしれないため削除しない。
             // (%LOCALAPPDATA% 配下には旧 "Application Data" 等の再解析ポイントがあり、
             //  追従すると同じ場所を無限に降りたり対象外を消したりする)。
-            if ((subdirectory.Attributes & FileAttributes.ReparsePoint) != 0)
+            if (!TryGetAttributes(subdirectory, out var subdirectoryAttributes))
+            {
+                outcome.Blocked++;
+                continue;
+            }
+
+            if ((subdirectoryAttributes & FileAttributes.ReparsePoint) != 0)
             {
                 outcome.RejectedTargets.Add($"{subdirectory.FullName} (リンクを保護するため)");
                 continue;
@@ -387,7 +422,10 @@ public static class FileCleanupEngine
         FileInfo[] files;
         try
         {
-            files = new DirectoryInfo(directory).GetFiles(pattern, SearchOption.TopDirectoryOnly);
+            files = new DirectoryInfo(directory)
+                .GetFiles(pattern, SearchOption.TopDirectoryOnly)
+                .Where(file => MatchesCleanupPattern(file.Name, pattern))
+                .ToArray();
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
         {
@@ -400,6 +438,30 @@ public static class FileCleanupEngine
             ct.ThrowIfCancellationRequested();
             TryDeleteFile(file, outcome, scheduleBlockedForReboot);
         }
+    }
+
+    /// <summary>
+    /// .NET の 3 文字拡張子ワイルドカードは、*.etl で .etl1 等も返すため、
+    /// 掃除で使う単純な拡張子・固定名パターンは名前側でも厳密に絞る。
+    /// </summary>
+    internal static bool MatchesCleanupPattern(string fileName, string pattern)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(pattern);
+
+        if (pattern.StartsWith("*.", StringComparison.Ordinal) &&
+            pattern.AsSpan(2).IndexOfAny('*', '?') < 0)
+        {
+            return string.Equals(Path.GetExtension(fileName), pattern[1..], StringComparison.OrdinalIgnoreCase);
+        }
+
+        if (pattern.AsSpan().IndexOfAny('*', '?') < 0)
+        {
+            return string.Equals(fileName, pattern, StringComparison.OrdinalIgnoreCase);
+        }
+
+        // 現行カタログに複雑なワイルドカードは無い。追加時は OS の列挙結果を維持する。
+        return true;
     }
 
     private static void TryDeleteFile(FileInfo file, CleanupOutcome outcome, bool scheduleBlockedForReboot)
@@ -455,6 +517,12 @@ public static class FileCleanupEngine
     {
         try
         {
+            if ((directory.Attributes & FileAttributes.ReparsePoint) != 0)
+            {
+                outcome.RejectedTargets.Add($"{directory.FullName} (リンクを保護するため)");
+                return;
+            }
+
             if ((directory.Attributes & FileAttributes.ReadOnly) != 0)
             {
                 directory.Attributes = FileAttributes.Directory;
@@ -467,6 +535,158 @@ public static class FileCleanupEngine
         {
             // 中身が残っている (使用中) 場合はファイル側で Blocked を数えているため二重計上しない。
         }
+    }
+
+    /// <summary>
+    /// 各ディレクトリを FILE_FLAG_OPEN_REPARSE_POINT で開き、リンクを辿らず属性を確認する。
+    /// FILE_SHARE_DELETE を付けずに保持することで、走査中の名前差し替えも防ぐ。
+    /// </summary>
+    private sealed class DirectoryHandleGuard(List<SafeFileHandle> handles) : IDisposable
+    {
+        public static bool TryOpenPath(
+            string path,
+            out DirectoryHandleGuard guard,
+            out string rejection)
+        {
+            var handles = new List<SafeFileHandle>();
+            guard = null!;
+            rejection = string.Empty;
+
+            try
+            {
+                var fullPath = Path.TrimEndingDirectorySeparator(Path.GetFullPath(path));
+                var root = Path.GetPathRoot(fullPath);
+                if (string.IsNullOrWhiteSpace(root))
+                {
+                    rejection = "パスのルートを確認できませんでした";
+                    return false;
+                }
+
+                if (!TryOpenComponent(root, handles, out rejection))
+                {
+                    return false;
+                }
+
+                var current = root;
+                var relative = Path.GetRelativePath(root, fullPath);
+                foreach (var segment in relative.Split(
+                             [Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar],
+                             StringSplitOptions.RemoveEmptyEntries))
+                {
+                    current = Path.Combine(current, segment);
+                    if (!TryOpenComponent(current, handles, out rejection))
+                    {
+                        return false;
+                    }
+                }
+
+                guard = new DirectoryHandleGuard(handles);
+                handles = [];
+                return true;
+            }
+            catch (Exception ex) when (ex is ArgumentException or NotSupportedException or IOException or UnauthorizedAccessException)
+            {
+                rejection = "再解析点の安全確認に失敗しました";
+                return false;
+            }
+            finally
+            {
+                foreach (var handle in handles)
+                {
+                    handle.Dispose();
+                }
+            }
+        }
+
+        public static bool TryOpenDirectory(
+            string path,
+            out DirectoryHandleGuard guard,
+            out string rejection)
+        {
+            var handles = new List<SafeFileHandle>();
+            guard = null!;
+            if (!TryOpenComponent(path, handles, out rejection))
+            {
+                return false;
+            }
+
+            guard = new DirectoryHandleGuard(handles);
+            return true;
+        }
+
+        private static bool TryOpenComponent(
+            string path,
+            List<SafeFileHandle> handles,
+            out string rejection)
+        {
+            var handle = CreateFile(
+                path,
+                FileReadAttributes,
+                FileShare.ReadWrite,
+                nint.Zero,
+                FileMode.Open,
+                FileFlagBackupSemantics | FileFlagOpenReparsePoint,
+                nint.Zero);
+
+            if (handle.IsInvalid)
+            {
+                var error = Marshal.GetLastWin32Error();
+                handle.Dispose();
+                rejection = $"再解析点の安全確認に失敗しました (Win32 {error})";
+                return false;
+            }
+
+            if (!GetFileInformationByHandle(handle, out var information))
+            {
+                var error = Marshal.GetLastWin32Error();
+                handle.Dispose();
+                rejection = $"再解析点の属性を確認できませんでした (Win32 {error})";
+                return false;
+            }
+
+            if ((information.FileAttributes & FileAttributes.ReparsePoint) != 0)
+            {
+                handle.Dispose();
+                rejection = "リンク先の実体を消さないため";
+                return false;
+            }
+
+            if ((information.FileAttributes & FileAttributes.Directory) == 0)
+            {
+                handle.Dispose();
+                rejection = "ディレクトリではありません";
+                return false;
+            }
+
+            handles.Add(handle);
+            rejection = string.Empty;
+            return true;
+        }
+
+        public void Dispose()
+        {
+            for (var i = handles.Count - 1; i >= 0; i--)
+            {
+                handles[i].Dispose();
+            }
+
+            handles.Clear();
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct ByHandleFileInformation
+    {
+        public FileAttributes FileAttributes;
+        public System.Runtime.InteropServices.ComTypes.FILETIME CreationTime;
+        public System.Runtime.InteropServices.ComTypes.FILETIME LastAccessTime;
+        public System.Runtime.InteropServices.ComTypes.FILETIME LastWriteTime;
+        public uint VolumeSerialNumber;
+        public uint FileSizeHigh;
+        public uint FileSizeLow;
+        public uint NumberOfLinks;
+        public uint FileIndexHigh;
+        public uint FileIndexLow;
     }
 
     /// <summary>
@@ -533,6 +753,24 @@ public static class FileCleanupEngine
             ? $"{bytes:N0} B"
             : value.ToString("N1", CultureInfo.InvariantCulture) + " " + units[unit];
     }
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("kernel32.dll", EntryPoint = "CreateFileW", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern SafeFileHandle CreateFile(
+        string fileName,
+        uint desiredAccess,
+        FileShare shareMode,
+        nint securityAttributes,
+        FileMode creationDisposition,
+        uint flagsAndAttributes,
+        nint templateFile);
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetFileInformationByHandle(
+        SafeFileHandle file,
+        out ByHandleFileInformation fileInformation);
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [DllImport("kernel32.dll", EntryPoint = "MoveFileExW", CharSet = CharSet.Unicode, SetLastError = true)]

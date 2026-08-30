@@ -25,7 +25,7 @@ public sealed class RecallToggle(ICommandExecutor executor) : IMaintenanceToggle
     public async Task<bool?> GetStateAsync(CancellationToken ct = default)
     {
         var result = await executor.RunAsync("dism.exe", "/online /get-featureinfo /featurename:Recall /english", ct);
-        if (!result.Success)
+        if (!DismExitCode.IsSuccessOrRebootRequired(result))
         {
             // 非対応機種 (機能自体が存在しない) は状態不明
             return null;
@@ -40,8 +40,42 @@ public sealed class RecallToggle(ICommandExecutor executor) : IMaintenanceToggle
             return null;
         }
 
-        // ON (= 無効化適用済み) は State が Disabled 系のとき
-        return stateLine.Contains("Disabled", StringComparison.OrdinalIgnoreCase);
+        return ParseFeatureState(stateLine);
+    }
+
+    /// <summary>
+    /// ON は無効化済み、または再起動後に無効化される保留状態。
+    /// DISM の既知状態だけを受理し、将来追加された状態を誤って OFF と断定しない。
+    /// </summary>
+    internal static bool? ParseFeatureState(string stateLine)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(stateLine);
+
+        var separator = stateLine.IndexOf(':');
+        if (separator < 0 ||
+            !stateLine[..separator].Trim().Equals("State", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        var state = stateLine[(separator + 1)..].Trim();
+        if (state.Equals("Disabled", StringComparison.OrdinalIgnoreCase) ||
+            state.Equals("Disable Pending", StringComparison.OrdinalIgnoreCase) ||
+            state.Equals("DisablePending", StringComparison.OrdinalIgnoreCase) ||
+            state.Equals("Disabled with Payload Removed", StringComparison.OrdinalIgnoreCase) ||
+            state.Equals("Removed", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (state.Equals("Enabled", StringComparison.OrdinalIgnoreCase) ||
+            state.Equals("Enable Pending", StringComparison.OrdinalIgnoreCase) ||
+            state.Equals("EnablePending", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        return null;
     }
 
     public async Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default)

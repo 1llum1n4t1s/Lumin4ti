@@ -143,7 +143,8 @@ public static class FileCleanupGroups
 
         const string etlPattern = "*.etl";
         var targets = new List<CleanupTarget> { CleanupTarget.Files(rawRoot, etlPattern) };
-        if (!FileCleanupEngine.TryResolve(rawRoot, out var fullRoot, out _) || !Directory.Exists(fullRoot))
+        if (!FileCleanupEngine.TryResolve(rawRoot, out var fullRoot, out _) ||
+            !FileCleanupEngine.CanSafelyTraverseDirectory(fullRoot))
         {
             return targets;
         }
@@ -153,7 +154,8 @@ public static class FileCleanupGroups
 
         while (pending.TryPop(out var entry))
         {
-            if (entry.Depth >= maxDepth)
+            if (entry.Depth >= maxDepth ||
+                !FileCleanupEngine.CanSafelyTraverseDirectory(entry.Directory.FullName))
             {
                 continue;
             }
@@ -170,14 +172,7 @@ public static class FileCleanupGroups
 
             foreach (var child in children)
             {
-                try
-                {
-                    if ((child.Attributes & FileAttributes.ReparsePoint) != 0)
-                    {
-                        continue;
-                    }
-                }
-                catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+                if (!FileCleanupEngine.CanSafelyTraverseDirectory(child.FullName))
                 {
                     continue;
                 }
@@ -407,11 +402,17 @@ public static class FileCleanupGroups
     /// インストール済みブラウザとそのプロファイルを走査して対象を組み立てる。
     /// プロファイル数は環境ごとに違うため、実行時に列挙する。
     /// </summary>
-    internal static IEnumerable<CleanupTarget> EnumerateBrowserTargets()
+    internal static IEnumerable<CleanupTarget> EnumerateBrowserTargets() =>
+        EnumerateBrowserTargets(BrowserRoots);
+
+    internal static IEnumerable<CleanupTarget> EnumerateBrowserTargets(IEnumerable<string> browserRoots)
     {
-        foreach (var rawRoot in BrowserRoots)
+        ArgumentNullException.ThrowIfNull(browserRoots);
+
+        foreach (var rawRoot in browserRoots)
         {
-            if (!FileCleanupEngine.TryResolve(rawRoot, out var root, out _) || !Directory.Exists(root))
+            if (!FileCleanupEngine.TryResolve(rawRoot, out var root, out _) ||
+                !FileCleanupEngine.CanSafelyTraverseDirectory(root))
             {
                 continue;
             }
@@ -422,10 +423,15 @@ public static class FileCleanupGroups
             }
 
             var userData = Path.Combine(root, "User Data");
+            if (!FileCleanupEngine.CanSafelyTraverseDirectory(userData))
+            {
+                continue;
+            }
+
             string[] profiles;
             try
             {
-                profiles = Directory.Exists(userData) ? Directory.GetDirectories(userData) : [];
+                profiles = Directory.GetDirectories(userData);
             }
             catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
             {
@@ -434,6 +440,11 @@ public static class FileCleanupGroups
 
             foreach (var profile in profiles)
             {
+                if (!FileCleanupEngine.CanSafelyTraverseDirectory(profile))
+                {
+                    continue;
+                }
+
                 foreach (var relative in BrowserProfileCaches)
                 {
                     yield return CleanupTarget.Contents(Path.Combine(profile, relative));

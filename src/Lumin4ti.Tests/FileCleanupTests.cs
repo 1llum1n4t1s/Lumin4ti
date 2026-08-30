@@ -198,6 +198,24 @@ public sealed class FileCleanupTests
     }
 
     [TestMethod]
+    public async Task 削除できない項目が残った場合は部分成功を返す()
+    {
+        var file = CreateFile(@"cache\locked.tmp");
+        using var lockStream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None);
+        var action = new FileCleanupAction(
+            "test-cleanup",
+            "テスト掃除",
+            "テスト用",
+            () => [CleanupTarget.Contents(Path.Combine(_root, "cache"))]);
+
+        var result = await action.ExecuteAsync();
+
+        Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
+        Assert.IsTrue(File.Exists(file));
+        StringAssert.Contains(result.Detail, "削除できませんでした");
+    }
+
+    [TestMethod]
     public void リンクになっている対象は辿らず拒否する()
     {
         // 掃除対象フォルダを別ドライブへ逃がしている環境で、リンク先の実体を消さないことの確認。
@@ -239,6 +257,68 @@ public sealed class FileCleanupTests
         Assert.AreEqual(1, outcome.RejectedTargets.Count);
         Assert.AreEqual(0, outcome.DeletedFiles);
         Assert.IsTrue(File.Exists(keep), "リンク先のパターン一致ファイルも残す");
+    }
+
+    [TestMethod]
+    public void 三文字拡張子パターンは長い拡張子を候補にも削除対象にもしない()
+    {
+        var keepEtl1 = CreateFile(@"logs\trace.etl1");
+        var keepEtlBackup = CreateFile(@"logs\trace.etlbackup");
+        var target = CleanupTarget.Files(Path.Combine(_root, "logs"), "*.etl");
+
+        Assert.IsFalse(FileCleanupEngine.HasCleanupCandidates(target));
+
+        var outcome = FileCleanupEngine.Run(
+            [target],
+            scheduleBlockedForReboot: false,
+            progress: null,
+            ct: CancellationToken.None);
+
+        Assert.AreEqual(0, outcome.DeletedFiles);
+        Assert.IsTrue(File.Exists(keepEtl1));
+        Assert.IsTrue(File.Exists(keepEtlBackup));
+    }
+
+    [TestMethod]
+    public void 祖先がリンクになっている対象も辿らず拒否する()
+    {
+        var realRoot = Path.Combine(_root, "real-browser");
+        var realCache = Path.Combine(realRoot, "Profile 1", "Cache");
+        Directory.CreateDirectory(realCache);
+        var keep = Path.Combine(realCache, "keep.bin");
+        File.WriteAllText(keep, "keep");
+        var linkedRoot = Path.Combine(_root, "linked-browser");
+        CreateJunction(linkedRoot, realRoot);
+        var target = CleanupTarget.Contents(Path.Combine(linkedRoot, "Profile 1", "Cache"));
+
+        Assert.IsFalse(FileCleanupEngine.HasCleanupCandidates(target));
+
+        var outcome = FileCleanupEngine.Run(
+            [target],
+            scheduleBlockedForReboot: false,
+            progress: null,
+            ct: CancellationToken.None);
+
+        Assert.AreEqual(1, outcome.RejectedTargets.Count);
+        Assert.AreEqual(0, outcome.DeletedFiles);
+        Assert.IsTrue(File.Exists(keep), "祖先リンクの先にあるキャッシュは残す");
+    }
+
+    [TestMethod]
+    public void ブラウザ列挙はリンクになっているプロファイルを対象に含めない()
+    {
+        var browserRoot = Path.Combine(_root, "browser");
+        var userData = Path.Combine(browserRoot, "User Data");
+        var externalProfile = Path.Combine(_root, "external-profile");
+        Directory.CreateDirectory(userData);
+        Directory.CreateDirectory(externalProfile);
+        CreateJunction(Path.Combine(userData, "Profile 1"), externalProfile);
+
+        var targets = FileCleanupGroups.EnumerateBrowserTargets([browserRoot]).ToArray();
+
+        Assert.IsFalse(
+            targets.Any(target => target.RawPath.Contains("Profile 1", StringComparison.OrdinalIgnoreCase)),
+            "リンク先プロファイルのキャッシュを対象へ展開しない");
     }
 
     [TestMethod]
@@ -459,6 +539,8 @@ public sealed class FileCleanupTests
         var rootEtl = CreateFile(@"etl-root\root.etl");
         var childEtl = CreateFile(@"etl-root\child\child.etl");
         var keepLog = CreateFile(@"etl-root\child\keep.log");
+        var keepEtl1 = CreateFile(@"etl-root\child\trace.etl1");
+        var keepEtlBackup = CreateFile(@"etl-root\child\trace.etlbackup");
         var linkedEtl = CreateFile(@"external\linked.etl");
         CreateJunction(Path.Combine(root, "linked"), external);
 
@@ -480,6 +562,8 @@ public sealed class FileCleanupTests
         Assert.IsFalse(File.Exists(rootEtl));
         Assert.IsFalse(File.Exists(childEtl));
         Assert.IsTrue(File.Exists(keepLog), "ETL 以外のログはこの選択では残す");
+        Assert.IsTrue(File.Exists(keepEtl1), ".etl1 は .etl として削除しない");
+        Assert.IsTrue(File.Exists(keepEtlBackup), ".etlbackup は .etl として削除しない");
         Assert.IsTrue(File.Exists(linkedEtl), "リンク先の ETL は削除しない");
     }
 
