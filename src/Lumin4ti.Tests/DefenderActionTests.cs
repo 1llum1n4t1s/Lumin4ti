@@ -46,6 +46,21 @@ public sealed class DefenderActionTests
     }
 
     [TestMethod]
+    public void MpCmdRunは信頼検証に失敗した最新版を選ばない()
+    {
+        var oldDirectory = @"C:\ProgramData\Microsoft\Windows Defender\Platform\4.18.9.0-0";
+        var latestDirectory = @"C:\ProgramData\Microsoft\Windows Defender\Platform\4.18.10.0-0";
+        var trusted = Path.Combine(oldDirectory, "MpCmdRun.exe");
+
+        var selected = DefenderCommandSupport.SelectMpCmdRunPath(
+            [oldDirectory, latestDirectory],
+            @"C:\Program Files\Windows Defender\MpCmdRun.exe",
+            path => path.Equals(trusted, StringComparison.OrdinalIgnoreCase));
+
+        Assert.AreEqual(trusted, selected);
+    }
+
+    [TestMethod]
     public async Task 定義ファイルは全体を戻してから更新する()
     {
         var executor = new RecordingExecutor(Success(), Success());

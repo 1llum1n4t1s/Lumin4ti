@@ -150,6 +150,54 @@ internal sealed record UwpBackgroundJournalDword(bool? Exists, int? Value)
 internal static class UwpBackgroundJournalStore
 {
     private const int AppliedValue = 1;
+
+    public static UwpBackgroundJournalLoadResult Load(
+        ProtectedBackupStorage storage,
+        string relativePath,
+        string legacyPath) =>
+        Load(
+            () => storage.FileExists(relativePath),
+            () => storage.ReadAllText(relativePath),
+            journal => SaveAtomic(storage, relativePath, journal),
+            legacyPath);
+
+    internal static UwpBackgroundJournalLoadResult Load(
+        Func<bool> protectedFileExists,
+        Func<string> readProtectedFile,
+        Action<UwpBackgroundJournal> saveProtectedFile,
+        string legacyPath)
+    {
+        try
+        {
+            if (protectedFileExists())
+            {
+                return Deserialize(readProtectedFile());
+            }
+        }
+        catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            return new(UwpBackgroundJournalLoadStatus.Invalid, Error: ex.Message);
+        }
+
+        // 旧 AppData journal は読み取り専用で取り込み、以後は保護領域だけを正本にする。
+        // 旧パスへ書いたり削除したりしないため、ジャンクションを介した昇格書き込みは発生しない。
+        var legacy = Load(legacyPath);
+        if (legacy.Status != UwpBackgroundJournalLoadStatus.Valid)
+        {
+            return legacy;
+        }
+
+        try
+        {
+            saveProtectedFile(legacy.Journal!);
+            return legacy;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            return new(UwpBackgroundJournalLoadStatus.Invalid, Error: ex.Message);
+        }
+    }
+
     public static UwpBackgroundJournalLoadResult Load(string path)
     {
         if (!File.Exists(path))
@@ -159,11 +207,7 @@ internal static class UwpBackgroundJournalStore
 
         try
         {
-            var journal = Lumin4tiJson.Deserialize<UwpBackgroundJournal>(File.ReadAllText(path));
-            var validationError = Validate(journal);
-            return validationError is null
-                ? new(UwpBackgroundJournalLoadStatus.Valid, journal)
-                : new(UwpBackgroundJournalLoadStatus.Invalid, Error: validationError);
+            return Deserialize(File.ReadAllText(path));
         }
         catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
         {
@@ -191,7 +235,7 @@ internal static class UwpBackgroundJournalStore
                        bufferSize: 4096,
                        FileOptions.WriteThrough))
             {
-                Lumin4tiJson.Serialize(stream, journal);
+                Serialize(stream, journal);
                 stream.Flush(flushToDisk: true);
             }
 
@@ -223,6 +267,41 @@ internal static class UwpBackgroundJournalStore
             return false;
         }
     }
+
+    public static void SaveAtomic(
+        ProtectedBackupStorage storage,
+        string relativePath,
+        UwpBackgroundJournal journal) =>
+        storage.WriteAtomically(relativePath, stream => Serialize(stream, journal));
+
+    public static bool TryClear(ProtectedBackupStorage storage, string relativePath)
+        => TryClear(journal => SaveAtomic(storage, relativePath, journal));
+
+    internal static bool TryClear(Action<UwpBackgroundJournal> saveProtectedFile)
+    {
+        try
+        {
+            // 空の有効 journal を残して旧 AppData 正本の再取り込みを防ぐ。
+            saveProtectedFile(UwpBackgroundJournal.Create([]));
+            return true;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            return false;
+        }
+    }
+
+    private static UwpBackgroundJournalLoadResult Deserialize(string json)
+    {
+        var journal = Lumin4tiJson.Deserialize<UwpBackgroundJournal>(json);
+        var validationError = Validate(journal);
+        return validationError is null
+            ? new(UwpBackgroundJournalLoadStatus.Valid, journal)
+            : new(UwpBackgroundJournalLoadStatus.Invalid, Error: validationError);
+    }
+
+    private static void Serialize(Stream stream, UwpBackgroundJournal journal) =>
+        Lumin4tiJson.Serialize(stream, journal);
 
     private static string? Validate(UwpBackgroundJournal? journal)
     {

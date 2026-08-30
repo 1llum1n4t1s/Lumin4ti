@@ -18,7 +18,7 @@ namespace Lumin4ti.UI.ViewModels;
 /// </summary>
 public partial class CommandCategoryViewModel : ObservableObject
 {
-    private static readonly TimeSpan StateVerificationTimeout = TimeSpan.FromSeconds(15);
+    internal static readonly TimeSpan StateQueryTimeout = TimeSpan.FromMinutes(2);
 
     /// <summary>ライブ出力の再描画間隔 (高頻度な進捗通知で UI スレッドを占有しないための下限)。</summary>
     private static readonly TimeSpan ProgressRenderInterval = TimeSpan.FromMilliseconds(120);
@@ -94,31 +94,21 @@ public partial class CommandCategoryViewModel : ObservableObject
         var toggles = AllItems.Where(i => i.Item is IMaintenanceToggle).ToList();
         var choices = AllItems.Where(i => i.Item is IMaintenanceChoice).ToList();
 
-        // 状態取得は外部プロセス (Get-MMAgent / dism / bcdedit) を伴い、環境によっては返ってこない。
-        // 適用後の検証と同じ上限を課し、ハングした子プロセスに最大 1 時間居座られないようにする。
-        using var loadCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        loadCts.CancelAfter(StateVerificationTimeout);
+        // 状態取得は外部プロセス (Get-MMAgent / dism / bcdedit) を伴うため、
+        // 遅い 1 項目が同じカテゴリの他項目を巻き添えにしないよう項目ごとに上限を持たせる。
         await Task.WhenAll(toggles.Select(async item =>
         {
             bool? state;
             try
             {
-                state = await ((IMaintenanceToggle)item.Item).GetStateAsync(loadCts.Token);
+                state = await QueryStateAsync(
+                    token => ((IMaintenanceToggle)item.Item).GetStateAsync(token),
+                    item.Item.Id,
+                    ct);
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
                 return;
-            }
-            catch (OperationCanceledException) when (loadCts.IsCancellationRequested)
-            {
-                LoggerBootstrap.Log.Error(
-                    $"{item.Item.Id} の状態取得が {StateVerificationTimeout.TotalSeconds:0} 秒でタイムアウトしました");
-                state = null;
-            }
-            catch (Exception ex)
-            {
-                LoggerBootstrap.Log.Error($"{item.Item.Id} の状態取得に失敗しました", ex);
-                state = null;
             }
 
             await Dispatcher.UIThread.InvokeAsync(() =>
@@ -133,22 +123,14 @@ public partial class CommandCategoryViewModel : ObservableObject
             string? value;
             try
             {
-                value = await ((IMaintenanceChoice)item.Item).GetSelectedValueAsync(loadCts.Token);
+                value = await QueryStateAsync(
+                    token => ((IMaintenanceChoice)item.Item).GetSelectedValueAsync(token),
+                    item.Item.Id,
+                    ct);
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
                 return;
-            }
-            catch (OperationCanceledException) when (loadCts.IsCancellationRequested)
-            {
-                LoggerBootstrap.Log.Error(
-                    $"{item.Item.Id} の状態取得が {StateVerificationTimeout.TotalSeconds:0} 秒でタイムアウトしました");
-                value = null;
-            }
-            catch (Exception ex)
-            {
-                LoggerBootstrap.Log.Error($"{item.Item.Id} の状態取得に失敗しました", ex);
-                value = null;
             }
 
             await Dispatcher.UIThread.InvokeAsync(() =>
@@ -159,6 +141,36 @@ public partial class CommandCategoryViewModel : ObservableObject
                 }
             });
         })));
+    }
+
+    internal static async Task<T?> QueryStateAsync<T>(
+        Func<CancellationToken, Task<T?>> query,
+        string itemId,
+        CancellationToken ct = default,
+        TimeSpan? timeout = null)
+    {
+        var effectiveTimeout = timeout ?? StateQueryTimeout;
+        using var queryCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        queryCts.CancelAfter(effectiveTimeout);
+        try
+        {
+            return await query(queryCts.Token);
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (OperationCanceledException) when (queryCts.IsCancellationRequested)
+        {
+            LoggerBootstrap.Log.Error(
+                $"{itemId} の状態取得が {effectiveTimeout.TotalSeconds:0} 秒でタイムアウトしました");
+            return default;
+        }
+        catch (Exception ex)
+        {
+            LoggerBootstrap.Log.Error($"{itemId} の状態取得に失敗しました", ex);
+            return default;
+        }
     }
 
     /// <summary>
@@ -230,19 +242,9 @@ public partial class CommandCategoryViewModel : ObservableObject
                 await ReloadChoiceAsync(child, childChoice);
                 break;
             case IMaintenanceToggle childToggle:
-                bool? state;
-                using (var verificationCts = new CancellationTokenSource(StateVerificationTimeout))
-                {
-                    try
-                    {
-                        state = await childToggle.GetStateAsync(verificationCts.Token);
-                    }
-                    catch (Exception ex)
-                    {
-                        LoggerBootstrap.Log.Error($"{childToggle.Id} の変更後状態取得に失敗しました", ex);
-                        state = null;
-                    }
-                }
+                var state = await QueryStateAsync(
+                    childToggle.GetStateAsync,
+                    childToggle.Id);
 
                 await Dispatcher.UIThread.InvokeAsync(() => child.ApplyState(state));
                 break;
@@ -251,17 +253,9 @@ public partial class CommandCategoryViewModel : ObservableObject
 
     private static async Task ReloadChoiceAsync(CommandItemViewModel item, IMaintenanceChoice choice)
     {
-        string? actual;
-        using var verificationCts = new CancellationTokenSource(StateVerificationTimeout);
-        try
-        {
-            actual = await choice.GetSelectedValueAsync(verificationCts.Token);
-        }
-        catch (Exception ex)
-        {
-            LoggerBootstrap.Log.Error($"{choice.Id} の変更後状態取得に失敗しました", ex);
-            actual = null;
-        }
+        var actual = await QueryStateAsync(
+            choice.GetSelectedValueAsync,
+            choice.Id);
 
         await Dispatcher.UIThread.InvokeAsync(() => item.ApplySelectedValue(actual));
     }
@@ -409,23 +403,9 @@ public partial class CommandCategoryViewModel : ObservableObject
 
             // 成否やキャンセルにかかわらず、推測値ではなく変更後の実状態を表示へ反映する。
             // 補償後も検証できる独立 token を使いつつ、終了処理を長時間塞がないよう上限を設ける。
-            bool? actualState;
-            using var verificationCts = new CancellationTokenSource(StateVerificationTimeout);
-            try
-            {
-                actualState = await toggle.GetStateAsync(verificationCts.Token);
-            }
-            catch (OperationCanceledException) when (verificationCts.IsCancellationRequested)
-            {
-                LoggerBootstrap.Log.Error(
-                    $"{item.Item.Id} の切り替え後状態取得が {StateVerificationTimeout.TotalSeconds:0} 秒でタイムアウトしました");
-                actualState = null;
-            }
-            catch (Exception ex)
-            {
-                LoggerBootstrap.Log.Error($"{item.Item.Id} の切り替え後状態取得に失敗しました", ex);
-                actualState = null;
-            }
+            var actualState = await QueryStateAsync(
+                toggle.GetStateAsync,
+                item.Item.Id);
 
             item.ApplyState(actualState);
 

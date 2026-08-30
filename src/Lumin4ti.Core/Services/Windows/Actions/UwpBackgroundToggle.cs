@@ -16,10 +16,10 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
 {
     private readonly Func<IReadOnlyList<string>> _getTargetFamilyNames;
     private readonly IUwpBackgroundSettingsStore _settings;
-    private readonly string _journalPath;
+    private readonly JournalAccess _journal;
 
     public UwpBackgroundToggle()
-        : this(GetInstalledPackageFamilyNames, new RegistryUwpBackgroundSettingsStore(), DefaultJournalPath)
+        : this(GetInstalledPackageFamilyNames, new RegistryUwpBackgroundSettingsStore(), CreateProtectedJournalAccess())
     {
     }
 
@@ -27,10 +27,24 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
         Func<IReadOnlyList<string>> getTargetFamilyNames,
         IUwpBackgroundSettingsStore settings,
         string journalPath)
+        : this(
+            getTargetFamilyNames,
+            settings,
+            new JournalAccess(
+                () => UwpBackgroundJournalStore.Load(journalPath),
+                journal => UwpBackgroundJournalStore.SaveAtomic(journalPath, journal),
+                () => UwpBackgroundJournalStore.TryDelete(journalPath)))
+    {
+    }
+
+    private UwpBackgroundToggle(
+        Func<IReadOnlyList<string>> getTargetFamilyNames,
+        IUwpBackgroundSettingsStore settings,
+        JournalAccess journal)
     {
         _getTargetFamilyNames = getTargetFamilyNames;
         _settings = settings;
-        _journalPath = journalPath;
+        _journal = journal;
     }
 
     public string Id => "uwp-background-off";
@@ -49,9 +63,46 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
     private static string DefaultJournalPath =>
         Path.Combine(AppPaths.AppDataDirectory, "backups", "uwp-background.json");
 
+    private static JournalAccess CreateProtectedJournalAccess()
+    {
+        const string relativePath = "uwp-background.json";
+        var storage = ProtectedBackupStorage.Default;
+        return new JournalAccess(
+            () => UwpBackgroundJournalStore.Load(storage, relativePath, DefaultJournalPath),
+            journal => UwpBackgroundJournalStore.SaveAtomic(storage, relativePath, journal),
+            () => UwpBackgroundJournalStore.TryClear(storage, relativePath));
+    }
+
     public Task<bool?> GetStateAsync(CancellationToken ct = default) =>
         Task.Run<bool?>(() =>
         {
+            var load = _journal.Load();
+            if (load.Status == UwpBackgroundJournalLoadStatus.Invalid)
+            {
+                LoggerBootstrap.Log.Error(
+                    "UWP バックグラウンド設定の復元 journal を検証できないため、状態を判定できませんでした");
+                return null;
+            }
+
+            var ownedEntries = load.Journal?.Entries ?? [];
+            if (ownedEntries.Count > 0)
+            {
+                var ownedFamilyNames = ownedEntries
+                    .Select(entry => entry.FamilyName!)
+                    .ToArray();
+                var ownedValues = _settings.ReadMany(ownedFamilyNames, ct);
+                foreach (var entry in ownedEntries)
+                {
+                    ct.ThrowIfCancellationRequested();
+                    if (ownedValues[entry.FamilyName!] == entry.GetApplied())
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
             var familyNames = _getTargetFamilyNames();
             if (familyNames.Count == 0)
             {
@@ -76,7 +127,7 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
 
     private MaintenanceActionResult Apply(CancellationToken ct)
     {
-        var load = UwpBackgroundJournalStore.Load(_journalPath);
+        var load = _journal.Load();
         if (load.Status == UwpBackgroundJournalLoadStatus.Invalid)
         {
             LoggerBootstrap.Log.Error($"{Id}: 復元 journal を読み取れないため適用を中止: {load.Error}");
@@ -113,9 +164,9 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
         try
         {
             // レジストリより先に journal を確定し、途中失敗でも適用済みの値を安全に戻せるようにする。
-            UwpBackgroundJournalStore.SaveAtomic(_journalPath, journal);
+            _journal.Save(journal);
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
         {
             LoggerBootstrap.Log.Error($"{Id}: 復元 journal の保存に失敗", ex);
             return MaintenanceActionResult.Fail(
@@ -138,7 +189,7 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
 
     private MaintenanceActionResult Restore(CancellationToken ct)
     {
-        var load = UwpBackgroundJournalStore.Load(_journalPath);
+        var load = _journal.Load();
         if (load.Status == UwpBackgroundJournalLoadStatus.Missing)
         {
             return MaintenanceActionResult.Ok(
@@ -179,7 +230,7 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
         ct.ThrowIfCancellationRequested();
         _settings.WriteMany(pending, CancellationToken.None);
 
-        var journalDeleted = UwpBackgroundJournalStore.TryDelete(_journalPath);
+        var journalDeleted = _journal.Clear();
         LoggerBootstrap.Log.Info($"{Id}: 元の個別設定 {restored} 件を復元 / 外部変更 {conflicts} 件を保持");
 
         var lines = new List<string>
@@ -198,6 +249,11 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
 
         return MaintenanceActionResult.Ok(lines);
     }
+
+    private sealed record JournalAccess(
+        Func<UwpBackgroundJournalLoadResult> Load,
+        Action<UwpBackgroundJournal> Save,
+        Func<bool> Clear);
 
     private static IReadOnlyList<string> GetInstalledPackageFamilyNames()
     {

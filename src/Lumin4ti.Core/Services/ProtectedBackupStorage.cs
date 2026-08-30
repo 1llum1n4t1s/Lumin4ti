@@ -91,11 +91,28 @@ internal sealed class ProtectedBackupStorage
     public void WriteNewAtomically(string relativePath, Action<Stream> write)
     {
         ArgumentNullException.ThrowIfNull(write);
-        var fullPath = PrepareFilePath(relativePath);
         if (FileExists(relativePath))
         {
             throw new IOException("保護バックアップは既に存在します。");
         }
+
+        WriteAtomicallyCore(relativePath, write, overwrite: false);
+    }
+
+    /// <summary>
+    /// ACL と再解析ポイントを検証した保護領域で、既存ファイルを置き換えて原子的に保存する。
+    /// 状態 journal のように同じ正本を更新し続ける用途に使う。
+    /// </summary>
+    public void WriteAtomically(string relativePath, Action<Stream> write)
+    {
+        ArgumentNullException.ThrowIfNull(write);
+        _ = FileExists(relativePath); // 既存エントリがある場合は ACL と種別を検証する。
+        WriteAtomicallyCore(relativePath, write, overwrite: true);
+    }
+
+    private void WriteAtomicallyCore(string relativePath, Action<Stream> write, bool overwrite)
+    {
+        var fullPath = PrepareFilePath(relativePath);
 
         var directory = Path.GetDirectoryName(fullPath)
             ?? throw new InvalidOperationException("保護バックアップ先ディレクトリを特定できません。");
@@ -115,7 +132,7 @@ internal sealed class ProtectedBackupStorage
                 stream.Flush(flushToDisk: true);
             }
 
-            File.Move(tempPath, fullPath);
+            File.Move(tempPath, fullPath, overwrite);
             ValidateFileOrRepairAndThrow(fullPath);
         }
         finally

@@ -1,5 +1,6 @@
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
+using Lumin4ti.Core.Services.Windows;
 using Lumin4ti.Core.Services.Windows.Actions;
 
 namespace Lumin4ti.Tests;
@@ -291,6 +292,18 @@ public sealed class FileCleanupTests
 
         Assert.AreEqual(1024, outcome.FreedBytes);
         Assert.AreEqual("1.0 KB", FileCleanupEngine.FormatBytes(outcome.FreedBytes));
+    }
+
+    [TestMethod]
+    public void 必須サービスを停止できなければ削除を開始しない()
+    {
+        var suspension = new ServiceSuspension(
+            new NoopExecutor(),
+            stopped: [],
+            failedToStop: ["wuauserv"]);
+
+        Assert.IsFalse(FileCleanupAction.CanRunCleanup(suspension));
+        Assert.IsTrue(FileCleanupAction.CanRunCleanup(null));
     }
 
     // ═══ 安全ガード ═══

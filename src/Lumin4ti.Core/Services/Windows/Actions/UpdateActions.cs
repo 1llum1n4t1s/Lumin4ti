@@ -965,13 +965,16 @@ internal static class DefenderCommandSupport
             Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
             @"Windows Defender\MpCmdRun.exe");
 
-        return SelectMpCmdRunPath(platformDirectories, legacyPath, File.Exists);
+        return SelectMpCmdRunPath(
+            platformDirectories,
+            legacyPath,
+            path => IsTrustedMpCmdRun(path, platformRoot, legacyPath));
     }
 
     internal static string? SelectMpCmdRunPath(
         IEnumerable<string> platformDirectories,
         string legacyPath,
-        Func<string, bool> fileExists)
+        Func<string, bool> isTrustedCandidate)
     {
         var latest = platformDirectories
             .Select(directory => new
@@ -979,14 +982,54 @@ internal static class DefenderCommandSupport
                 Path = Path.Combine(directory, "MpCmdRun.exe"),
                 Version = ParsePlatformVersion(Path.GetFileName(directory)),
             })
-            .Where(candidate => fileExists(candidate.Path))
+            .Where(candidate => isTrustedCandidate(candidate.Path))
             .OrderByDescending(candidate => candidate.Version)
             .ThenByDescending(candidate => candidate.Path, StringComparer.OrdinalIgnoreCase)
             .Select(candidate => candidate.Path)
             .FirstOrDefault();
 
-        return latest ?? (fileExists(legacyPath) ? legacyPath : null);
+        return latest ?? (isTrustedCandidate(legacyPath) ? legacyPath : null);
     }
+
+    private static bool IsTrustedMpCmdRun(string path, string platformRoot, string legacyPath)
+    {
+        try
+        {
+            var fullPath = Path.GetFullPath(path);
+            var fullPlatformRoot = Path.GetFullPath(platformRoot);
+            var fullLegacyPath = Path.GetFullPath(legacyPath);
+            var candidateDirectory = Path.GetDirectoryName(fullPath);
+            var platformParent = candidateDirectory is null ? null : Path.GetDirectoryName(candidateDirectory);
+            var isLegacy = fullPath.Equals(fullLegacyPath, StringComparison.OrdinalIgnoreCase);
+            var isDirectPlatformChild = platformParent is not null &&
+                platformParent.Equals(fullPlatformRoot, StringComparison.OrdinalIgnoreCase);
+            if (!isLegacy && !isDirectPlatformChild)
+            {
+                return false;
+            }
+
+            var trustedRoot = isLegacy ? Path.GetDirectoryName(fullLegacyPath)! : fullPlatformRoot;
+            if (!File.Exists(fullPath) ||
+                HasReparsePoint(trustedRoot) ||
+                HasReparsePoint(candidateDirectory!) ||
+                HasReparsePoint(fullPath))
+            {
+                return false;
+            }
+
+            return ExecutableTrustVerifier.TryVerify(
+                fullPath,
+                "Microsoft Windows Publisher",
+                out _);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            return false;
+        }
+    }
+
+    private static bool HasReparsePoint(string path) =>
+        (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
 
     internal static string DescribeFailure(CommandExecutionResult result)
     {

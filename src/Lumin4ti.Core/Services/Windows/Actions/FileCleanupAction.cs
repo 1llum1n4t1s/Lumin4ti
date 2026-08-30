@@ -197,9 +197,13 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
                 suspension = await WindowsServiceControl.SuspendAsync(_executor!, _servicesToStop, progress, ct);
             }
 
-            outcome = await Task.Run(
-                () => FileCleanupEngine.Run(targets, _scheduleBlockedForReboot, progress, ct),
-                ct);
+            ct.ThrowIfCancellationRequested();
+            if (CanRunCleanup(suspension))
+            {
+                outcome = await Task.Run(
+                    () => FileCleanupEngine.Run(targets, _scheduleBlockedForReboot, progress, ct),
+                    ct);
+            }
         }
         finally
         {
@@ -210,16 +214,27 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
             }
         }
 
-        var lines = FileCleanupEngine.DescribeOutcome(outcome!).ToList();
-        var degraded = false;
-
-        if (suspension is { FailedToStop.Count: > 0 })
+        if (outcome is null)
         {
-            degraded = true;
-            lines.Add($"  - 次のサービスを停止できず、使用中のファイルが残った可能性があります: {string.Join(", ", suspension.FailedToStop)}");
+            var failedServices = string.Join(", ", suspension!.FailedToStop);
+            var failureLines = new List<string>
+            {
+                $"  - 必要なサービスを停止できなかったため、削除を中止しました: {failedServices}",
+            };
+            if (resumeFailures.Count > 0)
+            {
+                failureLines.Add($"  - 停止したサービスを再開できませんでした: {string.Join(", ", resumeFailures)}");
+                failureLines.Add("  - PC を再起動すると自動的に開始されます");
+            }
+
+            LoggerBootstrap.Log.Error($"{Id}: サービス停止失敗のため削除を中止: {failedServices}");
+            return MaintenanceActionResult.Fail(string.Join(Environment.NewLine, failureLines));
         }
 
-        if (outcome!.RejectedTargets.Count > 0)
+        var lines = FileCleanupEngine.DescribeOutcome(outcome).ToList();
+        var degraded = false;
+
+        if (outcome.RejectedTargets.Count > 0)
         {
             degraded = true;
         }
@@ -239,4 +254,7 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
             ? MaintenanceActionResult.Partial(lines)
             : MaintenanceActionResult.Ok(lines);
     }
+
+    internal static bool CanRunCleanup(ServiceSuspension? suspension) =>
+        suspension is not { FailedToStop.Count: > 0 };
 }
