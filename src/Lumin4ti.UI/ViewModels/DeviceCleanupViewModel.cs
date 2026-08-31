@@ -15,6 +15,7 @@ public partial class DeviceCleanupViewModel : ObservableObject
     private readonly MaintenanceOperationCoordinator _operationCoordinator;
     private readonly Func<Action, Task> _dispatchAsync;
     private bool _suppressSelectionUpdates;
+    private DisconnectedDevice[] _pendingRemoval = [];
 
     public ObservableCollection<DisconnectedDeviceItemViewModel> Devices { get; } = [];
 
@@ -35,6 +36,8 @@ public partial class DeviceCleanupViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ConfirmationText))]
+    [NotifyPropertyChangedFor(nameof(CanChangeSelection))]
+    [NotifyPropertyChangedFor(nameof(CanRemove))]
     private bool isConfirmingRemoval;
 
     [ObservableProperty]
@@ -54,9 +57,9 @@ public partial class DeviceCleanupViewModel : ObservableObject
 
     public bool CanRefresh => !IsBusy;
 
-    public bool CanChangeSelection => HasDevices && !IsBusy;
+    public bool CanChangeSelection => HasDevices && !IsBusy && !IsConfirmingRemoval;
 
-    public bool CanRemove => SelectedCount > 0 && !IsBusy;
+    public bool CanRemove => SelectedCount > 0 && !IsBusy && !IsConfirmingRemoval;
 
     public string SelectionText => App.Text(
         "DeviceCleanup.Selection",
@@ -67,7 +70,7 @@ public partial class DeviceCleanupViewModel : ObservableObject
     public string ConfirmationText => App.Text(
         "DeviceCleanup.ConfirmText",
         "選択した {0} 件のデバイスを削除しますか？ 再接続するとドライバーは再検出されますが、デバイス固有の設定は初期化される場合があります。",
-        SelectedCount);
+        IsConfirmingRemoval ? _pendingRemoval.Length : SelectedCount);
 
     public DeviceCleanupViewModel(
         IDisconnectedDeviceService deviceService,
@@ -181,7 +184,7 @@ public partial class DeviceCleanupViewModel : ObservableObject
     [RelayCommand]
     private void ClearSelection()
     {
-        if (IsBusy)
+        if (!CanChangeSelection)
         {
             return;
         }
@@ -200,7 +203,7 @@ public partial class DeviceCleanupViewModel : ObservableObject
         }
 
         RecountSelection();
-        IsConfirmingRemoval = false;
+        CancelPendingRemoval();
     }
 
     [RelayCommand]
@@ -208,17 +211,21 @@ public partial class DeviceCleanupViewModel : ObservableObject
     {
         if (CanRemove)
         {
+            _pendingRemoval = Devices
+                .Where(device => device.IsSelected)
+                .Select(device => device.Device)
+                .ToArray();
             IsConfirmingRemoval = true;
         }
     }
 
     [RelayCommand]
-    private void CancelRemoval() => IsConfirmingRemoval = false;
+    private void CancelRemoval() => CancelPendingRemoval();
 
     [RelayCommand]
     private async Task ConfirmRemovalAsync()
     {
-        var selected = Devices.Where(device => device.IsSelected).ToArray();
+        var selected = _pendingRemoval;
         if (!IsConfirmingRemoval || selected.Length == 0)
         {
             return;
@@ -242,6 +249,7 @@ public partial class DeviceCleanupViewModel : ObservableObject
 
         await _dispatchAsync(() =>
         {
+            _pendingRemoval = [];
             IsConfirmingRemoval = false;
             IsRemoving = true;
         }).ConfigureAwait(false);
@@ -294,10 +302,6 @@ public partial class DeviceCleanupViewModel : ObservableObject
                     case DisconnectedDeviceRemovalStatus.Reconnected:
                         skipped++;
                         LoggerBootstrap.Log.Info($"再接続されたため削除を見送りました: {item.InstanceId}");
-                        break;
-                    case DisconnectedDeviceRemovalStatus.Protected:
-                        skipped++;
-                        LoggerBootstrap.Log.Info($"保護対象のため削除を見送りました: {item.InstanceId}");
                         break;
                     default:
                         failed++;
@@ -369,7 +373,7 @@ public partial class DeviceCleanupViewModel : ObservableObject
         }
 
         SelectedCount = 0;
-        IsConfirmingRemoval = false;
+        CancelPendingRemoval();
         NotifyDeviceCollectionChanged();
     }
 
@@ -390,10 +394,16 @@ public partial class DeviceCleanupViewModel : ObservableObject
     private void RecountSelection()
     {
         SelectedCount = Devices.Count(device => device.IsSelected);
-        if (SelectedCount == 0)
+        if (SelectedCount == 0 && !IsConfirmingRemoval)
         {
-            IsConfirmingRemoval = false;
+            CancelPendingRemoval();
         }
+    }
+
+    private void CancelPendingRemoval()
+    {
+        _pendingRemoval = [];
+        IsConfirmingRemoval = false;
     }
 
     private void OnDeviceSelectionChanged()

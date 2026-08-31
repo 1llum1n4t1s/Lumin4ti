@@ -16,7 +16,7 @@
   <!-- ===== Mga nakadiskonektang device ===== -->
   <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">Mga nakadiskonektang device</x:String>
   <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">Inililista ang mga dating naka-install na Plug and Play device na hindi kasalukuyang nakakonekta. Pumili ng isa-isa o piliin lahat bago alisin.</x:String>
-  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Nakatago ang software at virtual device para sa kaligtasan. Muling hahanapin ng Windows ang driver kapag ikinonekta, ngunit maaaring ma-reset ang mga setting ng device.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Ipinapakita rin ang mga hindi nakakonektang software at virtual device. Maaaring ma-reset ng pagtanggal ang mga driver o setting ng device, kaya piliin lamang ang mga device na tiyak mong hindi na kailangan.</x:String>
   <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">I-refresh</x:String>
   <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">Piliin lahat</x:String>
   <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">Alisin ang pagpili</x:String>

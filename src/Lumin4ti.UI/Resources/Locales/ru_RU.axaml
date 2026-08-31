@@ -16,7 +16,7 @@
   <!-- ===== Отключённые устройства ===== -->
   <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">Отключённые устройства</x:String>
   <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">Показывает ранее установленные устройства Plug and Play, которые сейчас не подключены. Перед удалением выберите отдельные записи или все сразу.</x:String>
-  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Программные и виртуальные устройства скрыты для безопасности. После повторного подключения Windows заново обнаружит драйвер, но настройки устройства могут быть сброшены.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Отключённые программные и виртуальные устройства также отображаются. Их удаление может сбросить драйверы или настройки, поэтому выбирайте только устройства, которые точно больше не нужны.</x:String>
   <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">Обновить</x:String>
   <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">Выбрать все</x:String>
   <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">Снять выделение</x:String>

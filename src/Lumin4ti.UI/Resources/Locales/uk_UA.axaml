@@ -16,7 +16,7 @@
   <!-- ===== Від’єднані пристрої ===== -->
   <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">Від’єднані пристрої</x:String>
   <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">Показує раніше встановлені пристрої Plug and Play, які зараз не підключені. Виберіть окремі записи або всі одразу перед видаленням.</x:String>
-  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Програмні та віртуальні пристрої приховано задля безпеки. Після повторного підключення Windows знову виявить драйвер, але параметри пристрою можуть бути скинуті.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Від’єднані програмні та віртуальні пристрої також відображаються. Їх видалення може скинути драйвери або параметри, тому вибирайте лише пристрої, які точно більше не потрібні.</x:String>
   <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">Оновити</x:String>
   <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">Вибрати все</x:String>
   <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">Зняти вибір</x:String>

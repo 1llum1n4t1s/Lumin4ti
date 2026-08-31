@@ -16,7 +16,7 @@
   <!-- ===== 未接続デバイス ===== -->
   <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">未接続デバイス</x:String>
   <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">過去にインストールされたものの、現在は接続されていない Plug and Play デバイスを一覧表示します。個別選択または全選択して削除できます。</x:String>
-  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">安全のためソフトウェア／仮想デバイスは表示しません。再接続時にドライバーは再検出されますが、デバイス固有の設定は初期化される場合があります。</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">ソフトウェア／仮想デバイスを含む未接続デバイスを表示します。削除するとドライバーやデバイス固有の設定が初期化される場合があるため、不要と判断できる項目だけを選択してください。</x:String>
   <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">再読み込み</x:String>
   <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">すべて選択</x:String>
   <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">選択解除</x:String>

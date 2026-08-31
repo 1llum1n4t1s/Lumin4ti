@@ -9,8 +9,8 @@ namespace Lumin4ti.Core.Services.Windows;
 
 /// <summary>
 /// SetupAPI で「インストール済みだが現在は存在しない」PnP デバイスを検出し、
-/// NewDev の DiUninstallDevice で削除する。再インストール性が不明なソフトウェア
-/// デバイスは表示・削除の両方から除外する。
+/// NewDev の DiUninstallDevice で削除する。ソフトウェア／仮想デバイスを含めて列挙し、
+/// 利用者が選択した項目だけを削除する。
 /// </summary>
 [SupportedOSPlatform("windows")]
 public sealed class WindowsDisconnectedDeviceService : IDisconnectedDeviceService
@@ -28,16 +28,6 @@ public sealed class WindowsDisconnectedDeviceService : IDisconnectedDeviceServic
     private const int ErrorNoSuchDevice = 433;
     private const int ErrorNotFound = 1168;
     private const int MaximumPropertyBytes = 1024 * 1024;
-
-    private static readonly string[] ProtectedInstanceIdPrefixes =
-    [
-        @"HTREE\ROOT\",
-        @"ROOT\",
-        @"SWD\",
-        @"SW\",
-        @"UMB\",
-        @"STORAGE\VOLUMESNAPSHOT\",
-    ];
 
     public Task<IReadOnlyList<DisconnectedDevice>> GetDisconnectedDevicesAsync(
         CancellationToken ct = default) =>
@@ -68,11 +58,6 @@ public sealed class WindowsDisconnectedDeviceService : IDisconnectedDeviceServic
         string instanceId,
         CancellationToken ct)
     {
-        if (IsProtectedSoftwareDevice(instanceId))
-        {
-            return new DisconnectedDeviceRemovalResult(DisconnectedDeviceRemovalStatus.Protected);
-        }
-
         ct.ThrowIfCancellationRequested();
         if (EnumerateDeviceIds(DigcfAllClasses | DigcfPresent, ct).Contains(instanceId))
         {
@@ -279,12 +264,7 @@ public sealed class WindowsDisconnectedDeviceService : IDisconnectedDeviceServic
     }
 
     internal static bool IsDisconnectedCandidate(string instanceId, bool isPresent) =>
-        !isPresent && !IsProtectedSoftwareDevice(instanceId);
-
-    internal static bool IsProtectedSoftwareDevice(string instanceId) =>
-        string.IsNullOrWhiteSpace(instanceId) ||
-        ProtectedInstanceIdPrefixes.Any(prefix =>
-            instanceId.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+        !isPresent && !string.IsNullOrWhiteSpace(instanceId);
 
     private static DisconnectedDeviceRemovalResult Failure(int errorCode) =>
         new(

@@ -16,7 +16,7 @@
   <!-- ===== 未连接设备 ===== -->
   <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">未连接设备</x:String>
   <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">列出以前安装但当前未连接的即插即用设备。可逐项选择或全选后删除。</x:String>
-  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">为安全起见，软件和虚拟设备不会显示。重新连接时 Windows 会重新检测驱动程序，但设备专用设置可能会被重置。</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">同时显示未连接的软件和虚拟设备。删除它们可能会重置驱动程序或设备专用设置，因此请仅选择确认不再需要的设备。</x:String>
   <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">刷新</x:String>
   <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">全选</x:String>
   <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">清除选择</x:String>

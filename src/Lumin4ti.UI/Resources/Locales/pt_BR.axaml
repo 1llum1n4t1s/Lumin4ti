@@ -16,7 +16,7 @@
   <!-- ===== Dispositivos desconectados ===== -->
   <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">Dispositivos desconectados</x:String>
   <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">Lista dispositivos Plug and Play instalados anteriormente que não estão conectados no momento. Selecione itens individuais ou todos antes de removê-los.</x:String>
-  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Dispositivos virtuais e de software ficam ocultos por segurança. O Windows detectará o driver novamente ao reconectar, mas as configurações específicas do dispositivo podem ser redefinidas.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Dispositivos virtuais e de software desconectados também são exibidos. Excluí-los pode redefinir drivers ou configurações específicas; selecione apenas os dispositivos que você sabe que não são mais necessários.</x:String>
   <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">Atualizar</x:String>
   <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">Selecionar tudo</x:String>
   <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">Limpar seleção</x:String>

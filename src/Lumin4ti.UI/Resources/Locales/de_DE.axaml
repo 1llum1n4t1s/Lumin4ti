@@ -16,7 +16,7 @@
   <!-- ===== Getrennte Geräte ===== -->
   <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">Nicht verbundene Geräte</x:String>
   <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">Listet zuvor installierte Plug-and-Play-Geräte auf, die derzeit nicht verbunden sind. Wählen Sie einzelne oder alle Einträge zum Entfernen aus.</x:String>
-  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Software- und virtuelle Geräte werden aus Sicherheitsgründen ausgeblendet. Windows erkennt den Treiber nach dem Wiederanschließen erneut; gerätespezifische Einstellungen können zurückgesetzt werden.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Auch getrennte Software- und virtuelle Geräte werden angezeigt. Durch das Löschen können Treiber oder gerätespezifische Einstellungen zurückgesetzt werden. Wählen Sie daher nur Geräte aus, die Sie sicher nicht mehr benötigen.</x:String>
   <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">Aktualisieren</x:String>
   <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">Alle auswählen</x:String>
   <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">Auswahl aufheben</x:String>

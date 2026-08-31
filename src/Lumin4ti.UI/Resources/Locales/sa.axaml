@@ -16,7 +16,7 @@
   <!-- ===== असंयुक्तानि उपकरणानि ===== -->
   <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">असंयुक्तानि उपकरणानि</x:String>
   <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">पूर्वं स्थापितानि किन्तु अधुना असंयुक्तानि Plug and Play उपकरणानि दर्शयति। एकैकं वा सर्वाणि वा निष्कासनार्थं चिनुत।</x:String>
-  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">सुरक्षार्थं आभासीयानि तन्त्रांशोपकरणानि च न दर्श्यन्ते। पुनः संयोजने Windows चालकं पुनः ज्ञास्यति, किन्तु उपकरणविशिष्टविन्यासाः पुनःस्थापिताः भवितुमर्हन्ति।</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">असंयुक्तानि तन्त्रांशोपकरणानि आभासीयोपकरणानि च अपि दर्श्यन्ते। तेषां लोपने चालकाः उपकरणविशिष्टविन्यासाश्च पुनःस्थापिताः भवितुमर्हन्ति; अतः अनावश्यकत्वं निश्चितानि एव उपकरणानि वृणुत।</x:String>
   <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">पुनः पठतु</x:String>
   <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">सर्वाणि चिनुत</x:String>
   <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">चयनं निरस्यतु</x:String>

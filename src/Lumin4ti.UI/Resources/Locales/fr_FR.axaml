@@ -16,7 +16,7 @@
   <!-- ===== Périphériques déconnectés ===== -->
   <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">Périphériques déconnectés</x:String>
   <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">Répertorie les périphériques Plug-and-Play déjà installés mais actuellement déconnectés. Sélectionnez une ou toutes les entrées avant leur suppression.</x:String>
-  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Les périphériques logiciels et virtuels sont masqués par sécurité. Windows redétectera le pilote après reconnexion, mais les réglages propres au périphérique peuvent être réinitialisés.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Les périphériques logiciels et virtuels déconnectés sont également affichés. Leur suppression peut réinitialiser les pilotes ou leurs réglages ; sélectionnez uniquement ceux dont vous êtes certain de ne plus avoir besoin.</x:String>
   <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">Actualiser</x:String>
   <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">Tout sélectionner</x:String>
   <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">Effacer la sélection</x:String>

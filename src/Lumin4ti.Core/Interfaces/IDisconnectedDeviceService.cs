@@ -13,7 +13,6 @@ public enum DisconnectedDeviceRemovalStatus
     Removed,
     AlreadyAbsent,
     Reconnected,
-    Protected,
     Failed,
 }
 

@@ -16,7 +16,7 @@
   <!-- ===== Perangkat terputus ===== -->
   <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">Perangkat tidak terhubung</x:String>
   <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">Menampilkan perangkat Plug and Play yang pernah dipasang tetapi saat ini tidak terhubung. Pilih satu per satu atau pilih semua sebelum menghapus.</x:String>
-  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Perangkat lunak dan virtual disembunyikan demi keamanan. Windows akan mendeteksi ulang driver saat perangkat disambungkan kembali, tetapi setelan khusus perangkat dapat direset.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Perangkat lunak dan virtual yang terputus juga ditampilkan. Menghapusnya dapat mereset driver atau setelan khusus perangkat, jadi pilih hanya perangkat yang dipastikan tidak lagi diperlukan.</x:String>
   <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">Muat ulang</x:String>
   <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">Pilih semua</x:String>
   <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">Hapus pilihan</x:String>

@@ -16,7 +16,7 @@
   <!-- ===== Instrumenta disiuncta ===== -->
   <x:String x:Key="Text.DeviceCleanup.Title" xml:space="preserve">Instrumenta non coniuncta</x:String>
   <x:String x:Key="Text.DeviceCleanup.Description" xml:space="preserve">Instrumenta Plug and Play antea instituta sed nunc non coniuncta enumerat. Singula vel omnia ante remotionem elige.</x:String>
-  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Instrumenta virtualia et programmata causa securitatis celantur. Windows rectorem post reconnectionem denuo inveniet, sed proprietates instrumenti restitui possunt.</x:String>
+  <x:String x:Key="Text.DeviceCleanup.Warning" xml:space="preserve">Instrumenta programmata et virtualia non coniuncta quoque monstrantur. Eorum deletio rectores vel proprietates instrumenti restituere potest; ea tantum elige quae iam necessaria non esse certo scis.</x:String>
   <x:String x:Key="Text.DeviceCleanup.Refresh" xml:space="preserve">Renova</x:String>
   <x:String x:Key="Text.DeviceCleanup.SelectAll" xml:space="preserve">Omnia elige</x:String>
   <x:String x:Key="Text.DeviceCleanup.ClearSelection" xml:space="preserve">Electionem dele</x:String>
