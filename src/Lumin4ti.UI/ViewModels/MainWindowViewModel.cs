@@ -75,12 +75,12 @@ public class MainWindowViewModel
 
         DeviceCleanup = deviceCleanup;
         Version = version;
-        Version.Initialize();
 
         // トグルの現在状態はバックグラウンドで読み込む (DISM/Get-MMAgent 等で外部プロセスを起動しうる)。
+        // 初回読込と起動時更新確認は同じ排他制御を使うため、読込完了後に更新確認を投入する。
         // Task.Run で包み、async の同期プレフィックス (Process.Start) が UI スレッド上で走って
         // 起動描画をブロックするのを防ぐ。
-        _ = Task.Run(ReloadAllStatesAsync);
+        _ = Task.Run(() => RunInitialStateLoadAndUpdateAsync(ReloadAllStatesAsync, Version.Initialize));
     }
 
     /// <summary>状態を読み直した直近時刻 (再アクティブのたびに外部プロセスを起こさないための間隔管理)。</summary>
@@ -129,6 +129,24 @@ public class MainWindowViewModel
         using var activeOperation = operation!;
         await reload(activeOperation.Token).ConfigureAwait(false);
         return true;
+    }
+
+    internal static async Task RunInitialStateLoadAndUpdateAsync(
+        Func<Task<bool>> reload,
+        Action startUpdateCheck)
+    {
+        ArgumentNullException.ThrowIfNull(reload);
+        ArgumentNullException.ThrowIfNull(startUpdateCheck);
+
+        try
+        {
+            await reload().ConfigureAwait(false);
+        }
+        finally
+        {
+            // 状態読込が失敗しても、独立した更新確認まで失わせない。
+            startUpdateCheck();
+        }
     }
 
     /// <summary>

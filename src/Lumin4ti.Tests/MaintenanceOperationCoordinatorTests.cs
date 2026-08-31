@@ -88,4 +88,37 @@ public sealed class MaintenanceOperationCoordinatorTests
         Assert.IsFalse(invoked);
         operation!.Dispose();
     }
+
+    [TestMethod]
+    public async Task 起動時更新確認は初回状態再読込の完了後に開始する()
+    {
+        var coordinator = new MaintenanceOperationCoordinator();
+        var reloadStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var releaseReload = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var updateStarted = false;
+
+        var initialization = MainWindowViewModel.RunInitialStateLoadAndUpdateAsync(
+            () => MainWindowViewModel.RunStateReloadAsync(coordinator, async _ =>
+            {
+                reloadStarted.TrySetResult();
+                await releaseReload.Task;
+            }),
+            () =>
+            {
+                updateStarted = true;
+                Assert.AreEqual(0, coordinator.ActiveCount);
+                Assert.IsTrue(coordinator.TryBegin(out var updateOperation));
+                updateOperation!.Dispose();
+            });
+
+        await reloadStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        Assert.IsFalse(updateStarted);
+        Assert.AreEqual(1, coordinator.ActiveCount);
+
+        releaseReload.TrySetResult();
+        await initialization;
+
+        Assert.IsTrue(updateStarted);
+        Assert.AreEqual(0, coordinator.ActiveCount);
+    }
 }

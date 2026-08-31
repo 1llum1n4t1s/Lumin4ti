@@ -125,6 +125,11 @@ public partial class VersionViewModel : ObservableObject
     {
         if (_updateDialogOpen)
         {
+            if (!manually)
+            {
+                LoggerBootstrap.Log.Info("起動時の更新確認をスキップ: 更新ダイアログが既に開いています");
+            }
+
             return;
         }
 
@@ -136,6 +141,10 @@ public partial class VersionViewModel : ObservableObject
                     "Status.Busy",
                     "別のメンテナンス操作が実行中です。完了後にもう一度お試しください。");
             }
+            else
+            {
+                LoggerBootstrap.Log.Info("起動時の更新確認をスキップ: 別の操作が実行中です");
+            }
 
             return;
         }
@@ -145,6 +154,7 @@ public partial class VersionViewModel : ObservableObject
         var owner = (Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
         if (owner is null)
         {
+            LoggerBootstrap.Log.Info("更新確認をスキップ: メインウィンドウが未確定です");
             return;
         }
 
@@ -156,9 +166,13 @@ public partial class VersionViewModel : ObservableObject
                 UpdateStatusText = "開発ビルドのため更新確認はスキップされます (インストール版でのみ動作)";
             }
 
+            LoggerBootstrap.Log.Info("更新確認をスキップ: Velopack のインストール環境ではありません");
+
             return;
         }
 
+        var mode = manually ? "手動" : "起動時";
+        LoggerBootstrap.Log.Info($"更新確認を開始します: mode={mode}");
         _updateDialogOpen = true;
         IsChecking = true;
         UpdateStatusText = string.Empty;
@@ -179,16 +193,18 @@ public partial class VersionViewModel : ObservableObject
             options.ErrorOccurred += ex =>
                 LoggerBootstrap.Log.Error($"Velopack 更新失敗: {ex.GetType().Name}", ex);
 
-            await UpdateDialogWindow.ShowAsync(
+            var result = await UpdateDialogWindow.ShowAsync(
                 owner,
                 manager,
                 options,
                 manualCheck: manually,
                 cancellationToken: activeOperation.Token);
+            LoggerBootstrap.Log.Info($"更新確認が完了しました: mode={mode} outcome={result.Outcome}");
         }
         catch (OperationCanceledException) when (activeOperation.Token.IsCancellationRequested)
         {
             UpdateStatusText = string.Empty;
+            LoggerBootstrap.Log.Info($"更新確認をキャンセルしました: mode={mode}");
         }
         catch (Exception ex)
         {
