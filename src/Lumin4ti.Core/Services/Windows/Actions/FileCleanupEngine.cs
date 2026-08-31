@@ -466,9 +466,11 @@ public static class FileCleanupEngine
 
     private static void TryDeleteFile(FileInfo file, CleanupOutcome outcome, bool scheduleBlockedForReboot)
     {
+        FileAttributes originalAttributes;
         try
         {
-            if ((file.Attributes & FileAttributes.ReparsePoint) != 0)
+            originalAttributes = file.Attributes;
+            if ((originalAttributes & FileAttributes.ReparsePoint) != 0)
             {
                 outcome.RejectedTargets.Add($"{file.FullName} (リンクを保護するため)");
                 return;
@@ -490,11 +492,13 @@ public static class FileCleanupEngine
             length = 0;
         }
 
+        var attributesChanged = false;
         try
         {
-            if ((file.Attributes & (FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System)) != 0)
+            if ((originalAttributes & (FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System)) != 0)
             {
                 file.Attributes = FileAttributes.Normal;
+                attributesChanged = true;
             }
 
             file.Delete();
@@ -509,23 +513,32 @@ public static class FileCleanupEngine
                 return;
             }
 
+            if (attributesChanged)
+            {
+                TryRestoreAttributes(file, originalAttributes);
+            }
+
             outcome.Blocked++;
         }
     }
 
     private static void TryDeleteDirectory(DirectoryInfo directory, CleanupOutcome outcome)
     {
+        var originalAttributes = FileAttributes.Normal;
+        var attributesChanged = false;
         try
         {
-            if ((directory.Attributes & FileAttributes.ReparsePoint) != 0)
+            originalAttributes = directory.Attributes;
+            if ((originalAttributes & FileAttributes.ReparsePoint) != 0)
             {
                 outcome.RejectedTargets.Add($"{directory.FullName} (リンクを保護するため)");
                 return;
             }
 
-            if ((directory.Attributes & FileAttributes.ReadOnly) != 0)
+            if ((originalAttributes & FileAttributes.ReadOnly) != 0)
             {
                 directory.Attributes = FileAttributes.Directory;
+                attributesChanged = true;
             }
 
             directory.Delete(recursive: false);
@@ -533,7 +546,24 @@ public static class FileCleanupEngine
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
+            if (attributesChanged)
+            {
+                TryRestoreAttributes(directory, originalAttributes);
+            }
+
             // 中身が残っている (使用中) 場合はファイル側で Blocked を数えているため二重計上しない。
+        }
+    }
+
+    private static void TryRestoreAttributes(FileSystemInfo entry, FileAttributes attributes)
+    {
+        try
+        {
+            entry.Attributes = attributes;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // 削除失敗を属性復元失敗で上書きせず、残った項目として集計を続ける。
         }
     }
 

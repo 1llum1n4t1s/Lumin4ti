@@ -51,6 +51,7 @@ public sealed class SettingsService : ISettingsService
             var settings = Lumin4tiJson.Deserialize<AppSettings>(json);
             if (settings is not null)
             {
+                NormalizeSettings(settings);
                 LoggerBootstrap.Log.Info($"設定ファイルを読み込みました: {settingsFilePath}");
                 return new SettingsLoadResult(settings, SettingsLoadStatus.Loaded);
             }
@@ -75,6 +76,18 @@ public sealed class SettingsService : ISettingsService
         }
 
         return new SettingsLoadResult(new AppSettings(), SettingsLoadStatus.Failed);
+    }
+
+    private static void NormalizeSettings(AppSettings settings)
+    {
+        settings.CleanupExclusions ??= [];
+        foreach (var key in settings.CleanupExclusions
+                     .Where(static pair => pair.Value is null)
+                     .Select(static pair => pair.Key)
+                     .ToArray())
+        {
+            settings.CleanupExclusions[key] = [];
+        }
     }
 
     public Task SaveAsync(CancellationToken ct = default)

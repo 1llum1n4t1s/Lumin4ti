@@ -216,6 +216,28 @@ public sealed class FileCleanupTests
     }
 
     [TestMethod]
+    public void 削除に失敗したファイルとフォルダの属性を復元する()
+    {
+        var directory = Path.Combine(_root, "cache", "protected");
+        var file = CreateFile(@"cache\protected\locked.tmp");
+        var fileAttributes = FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System;
+        var directoryAttributes = FileAttributes.Directory | FileAttributes.ReadOnly | FileAttributes.Hidden;
+        File.SetAttributes(file, fileAttributes);
+        File.SetAttributes(directory, directoryAttributes);
+
+        using var lockStream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.None);
+        var outcome = FileCleanupEngine.Run(
+            [CleanupTarget.Contents(Path.Combine(_root, "cache"))],
+            scheduleBlockedForReboot: false,
+            progress: null,
+            ct: CancellationToken.None);
+
+        Assert.AreEqual(1, outcome.Blocked);
+        Assert.AreEqual(fileAttributes, File.GetAttributes(file));
+        Assert.AreEqual(directoryAttributes, File.GetAttributes(directory));
+    }
+
+    [TestMethod]
     public void リンクになっている対象は辿らず拒否する()
     {
         // 掃除対象フォルダを別ドライブへ逃がしている環境で、リンク先の実体を消さないことの確認。

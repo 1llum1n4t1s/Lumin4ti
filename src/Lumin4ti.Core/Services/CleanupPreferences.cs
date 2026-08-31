@@ -31,8 +31,11 @@ public sealed class CleanupPreferences(ISettingsService settings) : ICleanupPref
     {
         lock (_lock)
         {
-            return !(settings.Current.CleanupExclusions.TryGetValue(itemId, out var excluded) &&
-                     excluded.Contains(rawPath, StringComparer.OrdinalIgnoreCase));
+            var exclusions = settings.Current.CleanupExclusions;
+            return exclusions is null ||
+                   !exclusions.TryGetValue(itemId, out var excluded) ||
+                   excluded is null ||
+                   !excluded.Contains(rawPath, StringComparer.OrdinalIgnoreCase);
         }
     }
 
@@ -43,11 +46,12 @@ public sealed class CleanupPreferences(ISettingsService settings) : ICleanupPref
 
         lock (_lock)
         {
-            var exclusions = settings.Current.CleanupExclusions;
+            var exclusions = settings.Current.CleanupExclusions ??= [];
             if (enabled)
             {
-                if (!exclusions.TryGetValue(itemId, out var excluded))
+                if (!exclusions.TryGetValue(itemId, out var excluded) || excluded is null)
                 {
+                    exclusions.Remove(itemId);
                     return;
                 }
 
@@ -61,7 +65,7 @@ public sealed class CleanupPreferences(ISettingsService settings) : ICleanupPref
                 return;
             }
 
-            if (!exclusions.TryGetValue(itemId, out var list))
+            if (!exclusions.TryGetValue(itemId, out var list) || list is null)
             {
                 list = [];
                 exclusions[itemId] = list;

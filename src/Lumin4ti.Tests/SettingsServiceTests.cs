@@ -70,6 +70,55 @@ public sealed class SettingsServiceTests
     }
 
     [TestMethod]
+    public void CleanupExclusionsがnullなら空の除外として読み込む()
+    {
+        var directory = CreateTemporaryDirectory();
+        try
+        {
+            var settingsPath = Path.Combine(directory, "settings.json");
+            File.WriteAllText(
+                settingsPath,
+                "{\"CleanupExclusions\":null,\"ScheduledCleanupGroupIds\":null}");
+
+            var service = new SettingsService(directory, settingsPath);
+            var preferences = new CleanupPreferences(service);
+
+            Assert.HasCount(0, service.Current.CleanupExclusions);
+            Assert.IsNull(service.Current.ScheduledCleanupGroupIds);
+            Assert.IsTrue(preferences.IsTargetEnabled("cleanup-user-temp", @"%LOCALAPPDATA%\Temp"));
+            Assert.AreEqual(SettingsLoadStatus.Loaded, service.LoadStatus);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public void CleanupExclusions内のnullリストは空の除外として読み込む()
+    {
+        var directory = CreateTemporaryDirectory();
+        try
+        {
+            var settingsPath = Path.Combine(directory, "settings.json");
+            File.WriteAllText(
+                settingsPath,
+                "{\"CleanupExclusions\":{\"cleanup-user-temp\":null}}");
+
+            var service = new SettingsService(directory, settingsPath);
+            var preferences = new CleanupPreferences(service);
+
+            Assert.HasCount(0, service.Current.CleanupExclusions["cleanup-user-temp"]);
+            Assert.IsTrue(preferences.IsTargetEnabled("cleanup-user-temp", @"%LOCALAPPDATA%\Temp"));
+            Assert.AreEqual(SettingsLoadStatus.Loaded, service.LoadStatus);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [TestMethod]
     public void 設定ファイルが無い場合も既定値で起動できる()
     {
         var directory = CreateTemporaryDirectory();
