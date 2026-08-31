@@ -417,7 +417,7 @@
           "Avalonia.Fonts.Inter": "[12.1.1, )",
           "Avalonia.Themes.Fluent": "[12.1.1, )",
           "CommunityToolkit.Mvvm": "[8.4.2, )",
-          "Lumin4ti.Core": "[1.0.32, )",
+          "Lumin4ti.Core": "[1.0.34, )",
           "Microsoft.Extensions.DependencyInjection": "[10.0.11, )",
           "Velopack": "[1.2.0, )",
           "VelopackUpdateDialog.Avalonia": "[1.0.16, )"
