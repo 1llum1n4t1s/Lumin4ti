@@ -3,7 +3,6 @@
 *.user
 .vs/
 .vscode/
-.serena/
 *.log
 *.tmp
 
