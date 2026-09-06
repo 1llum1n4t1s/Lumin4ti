@@ -14,14 +14,37 @@ internal static class ProcessJobTracker
 {
     private static readonly nint JobHandle = CreateKillOnCloseJob();
 
-    public static void Track(nint processHandle)
+    internal static bool ContainsProcess(nint processHandle) =>
+        JobHandle != 0 && IsProcessInJob(processHandle, JobHandle, out var belongs) && belongs;
+
+    // Explorer broker は生成時のスレッドを取得できないため、既存プロセスの登録だけを行う。
+    // 生成を制御できる経路には使わず、TrackAndResume で実行前に登録する。
+    public static void TrackExistingBrokerProcess(nint processHandle)
     {
         if (JobHandle != nint.Zero && processHandle != nint.Zero)
         {
-            // 失敗しても致命的でない (孤児化防止はベストエフォート) ため戻り値は無視する
-            AssignProcessToJobObject(JobHandle, processHandle);
+            if (!AssignProcessToJobObject(JobHandle, processHandle))
+                LoggerBootstrap.Log.Error($"子プロセスの Job 登録に失敗しました: Win32 {Marshal.GetLastWin32Error()}");
         }
     }
+
+    /// <summary>CREATE_SUSPENDED で生成したプロセスだけを登録し、成功後に再開する。</summary>
+    public static void TrackAndResume(nint processHandle, nint threadHandle)
+    {
+        if (JobHandle == 0)
+            throw new InvalidOperationException("子プロセスの終了を管理する Job を作成できませんでした");
+        if (!AssignProcessToJobObject(JobHandle, processHandle))
+            throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error(), "子プロセスの Job 登録に失敗しました");
+        if (ResumeThread(threadHandle) == uint.MaxValue)
+            throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error(), "子プロセスを再開できませんでした");
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern uint ResumeThread(nint threadHandle);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool IsProcessInJob(nint processHandle, nint jobHandle, [MarshalAs(UnmanagedType.Bool)] out bool belongs);
 
     private static nint CreateKillOnCloseJob()
     {

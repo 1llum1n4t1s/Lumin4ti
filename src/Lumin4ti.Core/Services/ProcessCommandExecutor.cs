@@ -74,24 +74,8 @@ public class ProcessCommandExecutor : ICommandExecutor
             executionToken.ThrowIfCancellationRequested();
             // 解決失敗も CommandExecutionResult.Fail として呼び出し側へ返す。
             // bare exe 名を System32 等の確定パスへ解決する (バイナリプランティング LPE 対策)。
-            var psi = new ProcessStartInfo(SystemProcessResolver.Resolve(fileName))
-            {
-                Arguments = arguments,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                // 対話プロンプトが出ても入力待ちで固まらないよう stdin を閉じる
-                RedirectStandardInput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WorkingDirectory = Environment.SystemDirectory,
-            };
-
-            using var process = new Process { StartInfo = psi };
-            process.Start();
-            process.StandardInput.Close();
-
-            // アプリ終了時に子プロセスを OS に自動終了させ、孤児化を防ぐ
-            ProcessJobTracker.Track(process.Handle);
+            using var child = JobProcess.Start(SystemProcessResolver.Resolve(fileName), arguments);
+            var process = child.Process;
 
             // キャンセル時はプロセスツリーごと確実に終了させる (WaitForExitAsync の例外だけでは
             // 起動済みの子プロセスが残るため)
@@ -118,8 +102,8 @@ public class ProcessCommandExecutor : ICommandExecutor
             // 打ち切り後に残った pump が進捗を報告し続けると、完了処理でクリアした表示を上書きしてしまう。
             // 通知先をゲート越しにして、打ち切りと同時に黙らせる。
             var gatedProgress = onOutputLine is null ? null : new GatedProgress(onOutputLine);
-            var readOut = PumpAsync(process.StandardOutput.BaseStream, stdoutBuffer, gatedProgress, executionToken);
-            var readErr = PumpAsync(process.StandardError.BaseStream, stderrBuffer, onLine: null, executionToken);
+            var readOut = PumpAsync(child.StandardOutput, stdoutBuffer, gatedProgress, executionToken);
+            var readErr = PumpAsync(child.StandardError, stderrBuffer, onLine: null, executionToken);
 
             // 無出力のまま長時間かかるコマンド (WU 待ちの DISM 等) でも生存が分かるようにする。
             using var heartbeatCts = CancellationTokenSource.CreateLinkedTokenSource(executionToken);

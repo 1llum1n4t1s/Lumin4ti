@@ -319,7 +319,16 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
 
             using var processHandle = new SafeKernelHandle(processInformation.ProcessHandle, ownsHandle: true);
             using var threadHandle = new SafeKernelHandle(processInformation.ThreadHandle, ownsHandle: true);
-            ProcessJobTracker.Track(processHandle.DangerousGetHandle());
+            try
+            {
+                ProcessJobTracker.TrackAndResume(processHandle.DangerousGetHandle(), threadHandle.DangerousGetHandle());
+            }
+            catch
+            {
+                _ = TerminateProcess(processHandle, 1);
+                _ = WaitForSingleObject(processHandle, TerminationWaitMilliseconds);
+                throw;
+            }
 
             using var executionCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
             if (timeout != Timeout.InfiniteTimeSpan)
@@ -579,7 +588,7 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
                 }
             }
 
-            ProcessJobTracker.Track(process.DangerousGetHandle());
+            ProcessJobTracker.TrackExistingBrokerProcess(process.DangerousGetHandle());
             return process;
         }
         catch
@@ -1256,7 +1265,8 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
         nint environment,
         string workingDirectory)
     {
-        var creationFlags = CreateUnicodeEnvironment | CreateNoWindow;
+        const uint createSuspended = 0x00000004;
+        var creationFlags = CreateUnicodeEnvironment | CreateNoWindow | createSuspended;
         var startupInfo = new StartupInfo
         {
             Size = (uint)Marshal.SizeOf<StartupInfo>(),

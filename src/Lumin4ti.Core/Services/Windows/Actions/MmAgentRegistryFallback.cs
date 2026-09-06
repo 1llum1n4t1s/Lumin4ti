@@ -49,6 +49,11 @@ internal static class MmAgentRegistryFallback
     /// ON では無効化前の値へ戻す (記録が無ければ Windows 既定の 3)。
     /// </summary>
     public static string? TrySetState(string propertyName, bool on, Func<int?>? readPreviousValue = null)
+        => TrySetState(propertyName, on, readPreviousValue, RegistryValueBackup.Default, WriteEnablePrefetcher);
+
+    internal static string? TrySetState(
+        string propertyName, bool on, Func<int?>? readPreviousValue,
+        RegistryValueBackup backup, Func<int, string?> writeValue)
     {
         if (!CanFallBack(propertyName))
         {
@@ -61,19 +66,26 @@ internal static class MmAgentRegistryFallback
             {
                 // 無効化前の値を退避してあればそこへ戻す。無ければ Windows 既定へ。
                 var lines = new List<string>();
-                var restore = RegistryValueBackup.Default.TryRestore(BackupId, PrefetchSpecs, lines);
+                var restore = backup.TryRestore(BackupId, PrefetchSpecs, lines);
                 if (restore.Status == RegistryBackupRestoreStatus.Restored)
                 {
                     LoggerBootstrap.Log.Info("mmagent fallback: EnablePrefetcher を無効化前の値へ復元");
                     return null;
                 }
 
-                return WriteEnablePrefetcher(readPreviousValue?.Invoke() ?? PrefetcherEnabledDefault);
+                if (restore.Status == RegistryBackupRestoreStatus.Invalid)
+                {
+                    var reason = $"復元バックアップが旧形式・未対応または破損しているため、設定を変更しませんでした。{restore.FailureReason}";
+                    LoggerBootstrap.Log.Error(reason);
+                    return reason;
+                }
+
+                return writeValue(readPreviousValue?.Invoke() ?? PrefetcherEnabledDefault);
             }
 
             // 「OFF で Windows 既定ではなく利用者の元の値へ戻す」ため、書く前に退避する。
-            RegistryValueBackup.Default.Save(BackupId, PrefetchSpecs);
-            return WriteEnablePrefetcher(PrefetcherDisabled);
+            backup.Save(BackupId, PrefetchSpecs);
+            return writeValue(PrefetcherDisabled);
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException or IOException or InvalidDataException)
         {
