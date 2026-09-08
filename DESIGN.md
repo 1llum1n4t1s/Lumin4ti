@@ -16,7 +16,7 @@ Lumin4ti は Windows 10 / 11（64-bit）向けのメンテナンス・最適化G
 | `Lumin4ti.UI` | Avalonia画面、MVVM、ローカライズ、DI、操作状態、更新UI | Coreの公開契約を呼び出す |
 | `Lumin4ti.Tests` | 純粋ロジック、安全ガード、カタログ、配布契約の回帰検証 | 実レジストリ・実削除・管理者依存の書き込みは行わない |
 | `scripts/` | Windows向けpublish、Velopack梱包、MSI補正、署名、R2公開 | リリース時だけ実行する |
-| `web/` | ランディングページを返すCloudflare Worker | `/`と`/index.html`以外はR2配信へ委譲する |
+| `../vps-web/lp/lumin4ti/` | VPSのランディングページへ中継するCloudflare Worker | `/`と`/index.html`以外はR2配信へ委譲する |
 
 依存方向は `Lumin4ti.UI` → `Lumin4ti.Core` の一方向である。OS操作をUI層へ持ち込まず、CoreはAvalonia型を受け取らない。
 
@@ -113,3 +113,9 @@ Cloudflare Workerはランディングページだけを処理し、更新manife
 | 手動DIをSingletonで構成する | デスクトップアプリの単一Window・共有操作状態を単純に保てる | componentごとの短いlifetimeは使わない |
 | 更新元とchannelをコードで固定する | 設定改ざんによる第三者ホストへの誘導を防ぐ | 利用者が任意mirrorへ切り替えることはできない |
 | PerMachine MSIとローカル署名を採用する | 管理者ツールをユーザー書込み可能領域から実行せず、対話署名を維持できる | リリースは署名環境のあるWindows端末へ依存する |
+
+## 製品ページの配信先
+
+製品ページの配信HTMLは `../vps-web/lp/lumin4ti/`（編集元は `../vps-web/tools/lp/templates/`）、公開実体はVPSの `/srv/www/lp/lumin4ti/`。
+Cloudflare側の中継設定は `../vps-web/deploy/lp-gateways/lumin4ti/` に置く。
+公開URLと既存のR2・ライセンス通信を維持し、配信は `vps-web/deploy/deploy-lp.ps1` へ統一する。
