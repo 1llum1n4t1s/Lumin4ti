@@ -516,6 +516,29 @@ public sealed class FileCleanupTests
     }
 
     [TestMethod]
+    public void npmのnpx実行環境は削除対象に含めない()
+    {
+        var npmTargets = FileCleanupGroups.PackageCacheTargets
+            .Where(target => FileCleanupGroups.GetPackageCacheGroupName(target) == "npm")
+            .Select(target => target.RawPath)
+            .ToArray();
+
+        CollectionAssert.AreEquivalent(
+            new[]
+            {
+                @"%LOCALAPPDATA%\npm-cache\_cacache",
+                @"%LOCALAPPDATA%\npm-cache\_logs",
+                @"%USERPROFILE%\.npm\_cacache",
+                @"%USERPROFILE%\.npm\_logs",
+            },
+            npmTargets);
+        Assert.IsFalse(
+            FileCleanupGroups.PackageCacheTargets.Any(target =>
+                target.RawPath.Contains(@"\_npx", StringComparison.OrdinalIgnoreCase)),
+            "npx の展開済み実行環境を削除対象へ戻さないでください");
+    }
+
+    [TestMethod]
     public void 基点フォルダを対象にできるのはファイル名指定のときだけ()
     {
         // IconCache.db / FNTCACHE.DAT のように保護フォルダ直下の単一ファイルは許可し、

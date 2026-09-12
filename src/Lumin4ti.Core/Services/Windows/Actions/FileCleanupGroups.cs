@@ -287,10 +287,11 @@ public static class FileCleanupGroups
     /// <summary>
     /// 内容アドレス方式のストア型キャッシュ。実体は venv や node_modules へハードリンクで配られるため、
     /// ストアを消しても展開済みの環境は壊れず、次回インストール時に再取得されるだけで済む。
+    /// npm のキャッシュ基点には実行時に直接使われる _npx も同居するため、_cacache だけを対象にする。
     /// </summary>
     internal static readonly CleanupTarget[] StoreCacheTargets =
     [
-        CleanupTarget.Contents(@"%LOCALAPPDATA%\npm-cache"),
+        CleanupTarget.Contents(@"%LOCALAPPDATA%\npm-cache\_cacache"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\pnpm\store"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\uv\cache"),
         CleanupTarget.Contents(@"%USERPROFILE%\.cargo\registry"),
@@ -301,9 +302,9 @@ public static class FileCleanupGroups
         CleanupTarget.Contents(@"%LOCALAPPDATA%\pip\Cache"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\Yarn\Cache"),
         CleanupTarget.Contents(@"%LOCALAPPDATA%\NuGet\v3-cache"),
+        CleanupTarget.Contents(@"%LOCALAPPDATA%\npm-cache\_logs"),
         CleanupTarget.Contents(@"%USERPROFILE%\.npm\_cacache"),
         CleanupTarget.Contents(@"%USERPROFILE%\.npm\_logs"),
-        CleanupTarget.Contents(@"%USERPROFILE%\.npm\_npx"),
         CleanupTarget.Contents(@"%USERPROFILE%\.nuget\packages"),
         CleanupTarget.Contents(@"%USERPROFILE%\.gradle\caches"),
         CleanupTarget.Contents(@"%USERPROFILE%\.bun\install\cache"),
@@ -320,7 +321,7 @@ public static class FileCleanupGroups
             _ when path.Contains(@"\NuGet\", StringComparison.OrdinalIgnoreCase) ||
                    path.Contains(@"\.nuget\", StringComparison.OrdinalIgnoreCase) => "NuGet",
             _ when path.Contains(@"\uv\", StringComparison.OrdinalIgnoreCase) => "uv",
-            _ when path.EndsWith(@"\npm-cache", StringComparison.OrdinalIgnoreCase) ||
+            _ when path.Contains(@"\npm-cache\", StringComparison.OrdinalIgnoreCase) ||
                    path.Contains(@"\.npm\", StringComparison.OrdinalIgnoreCase) => "npm",
             _ when path.Contains(@"\pnpm\", StringComparison.OrdinalIgnoreCase) => "pnpm",
             _ when path.Contains(@"\.cargo\", StringComparison.OrdinalIgnoreCase) => "Cargo",
