@@ -38,6 +38,15 @@ public static class WindowsServiceControl
     /// </summary>
     internal static readonly TimeSpan ServiceStopTimeout = TimeSpan.FromMinutes(2);
 
+    /// <summary>net start 1 件あたりの上限。</summary>
+    internal static readonly TimeSpan ServiceStartTimeout = TimeSpan.FromMinutes(2);
+
+    /// <summary>net start 失敗後に SCM による自動回復を待つ上限。</summary>
+    internal static readonly TimeSpan ServiceStartRecoveryTimeout = TimeSpan.FromSeconds(60);
+
+    /// <summary>SCM による自動回復を確認する間隔。</summary>
+    internal static readonly TimeSpan ServiceStartRecoveryPollInterval = TimeSpan.FromSeconds(2);
+
     /// <summary>サービスの状態を取得する。SCM を開けない場合は例外を投げる。</summary>
     public static WindowsServiceState QueryState(string serviceName)
     {
@@ -214,16 +223,50 @@ public static class WindowsServiceControl
 /// 停止に失敗したサービスは <see cref="FailedToStop"/> に入り、呼び出し側が結果へ反映する。
 /// </summary>
 [SupportedOSPlatform("windows")]
-public sealed class ServiceSuspension(
-    ICommandExecutor executor,
-    IReadOnlyList<string> stopped,
-    IReadOnlyList<string> failedToStop)
+public sealed class ServiceSuspension
 {
+    private readonly ICommandExecutor _executor;
+    private readonly Func<string, WindowsServiceState?> _queryState;
+    private readonly Func<TimeSpan, Task> _delay;
+
+    public ServiceSuspension(
+        ICommandExecutor executor,
+        IReadOnlyList<string> stopped,
+        IReadOnlyList<string> failedToStop)
+        : this(
+            executor,
+            stopped,
+            failedToStop,
+            WindowsServiceControl.TryQueryState,
+            static delay => Task.Delay(delay, CancellationToken.None))
+    {
+    }
+
+    internal ServiceSuspension(
+        ICommandExecutor executor,
+        IReadOnlyList<string> stopped,
+        IReadOnlyList<string> failedToStop,
+        Func<string, WindowsServiceState?> queryState,
+        Func<TimeSpan, Task> delay)
+    {
+        ArgumentNullException.ThrowIfNull(executor);
+        ArgumentNullException.ThrowIfNull(stopped);
+        ArgumentNullException.ThrowIfNull(failedToStop);
+        ArgumentNullException.ThrowIfNull(queryState);
+        ArgumentNullException.ThrowIfNull(delay);
+
+        _executor = executor;
+        Stopped = stopped;
+        FailedToStop = failedToStop;
+        _queryState = queryState;
+        _delay = delay;
+    }
+
     /// <summary>この操作で停止したサービス (再開対象)。</summary>
-    public IReadOnlyList<string> Stopped { get; } = stopped;
+    public IReadOnlyList<string> Stopped { get; }
 
     /// <summary>稼働中だが停止できなかったサービス。</summary>
-    public IReadOnlyList<string> FailedToStop { get; } = failedToStop;
+    public IReadOnlyList<string> FailedToStop { get; }
 
     /// <summary>
     /// 停止したサービスを開始し直す。削除処理が失敗・キャンセルされた場合でも
@@ -236,8 +279,24 @@ public sealed class ServiceSuspension(
         {
             try
             {
-                var start = await executor.RunAsync("net.exe", $"start \"{name}\"", CancellationToken.None);
-                if (!start.Success && WindowsServiceControl.TryQueryState(name) is not WindowsServiceState.Running)
+                var start = await _executor.RunAsync(
+                    "net.exe",
+                    $"start \"{name}\"",
+                    CancellationToken.None,
+                    timeout: WindowsServiceControl.ServiceStartTimeout);
+                if (start.Success)
+                {
+                    continue;
+                }
+
+                LoggerBootstrap.Log.Info(
+                    $"{name} サービスの開始コマンド失敗後、SCM による回復を最大 " +
+                    $"{WindowsServiceControl.ServiceStartRecoveryTimeout.TotalSeconds:0} 秒待機します");
+                if (await WaitForRunningAsync(name))
+                {
+                    LoggerBootstrap.Log.Info($"{name} サービスが SCM により再開されたことを確認しました");
+                }
+                else
                 {
                     failures.Add(name);
                     LoggerBootstrap.Log.Error($"{name} サービスの再開に失敗: exit={start.ExitCode}");
@@ -251,5 +310,32 @@ public sealed class ServiceSuspension(
         }
 
         return failures;
+    }
+
+    private async Task<bool> WaitForRunningAsync(string serviceName)
+    {
+        var elapsed = TimeSpan.Zero;
+        while (true)
+        {
+            var state = _queryState(serviceName);
+            if (state is WindowsServiceState.Running)
+            {
+                return true;
+            }
+
+            // 状態を確認できない場合と、サービスが消えた場合は待っても正常復帰を確認できない。
+            if (state is null or WindowsServiceState.NotInstalled ||
+                elapsed >= WindowsServiceControl.ServiceStartRecoveryTimeout)
+            {
+                return false;
+            }
+
+            var remaining = WindowsServiceControl.ServiceStartRecoveryTimeout - elapsed;
+            var delay = remaining < WindowsServiceControl.ServiceStartRecoveryPollInterval
+                ? remaining
+                : WindowsServiceControl.ServiceStartRecoveryPollInterval;
+            await _delay(delay);
+            elapsed += delay;
+        }
     }
 }

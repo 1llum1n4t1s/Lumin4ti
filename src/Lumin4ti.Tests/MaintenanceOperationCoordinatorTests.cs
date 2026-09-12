@@ -39,6 +39,16 @@ public sealed class MaintenanceOperationCoordinatorTests
     }
 
     [TestMethod]
+    public void 別プロセスが操作中なら開始しない()
+    {
+        var coordinator = new MaintenanceOperationCoordinator(() => null);
+
+        Assert.IsFalse(coordinator.TryBegin(out var rejected));
+        Assert.IsNull(rejected);
+        Assert.AreEqual(0, coordinator.ActiveCount);
+    }
+
+    [TestMethod]
     public async Task 操作がなければ待機は即座に完了する()
     {
         var coordinator = new MaintenanceOperationCoordinator();

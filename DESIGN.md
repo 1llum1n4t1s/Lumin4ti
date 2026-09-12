@@ -45,12 +45,12 @@ Lumin4ti は Windows 10 / 11（64-bit）向けのメンテナンス・最適化G
 操作データは次の順に流れる。
 
 1. `MainWindowViewModel`がカテゴリごとの`CommandCategoryViewModel`を公開する。
-2. ViewModelが`MaintenanceOperationCoordinator`から排他的なleaseを取得する。
+2. ViewModelが`MaintenanceOperationCoordinator`からプロセス間で排他的なleaseを取得する。サインイン時クリーンアップも同じ共有ロックを取得し、GUI操作と重なった場合は実行しない。
 3. CoreのAction / Toggle / ChoiceがWindows API、レジストリ、または`ICommandExecutor`を通してOSを操作する。
 4. 進捗と`Success` / `Partial` / `Failure` / `Canceled`をUIへ返す。
 5. トグルと選択項目は実状態を再取得し、必要な項目だけExplorerを再起動する。
 
-アプリ全体で状態変更操作は同時に1件だけ実行する。これにより、複数のレジストリ変更、サービス停止、外部コマンド、Explorer再起動が競合しない。
+GUI とサインイン時クリーンアップを含め、状態変更操作はマシン全体で同時に1件だけ実行する。これにより、複数のレジストリ変更、サービス停止、外部コマンド、Explorer再起動が競合しない。
 
 ### 未接続デバイス管理
 

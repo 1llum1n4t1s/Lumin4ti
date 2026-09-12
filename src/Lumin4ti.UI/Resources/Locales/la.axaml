@@ -126,7 +126,7 @@
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">Data praelectionis et indicem quaerendi delere et reficere</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">Data praelectionis (Prefetch), quae initium applicationum accelerant, et indicem quaerendi Exploratoris delet, ut Windows utraque denuo condat. Utere cum quaestio nihil reddit vel documenta obsoleta semper affert. Dum refectio durat, a decem minutis ad aliquot horas, applicationes tardius incipiunt, quaestio limitatur et usus processorii in fundo crescit.</x:String>
   <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">Munus inscribere quod purgationem in ingressu automatice exsequitur</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Runs the selected cache and log cleanup items at sign-in using the same checklists as the Run buttons. Items needing administrator rights may be skipped. Files in use are skipped. Turning this OFF removes the task.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">In ingressu purgationes conditivorum et actorum electas summis privilegiis praesto exsequitur, ut etiam opera quae iura administratoris aut cessationem ministeriorum requirunt perfici possint. Eisdem indicibus ac globuli Exsequere utitur et sine admonitione UAC incipit. Documenta in usu omittuntur. OFF munus removet.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Memory Compression</x:String>

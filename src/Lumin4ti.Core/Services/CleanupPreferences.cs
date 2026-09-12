@@ -11,8 +11,8 @@ public sealed class CleanupPreferences(ISettingsService settings) : ICleanupPref
 {
     /// <summary>
     /// 未設定のときにサインイン時のクリーンアップで実行する項目。
-    /// 管理者権限やサービス停止を必要としない、ユーザー権限で完走できるものだけにする
-    /// (タスクは非昇格で動くため、システム側の掃除は既定では選ばない)。
+    /// サインイン直後の負荷と所要時間を抑えるため、利用者固有の一時ファイルとキャッシュだけを既定にし、
+    /// 最高権限が必要なシステム側の掃除は利用者が明示的に選べるようにする。
     /// </summary>
     public static readonly IReadOnlyList<string> DefaultScheduledGroupIds =
     [

@@ -1,3 +1,5 @@
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Text;
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
@@ -103,14 +105,15 @@ public sealed class ScheduledTempCleanupTests
     }
 
     [TestMethod]
-    public void タスク定義はログオン時トリガーと非昇格実行を指定する()
+    public void タスク定義はログオン時トリガーと最高権限実行を指定する()
     {
         const string exePath = @"C:\Program Files\Lumin4ti\Lumin4ti.exe";
         var xml = ScheduledTempCleanupToggle.BuildTaskXml(exePath, @"TESTPC\Test");
 
         StringAssert.Contains(xml, "<LogonTrigger>");
-        StringAssert.Contains(xml, "<RunLevel>LeastPrivilege</RunLevel>");
+        StringAssert.Contains(xml, "<RunLevel>HighestAvailable</RunLevel>");
         StringAssert.Contains(xml, "<LogonType>InteractiveToken</LogonType>");
+        Assert.IsFalse(xml.Contains("<RunLevel>LeastPrivilege</RunLevel>", StringComparison.Ordinal));
         StringAssert.Contains(xml, $"<Command>{exePath}</Command>");
         StringAssert.Contains(xml, $"<Arguments>{ScheduledTempCleanup.CommandLineArgument}</Arguments>");
         StringAssert.Contains(xml, @"<UserId>TESTPC\Test</UserId>");
@@ -142,6 +145,68 @@ public sealed class ScheduledTempCleanupTests
     }
 
     [TestMethod]
+    public void 最高権限タスクへ登録できるのはProgramFilesの正規実体だけである()
+    {
+        const string programFiles = @"C:\Program Files";
+
+        Assert.IsTrue(ScheduledTaskExecutableTrust.IsExpectedInstalledPath(
+            @"C:\Program Files\Lumin4ti\current\Lumin4ti.UI.exe",
+            programFiles));
+        Assert.IsFalse(ScheduledTaskExecutableTrust.IsExpectedInstalledPath(
+            @"D:\Custom\Lumin4ti\current\Lumin4ti.UI.exe",
+            programFiles));
+        Assert.IsFalse(ScheduledTaskExecutableTrust.IsExpectedInstalledPath(
+            @"C:\Program Files\Lumin4ti\current\subdir\Lumin4ti.UI.exe",
+            programFiles));
+        Assert.IsFalse(ScheduledTaskExecutableTrust.IsExpectedInstalledPath(
+            @"C:\Program Files\Lumin4ti\current\Lumin4ti.UI-copy.exe",
+            programFiles));
+    }
+
+    [TestMethod]
+    public void 最高権限タスクの実体ACLは一般ユーザーの読み取りだけを許可する()
+    {
+        var security = CreateTaskExecutableAcl();
+        security.AddAccessRule(new FileSystemAccessRule(
+            new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null),
+            FileSystemRights.ReadAndExecute,
+            AccessControlType.Allow));
+
+        Assert.IsTrue(ScheduledTaskExecutableTrust.IsSafeAcl(security, out var reason), reason);
+    }
+
+    [TestMethod]
+    public void 最高権限タスクの実体ACLは一般ユーザーの書き込みを拒否する()
+    {
+        var security = CreateTaskExecutableAcl();
+        security.AddAccessRule(new FileSystemAccessRule(
+            new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null),
+            FileSystemRights.Write,
+            AccessControlType.Allow));
+
+        Assert.IsFalse(ScheduledTaskExecutableTrust.IsSafeAcl(security, out var reason));
+        StringAssert.Contains(reason, "非管理者");
+    }
+
+    [TestMethod]
+    public void 最高権限タスクの実体ACLは一般ユーザー所有を拒否する()
+    {
+        var security = CreateTaskExecutableAcl();
+        security.SetOwner(new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null));
+
+        Assert.IsFalse(ScheduledTaskExecutableTrust.IsSafeAcl(security, out var reason));
+        StringAssert.Contains(reason, "所有者");
+    }
+
+    [TestMethod]
+    public void 最高権限タスクの実体と祖先では再解析ポイントを拒否する()
+    {
+        Assert.IsTrue(ScheduledTaskExecutableTrust.IsSafePathAttributes(FileAttributes.Archive));
+        Assert.IsFalse(ScheduledTaskExecutableTrust.IsSafePathAttributes(
+            FileAttributes.Directory | FileAttributes.ReparsePoint));
+    }
+
+    [TestMethod]
     public async Task 照会が成功すればONと判定する()
     {
         var executor = new RecordingExecutor { NextSuccess = true };
@@ -151,6 +216,22 @@ public sealed class ScheduledTempCleanupTests
 
         Assert.AreEqual(true, state);
         StringAssert.Contains(executor.LastArguments, "/query");
+    }
+
+    private static FileSecurity CreateTaskExecutableAcl()
+    {
+        var security = new FileSecurity();
+        security.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
+        security.SetOwner(new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null));
+        security.AddAccessRule(new FileSystemAccessRule(
+            new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
+            FileSystemRights.FullControl,
+            AccessControlType.Allow));
+        security.AddAccessRule(new FileSystemAccessRule(
+            new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null),
+            FileSystemRights.FullControl,
+            AccessControlType.Allow));
+        return security;
     }
 
     [TestMethod]
@@ -279,6 +360,20 @@ public sealed class ScheduledTempCleanupTests
         var exitCode = ScheduledTempCleanup.Run(new FailedSettingsService(), executor);
 
         Assert.AreEqual(1, exitCode);
+        Assert.IsNull(executor.LastFileName);
+    }
+
+    [TestMethod]
+    public void 別のメンテナンス操作中は定期削除を正常終了でスキップする()
+    {
+        var executor = new RecordingExecutor();
+
+        var exitCode = ScheduledTempCleanup.Run(
+            new FailedSettingsService(),
+            executor,
+            tryAcquireOperationLock: () => null);
+
+        Assert.AreEqual(0, exitCode);
         Assert.IsNull(executor.LastFileName);
     }
 

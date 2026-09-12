@@ -126,7 +126,7 @@
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">Elimina e ricostruisci i dati di precaricamento e l'indice di ricerca</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">Elimina i dati di precaricamento (Prefetch) che velocizzano l'avvio delle applicazioni e l'indice di ricerca di Esplora file, lasciando che Windows li ricrei. Utile quando la ricerca non restituisce risultati o restituisce file obsoleti. Per le decine di minuti o le ore necessarie alla ricostruzione l'avvio delle applicazioni e la ricerca risultano più lenti e l'uso della CPU in background aumenta.</x:String>
   <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">Registra un'attività che esegue automaticamente la pulizia all'accesso</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Esegue all’accesso le pulizie di cache e log selezionate usando le stesse liste dei pulsanti Esegui. Gli elementi che richiedono privilegi amministrativi possono essere ignorati. I file in uso vengono ignorati. OFF rimuove l’attività.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Esegue all’accesso le pulizie di cache e log selezionate con i privilegi più elevati disponibili, così possono essere eseguiti anche gli elementi che richiedono diritti amministrativi o l’arresto di servizi. Usa le stesse liste dei pulsanti Esegui e si avvia senza richiesta UAC. I file in uso vengono ignorati. OFF rimuove l’attività.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Compressione della memoria</x:String>

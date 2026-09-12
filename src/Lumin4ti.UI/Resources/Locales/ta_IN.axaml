@@ -126,7 +126,7 @@
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">முன்பதிவுத் தரவையும் தேடல் அட்டவணையையும் நீக்கி மீண்டும் உருவாக்கு</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">செயலிகள் விரைவாகத் தொடங்க உதவும் முன்பதிவுத் தரவையும் (Prefetch) File Explorer-இன் தேடல் அட்டவணையையும் நீக்கி, Windows அவற்றை மீண்டும் உருவாக்கச் செய்கிறது. தேடலில் எதுவும் கிடைக்காதபோது அல்லது பழைய கோப்புகளே வரும்போது இதைப் பயன்படுத்தவும். மீண்டும் உருவாக்கும் பல்லாயிரம் நிமிடங்கள் முதல் சில மணிநேரம் வரை செயலிகளின் தொடக்கமும் தேடலும் மெதுவாக இருக்கும், பின்னணியில் CPU பயன்பாடும் அதிகரிக்கும்.</x:String>
   <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">உள்நுழையும்போது தானாக சுத்தம் செய்யும் பணியைப் பதிவு செய்</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Runs the selected cache and log cleanup items at sign-in using the same checklists as the Run buttons. Items needing administrator rights may be skipped. Files in use are skipped. Turning this OFF removes the task.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">உள்நுழையும்போது தேர்ந்தெடுக்கப்பட்ட தற்காலிகச் சேமிப்பு மற்றும் பதிவு சுத்தம் செய்யும் உருப்படிகளை கிடைக்கும் மிக உயர்ந்த உரிமைகளுடன் இயக்குகிறது; எனவே நிர்வாகி உரிமைகள் அல்லது சேவைகளை நிறுத்த வேண்டிய உருப்படிகளும் இயங்கும். இயக்குக பொத்தான்களின் அதே பட்டியல்களைப் பயன்படுத்தி UAC அறிவிப்பு இல்லாமல் தொடங்குகிறது. பயன்பாட்டில் உள்ள கோப்புகள் தவிர்க்கப்படும். OFF பணியை நீக்கும்.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Memory Compression</x:String>

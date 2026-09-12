@@ -126,7 +126,7 @@
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">Excluir e reconstruir os dados de pré-carregamento e o índice de pesquisa</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">Exclui os dados de pré-carregamento (Prefetch) que aceleram a abertura de aplicativos e o índice de pesquisa do Explorador de Arquivos, deixando o Windows recriá-los. Use quando a pesquisa não retorna nada ou retorna arquivos desatualizados. Durante a reconstrução, que leva de dezenas de minutos a horas, os aplicativos abrem mais devagar, a pesquisa fica limitada e o uso de CPU em segundo plano aumenta.</x:String>
   <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">Registrar uma tarefa que executa a limpeza automaticamente ao entrar</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Executa no logon as limpezas de cache e logs selecionadas usando as mesmas listas dos botões Executar. Itens que exigem administrador podem ser ignorados. Arquivos em uso são ignorados. OFF remove a tarefa.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Executa no logon as limpezas de cache e logs selecionadas com os privilégios mais altos disponíveis, permitindo também os itens que exigem direitos de administrador ou a interrupção de serviços. Usa as mesmas listas dos botões Executar e inicia sem aviso do UAC. Arquivos em uso são ignorados. OFF remove a tarefa.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Compressão de memória</x:String>

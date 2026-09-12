@@ -25,7 +25,7 @@ public sealed class ScheduledTempCleanupToggle(
     /// 登録前のパス信頼確認。既定は実際の署名・インストール状態検証だが、テストでは差し替える。
     /// </summary>
     private readonly Func<string, bool> _isTrustedInstalledExecutable =
-        isTrustedInstalledExecutable ?? (path => WindowsPerMachineMigration.IsCurrentProcessPerMachine(path));
+        isTrustedInstalledExecutable ?? ScheduledTaskExecutableTrust.IsTrustedInstalledExecutable;
 
     /// <summary>
     /// タスク定義 XML の置き場。Administrators / SYSTEM 以外が書けない場所へ置くため、
@@ -52,9 +52,8 @@ public sealed class ScheduledTempCleanupToggle(
         "Windows タスクスケジューラーに、サインインのたびにクリーンアップを実行するタスクを登録します。" +
         "実行する項目は下の一覧で選べ、各項目が消す対象も項目カードのチェックリストの設定がそのまま使われます " +
         "(画面のボタンで実行したときとまったく同じ処理が走ります)。" +
-        "タスクはサインインしたユーザーの権限だけで動き、管理者権限や UAC の確認は必要ありません。" +
-        "そのため、管理者権限やサービスの停止が要る項目 (システムの一時ファイル・Windows Update キャッシュ等) を選ぶと、" +
-        "その項目だけ失敗またはスキップとして記録されます。" +
+        "タスクは最高権限で動くため、サービスの停止が必要な項目も実行できます。" +
+        "サインイン時に UAC の確認は表示されません。" +
         "選んだキャッシュやログの量によっては、サインインのたびに数分以上かかることがあります。" +
         "使用中のファイルは自動的にスキップされます。OFF にするとタスクを削除します。";
 
@@ -125,7 +124,8 @@ public sealed class ScheduledTempCleanupToggle(
 
         // ユーザー書き込み可能な場所から起動されたプロセス (移行前残骸・手動コピー等) のパスを
         // タスクスケジューラーへ固定登録すると、改ざん後の自動実行を許してしまう。
-        // 署名済み・Program Files 配下・MSI インストール済みの正規実体だけを登録対象にする。
+        // 署名済み・Program Files\Lumin4ti\current 配下・MSI インストール済みで、
+        // 実行ファイルまでの各要素を非管理者が差し替えられない正規実体だけを登録対象にする。
         if (!_isTrustedInstalledExecutable(exePath))
         {
             LoggerBootstrap.Log.Error($"{Id}: 実行ファイルが信頼できるインストール済みの実体ではありません ({exePath})");
@@ -187,7 +187,7 @@ public sealed class ScheduledTempCleanupToggle(
     /// タスク定義 XML を組み立てる。要素の並びはタスクスケジューラーのスキーマ順に固定する
     /// (順序が違うと schtasks /xml が受け付けない)。
     /// <list type="bullet">
-    /// <item>LeastPrivilege + InteractiveToken … サインインのたびに UAC を出さず非昇格で走らせる。</item>
+    /// <item>HighestAvailable + InteractiveToken … サインインしたユーザーの最高権限で、UAC を出さずに走らせる。</item>
     /// <item>DisallowStartIfOnBatteries / StopIfGoingOnBatteries = false … ノート PC でバッテリー駆動中に
     /// サインインした回もスキップさせず、実行中に電源を抜かれても中断しない。</item>
     /// <item>IgnoreNew … 前回の掃除が長引いている間に再サインインしても二重起動させない。</item>
@@ -209,7 +209,7 @@ public sealed class ScheduledTempCleanupToggle(
             <Principal id="Author">
               <UserId>{SecurityElement.Escape(userId)}</UserId>
               <LogonType>InteractiveToken</LogonType>
-              <RunLevel>LeastPrivilege</RunLevel>
+              <RunLevel>HighestAvailable</RunLevel>
             </Principal>
           </Principals>
           <Settings>

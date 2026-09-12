@@ -126,7 +126,7 @@
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">删除并重建预读数据和搜索索引</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">删除用于加快应用启动的预读数据（Prefetch）和文件资源管理器的搜索索引，让 Windows 重新生成。适用于搜索不出结果或总是命中过期文件的情况。在重建完成前的数十分钟至数小时内，应用启动和搜索都会变慢，后台 CPU 占用也会升高。</x:String>
   <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">注册登录时自动执行清理的任务</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">登录时使用与“运行”按钮相同的清单执行所选缓存和日志清理。需要管理员权限的项目可能会被跳过。正在使用的文件会被跳过。关闭后会删除任务。</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">登录时以可用的最高权限执行所选缓存和日志清理，因此也能运行需要管理员权限或停止服务的项目。它使用与“运行”按钮相同的清单，并且启动时不会显示 UAC 提示。正在使用的文件会被跳过。关闭后会删除任务。</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">内存压缩</x:String>

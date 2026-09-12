@@ -33,7 +33,7 @@ internal static class Program
 
         // タスクスケジューラーからのスケジュール実行はここで即終了する。
         // 自己昇格・多重起動ガード・UI 起動を一切経由しないため、ログオンのたびに
-        // UAC プロンプトを出さず無人で完走できる (%TEMP% の削除はユーザー権限で足りる)。
+        // UAC プロンプトを出さず、登録済みタスクの最高権限で無人実行できる。
         if (OperatingSystem.IsWindows() && args.Contains(ScheduledTempCleanup.CommandLineArgument))
         {
             return ScheduledTempCleanup.Run();

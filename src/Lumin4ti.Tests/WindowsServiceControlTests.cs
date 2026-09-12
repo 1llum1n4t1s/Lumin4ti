@@ -82,6 +82,90 @@ public sealed class WindowsServiceControlTests
         Assert.HasCount(2, executor.Invocations);
         StringAssert.StartsWith(executor.Invocations[1].Arguments, "start");
         Assert.IsFalse(executor.Invocations[1].Token.CanBeCanceled);
+        Assert.AreEqual(WindowsServiceControl.ServiceStartTimeout, executor.Invocations[1].Timeout);
+    }
+
+    [TestMethod]
+    public async Task 再開要求が失敗してもSCMの自動回復で稼働すれば成功とする()
+    {
+        var states = new Queue<WindowsServiceState?>(
+            [WindowsServiceState.Stopped, WindowsServiceState.Transitioning, WindowsServiceState.Running]);
+        var delays = new List<TimeSpan>();
+        var executor = new RecordingExecutor((_, _, _) => Result(success: false));
+        var suspension = new ServiceSuspension(
+            executor,
+            stopped: ["WSearch"],
+            failedToStop: [],
+            _ => states.Dequeue(),
+            delay =>
+            {
+                delays.Add(delay);
+                return Task.CompletedTask;
+            });
+
+        var failures = await suspension.ResumeAsync();
+
+        Assert.HasCount(0, failures);
+        Assert.HasCount(1, executor.Invocations, "net start を再試行してはいけません");
+        CollectionAssert.AreEqual(
+            new[]
+            {
+                WindowsServiceControl.ServiceStartRecoveryPollInterval,
+                WindowsServiceControl.ServiceStartRecoveryPollInterval,
+            },
+            delays.ToArray());
+    }
+
+    [TestMethod]
+    public async Task 再開要求失敗後に停止したままなら上限で失敗する()
+    {
+        var queryCount = 0;
+        var elapsed = TimeSpan.Zero;
+        var executor = new RecordingExecutor((_, _, _) => Result(success: false));
+        var suspension = new ServiceSuspension(
+            executor,
+            stopped: ["WSearch"],
+            failedToStop: [],
+            _ =>
+            {
+                queryCount++;
+                return WindowsServiceState.Stopped;
+            },
+            delay =>
+            {
+                elapsed += delay;
+                return Task.CompletedTask;
+            });
+
+        var failures = await suspension.ResumeAsync();
+
+        CollectionAssert.AreEqual(new[] { "WSearch" }, failures.ToArray());
+        Assert.AreEqual(WindowsServiceControl.ServiceStartRecoveryTimeout, elapsed);
+        Assert.AreEqual(31, queryCount, "初回と2秒間隔の確認を含め、60秒で打ち切ります");
+        Assert.HasCount(1, executor.Invocations, "net start を再試行してはいけません");
+    }
+
+    [TestMethod]
+    public async Task 再開要求失敗後に状態を照会できなければ直ちに失敗する()
+    {
+        var delayCalled = false;
+        var executor = new RecordingExecutor((_, _, _) => Result(success: false));
+        var suspension = new ServiceSuspension(
+            executor,
+            stopped: ["WSearch"],
+            failedToStop: [],
+            _ => null,
+            _ =>
+            {
+                delayCalled = true;
+                return Task.CompletedTask;
+            });
+
+        var failures = await suspension.ResumeAsync();
+
+        CollectionAssert.AreEqual(new[] { "WSearch" }, failures.ToArray());
+        Assert.IsFalse(delayCalled);
+        Assert.HasCount(1, executor.Invocations);
     }
 
     /// <summary>

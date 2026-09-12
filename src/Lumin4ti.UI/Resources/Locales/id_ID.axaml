@@ -126,7 +126,7 @@
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">Hapus dan bangun ulang data prefetch serta indeks pencarian</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">Menghapus data prefetch yang mempercepat peluncuran aplikasi dan indeks pencarian File Explorer, lalu membiarkan Windows membuatnya kembali. Gunakan bila pencarian tidak menemukan apa pun atau selalu memunculkan berkas usang. Selama pembangunan ulang yang memakan puluhan menit hingga beberapa jam, peluncuran aplikasi dan pencarian menjadi lambat serta penggunaan CPU di latar belakang meningkat.</x:String>
   <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">Daftarkan tugas yang menjalankan pembersihan secara otomatis saat masuk</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Saat masuk, menjalankan pembersihan cache dan log terpilih dengan daftar yang sama seperti tombol Jalankan. Item yang memerlukan administrator dapat dilewati. Berkas yang digunakan dilewati. OFF menghapus tugas.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Saat masuk, menjalankan pembersihan cache dan log terpilih dengan hak istimewa tertinggi yang tersedia, sehingga item yang memerlukan hak administrator atau penghentian layanan juga dapat dijalankan. Menggunakan daftar yang sama seperti tombol Jalankan dan dimulai tanpa perintah UAC. Berkas yang digunakan dilewati. OFF menghapus tugas.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Kompresi Memori</x:String>

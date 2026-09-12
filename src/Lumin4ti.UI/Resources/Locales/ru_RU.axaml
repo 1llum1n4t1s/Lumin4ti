@@ -126,7 +126,7 @@
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">Удалить и перестроить данные предзагрузки и индекс поиска</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">Удаляет данные предзагрузки (Prefetch), ускоряющие запуск приложений, и индекс поиска проводника, позволяя Windows создать их заново. Помогает, когда поиск ничего не находит или выдаёт устаревшие файлы. Пока идёт перестроение, от десятков минут до нескольких часов, приложения запускаются медленнее, поиск ограничен, а фоновая нагрузка на процессор возрастает.</x:String>
   <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">Зарегистрировать задачу, которая выполняет очистку автоматически при входе</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">При входе выполняет выбранную очистку кешей и журналов с теми же списками, что и кнопки запуска. Элементы, требующие прав администратора, могут быть пропущены. Используемые файлы пропускаются. OFF удаляет задачу.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">При входе выполняет выбранную очистку кешей и журналов с наивысшими доступными правами, поэтому также могут выполняться элементы, требующие прав администратора или остановки служб. Использует те же списки, что и кнопки запуска, и запускается без запроса UAC. Используемые файлы пропускаются. OFF удаляет задачу.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Сжатие памяти</x:String>

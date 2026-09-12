@@ -126,7 +126,7 @@
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">刪除並重建預先擷取資料與搜尋索引</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">刪除加速應用程式啟動的預先擷取資料（Prefetch）與檔案總管的搜尋索引，讓 Windows 重新建立。適用於搜尋不到結果或總是找到過期檔案的情況。在重建完成前的數十分鐘到數小時內，應用程式啟動與搜尋都會變慢，背景 CPU 使用率也會上升。</x:String>
   <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">註冊登入時自動執行清理的工作</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">登入時使用與「執行」按鈕相同的清單執行所選快取與記錄清理。需要系統管理員權限的項目可能會略過。使用中的檔案會略過。關閉後會刪除工作。</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">登入時以可用的最高權限執行所選快取與記錄清理，因此也能執行需要系統管理員權限或停止服務的項目。它使用與「執行」按鈕相同的清單，且啟動時不會顯示 UAC 提示。使用中的檔案會略過。關閉後會刪除工作。</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">記憶體壓縮</x:String>

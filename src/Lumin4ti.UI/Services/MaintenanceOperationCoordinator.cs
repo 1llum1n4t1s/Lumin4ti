@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Lumin4ti.Core.Services;
 
 namespace Lumin4ti.UI.Services;
 
@@ -14,7 +15,19 @@ public sealed class MaintenanceOperationCoordinator
 {
     private readonly object _sync = new();
     private readonly HashSet<CancellationTokenSource> _active = [];
+    private readonly Func<IDisposable?> _tryAcquireProcessLock;
     private TaskCompletionSource? _idleSignal;
+
+    public MaintenanceOperationCoordinator()
+        : this(MaintenanceOperationProcessLock.TryAcquire)
+    {
+    }
+
+    internal MaintenanceOperationCoordinator(Func<IDisposable?> tryAcquireProcessLock)
+    {
+        ArgumentNullException.ThrowIfNull(tryAcquireProcessLock);
+        _tryAcquireProcessLock = tryAcquireProcessLock;
+    }
 
     public int ActiveCount
     {
@@ -39,11 +52,28 @@ public sealed class MaintenanceOperationCoordinator
                 return false;
             }
 
-            var source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            var processLock = _tryAcquireProcessLock();
+            if (processLock is null)
+            {
+                lease = null;
+                return false;
+            }
+
+            CancellationTokenSource source;
+            try
+            {
+                source = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            }
+            catch
+            {
+                processLock.Dispose();
+                throw;
+            }
+
             _idleSignal = new TaskCompletionSource(
                 TaskCreationOptions.RunContinuationsAsynchronously);
             _active.Add(source);
-            lease = new OperationLease(this, source);
+            lease = new OperationLease(this, source, processLock);
             return true;
         }
     }
@@ -97,17 +127,35 @@ public sealed class MaintenanceOperationCoordinator
     {
         private MaintenanceOperationCoordinator? _owner;
         private readonly CancellationTokenSource _source;
+        private readonly IDisposable _processLock;
 
         internal OperationLease(
             MaintenanceOperationCoordinator owner,
-            CancellationTokenSource source)
+            CancellationTokenSource source,
+            IDisposable processLock)
         {
             _owner = owner;
             _source = source;
+            _processLock = processLock;
         }
 
         public CancellationToken Token => _source.Token;
 
-        public void Dispose() => Interlocked.Exchange(ref _owner, null)?.Complete(_source);
+        public void Dispose()
+        {
+            if (Interlocked.Exchange(ref _owner, null) is not { } owner)
+            {
+                return;
+            }
+
+            try
+            {
+                _processLock.Dispose();
+            }
+            finally
+            {
+                owner.Complete(_source);
+            }
+        }
     }
 }

@@ -126,7 +126,7 @@
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">पूर्वपठनदत्तांशम् अन्वेषणसूचीं च लोपयित्वा पुनः रचयतु</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">अनुप्रयोगारम्भं शीघ्रं कुर्वन्तं पूर्वपठनदत्तांशं (Prefetch) अन्वेषकस्य अन्वेषणसूचीं च लोपयति, येन Windows उभे पुनः रचयति। अन्वेषणे किमपि न लभ्यते पुरातनसञ्चिकाः एव लभ्यन्ते वा तदा एतत् प्रयोक्तव्यम्। पुनर्रचनाकाले, दशनिमेषेभ्यः कतिपयघण्टान् यावत्, अनुप्रयोगारम्भः अन्वेषणं च मन्दतरं भवति, पृष्ठभूमौ च संसाधकव्ययः वर्धते।</x:String>
   <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">प्रवेशकाले स्वयमेव शोधनं चालयितुं कार्यं पञ्जीकुरु</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Runs the selected cache and log cleanup items at sign-in using the same checklists as the Run buttons. Items needing administrator rights may be skipped. Files in use are skipped. Turning this OFF removes the task.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Runs the selected cache and log cleanup items at sign-in with the highest available privileges, so items requiring administrator rights or stopping services can run. It uses the same checklists as the Run buttons and starts without a UAC prompt. Files in use are skipped. Turning this OFF removes the task.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Memory Compression</x:String>

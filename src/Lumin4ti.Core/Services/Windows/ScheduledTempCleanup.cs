@@ -9,7 +9,7 @@ namespace Lumin4ti.Core.Services.Windows;
 /// タスクスケジューラーから起動されたときに、画面と同じクリーンアップ項目を実行して即終了する
 /// 専用エントリポイント。<see cref="Actions.ScheduledTempCleanupToggle"/> が登録するタスクは、
 /// この引数を付けて自分自身 (Lumin4ti.exe) を呼び出す。通常の起動フロー (自己昇格・多重起動ガード・UI) を
-/// 経由しないため、サインインのたびに UAC を出さず無人で完走できる。
+/// 経由せず、タスクスケジューラーから最高権限で起動されるため、サインインのたびに UAC を出さず無人で完走できる。
 /// 実行する項目と、項目ごとに消す対象は settings.json の利用者設定 (<see cref="ICleanupPreferences"/>) が唯一の正本で、
 /// 画面のボタンで走る処理とまったく同じコードを通る。
 /// 対象は再生成可能なキャッシュ・ログ・一時領域だけに限定し、使用中のファイルはスキップする。
@@ -41,10 +41,21 @@ public static class ScheduledTempCleanup
     /// 設定を正常に読めた場合だけ無人削除を行う。設定が無い、または読めない状態では
     /// 利用者が選んだ除外対象を再現できないため、既定値で推測して削除しない。
     /// </summary>
-    internal static int Run(ISettingsService settingsService, ICommandExecutor executor)
+    internal static int Run(
+        ISettingsService settingsService,
+        ICommandExecutor executor,
+        Func<IDisposable?>? tryAcquireOperationLock = null)
     {
         ArgumentNullException.ThrowIfNull(settingsService);
         ArgumentNullException.ThrowIfNull(executor);
+
+        using var operationLock =
+            (tryAcquireOperationLock ?? MaintenanceOperationProcessLock.TryAcquire)();
+        if (operationLock is null)
+        {
+            LoggerBootstrap.Log.Info("scheduled-cleanup: 別のメンテナンス操作が実行中のためスキップしました");
+            return 0;
+        }
 
         if (settingsService.LoadStatus != SettingsLoadStatus.Loaded)
         {

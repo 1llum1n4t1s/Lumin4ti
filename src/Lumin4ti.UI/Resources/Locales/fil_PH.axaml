@@ -126,7 +126,7 @@
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">Burahin at muling buuin ang prefetch data at search index</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">Binubura ang prefetch data na nagpapabilis sa pagbukas ng mga app at ang search index ng File Explorer, at hinahayaang muling likhain ng Windows ang dalawa. Gamitin ito kapag walang ibinabalik ang paghahanap o laging luma ang mga resultang file. Sa loob ng sampu-sampung minuto hanggang ilang oras ng muling pagbuo, bumabagal ang pagbukas ng app at ang paghahanap, at tumataas ang paggamit ng CPU sa background.</x:String>
   <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">Magrehistro ng task na awtomatikong nagpapatakbo ng paglilinis sa pag-sign in</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Sa pag-sign in, pinapatakbo ang napiling cache at log cleanup gamit ang kaparehong checklist ng Run button. Maaaring laktawan ang item na nangangailangan ng administrator. Nilalaktawan ang file na ginagamit. Inaalis ng OFF ang task.</x:String>
+  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Sa pag-sign in, pinapatakbo ang napiling cache at log cleanup gamit ang pinakamataas na available na pribilehiyo, kaya maaari ring tumakbo ang mga item na nangangailangan ng administrator o paghinto ng serbisyo. Ginagamit nito ang kaparehong checklist ng Run button at nagsisimula nang walang UAC prompt. Nilalaktawan ang file na ginagamit. Inaalis ng OFF ang task.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Memory Compression</x:String>
