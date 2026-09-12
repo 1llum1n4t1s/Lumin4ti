@@ -51,7 +51,7 @@ dotnet test Lumin4ti.slnx --filter "Name=既定値に戻せるトグルの既定
 - **セキュリティ (回帰厳禁)**: bare exe 名を渡すと `CreateProcess` の検索順序でインストールディレクトリが `System32` より先に照合され、昇格プロセスがバイナリプランティング LPE を踏む。`ProcessCommandExecutor` は [SystemProcessResolver](src/Lumin4ti.Core/Services/SystemProcessResolver.cs) でフルパス解決 + `WorkingDirectory=System32` 固定してこれを封じている。呼び出し側は論理名でよいが、この解決を外さないこと。
 - 子プロセスは [ProcessJobTracker](src/Lumin4ti.Core/Services/ProcessJobTracker.cs) の Job Object (KILL_ON_JOB_CLOSE) に紐付け、アプリ終了時に OS が孤児を kill する。`ct` キャンセル時はプロセスツリーごと kill。
 - 出力は UTF-8 → OEM (CP932) の順で自動デコード。長時間コマンドの進捗は `\r`/`\n` 区切りで `IProgress<string>` 通知。
-- サービスの停止・再開が要る操作は [WindowsServiceControl](src/Lumin4ti.Core/Services/Windows/WindowsServiceControl.cs) を通す。状態照会は SCM を直接叩き (`QueryState`)、停止・開始だけ `net.exe` に委ねる。`SuspendAsync` は**元から稼働していたサービスだけ**を止めて `ServiceSuspension` を返し、呼び出し側は失敗・キャンセル時も `finally` で `ResumeAsync()` を必ず実行する。キャンセル時に例外を投げず途中で打ち切るのは、既に止めたサービスの再開手段を呼び出し側が失わないため。
+- サービスの停止・再開が要る操作は [WindowsServiceControl](src/Lumin4ti.Core/Services/Windows/WindowsServiceControl.cs) を通す。状態照会は SCM を直接叩き (`QueryState`)、停止・開始だけ `net.exe` に委ねる。`SuspendAsync` は**元から稼働していたサービスだけ**を止めて `ServiceSuspension` を返し、呼び出し側は失敗・キャンセル時も `finally` で `ResumeAsync()` を必ず実行する。キャンセル時に例外を投げず途中で打ち切るのは、既に止めたサービスの再開手段を呼び出し側が失わないため。`net start` が失敗した場合も SCM の自動回復を最大 60 秒確認し、実際に稼働へ戻らなかったサービスだけを再開失敗とする。
 
 ### 破壊的操作の復元性
 
@@ -80,14 +80,15 @@ dotnet test Lumin4ti.slnx --filter "Name=既定値に戻せるトグルの既定
 - Windows のイベントログ、Defender の検出履歴、GPU 設定、スタートアップ登録、ファイル関連付け、アプリのパッケージ登録、WinSxS の旧コンポーネントはキャッシュではないため `FileCleanupGroups` では扱わない。リンク切れスタートアップと関連付け候補だけは専用アクションで扱い、`StartupCommandParser.IsConfirmedMissing` が準備済み固定ドライブ上の欠損を確定できた登録だけを削除する。UNC、リムーバブル、未準備ドライブ、再解析点配下、アクセス不能、解決不能なコマンドは保持する。
 - ETL トレースログは `%SystemRoot%\Logs`、`System32\LogFiles`、`Panther`、`%ProgramData%\Microsoft\Diagnosis\ETLLogs` の既知基点だけをリンク非追従で列挙し、`*.etl` のみ削除する。ドライブ全体を対象にする再帰パターン削除は復活させない。
 - シェルが握って離さないファイル (アイコン・フォントキャッシュ) は `MoveFileEx(MOVEFILE_DELAY_UNTIL_REBOOT)` で再起動時削除に回す。Explorer を kill しないのは、失敗時に利用者がシェル無しで取り残されるのを避けるため。
+- サインイン時クリーンアップは画面と同じ `FileCleanupGroups` と利用者設定を使い、タスクスケジューラーから最高権限で実行する。タスクへ登録できるのは、署名・MSI マーカー・`Program Files\Lumin4ti\current` の配置と各パス要素の所有者／ACL／再解析ポイントを検証できた実行ファイルだけとする。登録用 XML は `%TEMP%` へ置かず、Administrators / SYSTEM だけが書ける保護ストレージで作成し、登録後に削除する。
 
 ### 同時実行と終了処理
 
-[MaintenanceOperationCoordinator](src/Lumin4ti.UI/Services/MaintenanceOperationCoordinator.cs) が状態変更操作を **同時に 1 件だけ**に制限する (`TryBegin` が false なら UI は「実行中」表示に落とす)。終了要求では `RequestCancellation()` が全操作へキャンセルを通知し、`WaitForIdleAsync()` が各操作の補償・再検証を含む `finally` の完了を待ってからアプリを閉じる。長時間アクションを足すときは、この lease を跨いで生き残る後始末を作らないこと。
+[MaintenanceOperationCoordinator](src/Lumin4ti.UI/Services/MaintenanceOperationCoordinator.cs) と [MaintenanceOperationProcessLock](src/Lumin4ti.Core/Services/MaintenanceOperationProcessLock.cs) が、GUI とサインイン時クリーンアップを含む状態変更操作を **マシン全体で同時に 1 件だけ**に制限する。`TryBegin` が false なら UI は「実行中」表示に落とし、サインイン時クリーンアップは別操作が先行していれば待たずにスキップする。終了要求では `RequestCancellation()` が全操作へキャンセルを通知し、`WaitForIdleAsync()` が各操作の補償・再検証を含む `finally` の完了を待ってからアプリを閉じる。長時間アクションを足すときは、この lease を跨いで生き残る後始末を作らないこと。
 
 ### 昇格とデバッグ起動
 
-[Program.cs](src/Lumin4ti.UI/Program.cs) で `VelopackApp.Build().Run()` → 非管理者なら自己昇格 (ShellExecute + runas) → `SingleInstanceGuard`。**`Debugger.IsAttached` のときは昇格をスキップ**して非昇格のまま続行するため、デバッグ実行 (F5) では HKLM 系操作・`Get-MMAgent`・イベントログ全削除などが権限エラーになる (これは正常)。管理者系までデバッグするなら IDE 自体を管理者起動する。
+通常の画面起動は [Program.cs](src/Lumin4ti.UI/Program.cs) で `VelopackApp.Build().Run()` → 非管理者なら自己昇格 (ShellExecute + runas) → `SingleInstanceGuard` の順に進む。**`Debugger.IsAttached` のときは昇格をスキップ**して非昇格のまま続行するため、デバッグ実行 (F5) では HKLM 系操作・`Get-MMAgent`・イベントログ全削除などが権限エラーになる (これは正常)。管理者系までデバッグするなら IDE 自体を管理者起動する。サインイン時クリーンアップはこの通常起動経路より前に専用引数を検出して分岐する。
 
 ### タスクバーアイコンと AUMID (回帰注意)
 
