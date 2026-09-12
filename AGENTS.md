@@ -55,7 +55,7 @@ dotnet test Lumin4ti.slnx --filter "Name=既定値に戻せるトグルの既定
 
 ### 破壊的操作の復元性
 
-「OFF で Windows 既定に戻す」を謳う以上、ハードコード既定値でなく**ユーザーの元の値**へ戻す。`RegistryToggle` は ON 適用前に [RegistryValueBackup](src/Lumin4ti.Core/Services/Windows/Actions/RegistryValueBackup.cs) で `%APPDATA%\Lumin4ti\backups\` にスナップショットし、OFF で復元 (UWP・Defender も同様のバックアップを持つ)。不可逆操作を足すときは同様のバックアップを検討する。
+「OFF で Windows 既定に戻す」を謳う以上、ハードコード既定値でなく**ユーザーの元の値**へ戻す。`RegistryToggle` は ON 適用前に [RegistryValueBackup](src/Lumin4ti.Core/Services/Windows/Actions/RegistryValueBackup.cs) で保護ストレージへスナップショットし、OFF で復元する。保存先と保護境界は [DESIGN.md の状態と永続化](DESIGN.md#状態と永続化) を参照する。旧 AppData バックアップを復元元に使わず、HKCU を含む項目は利用者 SID ごとの分離を維持する。UWP・Defender も同様に保護バックアップを使う。不可逆操作を足すときは同様のバックアップを検討する。
 
 ### 未接続 PnP デバイスの削除
 

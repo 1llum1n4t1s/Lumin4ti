@@ -16,7 +16,7 @@ Lumin4ti は Windows 10 / 11（64-bit）向けのメンテナンス・最適化G
 | `Lumin4ti.UI` | Avalonia画面、MVVM、ローカライズ、DI、操作状態、更新UI | Coreの公開契約を呼び出す |
 | `Lumin4ti.Tests` | 純粋ロジック、安全ガード、カタログ、配布契約の回帰検証 | 実レジストリ・実削除・管理者依存の書き込みは行わない |
 | `scripts/` | Windows向けpublish、Velopack梱包、MSI補正、署名、R2公開 | リリース時だけ実行する |
-| `../vps-web/lp/lumin4ti/` | VPSのランディングページへ中継するCloudflare Worker | `/`と`/index.html`以外はR2配信へ委譲する |
+| `../vps-web/deploy/lp-gateways/lumin4ti/` | Cloudflare内の製品ページへ中継するWorker | ページと共通CSS以外は既存のR2配信へ委譲する |
 
 依存方向は `Lumin4ti.UI` → `Lumin4ti.Core` の一方向である。OS操作をUI層へ持ち込まず、CoreはAvalonia型を受け取らない。
 
@@ -84,11 +84,11 @@ UI文字列は`Resources/Locales/*.axaml`の17辞書で管理する。`en_US.axa
 
 ## 更新と配布
 
-更新元は`https://lumin4ti.kagayoi.com`、channelは`win`へ固定され、`settings.json`から変更できない。インストール版だけがVelopackの`releases.win.json`を参照し、開発実行では更新機構を無効として扱う。
+更新元は`https://lumin4ti.kagayoi.com`、channelは`win`へ固定され、`settings.json`から変更できない。インストール版だけがVelopackの`releases.win.json`を参照し、開発実行では更新機構を無効として扱う。`UpdateService`は`UpdateManager`の生成と現在バージョンの取得を担当し、`VersionViewModel`が操作コーディネーターのlease内で`VelopackUpdateDialog.Avalonia`へ確認・ダウンロード・適用UIを委譲する。終了時のキャンセルもこのleaseのトークンで伝える。
 
 配布物はVelopackが生成する署名済みPerMachine MSIである。ローカルのリリーススクリプトがrestore、self-contained publish、Velopack梱包、MSI配置補正、SimplySign署名、Cloudflare R2 upload、配信検証を順に行う。署名に対話的なSimplySign Desktopを使うため、リリースはCIではなくローカルで完結する。
 
-Cloudflare Workerはランディングページだけを処理し、更新manifest、nupkg、MSIなどのパスを加工せずR2へ委譲する。これによりWebページとVelopack配信が同じホスト名を共有する。
+Cloudflare Workerは`/`、`/index.html`と`/common.css`を`LP_CONTENT`サービスbinding経由で配信し、更新manifest、nupkg、MSIなどのパスを加工せず既存のR2配信へ委譲する。これによりWebページとVelopack配信が同じホスト名を共有する。
 
 ## 重要な不変条件
 
@@ -116,6 +116,6 @@ Cloudflare Workerはランディングページだけを処理し、更新manife
 
 ## 製品ページの配信先
 
-製品ページの配信HTMLは `../vps-web/lp/lumin4ti/`（編集元は `../vps-web/tools/lp/templates/`）、公開実体はVPSの `/srv/www/lp/lumin4ti/`。
+製品ページの配信HTMLは `../vps-web/lp/lumin4ti/`（編集元は `../vps-web/tools/lp/templates/`）。Cloudflareの `vps-web-lp` サービスがStatic Assetsとして提供する。
 Cloudflare側の中継設定は `../vps-web/deploy/lp-gateways/lumin4ti/` に置く。
 公開URLと既存のR2・ライセンス通信を維持し、配信は `vps-web/deploy/deploy-lp.ps1` へ統一する。
