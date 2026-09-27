@@ -384,12 +384,11 @@
       },
       "VelopackUpdateDialog.Avalonia": {
         "type": "Transitive",
-        "resolved": "1.0.17",
-        "contentHash": "LDB6SnkkJx1KuN045E4C9ElMyG5HjNFdpQkflH+x463vVydCdgW+H142a72ToqyzEHIGBAiFUU6ZE7UIt5nE+A==",
+        "resolved": "1.0.19",
+        "contentHash": "7XakW+QFLDoAtTjdvN7foEfZ3INqGc/jPgs04o6Z7/lAR4p1GB7oB77fdKCTC+RZ9KUgYMy+f0eRIS+Q/YCbvg==",
         "dependencies": {
           "Avalonia": "12.1.2",
           "CommunityToolkit.Mvvm": "8.4.2",
-          "SuperLightLogger": "1.0.16",
           "Velopack": "1.2.0"
         }
       },
@@ -411,7 +410,7 @@
           "Lumin4ti.Core": "[1.0.38, )",
           "Microsoft.Extensions.DependencyInjection": "[10.0.12, )",
           "Velopack": "[1.2.0, )",
-          "VelopackUpdateDialog.Avalonia": "[1.0.17, )"
+          "VelopackUpdateDialog.Avalonia": "[1.0.19, )"
         }
       }
     }
