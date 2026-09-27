@@ -194,9 +194,6 @@ public sealed class MmAgentFeatureToggle(
 {
     private readonly SemaphoreSlim _setGate = new(1, 1);
 
-    /// <summary>レジストリ経由で無効化する直前の値 (ON で戻すときに使う)。</summary>
-    private int? _valueBeforeDisable;
-
     public string Id => id;
 
     public string Label => label;
@@ -254,6 +251,15 @@ public sealed class MmAgentFeatureToggle(
                 return MaintenanceActionResult.Ok($"  - {propertyName} を{(on ? "有効化" : "無効化")}しました");
             }
 
+            var isNotSupported = IsNotSupportedError(result.StandardError);
+            if (isNotSupported && MmAgentRegistryFallback.CanFallBack(propertyName))
+            {
+                // レジストリで切り替えた直後は、Get-MMAgent が再起動まで古い値を返すことがある。
+                // その値を冪等成功の根拠にすると ON へ戻す書き込みを飛ばすため、先に代替手段を使う。
+                LoggerBootstrap.Log.Info($"{Id}: {cmdlet} が非対応のためレジストリ経由で切り替えます");
+                return await SetViaRegistryAsync(on, ct);
+            }
+
             // cmdlet が失敗しても、目的の状態に既に一致していれば成功扱い (冪等)。
             // 例: OperationAPI は前提機能のプリフェッチが無効だと「この要求はサポートされていません」で
             // 失敗するが、既定で無効なら OFF 目標は既に達成済み。フレッシュ値で確認する。
@@ -271,16 +277,8 @@ public sealed class MmAgentFeatureToggle(
             }
 
             var reason = result.StandardError.Split('\n', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim() ?? string.Empty;
-            if (IsNotSupportedError(result.StandardError))
+            if (isNotSupported)
             {
-                // cmdlet が非対応でも、同じ設定を持つレジストリ値から切り替えられる機能がある。
-                // 「切り替えられないはず」と決めつけず、代替手段があるならそちらで達成する。
-                if (MmAgentRegistryFallback.CanFallBack(propertyName))
-                {
-                    LoggerBootstrap.Log.Info($"{Id}: {cmdlet} が非対応のためレジストリ経由で切り替えます");
-                    return await SetViaRegistryAsync(on, ct);
-                }
-
                 stateProvider.MarkUnsupported(propertyName);
                 LoggerBootstrap.Log.Error($"{Id}: {cmdlet} はこの Windows でサポートされていません");
                 return UnsupportedResult();
@@ -308,17 +306,7 @@ public sealed class MmAgentFeatureToggle(
     /// </summary>
     private async Task<MaintenanceActionResult> SetViaRegistryAsync(bool on, CancellationToken ct)
     {
-        if (!on)
-        {
-            // 次に ON へ戻すときのために、無効化直前の値を控える (既に控えがあれば上書きしない)。
-            _valueBeforeDisable ??= MmAgentRegistryFallback.TryReadRawValue();
-        }
-
-        var error = MmAgentRegistryFallback.TrySetState(
-            propertyName,
-            on,
-            // ON で戻すときは無効化前の値を使う。控えが無ければ Windows 既定 (3) に戻す。
-            readPreviousValue: () => _valueBeforeDisable);
+        var error = MmAgentRegistryFallback.TrySetState(propertyName, on);
         if (error is not null)
         {
             return MaintenanceActionResult.Fail($"{Label} を切り替えられませんでした: {error}");

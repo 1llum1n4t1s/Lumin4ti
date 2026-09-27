@@ -14,8 +14,11 @@ namespace Lumin4ti.Core.Services.Windows.Actions;
 public sealed class NtpConfigAction : IMaintenanceAction
 {
     internal const string ParametersKey = @"SYSTEM\CurrentControlSet\Services\W32Time\Parameters";
-    internal const string ConfigKey = @"SYSTEM\CurrentControlSet\Services\W32Time\Config";
+    internal const string NtpClientKey = @"SYSTEM\CurrentControlSet\Services\W32Time\TimeProviders\NtpClient";
+    internal const string PolicyParametersKey = @"SOFTWARE\Policies\Microsoft\W32Time\Parameters";
+    internal const string PolicyNtpClientKey = @"SOFTWARE\Policies\Microsoft\W32Time\TimeProviders\NtpClient";
     internal const string NtpServer = "ntp.jst.mfeed.ad.jp";
+    internal const string NtpServerConfiguration = NtpServer + ",0x9";
 
     private readonly ICommandExecutor _executor;
     private readonly Func<bool> _isServiceRunning;
@@ -25,7 +28,7 @@ public sealed class NtpConfigAction : IMaintenanceAction
         : this(
             executor,
             IsWindowsTimeRunning,
-            new TransactionalNtpConfigurationStore(WindowsRegistryValueAccessor.Instance))
+            new NtpConfigurationStore(WindowsRegistryValueAccessor.Instance))
     {
     }
 
@@ -62,6 +65,13 @@ public sealed class NtpConfigAction : IMaintenanceAction
     public async Task<MaintenanceActionResult> ExecuteAsync(CancellationToken ct = default)
     {
         ct.ThrowIfCancellationRequested();
+        var blockReason = _configuration.GetBlockReason();
+        if (blockReason is not null)
+        {
+            LoggerBootstrap.Log.Warn($"{Id}: 適用を見送り: {blockReason}");
+            return MaintenanceActionResult.Fail($"NTP サーバを変更できませんでした: {blockReason}");
+        }
+
         var wasRunning = _isServiceRunning();
         var stoppedByThisAction = false;
         ExceptionDispatchInfo? operationFailure = null;
@@ -167,6 +177,8 @@ public sealed class NtpConfigAction : IMaintenanceAction
 
 internal interface INtpConfigurationStore
 {
+    string? GetBlockReason();
+
     void Apply();
 }
 
@@ -174,75 +186,107 @@ internal sealed class DelegateNtpConfigurationStore(Action apply) : INtpConfigur
 {
     private readonly Action _apply = apply ?? throw new ArgumentNullException(nameof(apply));
 
+    public string? GetBlockReason() => null;
+
     public void Apply() => _apply();
 }
 
-/// <summary>NTP の3値を一つのトランザクションとして扱い、途中失敗時は全値を開始前へ戻す。</summary>
-internal sealed class TransactionalNtpConfigurationStore(IRegistryValueAccessor registry) : INtpConfigurationStore
+/// <summary>
+/// 手動 NTP ピアだけを変更する。Type と AnnounceFlags は、ドメイン階層や時刻サーバーとしての
+/// 役割を決める既存値なので変更しない。
+/// </summary>
+internal sealed class NtpConfigurationStore(IRegistryValueAccessor registry) : INtpConfigurationStore
 {
-    private static readonly RegistryToggleSpec[] Specs =
-    [
-        new(
-            RegistryHive.LocalMachine,
-            NtpConfigAction.ParametersKey,
-            "NtpServer",
-            RegistryValueKind.String,
-            NtpConfigAction.NtpServer),
-        new(
-            RegistryHive.LocalMachine,
-            NtpConfigAction.ParametersKey,
-            "Type",
-            RegistryValueKind.String,
-            "NTP"),
-        new(
-            RegistryHive.LocalMachine,
-            NtpConfigAction.ConfigKey,
-            "AnnounceFlags",
-            RegistryValueKind.DWord,
-            5),
-    ];
+    private static readonly RegistryToggleSpec TypeSpec = new(
+        RegistryHive.LocalMachine,
+        NtpConfigAction.ParametersKey,
+        "Type",
+        RegistryValueKind.String,
+        string.Empty);
+
+    private static readonly RegistryToggleSpec PolicyTypeSpec = new(
+        RegistryHive.LocalMachine,
+        NtpConfigAction.PolicyParametersKey,
+        "Type",
+        RegistryValueKind.String,
+        string.Empty);
+
+    private static readonly RegistryToggleSpec PolicyNtpServerSpec = new(
+        RegistryHive.LocalMachine,
+        NtpConfigAction.PolicyParametersKey,
+        "NtpServer",
+        RegistryValueKind.String,
+        string.Empty);
+
+    private static readonly RegistryToggleSpec NtpClientEnabledSpec = new(
+        RegistryHive.LocalMachine,
+        NtpConfigAction.NtpClientKey,
+        "Enabled",
+        RegistryValueKind.DWord,
+        1);
+
+    private static readonly RegistryToggleSpec PolicyNtpClientEnabledSpec = new(
+        RegistryHive.LocalMachine,
+        NtpConfigAction.PolicyNtpClientKey,
+        "Enabled",
+        RegistryValueKind.DWord,
+        1);
+
+    private static readonly RegistryToggleSpec NtpServerSpec = new(
+        RegistryHive.LocalMachine,
+        NtpConfigAction.ParametersKey,
+        "NtpServer",
+        RegistryValueKind.String,
+        NtpConfigAction.NtpServerConfiguration);
 
     private readonly IRegistryValueAccessor _registry =
         registry ?? throw new ArgumentNullException(nameof(registry));
 
+    public string? GetBlockReason()
+    {
+        if (_registry.Read(PolicyNtpServerSpec).Exists)
+        {
+            return "グループ ポリシーで NTP サーバが管理されています。管理ポリシー側で変更してください";
+        }
+
+        var enabled = _registry.Read(PolicyNtpClientEnabledSpec);
+        if (!enabled.Exists)
+        {
+            enabled = _registry.Read(NtpClientEnabledSpec);
+        }
+
+        if (!enabled.Exists || enabled.DwordValue != 1)
+        {
+            return "Windows NTP クライアントが有効ではありません";
+        }
+
+        var type = _registry.Read(PolicyTypeSpec);
+        if (!type.Exists)
+        {
+            type = _registry.Read(TypeSpec);
+        }
+
+        return type.StringValue?.Trim() switch
+        {
+            string value when value.Equals("NTP", StringComparison.OrdinalIgnoreCase) => null,
+            string value when value.Equals("AllSync", StringComparison.OrdinalIgnoreCase) =>
+                "時刻同期モードが AllSync のため、ドメイン階層が優先される場合は手動 NTP サーバへの切替を確認できません",
+            string value when value.Equals("NT5DS", StringComparison.OrdinalIgnoreCase) =>
+                "時刻同期モードが NT5DS (ドメイン階層) のため、手動 NTP サーバは使われません",
+            string value when value.Equals("NoSync", StringComparison.OrdinalIgnoreCase) =>
+                "時刻同期モードが NoSync のため、手動 NTP サーバは使われません",
+            null or "" => "時刻同期モードを確認できません",
+            var value => $"未対応の時刻同期モードです: {value}",
+        };
+    }
+
     public void Apply()
     {
-        var before = Specs.Select(spec => (Spec: spec, Value: _registry.Read(spec))).ToArray();
-        try
-        {
-            foreach (var spec in Specs)
-            {
-                _registry.Write(
-                    spec,
-                    RegistryValueSnapshot.FromRegistry(spec.Kind, spec.AppliedValue));
-            }
-        }
-        catch (Exception applyError)
-        {
-            var rollbackErrors = new List<Exception>();
-            foreach (var (spec, value) in before.Reverse())
-            {
-                try
-                {
-                    _registry.Write(spec, value);
-                }
-                catch (Exception rollbackError)
-                {
-                    rollbackErrors.Add(rollbackError);
-                }
-            }
-
-            if (rollbackErrors.Count > 0)
-            {
-                throw new InvalidOperationException(
-                    "NTP レジストリ設定に失敗し、開始前の値へのロールバックにも失敗しました。",
-                    new AggregateException([applyError, .. rollbackErrors]));
-            }
-
-            throw new InvalidOperationException(
-                "NTP レジストリ設定に失敗したため、開始前の値へロールバックしました。",
-                applyError);
-        }
+        _registry.Write(
+            NtpServerSpec,
+            RegistryValueSnapshot.FromRegistry(
+                NtpServerSpec.Kind,
+                NtpServerSpec.AppliedValue));
     }
 }
 

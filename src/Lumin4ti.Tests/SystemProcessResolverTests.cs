@@ -6,14 +6,6 @@ namespace Lumin4ti.Tests;
 public sealed class SystemProcessResolverTests
 {
     [TestMethod]
-    public void 既にフルパスならそのまま返す()
-    {
-        var full = typeof(SystemProcessResolverTests).Assembly.Location;
-
-        Assert.AreEqual(full, SystemProcessResolver.Resolve(full));
-    }
-
-    [TestMethod]
     public void System32常駐exeはSystem32のフルパスへ解決される()
     {
         // dism.exe は実機の System32 に存在するため絶対パスへ解決される

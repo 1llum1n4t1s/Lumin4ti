@@ -48,9 +48,9 @@ public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanc
         var sourceExport = await executor.RunAsync("winget", SourceExportArguments, ct);
         if (!sourceExport.Success)
         {
-            LoggerBootstrap.Log.Error($"{Id}: 公式ソース確認に失敗 (exit={sourceExport.ExitCode})");
-            return MaintenanceActionResult.Fail(
-                $"winget 公式ソースの確認に失敗したため、更新を中止しました (exit={sourceExport.ExitCode})");
+            var failure = DescribeCommandFailure("winget 公式ソースの確認に失敗したため、更新を中止しました", sourceExport);
+            LoggerBootstrap.Log.Error($"{Id}: {failure}");
+            return MaintenanceActionResult.Fail(failure);
         }
 
         if (!IsOfficialSourceExport(sourceExport.StandardOutput))

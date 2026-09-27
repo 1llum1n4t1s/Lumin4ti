@@ -20,25 +20,14 @@ internal static class MmAgentRegistryFallback
     /// <summary>プリフェッチ無効。</summary>
     private const int PrefetcherDisabled = 0;
 
+    /// <summary>アプリ起動プリフェッチを表すビット。</summary>
+    private const int ApplicationLaunchPrefetchingMask = 1;
+
+    /// <summary>EnablePrefetcher で定義されているアプリ起動・ブートの全ビット。</summary>
+    private const int KnownPrefetcherMask = 3;
+
     /// <summary>アプリ + ブートのプリフェッチを行う Windows 既定値。</summary>
     private const int PrefetcherEnabledDefault = 3;
-
-    /// <summary>
-    /// 元値の退避先。RegistryToggle と同じ仕組み (%ProgramData% の保護ストレージ) に載せて、
-    /// アプリを再起動しても「OFF の前はどの値だったか」を失わないようにする。
-    /// </summary>
-    private const string BackupId = "mmagent-launch-prefetch";
-
-    private static IReadOnlyList<RegistryToggleSpec> PrefetchSpecs { get; } =
-    [
-        new(
-            RegistryHive.LocalMachine,
-            PrefetchKeyPath,
-            "EnablePrefetcher",
-            RegistryValueKind.DWord,
-            PrefetcherDisabled,
-            PrefetcherEnabledDefault),
-    ];
 
     /// <summary>この機能名にレジストリ経由の代替手段があるか。</summary>
     public static bool CanFallBack(string propertyName) =>
@@ -46,14 +35,13 @@ internal static class MmAgentRegistryFallback
 
     /// <summary>
     /// 機能を切り替える。成功したら null、失敗したら利用者向けの理由を返す。
-    /// ON では無効化前の値へ戻す (記録が無ければ Windows 既定の 3)。
+    /// 現在値のアプリ起動ビットだけを変更し、ブートプリフェッチの状態は維持する。
     /// </summary>
-    public static string? TrySetState(string propertyName, bool on, Func<int?>? readPreviousValue = null)
-        => TrySetState(propertyName, on, readPreviousValue, RegistryValueBackup.Default, WriteEnablePrefetcher);
+    public static string? TrySetState(string propertyName, bool on) =>
+        TrySetState(propertyName, on, ReadEnablePrefetcher, WriteEnablePrefetcher);
 
     internal static string? TrySetState(
-        string propertyName, bool on, Func<int?>? readPreviousValue,
-        RegistryValueBackup backup, Func<int, string?> writeValue)
+        string propertyName, bool on, Func<int?> readCurrentValue, Func<int, string?> writeValue)
     {
         if (!CanFallBack(propertyName))
         {
@@ -62,36 +50,30 @@ internal static class MmAgentRegistryFallback
 
         try
         {
-            if (on)
-            {
-                // 無効化前の値を退避してあればそこへ戻す。無ければ Windows 既定へ。
-                var lines = new List<string>();
-                var restore = backup.TryRestore(BackupId, PrefetchSpecs, lines);
-                if (restore.Status == RegistryBackupRestoreStatus.Restored)
-                {
-                    LoggerBootstrap.Log.Info("mmagent fallback: EnablePrefetcher を無効化前の値へ復元");
-                    return null;
-                }
-
-                if (restore.Status == RegistryBackupRestoreStatus.Invalid)
-                {
-                    var reason = $"復元バックアップが旧形式・未対応または破損しているため、設定を変更しませんでした。{restore.FailureReason}";
-                    LoggerBootstrap.Log.Error(reason);
-                    return reason;
-                }
-
-                return writeValue(readPreviousValue?.Invoke() ?? PrefetcherEnabledDefault);
-            }
-
-            // 「OFF で Windows 既定ではなく利用者の元の値へ戻す」ため、書く前に退避する。
-            backup.Save(BackupId, PrefetchSpecs);
-            return writeValue(PrefetcherDisabled);
+            // 旧版の registry/mmagent-launch-prefetch.json は DWORD 全体を復元してブート側の
+            // 外部変更を巻き戻すため、通常実行経路から外す。既存ファイルは削除せず保持する。
+            return WriteApplicationLaunchState(on, readCurrentValue, writeValue);
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException or IOException or InvalidDataException)
         {
             LoggerBootstrap.Log.Error("mmagent fallback: EnablePrefetcher の書き込みに失敗", ex);
             return $"EnablePrefetcher を変更できませんでした ({ex.Message})";
         }
+    }
+
+    private static string? WriteApplicationLaunchState(
+        bool on, Func<int?> readCurrentValue, Func<int, string?> writeValue)
+    {
+        var currentValue = readCurrentValue() ?? PrefetcherEnabledDefault;
+        if (currentValue is < PrefetcherDisabled or > KnownPrefetcherMask)
+        {
+            return $"EnablePrefetcher に未対応の値 ({currentValue}) が設定されているため変更しませんでした";
+        }
+
+        var nextValue = on
+            ? currentValue | ApplicationLaunchPrefetchingMask
+            : currentValue & ~ApplicationLaunchPrefetchingMask;
+        return writeValue(nextValue);
     }
 
     private static string? WriteEnablePrefetcher(int value)
@@ -121,7 +103,10 @@ internal static class MmAgentRegistryFallback
             // 値が無い場合は Windows 既定 (有効) 扱い。
             return key?.GetValue("EnablePrefetcher") switch
             {
-                int value => value != PrefetcherDisabled,
+                PrefetcherDisabled => false,
+                ApplicationLaunchPrefetchingMask => true,
+                2 => false,
+                KnownPrefetcherMask => true,
                 null => true,
                 _ => null,
             };
@@ -134,19 +119,15 @@ internal static class MmAgentRegistryFallback
         }
     }
 
-    /// <summary>無効化前の値を控えておくための現在値 (DWORD 以外・欠損は null)。</summary>
-    public static int? TryReadRawValue()
+    /// <summary>アプリ起動ビットだけを変更するための現在値。未設定なら null。</summary>
+    private static int? ReadEnablePrefetcher()
     {
-        try
+        using var key = Registry.LocalMachine.OpenSubKey(PrefetchKeyPath);
+        return key?.GetValue("EnablePrefetcher") switch
         {
-            using var key = Registry.LocalMachine.OpenSubKey(PrefetchKeyPath);
-            return key?.GetValue("EnablePrefetcher") as int?;
-        }
-        catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException or IOException)
-        {
-            // 復元用の控えが取れないまま変更へ進むと元へ戻せなくなるため残す。
-            LoggerBootstrap.Log.Error($"{PrefetchKeyPath}\\EnablePrefetcher の現在値を控えられませんでした", ex);
-            return null;
-        }
+            int value => value,
+            null => null,
+            _ => throw new InvalidDataException("EnablePrefetcher が DWORD ではありません"),
+        };
     }
 }

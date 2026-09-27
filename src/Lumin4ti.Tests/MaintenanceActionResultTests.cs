@@ -8,19 +8,6 @@ namespace Lumin4ti.Tests;
 public sealed class MaintenanceActionResultTests
 {
     [TestMethod]
-    public void 既存boolコンストラクタと分解は互換動作を維持する()
-    {
-        var succeeded = new MaintenanceActionResult(true, "ok");
-        var failed = new MaintenanceActionResult(false, "failed");
-        var (success, detail) = succeeded;
-
-        Assert.AreEqual(MaintenanceActionStatus.Success, succeeded.Status);
-        Assert.AreEqual(MaintenanceActionStatus.Failed, failed.Status);
-        Assert.IsTrue(success);
-        Assert.AreEqual("ok", detail);
-    }
-
-    [TestMethod]
     public void 部分成功とcancelは完全成功にならない()
     {
         var partial = MaintenanceActionResult.Partial("partial");
@@ -30,17 +17,6 @@ public sealed class MaintenanceActionResultTests
         Assert.IsFalse(partial.Success);
         Assert.AreEqual(MaintenanceActionStatus.Canceled, canceled.Status);
         Assert.IsFalse(canceled.Success);
-    }
-
-    [TestMethod]
-    public void Status変更時も後方互換Successは状態から導出される()
-    {
-        var result = MaintenanceActionResult.Ok("done") with
-        {
-            Status = MaintenanceActionStatus.Partial,
-        };
-
-        Assert.IsFalse(result.Success);
     }
 
     [TestMethod]

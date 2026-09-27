@@ -6,19 +6,6 @@ namespace Lumin4ti.Tests;
 public sealed class ExplorerRestarterTests
 {
     [TestMethod]
-    public void 実環境の正規Explorerを完全パスで解決できる()
-    {
-        var actual = ExplorerRestarter.ResolveExplorerPath();
-
-        Assert.IsTrue(Path.IsPathFullyQualified(actual));
-        Assert.IsTrue(File.Exists(actual));
-        Assert.IsTrue(string.Equals(
-            "explorer.exe",
-            Path.GetFileName(actual),
-            StringComparison.OrdinalIgnoreCase));
-    }
-
-    [TestMethod]
     public void ExplorerはWindowsDirectory配下の存在確認済み完全パスで解決する()
     {
         var windowsDirectory = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "Windows"));

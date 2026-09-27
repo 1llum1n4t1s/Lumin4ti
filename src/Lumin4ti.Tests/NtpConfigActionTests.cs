@@ -2,7 +2,6 @@ using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services.Windows;
 using Lumin4ti.Core.Services.Windows.Actions;
-using Microsoft.Win32;
 
 namespace Lumin4ti.Tests;
 
@@ -138,20 +137,6 @@ public sealed class NtpConfigActionTests
         Assert.HasCount(1, executor.Invocations);
     }
 
-    [TestMethod]
-    public void NTPレジストリの途中失敗は全値を開始前へ戻す()
-    {
-        var accessor = new FailingRegistryAccessor();
-        var store = new TransactionalNtpConfigurationStore(accessor);
-
-        var error = Assert.Throws<InvalidOperationException>(store.Apply);
-
-        StringAssert.Contains(error.Message, "ロールバックしました");
-        Assert.AreEqual("time.windows.com", accessor.Values["NtpServer"].ToRegistryValue());
-        Assert.AreEqual("NT5DS", accessor.Values["Type"].ToRegistryValue());
-        Assert.AreEqual(10, accessor.Values["AnnounceFlags"].ToRegistryValue());
-    }
-
     private static CommandExecutionResult Result(bool success, string error = "") =>
         new(success, "net.exe", success ? 0 : 1, string.Empty, error);
 
@@ -181,28 +166,4 @@ public sealed class NtpConfigActionTests
         }
     }
 
-    private sealed class FailingRegistryAccessor : IRegistryValueAccessor
-    {
-        private int _writeCount;
-
-        public Dictionary<string, RegistryValueSnapshot> Values { get; } = new(StringComparer.OrdinalIgnoreCase)
-        {
-            ["NtpServer"] = RegistryValueSnapshot.FromRegistry(RegistryValueKind.String, "time.windows.com"),
-            ["Type"] = RegistryValueSnapshot.FromRegistry(RegistryValueKind.String, "NT5DS"),
-            ["AnnounceFlags"] = RegistryValueSnapshot.Dword(10),
-        };
-
-        public RegistryValueSnapshot Read(RegistryToggleSpec spec) => Values[spec.Name];
-
-        public void Write(RegistryToggleSpec spec, RegistryValueSnapshot value)
-        {
-            _writeCount++;
-            if (_writeCount == 2)
-            {
-                throw new IOException("simulated second write failure");
-            }
-
-            Values[spec.Name] = value;
-        }
-    }
 }

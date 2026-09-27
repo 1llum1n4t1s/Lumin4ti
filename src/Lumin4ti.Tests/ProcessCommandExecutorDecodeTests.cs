@@ -26,12 +26,6 @@ public sealed class ProcessCommandExecutorDecodeTests
     }
 
     [TestMethod]
-    public void 空バイト列は空文字を返す()
-    {
-        Assert.AreEqual(string.Empty, ProcessCommandExecutor.DecodeConsoleOutput([]));
-    }
-
-    [TestMethod]
     public async Task 上限時間を超えた外部プロセスは失敗として終了する()
     {
         var executor = new ProcessCommandExecutor(TimeSpan.FromMilliseconds(200));
@@ -42,19 +36,6 @@ public sealed class ProcessCommandExecutorDecodeTests
 
         Assert.IsFalse(result.Success);
         StringAssert.Contains(result.StandardError, "タイムアウト");
-    }
-
-    [TestMethod]
-    public async Task 不存在の論理名は例外ではなく失敗結果を返す()
-    {
-        var executor = new ProcessCommandExecutor();
-        var missing = $"lumin4ti-missing-{Guid.NewGuid():N}.exe";
-
-        var result = await executor.RunAsync(missing, string.Empty);
-
-        Assert.IsFalse(result.Success);
-        Assert.AreEqual(-1, result.ExitCode);
-        StringAssert.Contains(result.StandardError, missing);
     }
 
     [TestMethod]

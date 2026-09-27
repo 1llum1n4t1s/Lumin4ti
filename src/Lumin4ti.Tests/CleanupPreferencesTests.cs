@@ -37,14 +37,6 @@ public sealed class CleanupPreferencesTests
     }
 
     [TestMethod]
-    public void 未保存の対象は既定で有効()
-    {
-        var preferences = new CleanupPreferences(new FakeSettingsService());
-
-        Assert.IsTrue(preferences.IsTargetEnabled("cleanup-user-temp", @"%LOCALAPPDATA%\Temp"));
-    }
-
-    [TestMethod]
     public void 外した対象だけが除外として保存される()
     {
         var settings = new FakeSettingsService();

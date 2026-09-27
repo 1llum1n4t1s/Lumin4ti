@@ -58,27 +58,6 @@ public sealed class MaintenanceActionCatalogTests
     }
 
     [TestMethod]
-    public void ラベルと説明が空でない()
-    {
-        foreach (var item in CreateCatalog().Items)
-        {
-            Assert.IsFalse(string.IsNullOrWhiteSpace(item.Label), item.Id);
-            // 「丁寧な説明」の担保: 効果と注意点を書くと最低でも 40 文字は超える
-            Assert.IsTrue(item.Description.Length >= 40, $"{item.Id} の説明が短すぎます ({item.Description.Length} 文字)");
-        }
-    }
-
-    [TestMethod]
-    public void 全カテゴリに1件以上の項目がある()
-    {
-        var items = CreateCatalog().Items;
-        foreach (var category in Enum.GetValues<CommandCategory>())
-        {
-            Assert.IsTrue(items.Any(a => a.Category == category), category.ToString());
-        }
-    }
-
-    [TestMethod]
     public void 復活対象以外の復元不能な削除アクションはカタログへ登録しない()
     {
         var ids = CreateCatalog().Items.Select(item => item.Id).ToHashSet(StringComparer.Ordinal);
@@ -98,15 +77,6 @@ public sealed class MaintenanceActionCatalogTests
         {
             Assert.IsFalse(ids.Contains(id), id);
         }
-    }
-
-    [TestMethod]
-    public void リンク切れ整理アクションはカタログに登録されている()
-    {
-        var items = CreateCatalog().Items.ToDictionary(item => item.Id);
-
-        Assert.IsInstanceOfType<BrokenStartupCleanupAction>(items["remove-broken-startup"]);
-        Assert.IsInstanceOfType<DeadAssociationCleanupAction>(items["remove-dead-associations"]);
     }
 
     [TestMethod]

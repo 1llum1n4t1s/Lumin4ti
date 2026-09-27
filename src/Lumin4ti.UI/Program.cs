@@ -1,6 +1,7 @@
 using Avalonia;
 using Lumin4ti.Core.Services;
 using Lumin4ti.Core.Services.Windows;
+using Lumin4ti.Core.Services.Windows.Actions;
 using Lumin4ti.UI.Services;
 using Velopack;
 
@@ -102,6 +103,23 @@ internal static class Program
             // (作成失敗の場合は SingleInstanceGuard 側が理由を出力している)。
             LoggerBootstrap.Log.Info("起動: 既に起動中のため終了します");
             return 1;
+        }
+
+        // 旧版の低権限タスクやログオン対象未指定のタスクは、単一インスタンス確保後に
+        // 既存登録だけを現行の権限・利用者限定定義へ移行する。
+        if (OperatingSystem.IsWindows() && isElevated)
+        {
+            try
+            {
+                new ScheduledTempCleanupToggle(new ProcessCommandExecutor())
+                    .RepairLegacyRegistrationAsync()
+                    .GetAwaiter()
+                    .GetResult();
+            }
+            catch (Exception ex) when (ex is not OutOfMemoryException)
+            {
+                LoggerBootstrap.Log.Error("scheduled-temp-cleanup: 既存タスクの更新に失敗しました", ex);
+            }
         }
 
         return BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);

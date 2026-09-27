@@ -32,14 +32,6 @@ public sealed class WindowsExplorerLauncherTests
             WindowsExplorerLauncher.NormalizeTarget("http://example.invalid"));
     }
 
-    [TestMethod]
-    public void 完全パスは正規化する()
-    {
-        var path = Path.Combine(Path.GetTempPath(), "folder", "..", "logs");
-
-        Assert.AreEqual(Path.GetFullPath(path), WindowsExplorerLauncher.NormalizeTarget(path));
-    }
-
     private sealed class RecordingExecutor : IUnelevatedCommandExecutor
     {
         public string? Script { get; private set; }

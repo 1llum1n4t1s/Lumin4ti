@@ -56,6 +56,7 @@ internal static class SystemProcessResolver
 
     private static string ResolveWinget()
     {
+        string? rejectionReason = null;
         try
         {
             var packages = new PackageManager()
@@ -66,6 +67,7 @@ internal static class SystemProcessResolver
             {
                 if (!IsTrustedDesktopAppInstaller(package))
                 {
+                    rejectionReason = "Desktop App Installer の登録情報または状態が信頼条件を満たしません";
                     continue;
                 }
 
@@ -79,25 +81,30 @@ internal static class SystemProcessResolver
                     !File.Exists(winget) ||
                     (File.GetAttributes(winget) & FileAttributes.ReparsePoint) != 0)
                 {
+                    rejectionReason = "Desktop App Installer の winget.exe が保護済みの配置に見つかりません";
                     continue;
                 }
 
-                if (ExecutableTrustVerifier.TryVerify(winget, "Microsoft Corporation", out _))
+                if (ExecutableTrustVerifier.TryVerify(winget, "Microsoft Corporation", out var signatureFailure))
                 {
                     return winget;
                 }
+
+                rejectionReason = signatureFailure;
             }
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
             throw new FileNotFoundException(
-                "信頼できる Microsoft Desktop App Installer の winget.exe を確認できませんでした",
+                $"信頼できる Microsoft Desktop App Installer の winget.exe を確認できませんでした: {ex.Message}",
                 "winget.exe",
                 ex);
         }
 
         throw new FileNotFoundException(
-            "信頼できる Microsoft Desktop App Installer の winget.exe が見つかりませんでした",
+            rejectionReason is null
+                ? "現在のユーザーに Microsoft Desktop App Installer が登録されていません"
+                : $"信頼できる Microsoft Desktop App Installer の winget.exe が見つかりませんでした: {rejectionReason}",
             "winget.exe");
     }
 

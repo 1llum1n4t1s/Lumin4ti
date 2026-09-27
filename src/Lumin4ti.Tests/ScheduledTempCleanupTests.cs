@@ -31,7 +31,13 @@ public sealed class ScheduledTempCleanupTests
 
         public string? LastArguments { get; private set; }
 
+        public List<string> Arguments { get; } = [];
+
         public bool NextSuccess { get; set; } = true;
+
+        public bool? QuerySuccess { get; set; }
+
+        public string? QueryXml { get; set; }
 
         public Task<CommandExecutionResult> RunAsync(
             string fileName,
@@ -42,12 +48,19 @@ public sealed class ScheduledTempCleanupTests
         {
             LastFileName = fileName;
             LastArguments = arguments;
+            Arguments.Add(arguments);
+            var isQuery = arguments.Contains("/query", StringComparison.OrdinalIgnoreCase);
+            var success = isQuery ? QuerySuccess ?? NextSuccess : NextSuccess;
+            var standardOutput = isQuery
+                && QueryXml is not null
+                ? QueryXml
+                : $"{fileName} {arguments}";
             return Task.FromResult(new CommandExecutionResult(
-                NextSuccess,
+                success,
                 $"{fileName} {arguments}",
-                NextSuccess ? 0 : 1,
-                string.Empty,
-                NextSuccess ? string.Empty : "エラーが発生しました"));
+                success ? 0 : 1,
+                standardOutput,
+                success ? string.Empty : "エラーが発生しました"));
         }
     }
 
@@ -109,6 +122,10 @@ public sealed class ScheduledTempCleanupTests
     {
         const string exePath = @"C:\Program Files\Lumin4ti\Lumin4ti.exe";
         var xml = ScheduledTempCleanupToggle.BuildTaskXml(exePath, @"TESTPC\Test");
+        var body = xml[(xml.IndexOf("?>", StringComparison.Ordinal) + 2)..];
+        var document = System.Xml.Linq.XDocument.Parse(body);
+        var ns = (System.Xml.Linq.XNamespace)"http://schemas.microsoft.com/windows/2004/02/mit/task";
+        var trigger = document.Root!.Element(ns + "Triggers")!.Element(ns + "LogonTrigger")!;
 
         StringAssert.Contains(xml, "<LogonTrigger>");
         StringAssert.Contains(xml, "<RunLevel>HighestAvailable</RunLevel>");
@@ -116,7 +133,7 @@ public sealed class ScheduledTempCleanupTests
         Assert.IsFalse(xml.Contains("<RunLevel>LeastPrivilege</RunLevel>", StringComparison.Ordinal));
         StringAssert.Contains(xml, $"<Command>{exePath}</Command>");
         StringAssert.Contains(xml, $"<Arguments>{ScheduledTempCleanup.CommandLineArgument}</Arguments>");
-        StringAssert.Contains(xml, @"<UserId>TESTPC\Test</UserId>");
+        Assert.AreEqual(@"TESTPC\Test", trigger.Element(ns + "UserId")?.Value);
     }
 
     [TestMethod]
@@ -207,15 +224,30 @@ public sealed class ScheduledTempCleanupTests
     }
 
     [TestMethod]
-    public async Task 照会が成功すればONと判定する()
+    public async Task 照会成功時は現在ユーザーならONで別ユーザーなら不明と判定する()
     {
-        var executor = new RecordingExecutor { NextSuccess = true };
+        var executor = new RecordingExecutor
+        {
+            QueryXml = ScheduledTempCleanupToggle.BuildTaskXml(
+                @"C:\Program Files\Lumin4ti\current\Lumin4ti.UI.exe",
+                WindowsIdentity.GetCurrent().Name),
+        };
         var toggle = new ScheduledTempCleanupToggle(executor);
 
         var state = await toggle.GetStateAsync();
 
         Assert.AreEqual(true, state);
         StringAssert.Contains(executor.LastArguments, "/query");
+
+        var otherUserExecutor = new RecordingExecutor
+        {
+            QueryXml = ScheduledTempCleanupToggle.BuildTaskXml(
+                @"C:\Program Files\Lumin4ti\current\Lumin4ti.UI.exe",
+                @"OTHER-PC\OtherUser"),
+        };
+        var otherUserState = await new ScheduledTempCleanupToggle(otherUserExecutor).GetStateAsync();
+
+        Assert.IsNull(otherUserState, "別ユーザーの固定名タスクを現在ユーザーの ON 状態として扱ってはいけません");
     }
 
     private static FileSecurity CreateTaskExecutableAcl()
@@ -243,12 +275,18 @@ public sealed class ScheduledTempCleanupTests
         var state = await toggle.GetStateAsync();
 
         Assert.AreEqual(false, state);
+
+        var blocked = await toggle.SetStateAsync(false);
+
+        Assert.AreEqual(MaintenanceActionStatus.Failed, blocked.Status);
+        Assert.IsFalse(executor.Arguments.Any(
+            arguments => arguments.Contains("/delete", StringComparison.OrdinalIgnoreCase)));
     }
 
     [TestMethod]
-    public async Task ONにするとschtasksを論理名で呼び出す()
+    public async Task ONは現在ユーザー用に登録し別ユーザーの既存タスクは上書きしない()
     {
-        var executor = new RecordingExecutor { NextSuccess = true };
+        var executor = new RecordingExecutor { QuerySuccess = false };
         var toggle = new ScheduledTempCleanupToggle(executor, new FakeTaskDefinitionStore(), _ => true);
 
         var result = await toggle.SetStateAsync(true);
@@ -256,6 +294,35 @@ public sealed class ScheduledTempCleanupTests
         Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
         Assert.AreEqual("schtasks", executor.LastFileName);
         StringAssert.Contains(executor.LastArguments, "/create");
+        Assert.IsFalse(executor.LastArguments.Contains("/f", StringComparison.OrdinalIgnoreCase));
+
+        var otherUserExecutor = new RecordingExecutor
+        {
+            QueryXml = ScheduledTempCleanupToggle.BuildTaskXml(
+                @"C:\Program Files\Lumin4ti\current\Lumin4ti.UI.exe",
+                @"OTHER-PC\OtherUser"),
+        };
+        var otherUserToggle = new ScheduledTempCleanupToggle(
+            otherUserExecutor,
+            new FakeTaskDefinitionStore(),
+            _ => true);
+
+        var blocked = await otherUserToggle.SetStateAsync(true);
+
+        Assert.AreEqual(MaintenanceActionStatus.Failed, blocked.Status);
+        StringAssert.Contains(blocked.Detail, "別の Windows ユーザー");
+        Assert.IsFalse(otherUserExecutor.Arguments.Any(
+            arguments => arguments.Contains("/create", StringComparison.OrdinalIgnoreCase)));
+
+        var unknownOwnerExecutor = new RecordingExecutor { QueryXml = "<Task>" };
+        var unknownOwnerResult = await new ScheduledTempCleanupToggle(
+            unknownOwnerExecutor,
+            new FakeTaskDefinitionStore(),
+            _ => true).SetStateAsync(true);
+
+        Assert.AreEqual(MaintenanceActionStatus.Failed, unknownOwnerResult.Status);
+        Assert.IsFalse(unknownOwnerExecutor.Arguments.Any(
+            arguments => arguments.Contains("/create", StringComparison.OrdinalIgnoreCase)));
     }
 
     [TestMethod]
@@ -263,7 +330,7 @@ public sealed class ScheduledTempCleanupTests
     {
         // %TEMP% へ書くと、書き終えてから昇格 schtasks が読むまでの間に同一ユーザーの
         // 非昇格プロセスが定義を差し替えられる (ログオン時に自動実行されるタスクの乗っ取り)。
-        var executor = new RecordingExecutor { NextSuccess = true };
+        var executor = new RecordingExecutor { QuerySuccess = false };
         var store = new FakeTaskDefinitionStore();
         var toggle = new ScheduledTempCleanupToggle(executor, store, _ => true);
 
@@ -280,7 +347,7 @@ public sealed class ScheduledTempCleanupTests
         // schtasks /xml は UTF-16 かつ BOM 付きでないと受け付けない。
         var store = new FakeTaskDefinitionStore();
         var toggle = new ScheduledTempCleanupToggle(
-            new RecordingExecutor { NextSuccess = true },
+            new RecordingExecutor { QuerySuccess = false },
             store,
             _ => true);
 
@@ -306,19 +373,46 @@ public sealed class ScheduledTempCleanupTests
     }
 
     [TestMethod]
-    public async Task OFFにするとschtasksへ削除を渡す()
+    public async Task OFFは現在ユーザーのタスクを削除し別ユーザーの既存タスクは削除しない()
     {
-        var executor = new RecordingExecutor { NextSuccess = true };
+        var executor = new RecordingExecutor
+        {
+            QueryXml = ScheduledTempCleanupToggle.BuildTaskXml(
+                @"C:\Program Files\Lumin4ti\current\Lumin4ti.UI.exe",
+                WindowsIdentity.GetCurrent().Name),
+        };
         var toggle = new ScheduledTempCleanupToggle(executor);
 
         var result = await toggle.SetStateAsync(false);
 
         Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
         StringAssert.Contains(executor.LastArguments, "/delete");
+
+        var otherUserExecutor = new RecordingExecutor
+        {
+            QueryXml = ScheduledTempCleanupToggle.BuildTaskXml(
+                @"C:\Program Files\Lumin4ti\current\Lumin4ti.UI.exe",
+                @"OTHER-PC\OtherUser"),
+        };
+
+        var blocked = await new ScheduledTempCleanupToggle(otherUserExecutor).SetStateAsync(false);
+
+        Assert.AreEqual(MaintenanceActionStatus.Failed, blocked.Status);
+        StringAssert.Contains(blocked.Detail, "別の Windows ユーザー");
+        Assert.IsFalse(otherUserExecutor.Arguments.Any(
+            arguments => arguments.Contains("/delete", StringComparison.OrdinalIgnoreCase)));
+
+        var unknownOwnerExecutor = new RecordingExecutor { QueryXml = "<Task>" };
+        var unknownOwnerResult = await new ScheduledTempCleanupToggle(unknownOwnerExecutor)
+            .SetStateAsync(false);
+
+        Assert.AreEqual(MaintenanceActionStatus.Failed, unknownOwnerResult.Status);
+        Assert.IsFalse(unknownOwnerExecutor.Arguments.Any(
+            arguments => arguments.Contains("/delete", StringComparison.OrdinalIgnoreCase)));
     }
 
     [TestMethod]
-    public async Task 登録に失敗すると結果に理由を含めて失敗を返す()
+    public async Task 登録失敗を返し別ユーザーの既存タスクは自動修復しない()
     {
         var executor = new RecordingExecutor { NextSuccess = false };
         var toggle = new ScheduledTempCleanupToggle(executor, new FakeTaskDefinitionStore(), _ => true);
@@ -326,15 +420,30 @@ public sealed class ScheduledTempCleanupTests
         var result = await toggle.SetStateAsync(true);
 
         Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
-    }
 
-    [TestMethod]
-    public void クリーンアップカテゴリの項目である()
-    {
-        var toggle = new ScheduledTempCleanupToggle(new RecordingExecutor());
+        var legacyXml = System.Xml.Linq.XDocument.Parse(
+            ScheduledTempCleanupToggle.BuildTaskXml(
+                @"C:\Program Files\Lumin4ti\current\Lumin4ti.UI.exe",
+                @"OTHER-PC\OtherUser"));
+        var taskNamespace = legacyXml.Root!.Name.Namespace;
+        legacyXml.Root
+            .Element(taskNamespace + "Triggers")!
+            .Element(taskNamespace + "LogonTrigger")!
+            .Element(taskNamespace + "UserId")!
+            .Remove();
+        var otherUserExecutor = new RecordingExecutor
+        {
+            QueryXml = legacyXml.ToString(),
+        };
+        var otherUserToggle = new ScheduledTempCleanupToggle(
+            otherUserExecutor,
+            new FakeTaskDefinitionStore(),
+            _ => true);
 
-        Assert.AreEqual(CommandCategory.Cleanup, toggle.Category);
-        Assert.IsFalse(toggle.RequiresReboot);
+        await otherUserToggle.RepairLegacyRegistrationAsync();
+
+        Assert.IsFalse(otherUserExecutor.Arguments.Any(
+            arguments => arguments.Contains("/create", StringComparison.OrdinalIgnoreCase)));
     }
 
     [TestMethod]

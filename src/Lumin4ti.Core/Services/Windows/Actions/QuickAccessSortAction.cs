@@ -59,12 +59,16 @@ public sealed class QuickAccessSortAction : IMaintenanceAction
 
         function Test-PinVerb([string]$name) {
             if ($null -eq $name) { return $false }
-            return (($name.Contains('ピン留め') -and -not $name.Contains('外す')) -or $name.Contains('Pin to'))
+            return (($name.Contains('クイック アクセス') -and
+                $name.Contains('ピン留め') -and -not $name.Contains('外す')) -or
+                $name.Contains('Pin to Quick access'))
         }
 
         function Test-UnpinVerb([string]$name) {
             if ($null -eq $name) { return $false }
-            return (($name.Contains('ピン留め') -and $name.Contains('外す')) -or $name.Contains('Unpin from'))
+            return (($name.Contains('クイック アクセス') -and
+                $name.Contains('ピン留め') -and $name.Contains('外す')) -or
+                $name.Contains('Unpin from Quick access'))
         }
 
         function Find-QuickAccessVerb($verbs, [bool]$wantUnpin) {
@@ -670,10 +674,14 @@ public sealed class QuickAccessSortAction : IMaintenanceAction
 
     // verb 名は OS 言語依存 (日本語 / 英語のみ対応。PowerShell 側と同じ判定をテストする)。
     internal static bool IsPinVerb(string? name) =>
-        name is not null && ((name.Contains("ピン留め") && !name.Contains("外す")) || name.Contains("Pin to"));
+        name is not null &&
+        ((name.Contains("クイック アクセス") && name.Contains("ピン留め") && !name.Contains("外す")) ||
+         name.Contains("Pin to Quick access"));
 
     internal static bool IsUnpinVerb(string? name) =>
-        name is not null && ((name.Contains("ピン留め") && name.Contains("外す")) || name.Contains("Unpin from"));
+        name is not null &&
+        ((name.Contains("クイック アクセス") && name.Contains("ピン留め") && name.Contains("外す")) ||
+         name.Contains("Unpin from Quick access"));
 
     internal static bool TryParseScriptResult(
         string? json,
