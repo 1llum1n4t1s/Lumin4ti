@@ -26,7 +26,7 @@ Lumin4ti は Windows 10 / 11（64-bit）向けのメンテナンス・最適化G
 
 1. ログを初期化する。スケジュール済み一時ファイル整理の引数なら、UI・自己昇格・多重起動ガードを経由せず、タスクスケジューラーから与えられた最高権限で実行して終了する。
 2. Velopackのinstall/update hookを処理し、旧ショートカットと旧PerUser版から署名済みPerMachine版への移行を試みる。
-3. デバッガ未接続の非管理者プロセスを`runas`で再起動する。昇格後に単一起動mutexを取得する。
+3. デバッガ未接続の非管理者プロセスを`runas`で再起動する。昇格後に単一起動mutexを取得する。管理者起動では、信頼済みインストールから現在利用者の既存クリーンアップタスクだけを現行定義へ修復する。未登録なら新規作成せず、修復失敗はログへ残して画面起動を続ける。
 4. Avaloniaを起動し、`App.ConfigureServices`が設定、コマンド実行、カタログ、操作コーディネーター、ViewModelをSingletonとして構成する。
 5. `SettingsService`から表示言語と利用者設定を読み、`MainWindowViewModel`へカテゴリ別ViewModelを組み立てる。
 
@@ -47,7 +47,7 @@ Lumin4ti は Windows 10 / 11（64-bit）向けのメンテナンス・最適化G
 1. `MainWindowViewModel`がカテゴリごとの`CommandCategoryViewModel`を公開する。
 2. ViewModelが`MaintenanceOperationCoordinator`からプロセス間で排他的なleaseを取得する。サインイン時クリーンアップも同じ共有ロックを取得し、GUI操作と重なった場合は実行しない。
 3. CoreのAction / Toggle / ChoiceがWindows API、レジストリ、または`ICommandExecutor`を通してOSを操作する。
-4. 進捗と`Success` / `Partial` / `Failure` / `Canceled`をUIへ返す。
+4. 進捗と`Success` / `Partial` / `Failed` / `Canceled`をUIへ返す。
 5. トグルと選択項目は実状態を再取得し、必要な項目だけExplorerを再起動する。
 
 GUI とサインイン時クリーンアップを含め、状態変更操作はマシン全体で同時に1件だけ実行する。これにより、複数のレジストリ変更、サービス停止、外部コマンド、Explorer再起動が競合しない。
@@ -68,7 +68,15 @@ GUI とサインイン時クリーンアップを含め、状態変更操作は�
 
 サインイン時クリーンアップは、画面と同じ`FileCleanupGroups`と`settings.json`の選択・除外設定を使う別エントリポイントである。登録タスクは`HighestAvailable`で動作するため、サービス停止を伴う項目もUACなしで実行できる。一方で昇格済み自動実行の差し替えを防ぐため、タスク登録時に署名済みPerMachine MSI、`Program Files\Lumin4ti\current`の固定配置、実行ファイルまでの所有者・ACL・再解析ポイントを検証する。タスク定義XMLもAdministrators / SYSTEMだけが書ける保護ストレージで一時作成し、登録後に削除する。検証できない配置ではタスクを登録しない。
 
+タスク名はマシン共通の `\Lumin4ti\ScheduledTempCleanup` で、Principal と LogonTrigger の両方を登録利用者へ限定する。既存タスクの所有者は Principal のアカウント名または SID で判定し、別利用者・所有者不明なら状態を不明として変更を拒否する。照会失敗時の登録は上書きなしの新規作成だけを試し、削除は拒否する。これにより共有PCで他利用者の登録を奪わないが、利用者ごとに複数のタスクを登録する構造ではない。
+
 スタートアップ登録とファイル関連付け候補はキャッシュ整理と混ぜず、専用アクションでレジストリを整理する。`StartupCommandParser` が完全パスへ解決でき、準備済み固定ドライブ上で再解析点を通らない実行ファイルの欠損を確認できた候補だけを削除する。複数の関連付け候補の一つでも存在または判定不能なら保持し、レジストリアクセス不能は `Partial` として可視化する。
+
+### 設定変更の範囲
+
+`NtpConfigAction` は、有効なNTPクライアントと同期モード `NTP` を確認してから、手動ピアの `NtpServer` だけを `ntp.jst.mfeed.ad.jp,0x9` へ変更する。ポリシー管理のサーバー、無効なクライアント、`AllSync`・`NT5DS`・`NoSync`・不明な同期モードではサービス停止前に中止する。`Type` と `AnnounceFlags` を維持することで、ドメイン同期や時刻サーバーとしての役割を変更しない。
+
+MMAgentのスイッチはONが機能有効、OFFが無効を表す。アプリ起動プリフェッチのcmdletが非対応なら、`MmAgentRegistryFallback` が `EnablePrefetcher` のアプリ起動ビットだけを更新し、ブート側のビットを保持する。未設定は既定値3として扱い、0〜3以外やDWORD以外は変更しない。旧 `registry/mmagent-launch-prefetch.json` は保持するが復元には使わない。DWORD全体を戻すとブート側の外部変更まで巻き戻すためである。非対応時は古い `Get-MMAgent` 値による冪等成功より代替書き込みを優先し、書き込み後も実状態が異なれば `Partial` と再起動の案内を返す。
 
 ## 状態と永続化
 

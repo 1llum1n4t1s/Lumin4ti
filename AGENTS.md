@@ -13,7 +13,7 @@ dotnet build Lumin4ti.slnx           # ビルド (0 warnings を維持する方�
 dotnet test Lumin4ti.slnx            # 全テスト (MSTest)
 # 単一テストクラス/メソッド:
 dotnet test Lumin4ti.slnx --filter "FullyQualifiedName~MaintenanceActionCatalogTests"
-dotnet test Lumin4ti.slnx --filter "Name=既定値に戻せるトグルの既定値は適用値と異なる"
+dotnet test Lumin4ti.slnx --filter "Name=子項目の親は同じカテゴリに実在する"
 # 実行 (通常起動は UAC 昇格が入る):
 ./src/Lumin4ti.UI/bin/Debug/net10.0-windows10.0.20348.0/Lumin4ti.UI.exe
 ```
@@ -82,6 +82,7 @@ dotnet test Lumin4ti.slnx --filter "Name=既定値に戻せるトグルの既定
 - ETL トレースログは `%SystemRoot%\Logs`、`System32\LogFiles`、`Panther`、`%ProgramData%\Microsoft\Diagnosis\ETLLogs` の既知基点だけをリンク非追従で列挙し、`*.etl` のみ削除する。ドライブ全体を対象にする再帰パターン削除は復活させない。
 - シェルが握って離さないファイル (アイコン・フォントキャッシュ) は `MoveFileEx(MOVEFILE_DELAY_UNTIL_REBOOT)` で再起動時削除に回す。Explorer を kill しないのは、失敗時に利用者がシェル無しで取り残されるのを避けるため。
 - サインイン時クリーンアップは画面と同じ `FileCleanupGroups` と利用者設定を使い、タスクスケジューラーから最高権限で実行する。タスクへ登録できるのは、署名・MSI マーカー・`Program Files\Lumin4ti\current` の配置と各パス要素の所有者／ACL／再解析ポイントを検証できた実行ファイルだけとする。登録用 XML は `%TEMP%` へ置かず、Administrators / SYSTEM だけが書ける保護ストレージで作成し、登録後に削除する。
+- 固定名の既存タスクは Principal の利用者を照合し、別利用者・所有者不明の定義を上書き・削除しない。照会失敗時の新規登録に `/f` を付けない。起動時の修復条件は [DESIGN.md の起動と終了](DESIGN.md#起動と終了) を参照し、変更時は `ScheduledTempCleanupTests` の所有者・旧定義・照会失敗の検証を通す。
 
 ### 同時実行と終了処理
 
@@ -131,6 +132,7 @@ Komorebi/Lhamiel と同一方式。翻訳は [Resources/Locales/*.axaml](src/Lum
 - トグルの多重操作レース: `ToggleSwitch` の `IsEnabled` は `CanToggle` (= 状態既知 かつ 非実行中) にバインドすること。
 - 状態表示の乖離を避ける: `GetStateAsync` はレジストリだけでなく実適用状態も見る (例: VBS トグルは bcdedit の `hypervisorlaunchtype` も照合)。部分適用を避けるため、失敗しやすいステップ (bcdedit 等) を先に実行してから残りを書く。
 - 部分失敗を成功と偽らない: マルチステップ (powercfg 等) は重要ステップの失敗で `Fail` を返す。使用中ファイルのスキップのように「想定内の一部未処理」は `Partial` と結果行で伝える。
+- NTP と MMAgent の変更では [DESIGN.md の設定変更の範囲](DESIGN.md#設定変更の範囲) を維持する。同期モードの強制変更や `EnablePrefetcher` 全体の旧バックアップ復元を再導入しない。
 - 配布契約は [DistributionContractTests](src/Lumin4ti.Tests/DistributionContractTests.cs) が横断で固定している。`Lumin4ti.UI.csproj` / `scripts/release-local.ps1` / `scripts/set-msi-program-files-location.ps1` / `README.md` / `AppSettings.cs` を編集すると、意図せずここで落ちることがある。落ちたら文字列だけ直さず、配布方式を変えていないかを先に確認する。
 
 ## ドメイン移行（2026-07 開始・期限 2027/05/31）
