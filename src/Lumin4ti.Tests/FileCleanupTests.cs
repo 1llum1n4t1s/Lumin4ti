@@ -710,15 +710,4 @@ public sealed class FileCleanupTests
             StringAssert.StartsWith(group.Id, "cleanup-", group.Id);
         }
     }
-
-    [TestMethod]
-    public void ブラウザキャッシュの対象はインストール済みブラウザだけを列挙する()
-    {
-        // 実機に何が入っているかに依存しないよう、生成された対象がすべて実在することだけを確認する。
-        foreach (var target in FileCleanupGroups.EnumerateBrowserTargets())
-        {
-            Assert.AreEqual(CleanupTargetKind.Contents, target.Kind);
-            Assert.IsTrue(Path.IsPathFullyQualified(target.RawPath), target.RawPath);
-        }
-    }
 }

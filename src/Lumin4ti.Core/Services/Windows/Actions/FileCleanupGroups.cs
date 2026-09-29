@@ -527,12 +527,11 @@ public static class FileCleanupGroups
         description:
             "エクスプローラーのアイコンキャッシュ、サムネイルキャッシュ、フォントキャッシュを削除して作り直させます。" +
             "アイコンが白紙・別アプリのものになる、サムネイルが古いまま更新されない、文字が正しく表示されない、といった表示の壊れに対する定番の修復です。" +
-            "実行後はエクスプローラーを再起動し、シェルが開いたままで消せなかったファイルは次回の再起動時に削除されます。キャッシュ再構築の間だけ表示が一時的に遅くなります。",
+            "シェルが開いたままで消せなかったファイルは次回の Windows 再起動時に削除されます。再構築を完了するには Windows を再起動してください。キャッシュ再構築の間だけ表示が一時的に遅くなります。",
         targetProvider: () => ShellCacheTargets,
         executor: executor,
         servicesToStop: ShellCacheServices,
         requiresReboot: true,
-        affectsExplorer: true,
         scheduleBlockedForReboot: true,
         preferences: preferences,
         checkListKeySelector: GetShellCacheGroupName);

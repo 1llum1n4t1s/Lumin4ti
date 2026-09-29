@@ -120,7 +120,7 @@
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">刪除瀏覽器快取</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">刪除 Chromium 網頁與著色器快取、Service Worker 快取儲存區、當機報告及擴充功能暫存資料。不會刪除 Service Worker 註冊、DRM 元件、書籤、密碼或登入狀態。</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">重建圖示、縮圖與字型快取</x:String>
-  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">刪除檔案總管的圖示快取、縮圖快取與字型快取，讓 Windows 重新建立。這是圖示空白或錯亂、縮圖不更新、文字顯示異常時的標準修復方式。執行後會重新啟動檔案總管，被殼層占用而無法刪除的檔案會在下次重新開機時刪除。快取重建期間顯示會暫時變慢。</x:String>
+  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">刪除檔案總管的圖示快取、縮圖快取與字型快取，讓 Windows 重新建立。這是圖示空白或錯亂、縮圖不更新、文字顯示異常時的標準修復方式。被殼層占用而無法刪除的檔案會在下次重新啟動 Windows 時刪除。請重新啟動 Windows 以完成重建。快取重建期間顯示會暫時變慢。</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">刪除 Windows Update 的下載快取</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">只刪除 SoftwareDistribution\Download 中可重新下載的檔案。不會刪除更新記錄或 catroot2。相關服務會在之後復原。</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">刪除並重建預先擷取資料與搜尋索引</x:String>

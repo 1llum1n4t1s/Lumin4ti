@@ -120,7 +120,7 @@
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">删除浏览器缓存</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">删除 Chromium 网页和着色器缓存、Service Worker 缓存存储、崩溃报告及扩展临时数据。不会删除 Service Worker 注册、DRM 组件、书签、密码或登录状态。</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">重建图标、缩略图和字体缓存</x:String>
-  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">删除文件资源管理器的图标缓存、缩略图缓存和字体缓存，让 Windows 重新生成。这是图标空白或错乱、缩略图不更新、文字显示异常时的常规修复手段。执行后会重启资源管理器，被外壳占用而无法删除的文件将在下次重启时删除。缓存重建期间显示会暂时变慢。</x:String>
+  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">删除文件资源管理器的图标缓存、缩略图缓存和字体缓存，让 Windows 重新生成。这是图标空白或错乱、缩略图不更新、文字显示异常时的常规修复手段。被外壳占用而无法删除的文件将在下次重启 Windows 时删除。请重启 Windows 以完成重建。缓存重建期间显示会暂时变慢。</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">删除 Windows 更新的下载缓存</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">仅删除 SoftwareDistribution\Download 中可重新下载的文件。不会删除更新历史或 catroot2。相关服务会在之后恢复。</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">删除并重建预读数据和搜索索引</x:String>
