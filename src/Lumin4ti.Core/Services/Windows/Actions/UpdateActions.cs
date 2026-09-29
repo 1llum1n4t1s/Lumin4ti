@@ -26,6 +26,9 @@ public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanc
     private const string OfficialSourceIdentifier = "Microsoft.Winget.Source_8wekyb3d8bbwe";
     private const string OfficialSourceType = "Microsoft.PreIndexed.Package";
     private const int MaxSourceExportLength = 64 * 1024;
+    private const int MaxDiagnosticLinesPerStream = 6;
+    private const int MaxDiagnosticLineLength = 240;
+    private const int MaxStreamSummaryLength = 600;
 
     public string Id => "winget-upgrade-all";
 
@@ -49,31 +52,39 @@ public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanc
         var sourceExport = await executor.RunAsync("winget", SourceExportArguments, ct);
         if (!sourceExport.Success)
         {
-            var failure = DescribeCommandFailure("winget 公式ソースの確認に失敗したため、更新を中止しました", sourceExport);
+            var failure = DescribeCommandResult("winget 公式ソースの確認に失敗したため、更新を中止しました", sourceExport);
             LoggerBootstrap.Log.Error($"{Id}: {failure}");
+            progress?.Report(failure);
             return MaintenanceActionResult.Fail(failure);
         }
 
         if (!IsOfficialSourceExport(sourceExport.StandardOutput))
         {
-            LoggerBootstrap.Log.Error($"{Id}: winget ソースが Microsoft 公式設定と不一致");
-            return MaintenanceActionResult.Fail(
-                "winget ソースが Microsoft 公式の既定設定と一致しないため、更新を中止しました。");
+            var failure = DescribeCommandResult(
+                "winget ソースが Microsoft 公式の既定設定と一致しないため、更新を中止しました",
+                sourceExport);
+            LoggerBootstrap.Log.Error($"{Id}: {failure}");
+            progress?.Report(failure);
+            return MaintenanceActionResult.Fail(failure);
         }
 
         var available = await executor.RunAsync("winget", ListUpgradesArguments, ct);
         if (!available.Success)
         {
-            LoggerBootstrap.Log.Error($"{Id}: 更新候補の取得に失敗 (exit={available.ExitCode})");
-            return MaintenanceActionResult.Fail(
-                DescribeCommandFailure("winget の更新候補を取得できませんでした", available));
+            var failure = DescribeCommandResult("winget の更新候補を取得できませんでした", available);
+            LoggerBootstrap.Log.Error($"{Id}: {failure}");
+            progress?.Report(failure);
+            return MaintenanceActionResult.Fail(failure);
         }
 
         if (!TryParsePackageTable(available.StandardOutput, out var candidates, out var tableFound))
         {
-            LoggerBootstrap.Log.Error($"{Id}: 更新候補一覧を安全に解析できないため中止");
-            return MaintenanceActionResult.Fail(
-                "winget の更新候補一覧を安全に確認できなかったため、更新を中止しました。");
+            var failure = DescribeCommandResult(
+                "winget の更新候補一覧を安全に確認できなかったため、更新を中止しました",
+                available);
+            LoggerBootstrap.Log.Error($"{Id}: {failure}");
+            progress?.Report(failure);
+            return MaintenanceActionResult.Fail(failure);
         }
 
         if (!tableFound)
@@ -92,17 +103,41 @@ public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanc
         {
             ct.ThrowIfCancellationRequested();
             var candidate = candidates[index];
-            progress?.Report($"  - ({index + 1}/{candidates.Count}) {candidate.Name} [{candidate.Id}] を確認しています");
+            var candidateDisplayName = SanitizeDiagnosticLine(candidate.Name);
+            progress?.Report($"  - ({index + 1}/{candidates.Count}) {candidateDisplayName} [{candidate.Id}] を確認しています");
 
             var catalog = await executor.RunAsync("winget", BuildSearchArguments(candidate.Id), ct);
-            if (!catalog.Success
-                || !TryParsePackageTable(catalog.StandardOutput, out var catalogPackages, out var catalogTableFound)
-                || !catalogTableFound
-                || catalogPackages.Count != 1
-                || !string.Equals(catalogPackages[0].Id, candidate.Id, StringComparison.Ordinal))
+            var catalogParsed = TryParsePackageTable(
+                catalog.StandardOutput,
+                out var catalogPackages,
+                out var catalogTableFound);
+            string? catalogFailureReason = null;
+            if (!catalog.Success)
+            {
+                catalogFailureReason = "公式カタログの照会に失敗したため除外";
+            }
+            else if (!catalogParsed)
+            {
+                catalogFailureReason = "公式カタログの応答を安全に解析できないため除外";
+            }
+            else if (!catalogTableFound || catalogPackages.Count != 1)
+            {
+                catalogFailureReason = "公式カタログで完全一致する1件を確認できないため除外";
+            }
+            else if (!string.Equals(catalogPackages[0].Id, candidate.Id, StringComparison.Ordinal))
+            {
+                catalogFailureReason = "公式カタログのPackage IDが一致しないため除外";
+            }
+
+            if (catalogFailureReason is not null)
             {
                 skipped++;
-                details.Add($"  - {candidate.Name} [{candidate.Id}]: 公式カタログの完全一致確認に失敗したため除外");
+                var detail = DescribeCommandResult(
+                    $"{candidateDisplayName} [{candidate.Id}]: {catalogFailureReason}",
+                    catalog);
+                details.Add(detail);
+                progress?.Report(detail);
+                LoggerBootstrap.Log.Error($"{Id}: {detail}");
                 continue;
             }
 
@@ -110,14 +145,16 @@ public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanc
             if (!IsConsistentPackageName(candidate.Name, catalogName))
             {
                 skipped++;
-                details.Add(
-                    $"  - {candidate.Name} [{candidate.Id}]: カタログ名「{catalogName}」と一致しないため除外 (他のパッケージは続行)");
-                LoggerBootstrap.Log.Error(
-                    $"{Id}: 名前不一致の候補を除外 installed={candidate.Name}, catalog={catalogName}, package={candidate.Id}");
+                var detail = DescribeCommandResult(
+                    $"{candidateDisplayName} [{candidate.Id}]: カタログ名「{SanitizeDiagnosticLine(catalogName)}」と一致しないため除外 (他のパッケージは続行)",
+                    catalog);
+                details.Add(detail);
+                progress?.Report(detail);
+                LoggerBootstrap.Log.Error($"{Id}: {detail}");
                 continue;
             }
 
-            progress?.Report($"  - ({index + 1}/{candidates.Count}) {candidate.Name} を更新しています");
+            progress?.Report($"  - ({index + 1}/{candidates.Count}) {candidateDisplayName} を更新しています");
             var result = await executor.RunAsync(
                 "winget",
                 BuildUpgradeArguments(candidate.Id),
@@ -126,14 +163,22 @@ public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanc
             if (result.Success)
             {
                 succeeded++;
-                details.Add($"  - {candidate.Name} [{candidate.Id}]: 更新完了");
+                var detail = DescribeCommandResult(
+                    $"{candidateDisplayName} [{candidate.Id}]: 更新完了",
+                    result);
+                details.Add(detail);
+                progress?.Report(detail);
+                LoggerBootstrap.Log.Info($"{Id}: {detail}");
                 continue;
             }
 
             failed++;
-            details.Add(DescribeCommandFailure(
-                $"{candidate.Name} [{candidate.Id}]: 更新失敗",
-                result));
+            var failure = DescribeCommandResult(
+                $"{candidateDisplayName} [{candidate.Id}]: 更新失敗",
+                result);
+            details.Add(failure);
+            progress?.Report(failure);
+            LoggerBootstrap.Log.Error($"{Id}: {failure}");
         }
 
         LoggerBootstrap.Log.Info(
@@ -319,17 +364,78 @@ public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanc
         && packageId.All(character => char.IsAsciiLetterOrDigit(character)
                                           || character is '.' or '-' or '_' or '+');
 
-    private static string DescribeCommandFailure(string message, CommandExecutionResult result)
+    private static string DescribeCommandResult(string message, CommandExecutionResult result)
     {
-        var output = string.IsNullOrWhiteSpace(result.StandardError)
-            ? result.StandardOutput
-            : result.StandardError;
-        var lastLine = output
+        var diagnostic = new StringBuilder(
+            $"exit={result.ExitCode}/0x{unchecked((uint)result.ExitCode):X8}");
+        AppendStreamSummary(diagnostic, "stdout", result.StandardOutput);
+        AppendStreamSummary(diagnostic, "stderr", result.StandardError);
+
+        var guidance = result.Success ? string.Empty : DescribeWingetFailureGuidance(result);
+        return string.IsNullOrEmpty(guidance)
+            ? $"  - {message} ({diagnostic})"
+            : $"  - {message} ({diagnostic})。{guidance}";
+    }
+
+    private static void AppendStreamSummary(StringBuilder diagnostic, string label, string output)
+    {
+        var summary = SummarizeOutput(output);
+        if (summary.Length > 0)
+        {
+            diagnostic.Append("; ").Append(label).Append('=').Append(summary);
+        }
+    }
+
+    private static string SummarizeOutput(string output)
+    {
+        if (string.IsNullOrWhiteSpace(output))
+        {
+            return string.Empty;
+        }
+
+        var lines = output
             .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .LastOrDefault(IsMeaningfulLine);
-        return lastLine is null
-            ? $"  - {message} (exit={result.ExitCode})"
-            : $"  - {message} (exit={result.ExitCode}): {lastLine}";
+            .Select(SanitizeDiagnosticLine)
+            .Where(IsMeaningfulLine)
+            .TakeLast(MaxDiagnosticLinesPerStream);
+        var summary = string.Join(" | ", lines);
+        return summary.Length <= MaxStreamSummaryLength
+            ? summary
+            : summary[..MaxStreamSummaryLength] + "…";
+    }
+
+    private static string SanitizeDiagnosticLine(string line)
+    {
+        // ANSI制御シーケンスとログ表示を崩す制御文字を除き、1行あたりの記録量を制限する。
+        var withoutAnsi = Regex.Replace(line, "\\x1B\\[[0-?]*[ -/]*[@-~]", string.Empty);
+        var sanitized = new StringBuilder(withoutAnsi.Length);
+        foreach (var character in withoutAnsi)
+        {
+            sanitized.Append(char.IsControl(character) ? ' ' : character);
+        }
+
+        var normalized = Regex.Replace(sanitized.ToString(), "\\s+", " ").Trim();
+        return normalized.Length <= MaxDiagnosticLineLength
+            ? normalized
+            : normalized[..MaxDiagnosticLineLength] + "…";
+    }
+
+    private static string DescribeWingetFailureGuidance(CommandExecutionResult result)
+    {
+        var combined = $"{result.StandardOutput}\n{result.StandardError}";
+        if (unchecked((uint)result.ExitCode) == 0x8A15008E
+            || combined.Contains("0x8a15008e", StringComparison.OrdinalIgnoreCase))
+        {
+            return "既存のインストール方式と更新方式が異なるため自動変更できません。発行元の公式インストーラーで更新方法を確認してください";
+        }
+
+        var installerFailure = (combined.Contains("installer", StringComparison.OrdinalIgnoreCase)
+                                && combined.Contains("fail", StringComparison.OrdinalIgnoreCase))
+                               || (combined.Contains("インストーラー", StringComparison.Ordinal)
+                                   && combined.Contains("失敗", StringComparison.Ordinal));
+        return installerFailure
+            ? "使用中のアプリがある場合は終了してから再実行してください。解消しない場合は上記のwinget出力と発行元の案内を確認してください"
+            : string.Empty;
     }
 
     internal sealed record WingetPackage(string Name, string Id);
@@ -358,9 +464,10 @@ public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanc
     {
         public void Report(string line)
         {
-            if (IsMeaningfulLine(line))
+            var sanitized = SanitizeDiagnosticLine(line);
+            if (IsMeaningfulLine(sanitized))
             {
-                downstream.Report(line);
+                downstream.Report(sanitized);
             }
         }
     }

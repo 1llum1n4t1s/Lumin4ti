@@ -209,6 +209,33 @@ public sealed class WingetOutputFilterTests
     }
 
     [TestMethod]
+    public async Task カタログ照会失敗はpackage別診断を結果と進捗へ残す()
+    {
+        var executor = new RecordingExecutor(
+            Success(OfficialSource),
+            Success(PackageTable(("Git", "Git.Git"))),
+            new CommandExecutionResult(
+                false,
+                string.Empty,
+                17,
+                "catalog stdout detail",
+                "catalog stderr detail"));
+        var action = new WingetUpgradeAction(executor);
+        var received = new List<string>();
+
+        var result = await action.ExecuteAsync(new InlineProgress<string>(received.Add));
+
+        Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
+        StringAssert.Contains(result.Detail, "Git [Git.Git]");
+        StringAssert.Contains(result.Detail, "exit=17/0x00000011");
+        StringAssert.Contains(result.Detail, "stdout=catalog stdout detail");
+        StringAssert.Contains(result.Detail, "stderr=catalog stderr detail");
+        Assert.IsTrue(received.Any(line => result.Detail.Contains(line, StringComparison.Ordinal)
+                                           && line.Contains("Git.Git", StringComparison.Ordinal)
+                                           && line.Contains("exit=17/0x00000011", StringComparison.Ordinal)));
+    }
+
+    [TestMethod]
     public async Task 除外があっても残りのpackageは更新する()
     {
         var executor = new RecordingExecutor(
@@ -273,23 +300,33 @@ public sealed class WingetOutputFilterTests
     {
         var executor = new RecordingExecutor(
             Success(OfficialSource),
-            Success(PackageTable(("Git", "Git.Git"), ("uv", "astral-sh.uv"))),
+            Success(PackageTable(("Git", "Git.Git"), ("SimplySign Desktop", "Certum.SmartSignSimplySignDesktop"))),
             Success(PackageTable(("Git", "Git.Git"))),
             Success("Successfully installed"),
-            Success(PackageTable(("uv", "astral-sh.uv"))),
+            Success(PackageTable(("SimplySign Desktop", "Certum.SmartSignSimplySignDesktop"))),
             new CommandExecutionResult(
                 false,
                 string.Empty,
-                1,
-                "Installer failed with exit code: 1",
-                "error"));
+                -1978335090,
+                "Installer failed with exit code: 0x8a15008e\u0001",
+                "The install technology of the newer version is different"));
         var action = new WingetUpgradeAction(executor);
+        var received = new List<string>();
 
-        var result = await action.ExecuteAsync();
+        var result = await action.ExecuteAsync(new InlineProgress<string>(received.Add));
 
         Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
         Assert.IsFalse(result.Success);
         StringAssert.Contains(result.Detail, "成功 1 件 / 失敗 1 件 / 安全確認で除外 0 件");
+        StringAssert.Contains(result.Detail, "Certum.SmartSignSimplySignDesktop");
+        StringAssert.Contains(result.Detail, "exit=-1978335090/0x8A15008E");
+        StringAssert.Contains(result.Detail, "stdout=Installer failed with exit code: 0x8a15008e");
+        StringAssert.Contains(result.Detail, "stderr=The install technology of the newer version is different");
+        StringAssert.Contains(result.Detail, "既存のインストール方式と更新方式が異なる");
+        StringAssert.Contains(result.Detail, "公式インストーラー");
+        Assert.IsFalse(result.Detail.Contains('\u0001'));
+        Assert.IsTrue(received.Any(line => line.Contains("Certum.SmartSignSimplySignDesktop", StringComparison.Ordinal)
+                                           && line.Contains("0x8A15008E", StringComparison.Ordinal)));
     }
 
     [TestMethod]
