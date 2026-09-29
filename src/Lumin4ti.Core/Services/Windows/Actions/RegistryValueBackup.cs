@@ -1,6 +1,5 @@
 using System.Runtime.Versioning;
 using System.Security;
-using System.Text;
 using System.Text.Json;
 using Microsoft.Win32;
 
@@ -14,8 +13,11 @@ namespace Lumin4ti.Core.Services.Windows.Actions;
 [SupportedOSPlatform("windows")]
 internal sealed class RegistryValueBackup(
     IRegistryBackupStorage storage,
-    IRegistryValueAccessor registry)
+    IRegistryValueAccessor registry,
+    Func<string?>? currentUserScopeProvider = null)
 {
+    private readonly Func<string?> _currentUserScopeProvider = currentUserScopeProvider ?? CurrentUserScope;
+
     public static RegistryValueBackup Default { get; } = new(
         new ProtectedRegistryBackupStorage(ProtectedBackupStorage.Default),
         WindowsRegistryValueAccessor.Instance);
@@ -24,24 +26,36 @@ internal sealed class RegistryValueBackup(
     /// 退避先。保存場所はマシン共通 (%ProgramData%) なので、HKCU を含む項目は利用者ごとに分ける。
     /// 分けないと、同じ PC の別利用者が同じ項目を操作したときに互いの元値を壊してしまう。
     /// </summary>
-    private static string RelativePath(string id, IReadOnlyList<RegistryToggleSpec> specs) =>
-        specs.Any(spec => spec.Hive == RegistryHive.CurrentUser)
-            ? Path.Combine("registry", CurrentUserScope(), id + ".json")
-            : LegacyRelativePath(id);
+    private string RelativePath(string id, IReadOnlyList<RegistryToggleSpec> specs)
+    {
+        if (!specs.Any(spec => spec.Hive == RegistryHive.CurrentUser))
+        {
+            return LegacyRelativePath(id);
+        }
+
+        var currentUserScope = _currentUserScopeProvider();
+        if (string.IsNullOrWhiteSpace(currentUserScope))
+        {
+            throw new InvalidOperationException(
+                "現在の利用者 SID を取得できないため、レジストリ復元バックアップを安全に使用できません。");
+        }
+
+        return Path.Combine("registry", currentUserScope, id + ".json");
+    }
 
     /// <summary>利用者スコープを導入する前の退避先 (既存バックアップを読み落とさないために残す)。</summary>
     private static string LegacyRelativePath(string id) => Path.Combine("registry", id + ".json");
 
-    private static string CurrentUserScope()
+    private static string? CurrentUserScope()
     {
         try
         {
             using var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
-            return identity.User?.Value ?? "unknown-user";
+            return identity.User?.Value;
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or SecurityException)
         {
-            return "unknown-user";
+            return null;
         }
     }
 
@@ -64,21 +78,6 @@ internal sealed class RegistryValueBackup(
             }
 
             return;
-        }
-
-        // 利用者スコープ導入前の退避が残っていれば、それが最初にこの項目を ON にした利用者の
-        // 真の元値。現在の利用者スコープへ一度だけ移し (レガシーは消す)、別の利用者が後から
-        // 同じ項目を ON にしたときにレガシーを「自分の元値」として誤って再利用しないようにする。
-        var legacyPath = LegacyRelativePath(id);
-        if (relativePath != legacyPath && storage.FileExists(legacyPath))
-        {
-            var legacy = LoadRestorePlan(legacyPath, specs);
-            if (legacy.IsValid)
-            {
-                MigrateLegacyBackup(legacyPath, relativePath);
-                return;
-            }
-            // 破損・spec 不一致のレガシーは移行せず無視し、現在の実値で新規スナップショットを作る。
         }
 
         var entries = new List<RegistryValueBackupEntry>(specs.Count);
@@ -108,17 +107,27 @@ internal sealed class RegistryValueBackup(
         IReadOnlyList<RegistryToggleSpec> specs,
         List<string> lines)
     {
-        var relativePath = RelativePath(id, specs);
+        string relativePath;
+        try
+        {
+            relativePath = RelativePath(id, specs);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return new(RegistryBackupRestoreStatus.Invalid, ex.Message);
+        }
+
         if (!storage.FileExists(relativePath))
         {
-            // 利用者スコープ導入前に書かれた退避があればそちらから復元する (元値を捨てない)。
             var legacyPath = LegacyRelativePath(id);
             if (relativePath == legacyPath || !storage.FileExists(legacyPath))
             {
                 return new(RegistryBackupRestoreStatus.Missing);
             }
 
-            relativePath = legacyPath;
+            return new(
+                RegistryBackupRestoreStatus.Invalid,
+                "利用者スコープ導入前の復元バックアップは所有者を証明できないため使用できません。");
         }
 
         var loaded = LoadRestorePlan(relativePath, specs);
@@ -148,27 +157,6 @@ internal sealed class RegistryValueBackup(
         }
 
         return new(RegistryBackupRestoreStatus.Restored);
-    }
-
-    /// <summary>検証済みのレガシー退避をそのまま利用者スコープへ複製し、レガシーを削除する。</summary>
-    private void MigrateLegacyBackup(string legacyPath, string relativePath)
-    {
-        var content = storage.ReadAllText(legacyPath);
-        storage.WriteNewAtomically(relativePath, stream =>
-        {
-            using var writer = new StreamWriter(stream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false), leaveOpen: true);
-            writer.Write(content);
-        });
-
-        try
-        {
-            storage.Delete(legacyPath);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException)
-        {
-            // 複製は完了している。レガシーを消せなかっただけなので、次回以降も同じ内容を複製するだけで安全。
-            LoggerBootstrap.Log.Error($"レガシーのレジストリ復元バックアップを削除できませんでした: {legacyPath}", ex);
-        }
     }
 
     private RegistryRestorePlanLoadResult LoadRestorePlan(

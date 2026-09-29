@@ -98,29 +98,38 @@ public sealed class RegistryToggleTests
     }
 
     [TestMethod]
-    public void HKCUの退避は利用者ごとに分かれHKLMはマシン共通に置く()
+    public void HKCUを含む退避は利用者ごとに分かれHKLMだけならマシン共通に置く()
     {
         var userSpecs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
         var machineSpecs = new[]
         {
             new RegistryToggleSpec(RegistryHive.LocalMachine, KeyPath, "Value", RegistryValueKind.DWord, 1, 9),
         };
+        var mixedSpecs = new[]
+        {
+            Spec("UserValue", RegistryValueKind.DWord, 1),
+            new RegistryToggleSpec(RegistryHive.LocalMachine, KeyPath, "MachineValue", RegistryValueKind.DWord, 1, 9),
+        };
         var registry = new FakeRegistryValueAccessor();
         registry.Set(userSpecs[0], RegistryValueSnapshot.Dword(9));
         registry.Set(machineSpecs[0], RegistryValueSnapshot.Dword(9));
+        registry.Set(mixedSpecs[0], RegistryValueSnapshot.Dword(9));
+        registry.Set(mixedSpecs[1], RegistryValueSnapshot.Dword(9));
         var storage = new MemoryRegistryBackupStorage();
         var backup = new RegistryValueBackup(storage, registry);
 
         backup.Save(ToggleId, userSpecs);
         backup.Save("machine-toggle-test", machineSpecs);
+        backup.Save("mixed-toggle-test", mixedSpecs);
 
-        // HKCU は利用者 SID 配下、HKLM は従来どおりの位置
+        // HKCU を 1 件でも含めば利用者 SID 配下、HKLM だけなら従来どおりの位置
         Assert.IsTrue(storage.FileExists(Path.Combine("registry", CurrentUserSid(), ToggleId + ".json")));
         Assert.IsTrue(storage.FileExists(Path.Combine("registry", "machine-toggle-test.json")));
+        Assert.IsTrue(storage.FileExists(Path.Combine("registry", CurrentUserSid(), "mixed-toggle-test.json")));
     }
 
     [TestMethod]
-    public void 利用者スコープ導入前の退避は現在の利用者スコープへ一度だけ移行してから復元する()
+    public void 所有者不明の利用者スコープ導入前退避は復元せずInvalidで保持する()
     {
         var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
         var registry = new FakeRegistryValueAccessor();
@@ -128,57 +137,67 @@ public sealed class RegistryToggleTests
         var storage = new MemoryRegistryBackupStorage();
         var seed = new RegistryValueBackup(storage, registry);
         seed.Save(ToggleId, specs);
-
-        // 旧バージョンが書いた位置 (利用者スコープ無し) へ移し替える
         var legacyPath = Path.Combine("registry", ToggleId + ".json");
         storage.SetJson(legacyPath, storage.GetJson(BackupPath(ToggleId)));
         storage.Delete(BackupPath(ToggleId));
-
         registry.Set(specs[0], RegistryValueSnapshot.Dword(1));
         var backup = new RegistryValueBackup(storage, registry);
 
-        // 再 ON では旧退避の真の元値を現在の利用者スコープへ複製し、レガシーは消す
-        // (別の利用者が後から同じ項目を ON にしたときに、このレガシーを誤って再利用しないため)。
+        var restored = backup.TryRestore(ToggleId, specs, []);
+
+        Assert.AreEqual(RegistryBackupRestoreStatus.Invalid, restored.Status);
+        StringAssert.Contains(restored.FailureReason, "所有者");
+        Assert.AreEqual(0, registry.WriteAttempts);
+        AssertSnapshot(RegistryValueSnapshot.Dword(1), registry.Read(specs[0]), specs[0].Name);
+        Assert.IsTrue(storage.FileExists(legacyPath), "所有者不明のレガシーは削除しない");
+        Assert.IsFalse(storage.FileExists(BackupPath(ToggleId)));
+    }
+
+    [TestMethod]
+    public void 所有者不明のレガシーがあってもSaveは現在値を利用者スコープへ退避してレガシーを保持する()
+    {
+        var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
+        var registry = new FakeRegistryValueAccessor();
+        registry.Set(specs[0], RegistryValueSnapshot.Dword(999));
+        var storage = new MemoryRegistryBackupStorage();
+        var seed = new RegistryValueBackup(storage, registry);
+        seed.Save(ToggleId, specs);
+        var legacyPath = Path.Combine("registry", ToggleId + ".json");
+        storage.SetJson(legacyPath, storage.GetJson(BackupPath(ToggleId)));
+        storage.Delete(BackupPath(ToggleId));
+        registry.Set(specs[0], RegistryValueSnapshot.Dword(1));
+
+        var backup = new RegistryValueBackup(storage, registry);
         backup.Save(ToggleId, specs);
-        Assert.IsTrue(storage.FileExists(BackupPath(ToggleId)), "旧退避は利用者スコープへ移行される");
-        Assert.IsFalse(storage.FileExists(legacyPath), "移行後はレガシーを残さない");
+
+        Assert.IsTrue(storage.FileExists(BackupPath(ToggleId)));
+        Assert.IsTrue(storage.FileExists(legacyPath), "所有者不明のレガシーは削除しない");
+        registry.Set(specs[0], RegistryValueSnapshot.Dword(2));
+        backup.Save(ToggleId, specs); // 利用者スコープの有効なバックアップを優先して保持する
 
         var restored = backup.TryRestore(ToggleId, specs, []);
-
         Assert.AreEqual(RegistryBackupRestoreStatus.Restored, restored.Status);
-        AssertSnapshot(RegistryValueSnapshot.Dword(9), registry.Read(specs[0]), specs[0].Name);
+        AssertSnapshot(RegistryValueSnapshot.Dword(1), registry.Read(specs[0]), specs[0].Name);
+        Assert.IsTrue(storage.FileExists(legacyPath), "SID スコープ復元後も所有者不明のレガシーは保持する");
     }
 
     [TestMethod]
-    public void 移行後の再Saveはレガシーではなく利用者スコープの既存バックアップを保持する()
+    public void 利用者SIDを取得できない場合は共有スコープへ保存も復元もしない()
     {
         var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
         var registry = new FakeRegistryValueAccessor();
         registry.Set(specs[0], RegistryValueSnapshot.Dword(9));
         var storage = new MemoryRegistryBackupStorage();
-        var seed = new RegistryValueBackup(storage, registry);
-        seed.Save(ToggleId, specs);
-        var legacyPath = Path.Combine("registry", ToggleId + ".json");
-        storage.SetJson(legacyPath, storage.GetJson(BackupPath(ToggleId)));
-        storage.Delete(BackupPath(ToggleId));
+        var backup = new RegistryValueBackup(storage, registry, () => null);
 
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(1));
-        var backup = new RegistryValueBackup(storage, registry);
-        backup.Save(ToggleId, specs); // 1 回目: レガシーを利用者スコープへ移行する
-
-        // 移行後にレガシーが復活しても (別利用者が旧版のまま操作した想定)、
-        // 既に利用者スコープにバックアップがある限りそちらを優先し、レガシーを読み直さない。
-        storage.SetJson(legacyPath, Lumin4tiJson.Serialize(new RegistryValueBackupDocument
-        {
-            SchemaVersion = RegistryValueBackupDocument.CurrentSchemaVersion,
-            Entries = [RegistryValueBackupEntry.Create(specs[0], RegistryValueSnapshot.Dword(999))],
-        }));
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(2));
-        backup.Save(ToggleId, specs); // 2 回目: 利用者スコープの既存バックアップをそのまま使う
-
+        var saveError = Assert.ThrowsExactly<InvalidOperationException>(() => backup.Save(ToggleId, specs));
+        StringAssert.Contains(saveError.Message, "SID");
         var restored = backup.TryRestore(ToggleId, specs, []);
-        Assert.AreEqual(RegistryBackupRestoreStatus.Restored, restored.Status);
-        AssertSnapshot(RegistryValueSnapshot.Dword(9), registry.Read(specs[0]), specs[0].Name);
+
+        Assert.AreEqual(RegistryBackupRestoreStatus.Invalid, restored.Status);
+        StringAssert.Contains(restored.FailureReason, "SID");
+        Assert.AreEqual(0, registry.WriteAttempts);
+        Assert.IsFalse(storage.FileExists(Path.Combine("registry", "unknown-user", ToggleId + ".json")));
     }
 
     [TestMethod]
