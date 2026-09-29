@@ -176,21 +176,21 @@ public sealed class WingetOutputFilterTests
     }
 
     [TestMethod]
-    public async Task エディション表記の差だけの候補は更新する()
+    public async Task 更新チャネルが異なる候補は更新しない()
     {
         var executor = new RecordingExecutor(
             Success(OfficialSource),
             Success(PackageTable(("Brave Origin", "Brave.BraveOrigin.Nightly"))),
-            Success(PackageTable(("Brave Origin Nightly", "Brave.BraveOrigin.Nightly"))),
-            Success("Successfully installed"));
+            Success(PackageTable(("Brave Origin Nightly", "Brave.BraveOrigin.Nightly"))));
         var action = new WingetUpgradeAction(executor);
 
         var result = await action.ExecuteAsync();
 
-        Assert.IsTrue(result.Success);
-        Assert.AreEqual(
-            WingetUpgradeAction.BuildUpgradeArguments("Brave.BraveOrigin.Nightly"),
-            executor.Calls[3].Arguments);
+        Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
+        Assert.AreEqual(3, executor.Calls.Count);
+        Assert.IsFalse(executor.Calls.Any(call =>
+            call.Arguments.StartsWith("upgrade ", StringComparison.Ordinal)));
+        StringAssert.Contains(result.Detail, "安全確認で除外 1 件");
     }
 
     [TestMethod]
@@ -229,7 +229,7 @@ public sealed class WingetOutputFilterTests
     }
 
     [TestMethod]
-    [DataRow("Brave Origin", "Brave Origin Nightly", true)]
+    [DataRow("Brave Origin", "Brave Origin Nightly", false)]
     [DataRow("Microsoft Visual Studio Code", "Visual Studio Code", true)]
     [DataRow("7-Zip 24.09 (x64)", "7-Zip", true)]
     [DataRow("git", "Git", true)]

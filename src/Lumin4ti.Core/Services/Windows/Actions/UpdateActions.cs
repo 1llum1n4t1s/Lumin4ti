@@ -3,6 +3,7 @@ using Lumin4ti.Core.Models;
 using System.Security;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace Lumin4ti.Core.Services.Windows.Actions;
 
@@ -256,19 +257,43 @@ public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanc
 
     /// <summary>
     /// インストール済み表示名とカタログ名が同じアプリを指しているかを判定する。
-    /// winget の list は ARP の表示名、search はカタログ名を返すため、エディション表記
-    /// (「Brave Origin」と「Brave Origin Nightly」)・記号・大小文字の差で正当に食い違う。
-    /// 対象パッケージは既に --id --exact で完全一致を確認済みなので、ここでは
-    /// 「まったく別のアプリを指していないか」だけを見て、表記ゆれでの取りこぼしを防ぐ。
+    /// winget の list は ARP の表示名、search はカタログ名を返すため、記号・大小文字・
+    /// バージョン等の差を許容する。ただし Nightly 等の更新チャネルの差は表記ゆれにしない。
+    /// --id --exact でも、winget が別チャネルの ID に誤って紐付けた候補は訂正されない。
     /// </summary>
     internal static bool IsConsistentPackageName(string installedName, string catalogName)
     {
+        if (!GetReleaseChannels(installedName).SetEquals(GetReleaseChannels(catalogName)))
+        {
+            return false;
+        }
+
         var installed = NormalizePackageName(installedName);
         var catalog = NormalizePackageName(catalogName);
         return installed.Length > 0
                && catalog.Length > 0
                && (installed.Contains(catalog, StringComparison.Ordinal)
                    || catalog.Contains(installed, StringComparison.Ordinal));
+    }
+
+    private static HashSet<string> GetReleaseChannels(string name)
+    {
+        var channels = new HashSet<string>(StringComparer.Ordinal);
+        // 記号や数字に隣接する「(Nightly)」「Beta2」もチャネルとして扱う。
+        foreach (Match match in Regex.Matches(name, "[A-Za-z]+"))
+        {
+            var token = match.Value.ToLowerInvariant();
+            if (token == "insiders")
+            {
+                token = "insider";
+            }
+            if (token is "alpha" or "beta" or "dev" or "canary" or "nightly"
+                or "preview" or "insider" or "unstable" or "rc")
+            {
+                channels.Add(token);
+            }
+        }
+        return channels;
     }
 
     /// <summary>表記ゆれを吸収するため、英数字だけを残して小文字化する。</summary>
