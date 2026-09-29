@@ -49,13 +49,19 @@ dotnet test Lumin4ti.slnx --filter "Name=子項目の親は同じカテゴリに
 `ICommandExecutor` → `ProcessCommandExecutor` が唯一の実装 (DI で単一登録)。DISM/regsvr32/powercfg/winget/bcdedit/MMAgent cmdlet など「OS 提供ツールが唯一の手段」のものだけ外部プロセスで実行し、レジストリ・COM・WinRT で代替可能なものは C# ネイティブで書く。
 
 - **セキュリティ (回帰厳禁)**: bare exe 名を渡すと `CreateProcess` の検索順序でインストールディレクトリが `System32` より先に照合され、昇格プロセスがバイナリプランティング LPE を踏む。`ProcessCommandExecutor` は [SystemProcessResolver](src/Lumin4ti.Core/Services/SystemProcessResolver.cs) でフルパス解決 + `WorkingDirectory=System32` 固定してこれを封じている。呼び出し側は論理名でよいが、この解決を外さないこと。
-- 子プロセスは [ProcessJobTracker](src/Lumin4ti.Core/Services/ProcessJobTracker.cs) の Job Object (KILL_ON_JOB_CLOSE) に紐付け、アプリ終了時に OS が孤児を kill する。`ct` キャンセル時はプロセスツリーごと kill。
+- 子プロセスは [ProcessJobTracker](src/Lumin4ti.Core/Services/ProcessJobTracker.cs) で子ごとに独立した Job Object (KILL_ON_JOB_CLOSE) へ登録する。生成を制御できる経路では停止状態で登録してから再開し、登録失敗時は実行させない。`ct` キャンセル時はプロセスツリーごと kill。Job の共有を再導入しないこと。理由と Explorer broker 経路の制約は [DESIGN.md の OS操作の境界](DESIGN.md#os操作の境界) を参照する。
 - 出力は UTF-8 → OEM (CP932) の順で自動デコード。長時間コマンドの進捗は `\r`/`\n` 区切りで `IProgress<string>` 通知。
 - サービスの停止・再開が要る操作は [WindowsServiceControl](src/Lumin4ti.Core/Services/Windows/WindowsServiceControl.cs) を通す。状態照会は SCM を直接叩き (`QueryState`)、停止・開始だけ `net.exe` に委ねる。`SuspendAsync` は**元から稼働していたサービスだけ**を止めて `ServiceSuspension` を返し、呼び出し側は失敗・キャンセル時も `finally` で `ResumeAsync()` を必ず実行する。キャンセル時に例外を投げず途中で打ち切るのは、既に止めたサービスの再開手段を呼び出し側が失わないため。`net start` が失敗した場合も SCM の自動回復を最大 60 秒確認し、実際に稼働へ戻らなかったサービスだけを再開失敗とする。
 
 ### 破壊的操作の復元性
 
-「OFF で Windows 既定に戻す」を謳う以上、ハードコード既定値でなく**ユーザーの元の値**へ戻す。`RegistryToggle` は ON 適用前に [RegistryValueBackup](src/Lumin4ti.Core/Services/Windows/Actions/RegistryValueBackup.cs) で保護ストレージへスナップショットし、OFF で復元する。保存先と保護境界は [DESIGN.md の状態と永続化](DESIGN.md#状態と永続化) を参照する。旧 AppData バックアップを復元元に使わず、HKCU を含む項目は利用者 SID ごとの分離を維持する。UWP・Defender も同様に保護バックアップを使う。不可逆操作を足すときは同様のバックアップを検討する。
+「OFF で Windows 既定に戻す」を謳う以上、ハードコード既定値でなく**ユーザーの元の値**へ戻す。`RegistryToggle` は ON 適用前に [RegistryValueBackup](src/Lumin4ti.Core/Services/Windows/Actions/RegistryValueBackup.cs) で保護ストレージへスナップショットし、OFF で復元する。保存先、型付き値の検証、既存退避の再利用条件は [DESIGN.md の状態と永続化](DESIGN.md#状態と永続化) を参照する。旧 AppData バックアップを復元元に使わず、HKCU を含む項目は利用者 SID ごとの分離を維持する。変更時は `RegistryToggleTests` の異なる元値型・再保存・SID 分離・旧退避拒否の検証を通す。UWP・Defender も同様に保護バックアップを使う。不可逆操作を足すときは同様のバックアップを検討する。
+
+### winget によるアプリ更新
+
+[WingetUpgradeAction](src/Lumin4ti.Core/Services/Windows/Actions/UpdateActions.cs) の更新候補は、公式ソース、Package ID、表示名と更新チャネルの整合性を確認してから個別に実行する。`upgrade --all` へ置き換えず、確認不能な一覧では更新を中止し、確認不能な個別候補は除外して他の候補を続行すること。
+
+個別の成功・失敗・除外、終了コードと出力要約を結果・進捗・ログへ残す。判定と診断を変更するときは [WingetOutputFilterTests](src/Lumin4ti.Tests/WingetOutputFilterTests.cs) の別チャネル拒否、個別結果、部分成功の検証を通す。データフローと集計結果の条件は [DESIGN.md のインストール済みアプリの更新](DESIGN.md#インストール済みアプリの更新) を参照する。
 
 ### 未接続 PnP デバイスの削除
 
@@ -67,7 +73,7 @@ dotnet test Lumin4ti.slnx --filter "Name=子項目の親は同じカテゴリに
 
 旧バッチのファイル削除は、対象を用途別にまとめた「グループ 1 つ = ボタン 1 つ」として実装している。ロジックは 3 ファイルに分かれ、**掃除対象を増やすときは [FileCleanupGroups.cs](src/Lumin4ti.Core/Services/Windows/Actions/FileCleanupGroups.cs) のパス表へ 1 行足すだけ**でよい (個別クラスを作らない)。
 
-- [FileCleanupEngine](src/Lumin4ti.Core/Services/Windows/Actions/FileCleanupEngine.cs) — 削除の実体。`CleanupTarget` は `Contents` (既知のキャッシュ／ログフォルダの中身だけ) / `Files` (既知のキャッシュファイル名だけ) の 2 種。フォルダごとの削除とドライブ全体の再帰検索は扱わない。使用中ファイルは飛ばして続行し、削除数・解放バイト数・ブロック数を `CleanupOutcome` に集計する。
+- [FileCleanupEngine](src/Lumin4ti.Core/Services/Windows/Actions/FileCleanupEngine.cs) — 削除の実体。`CleanupTarget` は `Contents` (既知のキャッシュ／ログフォルダの中身だけ) / `Files` (既知のキャッシュファイル名だけ) の 2 種。フォルダごとの削除とドライブ全体の再帰検索は扱わない。使用中ファイルは飛ばして続行し、削除数・解放バイト数・ブロック数を `CleanupOutcome` に集計する。削除不能の記録は `RecordBlocked` を通し、パス・理由・エラー番号の代表例を件数・長さの上限内で残す。
 - [FileCleanupAction](src/Lumin4ti.Core/Services/Windows/Actions/FileCleanupAction.cs) — グループ 1 件分の `IMaintenanceAction`。サービス停止・再起動要否・Explorer 影響・再起動時削除予約をコンストラクタ引数で受ける。
 
 削除対象は、名称と用途の両方から再生成可能と確認できるキャッシュ・ログ・一時領域だけに限定する。Python ランタイム、仮想環境、ローカルビルド成果物、WebStorage、閲覧・利用履歴、オフラインデータ、復旧資産、ドライバインストーラー、アプリ設定、汎用ホームディレクトリは対象にしない。ゴミ箱、`Windows.old`、Outlook OST/NST、ドライブ全体のファイル検索も扱わない。
@@ -94,7 +100,7 @@ dotnet test Lumin4ti.slnx --filter "Name=子項目の親は同じカテゴリに
 
 ### タスクバーアイコンと AUMID (回帰注意)
 
-v1.0.11〜1.0.13 で 3 回連続修正した領域。現行方針は「**プロセスだけが AUMID を名乗り、ショートカットには何も書かない**」:
+「**プロセスだけが AUMID を名乗り、ショートカットには何も書かない**」方針を維持する:
 
 - 製品版 (`#if !DEBUG`) だけ起動直後に `WindowsElevationHelper.TrySetCurrentProcessAppUserModelId()` で Velopack の AUMID を設定する。Debug ビルドで名乗ると Windows がインストール済み製品の情報を参照して開発用 EXE のタスクバーアイコンが白紙になるため設定しない。
 - ショートカット (.lnk) へ AUMID や明示アイコンを追記しない。埋め込みアイコンの解決は Windows に任せる。v1.0.12 が追記した override は起動時に [WindowsLegacyStartMenuShortcutMigrator.ClearInstalledShortcutOverrides()](src/Lumin4ti.UI/Services/WindowsLegacyStartMenuShortcutMigrator.cs) が Start メニュー・デスクトップ・タスクバーピン留めから除去する。
