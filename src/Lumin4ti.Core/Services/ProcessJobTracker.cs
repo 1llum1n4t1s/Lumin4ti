@@ -1,5 +1,8 @@
+using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using Microsoft.Win32.SafeHandles;
 
 namespace Lumin4ti.Core.Services;
 
@@ -12,32 +15,72 @@ namespace Lumin4ti.Core.Services;
 [SupportedOSPlatform("windows")]
 internal static class ProcessJobTracker
 {
-    private static readonly nint JobHandle = CreateKillOnCloseJob();
+    // WindowsApps の winget は生成時点で別の Job に入ることがある。
+    // 一度ほかの子を登録した Job を再利用すると、異なる Job 階層との競合で登録が拒否される。
+    // 子ごとに独立した Job を持ち、アプリ終了までハンドルを保持する。
+    private static readonly ConcurrentBag<SafeFileHandle> JobHandles = new();
 
     internal static bool ContainsProcess(nint processHandle) =>
-        JobHandle != 0 && IsProcessInJob(processHandle, JobHandle, out var belongs) && belongs;
+        JobHandles.Any(job => IsProcessInJob(processHandle, job.DangerousGetHandle(), out var belongs) && belongs);
 
     // Explorer broker は生成時のスレッドを取得できないため、既存プロセスの登録だけを行う。
     // 生成を制御できる経路には使わず、TrackAndResume で実行前に登録する。
     public static void TrackExistingBrokerProcess(nint processHandle)
     {
-        if (JobHandle != nint.Zero && processHandle != nint.Zero)
+        if (processHandle == nint.Zero)
         {
-            if (!AssignProcessToJobObject(JobHandle, processHandle))
-                LoggerBootstrap.Log.Error($"子プロセスの Job 登録に失敗しました: Win32 {Marshal.GetLastWin32Error()}");
+            return;
         }
+
+        var job = CreateKillOnCloseJob();
+        if (job is null)
+        {
+            LoggerBootstrap.Log.Error("Explorer broker の終了を管理する Job を作成できませんでした");
+            return;
+        }
+
+        if (!AssignProcessToJobObject(job.DangerousGetHandle(), processHandle))
+        {
+            var error = Marshal.GetLastWin32Error();
+            job.Dispose();
+            LoggerBootstrap.Log.Error(DescribeAssignmentFailure(error, processHandle));
+            return;
+        }
+
+        JobHandles.Add(job);
     }
 
     /// <summary>CREATE_SUSPENDED で生成したプロセスだけを登録し、成功後に再開する。</summary>
     public static void TrackAndResume(nint processHandle, nint threadHandle)
     {
-        if (JobHandle == 0)
+        var job = CreateKillOnCloseJob();
+        if (job is null)
             throw new InvalidOperationException("子プロセスの終了を管理する Job を作成できませんでした");
-        if (!AssignProcessToJobObject(JobHandle, processHandle))
-            throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error(), "子プロセスの Job 登録に失敗しました");
+        if (!AssignProcessToJobObject(job.DangerousGetHandle(), processHandle))
+        {
+            var error = Marshal.GetLastWin32Error();
+            job.Dispose();
+            throw new Win32Exception(error, DescribeAssignmentFailure(error, processHandle));
+        }
+        JobHandles.Add(job);
         if (ResumeThread(threadHandle) == uint.MaxValue)
-            throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error(), "子プロセスを再開できませんでした");
+        {
+            var error = Marshal.GetLastWin32Error();
+            throw new Win32Exception(error, $"子プロセスを再開できませんでした: Win32 {error} ({new Win32Exception(error).Message})");
+        }
     }
+
+    private static string DescribeAssignmentFailure(int error, nint processHandle) =>
+        $"子プロセスの Job 登録に失敗しました: Win32 {error} ({new Win32Exception(error).Message}); " +
+        $"親Job={DescribeJobMembership(GetCurrentProcess())}; 子Job={DescribeJobMembership(processHandle)}";
+
+    private static string DescribeJobMembership(nint processHandle) =>
+        IsProcessInJob(processHandle, nint.Zero, out var belongs)
+            ? belongs ? "所属" : "未所属"
+            : $"照会失敗 Win32 {Marshal.GetLastWin32Error()}";
+
+    [DllImport("kernel32.dll")]
+    private static extern nint GetCurrentProcess();
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern uint ResumeThread(nint threadHandle);
@@ -46,39 +89,47 @@ internal static class ProcessJobTracker
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool IsProcessInJob(nint processHandle, nint jobHandle, [MarshalAs(UnmanagedType.Bool)] out bool belongs);
 
-    private static nint CreateKillOnCloseJob()
+    private static SafeFileHandle? CreateKillOnCloseJob()
     {
         var handle = CreateJobObject(nint.Zero, null);
         if (handle == nint.Zero)
         {
-            return nint.Zero;
+            return null;
         }
-
-        var info = new JOBOBJECT_EXTENDED_LIMIT_INFORMATION
-        {
-            BasicLimitInformation = new JOBOBJECT_BASIC_LIMIT_INFORMATION
-            {
-                LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
-            },
-        };
-
-        var length = Marshal.SizeOf<JOBOBJECT_EXTENDED_LIMIT_INFORMATION>();
-        var ptr = Marshal.AllocHGlobal(length);
+        var job = new SafeFileHandle(handle, ownsHandle: true);
         try
         {
-            Marshal.StructureToPtr(info, ptr, fDeleteOld: false);
-            if (!SetInformationJobObject(handle, JobObjectExtendedLimitInformation, ptr, (uint)length))
+            var info = new JOBOBJECT_EXTENDED_LIMIT_INFORMATION
             {
-                CloseHandle(handle);
-                return nint.Zero;
-            }
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(ptr);
-        }
+                BasicLimitInformation = new JOBOBJECT_BASIC_LIMIT_INFORMATION
+                {
+                    LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
+                },
+            };
 
-        return handle;
+            var length = Marshal.SizeOf<JOBOBJECT_EXTENDED_LIMIT_INFORMATION>();
+            var ptr = Marshal.AllocHGlobal(length);
+            try
+            {
+                Marshal.StructureToPtr(info, ptr, fDeleteOld: false);
+                if (!SetInformationJobObject(job.DangerousGetHandle(), JobObjectExtendedLimitInformation, ptr, (uint)length))
+                {
+                    job.Dispose();
+                    return null;
+                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(ptr);
+            }
+
+            return job;
+        }
+        catch
+        {
+            job.Dispose();
+            throw;
+        }
     }
 
     private const int JobObjectExtendedLimitInformation = 9;
@@ -130,8 +181,4 @@ internal static class ProcessJobTracker
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool AssignProcessToJobObject(nint hJob, nint hProcess);
-
-    [DllImport("kernel32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool CloseHandle(nint hObject);
 }
