@@ -213,6 +213,9 @@ public sealed class FileCleanupTests
         Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
         Assert.IsTrue(File.Exists(file));
         StringAssert.Contains(result.Detail, "削除できませんでした");
+        StringAssert.Contains(result.Detail, "使用中");
+        StringAssert.Contains(result.Detail, file);
+        StringAssert.Contains(result.Detail, "0x80070020");
     }
 
     [TestMethod]

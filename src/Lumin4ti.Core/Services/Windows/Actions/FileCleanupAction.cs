@@ -236,7 +236,16 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
 
         LoggerBootstrap.Log.Info(
             $"{Id}: files={outcome.DeletedFiles} dirs={outcome.DeletedDirectories} " +
-            $"bytes={outcome.FreedBytes} blocked={outcome.Blocked} missing={outcome.MissingTargets}");
+            $"bytes={outcome.FreedBytes} blocked={outcome.Blocked} missing={outcome.MissingTargets} " +
+            $"scheduled={outcome.ScheduledForReboot} rejected={outcome.RejectedTargets.Count}");
+        foreach (var example in outcome.BlockedExamples)
+        {
+            LoggerBootstrap.Log.Info($"{Id}: 削除できなかった項目: {example}");
+        }
+        foreach (var rejected in outcome.RejectedTargets.Take(8))
+        {
+            LoggerBootstrap.Log.Info($"{Id}: 安全のため対象から除外: {rejected}");
+        }
 
         if (resumeFailures.Count > 0)
         {

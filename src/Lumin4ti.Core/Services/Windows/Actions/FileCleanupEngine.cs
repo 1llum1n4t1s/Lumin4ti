@@ -36,6 +36,9 @@ public sealed record CleanupTarget(string RawPath, CleanupTargetKind Kind, strin
 /// <summary>削除処理の集計。</summary>
 public sealed class CleanupOutcome
 {
+    private const int MaxBlockedExamples = 8;
+    private readonly List<string> _blockedExamples = [];
+
     /// <summary>削除できたファイル数。</summary>
     public long DeletedFiles { get; internal set; }
 
@@ -47,6 +50,22 @@ public sealed class CleanupOutcome
 
     /// <summary>使用中・権限不足で削除できなかった項目数。</summary>
     public long Blocked { get; internal set; }
+
+    /// <summary>削除できなかった理由とパスの代表例。大量のファイルでも記録量を一定に保つ。</summary>
+    public IReadOnlyList<string> BlockedExamples => _blockedExamples;
+
+    internal void RecordBlocked(string path, Exception exception) =>
+        RecordBlocked(path, $"{exception.Message} (HRESULT=0x{unchecked((uint)exception.HResult):X8})");
+
+    internal void RecordBlocked(string path, string reason)
+    {
+        Blocked++;
+        if (_blockedExamples.Count < MaxBlockedExamples)
+        {
+            var diagnostic = $"{path}: {reason}".Replace('\r', ' ').Replace('\n', ' ');
+            _blockedExamples.Add(diagnostic.Length <= 1024 ? diagnostic : diagnostic[..1024] + "…");
+        }
+    }
 
     /// <summary>再起動時削除として予約した項目数。</summary>
     public long ScheduledForReboot { get; internal set; }
@@ -354,7 +373,7 @@ public static class FileCleanupEngine
     {
         if (depth > MaxDepth)
         {
-            outcome.Blocked++;
+            outcome.RecordBlocked(directory.FullName, "安全な再帰深度の上限を超えました");
             return;
         }
 
@@ -377,7 +396,7 @@ public static class FileCleanupEngine
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
         {
-            outcome.Blocked++;
+            outcome.RecordBlocked(directory.FullName, ex);
             return;
         }
 
@@ -397,7 +416,7 @@ public static class FileCleanupEngine
             //  追従すると同じ場所を無限に降りたり対象外を消したりする)。
             if (!TryGetAttributes(subdirectory, out var subdirectoryAttributes))
             {
-                outcome.Blocked++;
+                outcome.RecordBlocked(subdirectory.FullName, "フォルダの属性を取得できませんでした");
                 continue;
             }
 
@@ -429,7 +448,7 @@ public static class FileCleanupEngine
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
         {
-            outcome.Blocked++;
+            outcome.RecordBlocked(directory, ex);
             return;
         }
 
@@ -478,7 +497,7 @@ public static class FileCleanupEngine
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            outcome.Blocked++;
+            outcome.RecordBlocked(file.FullName, ex);
             return;
         }
 
@@ -518,7 +537,7 @@ public static class FileCleanupEngine
                 TryRestoreAttributes(file, originalAttributes);
             }
 
-            outcome.Blocked++;
+            outcome.RecordBlocked(file.FullName, ex);
         }
     }
 
@@ -753,6 +772,14 @@ public static class FileCleanupEngine
         if (outcome.Blocked > 0)
         {
             lines.Add($"  - 使用中または権限不足で {outcome.Blocked:N0} 個の項目を削除できませんでした (次回起動直後の再実行で消えることがあります)");
+            foreach (var example in outcome.BlockedExamples)
+            {
+                lines.Add($"  - 削除できなかった項目: {example}");
+            }
+            if (outcome.Blocked > outcome.BlockedExamples.Count)
+            {
+                lines.Add($"  - 残り {outcome.Blocked - outcome.BlockedExamples.Count:N0} 件の詳細は省略しました");
+            }
         }
 
         if (outcome.MissingTargets > 0)
