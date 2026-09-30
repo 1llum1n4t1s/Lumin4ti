@@ -204,6 +204,7 @@ foreach ($runtime in $Runtimes) {
             --icon (Join-Path 'src' 'Lumin4ti.UI' 'icon' 'app.ico') `
             --packDir $publishDir `
             --outputDir $ArtifactsDir `
+            --runtime $runtime `
             --channel $config.Channel `
             --shortcuts 'StartMenuRoot,Desktop' `
             --msi `
