@@ -4,7 +4,7 @@
 
 ## 目的と対象範囲
 
-Lumin4ti は Windows 10 / 11（64-bit）向けのメンテナンス・最適化GUIである。利用者がコマンドを直接入力せずに、Windows Update、セキュリティ、キャッシュ整理、修復、性能設定、システム設定、並べ替えをカテゴリ別に実行できるようにする。
+Lumin4ti は Windows 10 / 11（x64）向けのメンテナンス・最適化GUIである。利用者がコマンドを直接入力せずに、Windows Update、セキュリティ、キャッシュ整理、修復、性能設定、システム設定、並べ替えをカテゴリ別に実行できるようにする。
 
 アプリは管理者権限で動作し、レジストリ、DISM、powercfg、bcdedit、winget、Shell COM、WinRTなどを操作する。Windows APIやレジストリで直接表現できる処理はC#で実装し、OS提供ツールが正式な実行手段である場合だけ外部プロセスを使う。
 
@@ -14,13 +14,14 @@ Lumin4ti は Windows 10 / 11（64-bit）向けのメンテナンス・最適化G
 | --- | --- | --- |
 | `Lumin4ti.Core` | メンテナンス項目、Windows操作、設定・ログ・バックアップ、外部プロセス管理 | UIを参照しない |
 | `Lumin4ti.UI` | Avalonia画面、MVVM、ローカライズ、DI、操作状態、更新UI | Coreの公開契約を呼び出す |
-| `Lumin4ti.Tests` | 純粋ロジック、安全ガード、カタログ、配布契約の回帰検証 | レジストリ・デバイス操作はモック化し、ファイル削除はテスト専用一時領域で検証する |
-| `scripts/` | 安全な動作検証、Windows向けpublish、Velopack梱包、MSI補正、署名、R2公開 | 梱包・署名・公開はリリース時だけ実行する |
+| `Lumin4ti.Tests` | 純粋ロジック、安全ガード、サービス補償、ViewModel、カタログ、配布契約の回帰検証 | レジストリ・デバイス操作はモック化し、ファイル削除はテスト専用一時領域で検証する |
+| `scripts/verification/` | solution外のコンソールによる操作フロー検証 | 実ViewModelとCoreを使い、OS操作は模擬境界に限定する |
+| `scripts/` のリリース処理 | Windows向けpublish、Velopack梱包、MSI補正、署名、R2公開 | 梱包・署名・公開はリリース時だけ実行する |
 | `../vps-web/deploy/lp-gateways/lumin4ti/` | Cloudflare内の製品ページへ中継するWorker | ページと共通CSS以外は既存のR2配信へ委譲する |
 
 依存方向は `Lumin4ti.UI` → `Lumin4ti.Core` の一方向である。OS操作をUI層へ持ち込まず、CoreはAvalonia型を受け取らない。
 
-`scripts/verify-review-fixes.ps1` は ViewModel → Core → 模擬 OS の動作を安全なコンソールで検証し、結果を `local-release/review-fixes-verification.json` へ保存する。実 GUI の E2E 検証とは区別し、build/test も別途実行する。
+操作フロー検証は ViewModel → Core → 模擬 OS の経路を通し、実レジストリ・SCM・通信・インストール・利用者データの削除を行わない。各ケースに15秒の待機上限を設け、失敗しても後続ケースと結果出力を続ける。結果にはケース別の証拠、実行環境、読込アセンブリの絶対パスとSHA256を含める。この上限は検証側の待機だけを終了し、元の処理を停止するものではないため、実OS操作の制限には使わない。実GUIのE2Eとは別の検証であり、再現手順と保持する成果物は [WORKFLOWS.md](scripts/verification/WORKFLOWS.md)、必須コマンドは [AGENTS.md](AGENTS.md#ビルドテスト実行) にまとめる。
 
 ## 起動と終了
 
@@ -49,7 +50,7 @@ Lumin4ti は Windows 10 / 11（64-bit）向けのメンテナンス・最適化G
 1. `MainWindowViewModel`がカテゴリごとの`CommandCategoryViewModel`を公開する。
 2. ViewModelが`MaintenanceOperationCoordinator`からプロセス間で排他的なleaseを取得する。サインイン時クリーンアップも同じ共有ロックを取得し、GUI操作と重なった場合は実行しない。
 3. CoreのAction / Toggle / ChoiceがWindows API、レジストリ、または`ICommandExecutor`を通してOSを操作する。
-4. 進捗と`Success` / `Partial` / `Failed` / `Canceled`をUIへ返す。
+4. 進捗と`Success` / `Partial` / `Failed` / `Canceled`をUIへ返す。複数段階の重要ステップが失敗した場合は`Failed`、使用中ファイルのスキップなど想定内の未処理は`Partial`として可視化する。
 5. トグルと選択項目は実状態を再取得し、必要な項目だけExplorerを再起動する。
 
 GUI とサインイン時クリーンアップを含め、状態変更操作はマシン全体で同時に1件だけ実行する。これにより、複数のレジストリ変更、サービス停止、外部コマンド、Explorer再起動が競合しない。
@@ -66,7 +67,9 @@ GUI とサインイン時クリーンアップを含め、状態変更操作は�
 
 ## OS操作の境界
 
-`ProcessCommandExecutor`は外部コマンド名を`SystemProcessResolver`で信頼済みの完全パスへ解決し、作業ディレクトリをSystem32へ固定する。`JobProcess`は子プロセスを停止状態で生成し、`ProcessJobTracker`が子ごとの独立したJob Objectへ登録してから再開する。WindowsAppsのwingetなどが生成時から別のJobに属していても、既に登録した他の子のJob階層と競合しないためである。登録・再開に失敗した子は停止し、Win32エラーと登録失敗時の親子のJob所属状況を診断へ残す。Jobハンドルはアプリ終了まで保持し、KILL_ON_JOB_CLOSEで孤児を終了する。キャンセル時はプロセスツリーを終了する。標準出力はUTF-8を優先し、失敗時はWindowsのOEMコードページで復号する。
+`ProcessCommandExecutor`は外部コマンド名を`SystemProcessResolver`で信頼済みの完全パスへ解決し、作業ディレクトリをSystem32へ固定する。`JobProcess`は子プロセスを停止状態で生成し、`ProcessJobTracker`が子ごとの独立したJob Objectへ登録してから再開する。WindowsAppsのwingetなどが生成時から別のJobに属していても、既に登録した他の子のJob階層と競合しないためである。登録・再開に失敗した子は停止し、Win32エラーと登録失敗時の親子のJob所属状況を診断へ残す。Jobハンドルはアプリ終了まで保持し、KILL_ON_JOB_CLOSEで孤児を終了する。キャンセル時はプロセスツリーを終了する。
+
+出力は厳密なUTF-8を優先し、途中で切れた末尾だけが不正ならその末尾を除いて再解釈する。それでもUTF-8でなければ現在のカルチャのOEMコードページ（日本語ではCP932）を使い、コードページを取得できない場合はLatin1へ代替する。進捗は`\r` / `\n`区切りで通知する。MMAgentなどの失敗診断は`CommandFailureDiagnostic`に集約し、終了コードを10進数・16進数で示す。標準出力・標準エラーは各末尾8192文字を処理し、Bearer値・URLの認証情報・代表的な秘密値フィールドを伏せる。制御文字を除いた各600文字を上限とし、切り詰めた要約には省略記号を添える。
 
 利用者セッションで行うShell操作は`UnelevatedCommandExecutor`へ分離する。直接生成する経路では同じ停止状態でのJob登録を使うが、Explorer broker経由では既に起動したプロセスを登録するため、登録失敗はログへ残す方式である。サービス操作は`WindowsServiceControl`に集約する。元から稼働中のサービスだけに停止を要求し、その全件がSCMで停止済みと確認できた場合に`FileCleanupAction`が削除を進める。元から停止中・未インストールなら操作せず、初期状態が取得不能・遷移中、または停止要求後に停止を確認できない場合は削除を中止する。SCMで稼働中の依存サービスを列挙し、存在する場合や列挙不能の場合は停止を拒否する。`net stop`は`/y`を付けず、標準入力をEOFにして確認待ちを防ぎ、停止・開始とも2分の上限を設ける。停止要求はキャンセルで途中終了させず、要求前に復帰対象へ記録する。これにより停止コマンドや照会が失敗しても、呼び出し側の`finally`で元の稼働状態への復帰を試みられる。復帰時に既に稼働中なら開始を省略し、それ以外は`net start`を実行する。開始失敗時も最大60秒間SCMで稼働への復帰を確認してから再開失敗を確定する。キャンセルされた整理でも復帰失敗は`Failed`と診断で利用者へ通知する。
 
@@ -108,36 +111,41 @@ MMAgentの状態は一括再読込ごとに完了済みキャッシュと操作�
 
 `RegistryValueBackup`はレジストリの元の型と未設定状態を保存する。既存退避は元値を保つため上書きせず、schema、対象のhive・key・value名、件数、型付き値を全件検証して再利用する。元値の型は適用する値の型と異なってもよく、旧形式・破損・対象不一致は設定変更前に拒否する。復元も全件の計画を確定してから書き戻す。共有JSONの`RegistryValueSnapshot`はメタデータ生成経路を使い、未使用のバイナリ値がnullから空Base64へ変化して再読込時に型不一致となることを防ぐ。
 
-ONの失敗補償には今回の操作直前の実値を使い、OFF用の初回原本を使わない。補償後は今回追加した原本と所有登録だけを同一性の確認後に取り消し、既存原本を保持する。混在項目のOFFで全値復元後に所有更新が失敗した場合、更新済み定義を照合できれば完了とする。照合不能なら原本を保持して失敗を表示し、レジストリだけONへ戻さない。画面がOFFになった場合の回復手順はON→OFFである。
+ONの失敗補償には今回の操作直前の実値を使い、OFF用の初回原本を使わない。補償後は今回追加した原本と所有登録だけを同一性の確認後に取り消し、既存原本を保持する。混在項目のOFFで全値復元後に所有更新が失敗した場合、更新済み定義を照合できれば完了とする。照合不能なら原本を保持して失敗を表示し、レジストリだけONへ戻さない。画面がOFFになった場合は、ON→OFFによる所有登録解除の再試行を案内する。
 
 UWPの2 DWORDは原子的に更新できない。書込み例外では現在のペアを確認して操作直前へ補償し、復帰を再確認する。次回起動でbefore/appliedの混合ペアが残っていた場合、途中更新と外部変更を区別できないため現在値・元値を保持して診断する。復元可能な他項目は処理し、未解決の項目だけschema 2のjournalに残す。
 
 ## ローカライズ
 
-UI文字列は`Resources/Locales/*.axaml`の17辞書で管理する。`en_US.axaml`が完全なキー集合で、各非日本語辞書は英語をmergeして上書きする。Coreは翻訳キーと日本語フォールバックだけを持ち、UIが`DynamicResource`または`App.Text`で現在言語を解決する。
+UI文字列は`src/Lumin4ti.UI/Resources/Locales/*.axaml`の17辞書で管理する。`en_US.axaml`が完全なキー集合で、英語以外の非日本語辞書は英語をmergeして上書きする。日本語辞書はシェル文言を中心に持ち、Action・カテゴリ・ステータスなどはコード内の日本語をフォールバックに使う。Coreは翻訳キーと日本語フォールバックだけを持ち、UIが`DynamicResource`または`App.Text`で現在言語を解決する。汎用の状態診断と更新状況は言語変更時に再評価し、OS例外の具体的な診断はそのまま保持する。
 
 ## 更新と配布
 
 更新元は`https://lumin4ti.kagayoi.com`、channelは`win`へ固定され、`settings.json`から変更できない。インストール版だけがVelopackの`releases.win.json`を参照し、開発実行では更新機構を無効として扱う。`UpdateService`は`UpdateManager`の生成と現在バージョンの取得を担当し、`VersionViewModel`が操作コーディネーターのlease内で`VelopackUpdateDialog.Avalonia`へ確認・ダウンロード・適用UIを委譲する。終了時のキャンセルもこのleaseのトークンで伝える。
 
-配布物はVelopackが生成する署名済みPerMachine MSIである。ローカルのリリーススクリプトがrestore、self-contained publish、Velopack梱包、MSI配置補正、SimplySign署名、Cloudflare R2 upload、配信検証を順に行う。署名に対話的なSimplySign Desktopを使うため、リリースはCIではなくローカルで完結する。
+配布物はVelopackが生成する署名済みPerMachine `Lumin4ti-win.msi`である。対象は`win-x64`のみで、restore、self-contained publish、`vpk pack --runtime`へ同じRIDを渡す。publishだけでなく梱包時も明示することで、実行ファイルと配布パッケージの対象環境を一致させる。更新channelの`win`はRIDとは別の識別子であり、manifest名を維持する。ARM64向けパッケージは配信しない。
 
-PerMachine移行の固定MSI取得には、呼び出し元のキャンセルと連動した5分の期限を設ける。HTTPヘッダー取得から本文のコピー完了まで同じ期限を使い、本文待ちで移行を無期限に止めない。
+### リリース成果物と公開順序
+
+ローカルのリリーススクリプトがrestore、self-contained publish、Velopack梱包と署名、MSI配置補正と再署名、Cloudflare R2 upload、配信検証を行う。`set-msi-program-files-location.ps1`がMSIのDirectory表を`ProgramFiles64Folder\Lumin4ti`へ補正し、固定配置を保証する。補正で元の署名が無効になるため、公開前に再署名と発行元の検証を行う。署名に対話的なSimplySign Desktopを使うため、リリースはCIではなくローカルで完結する。
+
+準備時に再生成するのは`local-release/artifacts`と対象RIDの`publish-*`だけで、同じ親ディレクトリの検証記録は保持する。清掃対象がその直下にあることと、再解析ポイントを含まないことを確認してから削除する。
+
+公開はassetを先にアップロードし、manifest参照先と固定MSIのHTTP 200・サイズ一致を確認してから、`releases.win.json`を最後に更新する。これを公開の確定点とすることで、途中失敗時も旧manifestの更新経路を維持する。固定名の配布物は公開内容のSHA256とローカルを照合し、不一致URLだけキャッシュをパージする。パージ後はmanifestのJSON内容がローカルと一致するまで待ち、確認できなければ旧assetの清掃を行わない。
+
+旧assetの清掃では、現manifestと更新直前manifestの参照先、直近2バージョン、バージョン文字列を含まない固定名を保持する。旧manifestを取得できない場合は清掃を省略する。PerUser `Setup.exe`は新規公開せず、MSIの配信確認後に旧Setupを回収する。配布契約テストが製品参照、リリーススクリプト、配置補正、利用者向け導線、更新設定の整合性を固定する。
+
+### 旧配置からの移行
+
+`WindowsPerMachineMigration`は通常の自己昇格より前に、旧`%LOCALAPPDATA%\Lumin4ti`版から信頼済みPerMachine版へ移行する。未導入なら固定URLのMSIを取得し、署名と発行元を確認してからインストールする。検証済みMSIの読取ハンドルを保持して、検証からインストール完了まで書換え・削除を防ぐ。取得には呼び出し元のキャンセルと連動した5分の期限を設け、HTTPヘッダー取得と本文コピーに同じ期限を渡す。`ResponseHeadersRead`の`HttpClient.Timeout`だけでは本文待ちを制限できないためである。
+
+インストール先は`VELOPACK_INSTALLDIR=<Program Files>\Lumin4ti`を明示する。署名・MSI登録・`.msi-installed`を確認できる既知の誤配置（ドライブ直下の`Lumin4ti`と`Program Files\ゆろち\Lumin4ti`）も固定MSIで配置を修復する。同一ProductCode/Versionで通常の`/i`が配置を変えない場合だけ`REINSTALL=ALL REINSTALLMODE=vamus`で全再配置・再キャッシュする。任意のカスタム配置は自動回収しない。
+
+信頼済みPerMachine起動側が旧プロセスの終了を待って、既知の旧本体・Updater・キャッシュ・HKCUアンインストール登録・ユーザーショートカットだけを回収する。`Update.exe`や`packages`だけが残る部分移行も次回起動で再回収し、ユーザー書込み可能な旧Updaterは実行しない。設定・ログ・保護バックアップを保持し、ショートカット削除後は`SHChangeNotify`でStartメニューの表示キャッシュを更新する。
+
+### 製品ページと更新ファイルの経路
 
 Cloudflare Workerは`/`、`/index.html`と`/common.css`を`LP_CONTENT`サービスbinding経由で配信し、更新manifest、nupkg、MSIなどのパスを加工せず既存のR2配信へ委譲する。これによりWebページとVelopack配信が同じホスト名を共有する。
-
-## 重要な不変条件
-
-- CoreはUIを参照せず、Windows操作の正本をCoreへ置く。
-- GUIとサインイン時クリーンアップの状態変更はマシン全体で1件ずつ実行し、終了時はキャンセル後の補償完了を待つ。
-- 外部コマンドは信頼済み完全パスとSystem32作業ディレクトリで起動する。
-- ON/OFFで戻せると表示する項目は、適用前の実値を保存して復元する。
-- 削除対象は再生成可能な既知領域へ限定し、リンクと未解決パスを拒否する。
-- スタートアップ登録と関連付け候補は、準備済み固定ドライブ上で実行ファイルの欠損を確定できた場合だけ削除する。
-- 複数段階の操作は重要ステップの失敗を成功扱いせず、想定内の未処理は`Partial`として可視化する。
-- UIは変更後の状態を推測せず、OSから再取得した値を表示する。
-- 未接続デバイスはソフトウェア／仮想デバイスも表示し、利用者の選択と二段階確認を経て、削除直前にも接続状態を確認する。
-- 配布形式、インストール範囲、更新元、channel、署名方式は配布契約テストとリリーススクリプトで一致させる。
 
 ## 採用済み設計判断
 
@@ -155,4 +163,4 @@ Cloudflare Workerは`/`、`/index.html`と`/common.css`を`LP_CONTENT`サービ�
 
 製品ページの配信HTMLは `../vps-web/lp/lumin4ti/`（編集元は `../vps-web/tools/lp/templates/`）。Cloudflareの `vps-web-lp` サービスがStatic Assetsとして提供する。
 Cloudflare側の中継設定は `../vps-web/deploy/lp-gateways/lumin4ti/` に置く。
-公開URLと既存のR2・ライセンス通信を維持し、配信は `vps-web/deploy/deploy-lp.ps1` へ統一する。
+公開URLと既存のR2更新経路を維持し、配信は `../vps-web/deploy/deploy-lp.ps1` へ統一する。

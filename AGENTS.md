@@ -12,33 +12,30 @@ Lumin4ti は Windows 10/11 向けのメンテナンス・最適化 GUI ツール
 dotnet build Lumin4ti.slnx           # ビルド (0 warnings を維持する方針)
 dotnet test Lumin4ti.slnx            # 全テスト (MSTest)
 # 単一テストクラス/メソッド:
-dotnet test Lumin4ti.slnx --filter "FullyQualifiedName~MaintenanceActionCatalogTests"
-dotnet test Lumin4ti.slnx --filter "Name=子項目の親は同じカテゴリに実在する"
+dotnet test Lumin4ti.slnx --filter "FullyQualifiedName~RegistryToggleTests"
+dotnet test Lumin4ti.slnx --filter "Name=既存の現行バックアップは再保存で上書きしない"
 # 実行 (通常起動は UAC 昇格が入る):
 ./src/Lumin4ti.UI/bin/Debug/net10.0-windows10.0.20348.0/Lumin4ti.UI.exe
 ```
 
 - TFM は `net10.0-windows10.0.20348.0` ([Directory.Build.props](Directory.Build.props))。UWP パッケージ列挙 (WinRT `PackageManager`) のため Windows SDK 付き。
-- **`.github/workflows/` は存在せず CI は無い**。`.github/dependabot.yml` は NuGet 更新の監視だけを担う。ローカルの `dotnet build` (0 warnings) と `dotnet test` が唯一の検証ゲートなので、変更後は必ず両方通す。
+- **`.github/workflows/` は存在せず CI は無い**。`.github/dependabot.yml` は NuGet 更新の監視だけを担う。変更後はローカルの `dotnet build` (0 warnings) と `dotnet test` を必ず両方通す。
 - **バージョン (`Directory.Build.props` の `<Version>`) は `/vava` 経由でのみ更新**。コード修正のついでに触らない。
-- `pwsh -NoProfile -File scripts/verify-review-fixes.ps1` は VM → Core → 模擬 OS の安全な動作検証を実行し、`local-release/review-fixes-verification.json` に結果を残す。実 GUI の E2E 検証とは区別し、通常の build/test ゲートも通す。
+- 復元・サービス補償・終了時排他・状態表示などの操作フローを変更したら、`pwsh -NoProfile -File scripts/verify-review-fixes.ps1` も実行する。対象ケースと再現方法は [WORKFLOWS.md](scripts/verification/WORKFLOWS.md) を参照し、成果物 `local-release/review-fixes-verification.json` を保持する。検証の境界は [DESIGN.md](DESIGN.md#主要コンポーネント) に記載し、実 GUI の E2E 検証と区別する。
 
 ## アーキテクチャ
 
 システム全体の構造と設計判断は [DESIGN.md](DESIGN.md) を正本とし、この節では実装時に守る規約を扱う。
 
-3 プロジェクト構成 (Avalonia MVVM + CommunityToolkit.Mvvm + Microsoft.Extensions.DI + Velopack 自動更新)。
-
-- **`Lumin4ti.Core`** — OS 操作ロジック。UI を一切参照しない (依存は一方向 UI→Core)。
-- **`Lumin4ti.UI`** — Avalonia。`App.axaml.cs` の `ConfigureServices` で手動 DI (全 Singleton)。
-- **`Lumin4ti.Tests`** — MSTest。純粋関数・パーサ・カタログ整合性を検証 (レジストリ/COM/管理者依存の実書き込みはテストしない)。
+- Core から UI を参照しない。Avalonia MVVM + CommunityToolkit.Mvvm を使い、`App.axaml.cs` の `ConfigureServices` で手動 DI (全 Singleton) を維持する。
+- テストではレジストリ・SCM・COM・デバイスの実変更を行わない。ファイル削除の検証はテスト専用一時領域に限定する。各プロジェクトと操作フロー検証の責務は [DESIGN.md](DESIGN.md#主要コンポーネント) を参照する。
 
 ### メンテナンス項目の中核 (最重要)
 
 すべての「機能」は `IMaintenanceItem` を軸にした 3 型 ([IMaintenanceAction.cs](src/Lumin4ti.Core/Interfaces/IMaintenanceAction.cs)):
 
 - **`IMaintenanceAction`** — 「実行」ボタン型 (1 回実行)。`ExecuteAsync(IProgress<string>?, ct)` でライブ進捗を UI へ流せる。
-- **`IMaintenanceToggle`** — ON/OFF トグル型。**ON = 最適化を適用 / OFF = Windows 既定に戻す** で統一 (例外は MMAgent 系トグルのみ ON = 機能有効)。`GetStateAsync`/`SetStateAsync`。
+- **`IMaintenanceToggle`** — ON/OFF トグル型。**ON = 最適化を適用 / OFF = 適用前の状態へ復元** を基本とし、復元情報がない場合の既定値への復帰は各項目の契約に従う。MMAgent 系は ON = 機能有効。`GetStateAsync`/`SetStateAsync`。
 - **`IMaintenanceChoice`** — ドロップダウン選択型。ON/OFF に収まらない数値・段階設定に使う (例: `MmAgentOperationApiChoice` は「無効」と記録ファイル数を 1 つの操作で選ばせる)。`Options`/`GetSelectedValueAsync`/`SetSelectedValueAsync`。選択肢の表示名は翻訳不要なら `Label` をそのまま出し、翻訳が要るものだけ `LabelKey` を持たせる。`IsDefault` を付けた選択肢に UI が「(既定)」を添える。
 
 `IMaintenanceItem.ParentId` に前提となる項目の Id を入れると、その項目は**親カードの中へ 1 段だけ入れ子表示**され、親トグルが OFF または状態不明の間は操作不可になる (OS 側で連動して無効になる子設定に使う)。親の状態既知・ON/OFF の変化を子へ通知する。親は同じカテゴリに置くこと。
@@ -51,13 +48,12 @@ dotnet test Lumin4ti.slnx --filter "Name=子項目の親は同じカテゴリに
 
 - **セキュリティ (回帰厳禁)**: bare exe 名を渡すと `CreateProcess` の検索順序でインストールディレクトリが `System32` より先に照合され、昇格プロセスがバイナリプランティング LPE を踏む。`ProcessCommandExecutor` は [SystemProcessResolver](src/Lumin4ti.Core/Services/SystemProcessResolver.cs) でフルパス解決 + `WorkingDirectory=System32` 固定してこれを封じている。呼び出し側は論理名でよいが、この解決を外さないこと。
 - 子プロセスは [ProcessJobTracker](src/Lumin4ti.Core/Services/ProcessJobTracker.cs) で子ごとに独立した Job Object (KILL_ON_JOB_CLOSE) へ登録する。生成を制御できる経路では停止状態で登録してから再開し、登録失敗時は実行させない。`ct` キャンセル時はプロセスツリーごと kill。Job の共有を再導入しないこと。理由と Explorer broker 経路の制約は [DESIGN.md の OS操作の境界](DESIGN.md#os操作の境界) を参照する。
-- 出力は UTF-8 → 現在のカルチャの OEM コードページ (日本語では CP932) の順で自動デコード。長時間コマンドの進捗は `\r`/`\n` 区切りで `IProgress<string>` 通知。
-- サービスの停止・再開が要る操作は [WindowsServiceControl](src/Lumin4ti.Core/Services/Windows/WindowsServiceControl.cs) を通す。状態照会は SCM を直接叩き、停止・開始だけ `net.exe` に委ねる。`SuspendAsync` は元から稼働中のサービスに停止を要求し、要求後の SCM 状態が停止済みと確認できない場合は削除を中止する。停止要求前に復帰対象へ記録するため、コマンド失敗・状態照会失敗・キャンセルでも、呼び出し側は返された `ServiceSuspension` の `ResumeAsync()` を `finally` で必ず実行する。初期状態が取得不能・遷移中の場合も削除を進めない。`net start` 失敗後は最大 60 秒間、実際の稼働状態への復帰を確認する。詳細な補償フローは [DESIGN.md](DESIGN.md#os操作の境界) を参照する。
-- 停止前に SCM で稼働中の依存サービスを確認し、存在する場合や確認不能なら停止を拒否する。`net stop` に `/y` を付けず、標準入力を EOF にし、停止・開始に各 2 分の上限を設ける。NTP も共通補償フローを使う。整理のキャンセル後でもサービス復帰失敗は `Failed` として理由を表示する。
+- 出力の復号とライブ進捗通知は `ProcessCommandExecutor` に集約し、呼び出し側で固定コードページを仮定しない。復号の順序は [DESIGN.md](DESIGN.md#os操作の境界) を参照する。
+- サービスの停止・再開が要る操作は [WindowsServiceControl](src/Lumin4ti.Core/Services/Windows/WindowsServiceControl.cs) を通す。停止を確認できなければ削除・設定変更を進めず、返された `ServiceSuspension` の `ResumeAsync()` を失敗・キャンセル時も `finally` で必ず実行する。依存サービス確認、標準入力 EOF、停止・開始の期限、復帰の再照合は [DESIGN.md](DESIGN.md#os操作の境界) の共通補償フローを維持し、`net stop /y` を再導入しない。復帰失敗をキャンセルや成功で隠さず `Failed` として表示する。
 
 ### 破壊的操作の復元性
 
-「OFF で Windows 既定に戻す」を謳う以上、ハードコード既定値でなく**ユーザーの元の値**へ戻す。`RegistryToggle` は ON 適用前に [RegistryValueBackup](src/Lumin4ti.Core/Services/Windows/Actions/RegistryValueBackup.cs) で保護ストレージへスナップショットし、OFF で復元する。保存先、型付き値の検証、既存退避の再利用条件は [DESIGN.md の状態と永続化](DESIGN.md#状態と永続化) を参照する。旧 AppData バックアップを復元元に使わず、HKCU は利用者 SID ごとの schema 1 を維持する。HKLM/HKCU 混在項目の HKLM は schema 2 の共有退避に所有者 SID 集合を記録し、最後の所有者の解除時だけ復元する。所有者不明の旧混在退避は拒否する。変更時は `RegistryToggleTests` の異なる元値型・再保存・SID 分離・旧退避拒否の検証を通す。UWP の復元ジャーナルは利用者 SID ごとの schema 2 とし、旧共有ジャーナルを拒否する。Defender も保護バックアップを使う。不可逆操作を足すときは同様のバックアップを検討する。
+復元可能な項目は、適用前の実値を保護ストレージへ保存して戻す。[RegistryValueBackup](src/Lumin4ti.Core/Services/Windows/Actions/RegistryValueBackup.cs) の型付き値検証、SID 分離、共有設定の所有管理、失敗補償は [DESIGN.md の状態と永続化](DESIGN.md#状態と永続化) に従う。旧 AppData・所有者不明の退避を復元元にしない。変更時は `RegistryToggleTests` と `UwpBackgroundToggleTests` の該当検証、および操作フロー検証を通す。Defender も保護バックアップを使い、不可逆操作を足すときは同様の復元手段を検討する。
 
 ### winget によるアプリ更新
 
@@ -73,7 +69,7 @@ dotnet test Lumin4ti.slnx --filter "Name=子項目の親は同じカテゴリに
 
 ### 一時ファイル・キャッシュの削除 (グループ実行)
 
-旧バッチのファイル削除は、対象を用途別にまとめた「グループ 1 つ = ボタン 1 つ」として実装している。ロジックは 3 ファイルに分かれ、**掃除対象を増やすときは [FileCleanupGroups.cs](src/Lumin4ti.Core/Services/Windows/Actions/FileCleanupGroups.cs) のパス表へ 1 行足すだけ**でよい (個別クラスを作らない)。
+ファイル削除は「グループ 1 つ = ボタン 1 つ」とし、対象パスは [FileCleanupGroups.cs](src/Lumin4ti.Core/Services/Windows/Actions/FileCleanupGroups.cs) に集約する。掃除対象を増やすときはパス表へ追加し、個別クラスを作らない。
 
 - [FileCleanupEngine](src/Lumin4ti.Core/Services/Windows/Actions/FileCleanupEngine.cs) — 削除の実体。`CleanupTarget` は `Contents` (既知のキャッシュ／ログフォルダの中身だけ) / `Files` (既知のキャッシュファイル名だけ) の 2 種。フォルダごとの削除とドライブ全体の再帰検索は扱わない。使用中ファイルは飛ばして続行し、削除数・解放バイト数・ブロック数を `CleanupOutcome` に集計する。削除不能の記録は `RecordBlocked` を通し、パス・理由・エラー番号の代表例を件数・長さの上限内で残す。
 - [FileCleanupAction](src/Lumin4ti.Core/Services/Windows/Actions/FileCleanupAction.cs) — グループ 1 件分の `IMaintenanceAction`。サービス停止・再起動要否・Explorer 影響・再起動時削除予約をコンストラクタ引数で受ける。
@@ -94,11 +90,11 @@ dotnet test Lumin4ti.slnx --filter "Name=子項目の親は同じカテゴリに
 
 ### 同時実行と終了処理
 
-[MaintenanceOperationCoordinator](src/Lumin4ti.UI/Services/MaintenanceOperationCoordinator.cs) と [MaintenanceOperationProcessLock](src/Lumin4ti.Core/Services/MaintenanceOperationProcessLock.cs) が、GUI とサインイン時クリーンアップを含む状態変更操作を **マシン全体で同時に 1 件だけ**に制限する。`TryBegin` が false なら UI は「実行中」表示に落とし、サインイン時クリーンアップは別操作が先行していれば待たずにスキップする。終了要求では `RequestCancellation()` が同期境界で新規受付を閉じてから全操作へキャンセルを通知し、`WaitForIdleAsync()` が各操作の補償・再検証を含む `finally` の完了を待ってからアプリを閉じる。操作がゼロでも受付を閉じ、キュー済み再読込や新しい `TryBegin` を拒否する。長時間アクションを足すときは、この lease を跨いで生き残る後始末を作らないこと。
+状態変更は [MaintenanceOperationCoordinator](src/Lumin4ti.UI/Services/MaintenanceOperationCoordinator.cs) と [MaintenanceOperationProcessLock](src/Lumin4ti.Core/Services/MaintenanceOperationProcessLock.cs) の lease を通し、マシン全体で同時に1件へ制限する。取得失敗時は実行せず、サインイン時クリーンアップは待たずにスキップする。終了処理では `RequestCancellation()` → `WaitForIdleAsync()` の順を維持し、補償・再検証を含む `finally` より先に閉じない。受付閉鎖と再読込の境界は [DESIGN.md の起動と終了](DESIGN.md#起動と終了) に従い、lease を跨いで生き残る後始末を作らない。
 
 ### 昇格とデバッグ起動
 
-通常の画面起動は [Program.cs](src/Lumin4ti.UI/Program.cs) で `VelopackApp.Build().Run()` → 非管理者なら自己昇格 (ShellExecute + runas) → `SingleInstanceGuard` の順に進む。**`Debugger.IsAttached` のときは昇格をスキップ**して非昇格のまま続行するため、デバッグ実行 (F5) では HKLM 系操作・`Get-MMAgent`・イベントログ全削除などが権限エラーになる (これは正常)。管理者系までデバッグするなら IDE 自体を管理者起動する。サインイン時クリーンアップはこの通常起動経路より前に専用引数を検出して分岐する。
+通常起動とサインイン時クリーンアップの分岐順序は [DESIGN.md の起動と終了](DESIGN.md#起動と終了) を維持する。旧版移行を自己昇格より後へ移さず、自己昇格前に `SingleInstanceGuard` を取得しない。**`Debugger.IsAttached` のときは昇格をスキップ**するため、F5 での HKLM 系操作・`Get-MMAgent` の権限エラーは正常である。管理者系までデバッグするなら IDE 自体を管理者起動する。
 
 ### タスクバーアイコンと AUMID (回帰注意)
 
@@ -106,34 +102,33 @@ dotnet test Lumin4ti.slnx --filter "Name=子項目の親は同じカテゴリに
 
 - 製品版 (`#if !DEBUG`) だけ起動直後に `WindowsElevationHelper.TrySetCurrentProcessAppUserModelId()` で Velopack の AUMID を設定する。Debug ビルドで名乗ると Windows がインストール済み製品の情報を参照して開発用 EXE のタスクバーアイコンが白紙になるため設定しない。
 - ショートカット (.lnk) へ AUMID や明示アイコンを追記しない。埋め込みアイコンの解決は Windows に任せる。v1.0.12 が追記した override は起動時に [WindowsLegacyStartMenuShortcutMigrator.ClearInstalledShortcutOverrides()](src/Lumin4ti.UI/Services/WindowsLegacyStartMenuShortcutMigrator.cs) が Start メニュー・デスクトップ・タスクバーピン留めから除去する。
-- .lnk のプロパティ操作が必要な場合は [WindowsShortcutPropertyStore](src/Lumin4ti.UI/Services/WindowsShortcutPropertyStore.cs) (IPropertyStore 直叩き) を使う。Velopack 1.2.0 の `ShellLink.SetAppUserModelId` は既存リンクへ Commit しないため使わない。
+- .lnk のプロパティ操作が必要な場合は [WindowsShortcutPropertyStore](src/Lumin4ti.UI/Services/WindowsShortcutPropertyStore.cs) (IPropertyStore 直叩き) を使い、既存リンクへの Commit を維持する。`ShellLink.SetAppUserModelId` へ置き換えない。
 
 ### ローカライズ
 
-Komorebi/Lhamiel と同一方式。翻訳は [Resources/Locales/*.axaml](src/Lumin4ti.UI/Resources/Locales/) (`ResourceDictionary`) を 1 言語 1 ファイルで 17 言語持ち、XAML は `{DynamicResource Text.Xxx}`、C# は `App.Text("key", 日本語フォールバック, args)` で引く。`en_US.axaml` が全キーの英語マスターで、非 ja 言語はこれを `MergedDictionaries` に含めて上書きする。`ja_JP.axaml` はシェル文言のみ (Action Label/Description・カテゴリ Caption・ステータスはコード内日本語がフォールバックになる)。
+辞書の構造とフォールバックは [DESIGN.md のローカライズ](DESIGN.md#ローカライズ) を参照する。UI 文言を直書きせず、XAML は `{DynamicResource Text.Xxx}`、C# は `App.Text("key", 日本語フォールバック, args)` で解決する。
 
-- Core は翻訳キーだけ持つ (`IMaintenanceItem.LabelKey`/`DescriptionKey` = `Action.{Id}.Label`)。翻訳解決は UI 側。**UI 文字列を追加したら 17 言語すべてに同じ `x:Key` を足す** (キー集合は `en_US.axaml` と一致させる)。
+- Core は翻訳キーと日本語フォールバックを持ち、翻訳解決は UI 側で行う。`IMaintenanceItem.LabelKey` は `Action.{Id}.Label`、`DescriptionKey` は `Action.{Id}.Desc`。共通 UI 文字列を追加したら 17 言語すべてに同じ `x:Key` を足す。非 ja 辞書のキー集合は `en_US.axaml` と一致させ、ja の Action・カテゴリ・ステータスはコード内日本語フォールバックを維持する。
 - `App.SetLocale()` が辞書を差し替え、`App.LocaleChanged` を購読する VM プロパティが再評価される。既定言語は `App.DetectDefaultLocale()` が OS ロケールから判定、選択は settings.json の `Locale` に保存。
 - アクションの実行結果ログ行 (`  - ...しました`) は技術的詳細なので日本語のまま。
 
 ## リリース・配信 (Cloudflare R2 + ローカル署名)
 
-自動更新は **Cloudflare R2** 配信。クライアントは [UpdateService.cs](src/Lumin4ti.UI/Services/UpdateService.cs) で `SimpleWebSource(UpdateBaseUrl)` (= `https://lumin4ti.kagayoi.com`) の `releases.win.json` を見る (`UpdateBaseUrl`/`UpdateChannel` は [AppSettings.cs](src/Lumin4ti.Core/Models/AppSettings.cs) にハードコード)。GitHub Releases は使わない。
+更新・移行・配信の構造と理由は [DESIGN.md の更新と配布](DESIGN.md#更新と配布) を参照する。GitHub Releases は使わない。
 
 ### 配布契約と変更権限
 
-- 現行の配布契約は Velopack が生成する署名済みPerMachine `Lumin4ti-win.msi` と、Cloudflare R2 の `releases.win.json` による自動更新である。PerUser `Setup.exe` は公開しない。
+- 現行の配布契約は [DESIGN.md](DESIGN.md#更新と配布) に記載する。`win-x64` のみを対象とし、restore / publish の RID と `vpk pack --runtime` を一致させる。`--channel win` は維持し、runtime と channel を混同しない。PerUser `Setup.exe` は公開しない。
 - 不具合調査、全体レビュー、セキュリティレビュー、および「見つかったものを全部直してよい」という許可は、この現行契約内の修正に適用する。レビューで配布や昇格の設計リスクを発見しても、それを理由に対応スコープを配布方式の変更へ広げない。
 - MSI / MSIX 等へのインストーラー形式変更、Velopack の置換、per-user / machine-wide のインストール範囲変更、NativeAOT 等のパッケージング方式変更、更新元・channel・署名方式の変更は、ユーザーが対象を個別に明示した場合だけ実装する。明示がない場合は現行契約を維持し、設計案と影響だけを報告する。
 - `dotnet publish` によるローカル検証は通常の検証に含めてよい。`vpk pack`、署名、R2 upload、cache purge、配信確認は、リリースまたは `/vava` が明示された場合だけ実行する。
 
-- **リリースはローカル署名リリース単独** (Windows のみ配信・CI リリース workflow なし)。SimplySign (Certum クラウド署名) は Desktop 接続 + スマホトークンが要り GitHub Actions から署名できないため。
 - 実行は `pwsh scripts/release-local.ps1` (build + PerMachine MSI生成 + 署名 + R2 アップロード + キャッシュパージ + 配信確認 + 旧 nupkg 掃除を一括)。`-SkipUpload` で署名までの動作確認。**`/vava` の precheck (証明書確認) → bump → 自動実行** が [vava.config.json](vava.config.json) で配線済み。
-- 旧`%LocalAppData%\Lumin4ti`版は、通常の自己昇格より前に[WindowsPerMachineMigration.cs](src/Lumin4ti.Core/Services/Windows/WindowsPerMachineMigration.cs)が固定URLのMSIを取得し、署名と発行元を検証してからPerMachine版へ移行する。設定・ログ・`%ProgramData%`の復元用バックアップは保持し、旧本体・Updater・キャッシュ・HKCUアンインストール登録・ユーザーショートカットだけを回収する。ユーザー書き込み可能な旧`Update.exe`は実行せず、`Update.exe`または`packages`だけが残った部分移行も次回の信頼済みPerMachine起動で再回収する。ショートカット削除後は`SHChangeNotify`でStartメニューの表示キャッシュを更新する。
-- Velopack 1.2.0の生成MSIは`--instLocation PerMachine`でも`INSTALLFOLDER`が`TARGETDIR`直下になるため、[set-msi-program-files-location.ps1](scripts/set-msi-program-files-location.ps1)でDirectory表を`ProgramFiles64Folder\Lumin4ti`へ補正し、変更後のMSIを再署名してから検証・公開する。アプリ内移行も`VELOPACK_INSTALLDIR=<Program Files>\Lumin4ti`を明示する。補正前MSIで作られた既知の誤配置（ドライブ直下の`Lumin4ti`と`Program Files\ゆろち\Lumin4ti`）から起動した場合は、署名・MSI登録・`.msi-installed`を確認して固定MSIでProgram Filesへメジャーアップグレードし、旧プロセス終了後にその既知ルートだけを回収する。同一ProductCode/Versionで通常の`/i`が配置を変えない場合だけ`REINSTALL=ALL REINSTALLMODE=vamus`で全再配置・再キャッシュする。任意のカスタム配置は自動削除しない。
+- [set-msi-program-files-location.ps1](scripts/set-msi-program-files-location.ps1) による Program Files 配置補正と、補正後 MSI の再署名・署名検証を省略しない。
+- 移行コードを変更するときは [DESIGN.md の旧配置からの移行](DESIGN.md#旧配置からの移行) の信頼確認・回収範囲・期限を維持し、`WindowsPerMachineMigrationTests` と操作フロー検証を通す。旧 `Update.exe` を実行せず、設定・ログ・復元原本と任意のカスタム配置を回収対象へ広げない。
+- リリース準備の清掃は今回再生成する `local-release/artifacts` と対象 RID の `publish-*` に限定し、検証記録を保持する。公開順序と配信確認は [DESIGN.md](DESIGN.md#リリース成果物と公開順序) に従う。
 - 前提: SimplySign Desktop がログイン済み (`Cert:\CurrentUser\My` に `CN=Open Source Developer Yuichiro Shinozaki` が見える) / `<Version>` が `/vava` 済み / `C:\Users\IMT\dev\Secret\secrets.json` に `cloudflare.api_token`。
-- PerMachine 移行用 MSI の取得は、呼び出し元のキャンセルに連動した 5 分の期限を HTTP ヘッダー取得と本文コピーの両方へ渡す。`ResponseHeadersRead` の `HttpClient.Timeout` だけに依存しない。
-- 製品ページの配信は `vps-web/deploy/deploy-lp.ps1` を使う。公開ホスト・更新ファイルの既存経路を維持する。
+- 製品ページの配信は `../vps-web/deploy/deploy-lp.ps1` を使う。配信先は [DESIGN.md](DESIGN.md#製品ページの配信先) を参照し、公開ホスト・更新ファイルの既存経路を維持する。
 - R2 バケット `lumin4ti-updates` (account `10901bfadbf1005164774a7350082985` / zone `kagayoi.com`)。`local-release/` は `.gitignore` 済み。
 
 ## コードレビュー時の注意点 (このコードベース特有)
@@ -143,7 +138,7 @@ Komorebi/Lhamiel と同一方式。翻訳は [Resources/Locales/*.axaml](src/Lum
 - 状態取得の診断は `StateErrorText`、操作結果は `ResultText` へ分け、状態回復時に診断だけを消す。親子の操作部品はローカライズ済み項目名をアクセシビリティ名にする。デバイスの空表示は列挙成功時だけ出す。
 - 部分失敗を成功と偽らない: マルチステップ (powercfg 等) は重要ステップの失敗で `Fail` を返す。使用中ファイルのスキップのように「想定内の一部未処理」は `Partial` と結果行で伝える。
 - NTP と MMAgent の変更では [DESIGN.md の設定変更の範囲](DESIGN.md#設定変更の範囲) を維持する。同期モードの強制変更や `EnablePrefetcher` 全体の旧バックアップ復元を再導入しない。
-- MMAgent の一括再読込では完了済みキャッシュと override を破棄して外部変更を取り込む。未完了の共有ロードは維持して重複起動を防ぎ、同じ再読込内の並行取得を集約する。切替時の他機能 invalidation と非対応機能の記録を維持する。
+- MMAgent の一括再読込・切替時は [DESIGN.md](DESIGN.md#設定変更の範囲) のキャッシュ更新と並行照会の集約を維持し、取得失敗や不正 JSON の診断を共有照会境界で記録する。外部コマンドの診断には `CommandFailureDiagnostic` を使い、秘密値・制御文字・出力量を制限する。
 - 配布契約は [DistributionContractTests](src/Lumin4ti.Tests/DistributionContractTests.cs) が横断で固定している。`Lumin4ti.UI.csproj` / `scripts/release-local.ps1` / `scripts/set-msi-program-files-location.ps1` / `README.md` / `AppSettings.cs` を編集すると、意図せずここで落ちることがある。落ちたら文字列だけ直さず、配布方式を変えていないかを先に確認する。
 
 ## ドメイン移行（2026-07 開始・期限 2027/05/31）
