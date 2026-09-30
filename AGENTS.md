@@ -51,7 +51,7 @@ dotnet test Lumin4ti.slnx --filter "Name=子項目の親は同じカテゴリに
 - **セキュリティ (回帰厳禁)**: bare exe 名を渡すと `CreateProcess` の検索順序でインストールディレクトリが `System32` より先に照合され、昇格プロセスがバイナリプランティング LPE を踏む。`ProcessCommandExecutor` は [SystemProcessResolver](src/Lumin4ti.Core/Services/SystemProcessResolver.cs) でフルパス解決 + `WorkingDirectory=System32` 固定してこれを封じている。呼び出し側は論理名でよいが、この解決を外さないこと。
 - 子プロセスは [ProcessJobTracker](src/Lumin4ti.Core/Services/ProcessJobTracker.cs) で子ごとに独立した Job Object (KILL_ON_JOB_CLOSE) へ登録する。生成を制御できる経路では停止状態で登録してから再開し、登録失敗時は実行させない。`ct` キャンセル時はプロセスツリーごと kill。Job の共有を再導入しないこと。理由と Explorer broker 経路の制約は [DESIGN.md の OS操作の境界](DESIGN.md#os操作の境界) を参照する。
 - 出力は UTF-8 → OEM (CP932) の順で自動デコード。長時間コマンドの進捗は `\r`/`\n` 区切りで `IProgress<string>` 通知。
-- サービスの停止・再開が要る操作は [WindowsServiceControl](src/Lumin4ti.Core/Services/Windows/WindowsServiceControl.cs) を通す。状態照会は SCM を直接叩き (`QueryState`)、停止・開始だけ `net.exe` に委ねる。`SuspendAsync` は**元から稼働していたサービスだけ**を止めて `ServiceSuspension` を返し、呼び出し側は失敗・キャンセル時も `finally` で `ResumeAsync()` を必ず実行する。キャンセル時に例外を投げず途中で打ち切るのは、既に止めたサービスの再開手段を呼び出し側が失わないため。`net start` が失敗した場合も SCM の自動回復を最大 60 秒確認し、実際に稼働へ戻らなかったサービスだけを再開失敗とする。
+- サービスの停止・再開が要る操作は [WindowsServiceControl](src/Lumin4ti.Core/Services/Windows/WindowsServiceControl.cs) を通す。状態照会は SCM を直接叩き、停止・開始だけ `net.exe` に委ねる。`SuspendAsync` は元から稼働中のサービスに停止を要求し、要求後の SCM 状態が停止済みと確認できない場合は削除を中止する。停止要求前に復帰対象へ記録するため、コマンド失敗・状態照会失敗・キャンセルでも、呼び出し側は返された `ServiceSuspension` の `ResumeAsync()` を `finally` で必ず実行する。初期状態が取得不能・遷移中の場合も削除を進めない。`net start` 失敗後は最大 60 秒間、実際の稼働状態への復帰を確認する。詳細な補償フローは [DESIGN.md](DESIGN.md#os操作の境界) を参照する。
 
 ### 破壊的操作の復元性
 
