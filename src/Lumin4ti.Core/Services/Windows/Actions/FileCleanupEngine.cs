@@ -771,7 +771,7 @@ public static class FileCleanupEngine
 
         if (outcome.Blocked > 0)
         {
-            lines.Add($"  - 使用中または権限不足で {outcome.Blocked:N0} 個の項目を削除できませんでした (次回起動直後の再実行で消えることがあります)");
+            lines.Add($"  - 使用中または権限不足で {outcome.Blocked:N0} 個の項目を削除できませんでした");
             foreach (var example in outcome.BlockedExamples)
             {
                 lines.Add($"  - 削除できなかった項目: {example}");
