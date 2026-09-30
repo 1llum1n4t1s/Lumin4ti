@@ -9,15 +9,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="12.1.2" />
-    <PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.2" />
+    <PackageReference Include="Avalonia" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.3" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.3" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
     <!-- Velopack 本体は Program.cs / UpdateService が直接使うため、VelopackUpdateDialog 経由の
-         transitive 参照に頼らず直接参照する (バージョンは両者で 1.2.0 に一致)。 -->
-    <PackageReference Include="Velopack" Version="1.2.0" />
+         transitive 参照に頼らず直接参照する (NuGet が直接参照版へ統合する)。 -->
+    <PackageReference Include="Velopack" Version="1.2.161" />
     <PackageReference Include="VelopackUpdateDialog.Avalonia" Version="1.0.19" />
   </ItemGroup>
 

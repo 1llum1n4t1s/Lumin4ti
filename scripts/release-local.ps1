@@ -24,9 +24,9 @@ Set-StrictMode -Version Latest
 # ---- 定数 ----
 # リリースの再現性を保つため、vpk はリポジトリ内で明示的に固定する。
 # 更新時は公式 NuGet の安定版を確認し、-SkipUpload で署名成果物を検証してから変更する。
-$VpkVersion = '1.2.0'
+$VpkVersion = '1.2.161'
 Write-Host "vpk 固定バージョン: $VpkVersion"
-$WranglerVersion = '4.131.1'        # サプライチェーン対策でバージョン固定
+$WranglerVersion = '4.144.0'        # サプライチェーン対策でバージョン固定
 $Bucket = 'lumin4ti-updates'
 $BaseUrl = 'https://lumin4ti.kagayoi.com'
 $AccountId = '10901bfadbf1005164774a7350082985'
