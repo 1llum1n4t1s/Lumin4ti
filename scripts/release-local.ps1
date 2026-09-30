@@ -147,7 +147,26 @@ if (-not $SkipUpload) {
     $env:CLOUDFLARE_ACCOUNT_ID = $AccountId
 }
 
-if (Test-Path $WorkDir) { Remove-Item $WorkDir -Recurse -Force }
+$resolvedRepo = [IO.Path]::GetFullPath($RepoRoot)
+$resolvedWork = [IO.Path]::GetFullPath($WorkDir)
+if ($resolvedWork -ne (Join-Path $resolvedRepo 'local-release')) { throw 'リリース出力先が不正です' }
+foreach ($path in @($resolvedRepo, $resolvedWork)) {
+    if ((Test-Path -LiteralPath $path) -and ((Get-Item -LiteralPath $path).Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        throw "リリース出力先に再解析ポイントがあります: $path"
+    }
+}
+# 検証記録などの既存ファイルは保持し、今回再生成する出力だけを整理する。
+foreach ($output in @($ArtifactsDir) + @($Runtimes | ForEach-Object { Join-Path $WorkDir "publish-$_" })) {
+    $resolvedOutput = [IO.Path]::GetFullPath($output)
+    if ((Split-Path -Parent $resolvedOutput) -ne $resolvedWork) { throw '整理対象がリリース出力範囲外です' }
+    if (Test-Path -LiteralPath $resolvedOutput) {
+        $entries = @((Get-Item -LiteralPath $resolvedOutput)) + @(Get-ChildItem -LiteralPath $resolvedOutput -Recurse -Force)
+        if (@($entries | Where-Object { $_.Attributes -band [IO.FileAttributes]::ReparsePoint }).Count -gt 0) {
+            throw "整理対象に再解析ポイントがあります: $resolvedOutput"
+        }
+        Remove-Item -LiteralPath $resolvedOutput -Recurse -Force
+    }
+}
 New-Item -ItemType Directory -Path $ArtifactsDir -Force | Out-Null
 
 # ---- 1. ビルド + 署名付きパッケージング (RID ごと) ----
@@ -352,9 +371,21 @@ $zoneName = ([uri]$BaseUrl).Host -replace '^[^.]+\.', ''   # <sub>.kagayoi.com �
 $zoneResp = Invoke-RestMethod -Uri "https://api.cloudflare.com/client/v4/zones?name=$zoneName" -Headers $cfHeaders -TimeoutSec 30
 if (-not $zoneResp.success -or @($zoneResp.result).Count -eq 0) { throw "Cloudflare zone '$zoneName' の取得に失敗しました" }
 $zoneId = $zoneResp.result[0].id
-$purgeUrls = @($publishArtifacts | Where-Object { $_.Name -notlike '*.nupkg' } | ForEach-Object { "$BaseUrl/$($_.Name)" })
+$purgeUrls = @()
+$verificationClient = [Net.Http.HttpClient]::new()
+$verificationClient.Timeout = [TimeSpan]::FromMinutes(3)
+try {
+    foreach ($fixedArtifact in @($publishArtifacts | Where-Object { $_.Name -notlike '*.nupkg' })) {
+        $fixedUrl = "$BaseUrl/$([uri]::EscapeDataString($fixedArtifact.Name))"
+        $remoteBytes = $verificationClient.GetByteArrayAsync("${fixedUrl}?_=$([Guid]::NewGuid().ToString('N'))").GetAwaiter().GetResult()
+        $remoteHash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($remoteBytes))
+        $localHash = (Get-FileHash -LiteralPath $fixedArtifact.FullName -Algorithm SHA256).Hash
+        if ($remoteHash -ne $localHash) { $purgeUrls += $fixedUrl }
+        else { Write-Host "  ✅ 最新配信の SHA256 一致: $($fixedArtifact.Name)" }
+    }
+} finally { $verificationClient.Dispose() }
 if ($purgeUrls.Count -gt 0) {
-    $purgeBody = "{`"files`":$(ConvertTo-Json -InputObject $purgeUrls -AsArray -Compress)}"
+    $purgeBody = [PSCustomObject]@{ files = $purgeUrls } | ConvertTo-Json -Compress
     $purgeResp = Invoke-RestMethod -Method Post -Uri "https://api.cloudflare.com/client/v4/zones/$zoneId/purge_cache" `
         -Headers $cfHeaders -ContentType 'application/json' -Body $purgeBody -TimeoutSec 30
     if (-not $purgeResp.success) { throw "Cloudflare キャッシュパージに失敗しました: $($purgeResp.errors | ConvertTo-Json -Compress)" }
@@ -433,7 +464,7 @@ foreach ($legacySetup in $legacySetupFiles) {
 }
 if ($legacySetupFiles.Count -gt 0) {
     $legacySetupUrls = @($legacySetupFiles | ForEach-Object { "$BaseUrl/$($_.Name)" })
-    $legacyPurgeBody = "{`"files`":$(ConvertTo-Json -InputObject $legacySetupUrls -AsArray -Compress)}"
+    $legacyPurgeBody = [PSCustomObject]@{ files = $legacySetupUrls } | ConvertTo-Json -Compress
     $legacyPurgeResp = Invoke-RestMethod -Method Post -Uri "https://api.cloudflare.com/client/v4/zones/$zoneId/purge_cache" `
         -Headers $cfHeaders -ContentType 'application/json' -Body $legacyPurgeBody -TimeoutSec 30
     if (-not $legacyPurgeResp.success) {
