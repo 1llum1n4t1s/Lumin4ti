@@ -13,30 +13,49 @@ namespace Lumin4ti.Tests;
 public sealed class WindowsServiceControlTests
 {
     [TestMethod]
-    public async Task 停止要求はキャンセル不能なトークンと上限付きで実行する()
+    [DataRow(WindowsServiceState.Running, WindowsServiceState.Stopped, true, false)]
+    [DataRow(WindowsServiceState.Running, WindowsServiceState.Stopped, false, false)]
+    [DataRow(WindowsServiceState.Running, WindowsServiceState.Running, true, true)]
+    [DataRow(WindowsServiceState.Running, WindowsServiceState.Transitioning, true, true)]
+    [DataRow(WindowsServiceState.Running, null, true, true)]
+    [DataRow(null, null, true, true)]
+    [DataRow(WindowsServiceState.Transitioning, null, true, true)]
+    [DataRow(WindowsServiceState.Stopped, null, true, false)]
+    [DataRow(WindowsServiceState.NotInstalled, null, true, false)]
+    public async Task 停止要求と実状態を照合して未確認のまま掃除を許可しない(
+        WindowsServiceState? initialState, WindowsServiceState? finalState, bool success, bool failed)
     {
-        var service = RequireRunningServices(1)[0];
+        const string service = "WSearch";
         using var cancellation = new CancellationTokenSource();
-        var executor = new RecordingExecutor((_, _, _) => Result(success: true));
+        var executor = new RecordingExecutor((_, _, _) => Result(success));
+        var states = new Queue<WindowsServiceState?>([initialState, finalState]);
 
         var suspension = await WindowsServiceControl.SuspendAsync(
             executor,
             [service],
             progress: null,
-            cancellation.Token);
+            cancellation.Token,
+            _ => states.Dequeue());
 
-        Assert.HasCount(1, executor.Invocations);
-        Assert.IsFalse(
-            executor.Invocations[0].Token.CanBeCanceled,
-            "停止を途中で打ち切ると停止できたか確定せず、再開対象から漏れます");
-        Assert.AreEqual(WindowsServiceControl.ServiceStopTimeout, executor.Invocations[0].Timeout);
-        CollectionAssert.AreEqual(new[] { service }, suspension.Stopped.ToArray());
+        var requested = initialState is WindowsServiceState.Running;
+        Assert.HasCount(requested ? 1 : 0, executor.Invocations);
+        if (requested)
+        {
+            Assert.IsFalse(executor.Invocations[0].Token.CanBeCanceled);
+            Assert.AreEqual(WindowsServiceControl.ServiceStopTimeout, executor.Invocations[0].Timeout);
+        }
+        CollectionAssert.AreEqual(requested ? new[] { service } : [], suspension.Stopped.ToArray());
+        CollectionAssert.AreEqual(failed ? new[] { service } : [], suspension.FailedToStop.ToArray());
     }
 
     [TestMethod]
-    public async Task 停止中にキャンセルされても停止済みサービスを再開対象として返す()
+    [DataRow(WindowsServiceState.Stopped, false)]
+    [DataRow(null, false)]
+    [DataRow(WindowsServiceState.Transitioning, true)]
+    public async Task 停止中にキャンセルや例外が起きても要求済みサービスを再開対象として返す(
+        WindowsServiceState? finalState, bool throwOnStop)
     {
-        var services = RequireRunningServices(2);
+        string[] services = ["WSearch", "wuauserv"];
         using var cancellation = new CancellationTokenSource();
         var executor = new RecordingExecutor((call, _, ct) =>
         {
@@ -48,6 +67,10 @@ public sealed class WindowsServiceControlTests
 
             // ProcessCommandExecutor は呼び出し元トークンがキャンセル済みなら OCE を伝播する。
             ct.ThrowIfCancellationRequested();
+            if (throwOnStop)
+            {
+                throw new InvalidOperationException("停止要求後の失敗");
+            }
             return Result(success: true);
         });
 
@@ -55,41 +78,43 @@ public sealed class WindowsServiceControlTests
             executor,
             services,
             progress: null,
-            cancellation.Token);
+            cancellation.Token,
+            _ => executor.Invocations.Count == 0 ? WindowsServiceState.Running : finalState);
 
         CollectionAssert.AreEqual(
             new[] { services[0] },
             suspension.Stopped.ToArray(),
             "停止できた 1 件目は再開対象として返す必要があります");
         Assert.HasCount(1, executor.Invocations, "2 件目はキャンセル後なので停止しません");
-        Assert.HasCount(0, suspension.FailedToStop);
+        Assert.HasCount(finalState is WindowsServiceState.Stopped && !throwOnStop ? 0 : 1, suspension.FailedToStop);
     }
 
     [TestMethod]
-    public async Task 再開はキャンセル不能なトークンで実行する()
+    [DataRow(WindowsServiceState.Stopped, 1)]
+    [DataRow(WindowsServiceState.Running, 0)]
+    public async Task 再開はキャンセル不能なトークンで実行し稼働済みなら開始を省略する(
+        WindowsServiceState state, int expectedCalls)
     {
-        var service = RequireRunningServices(1)[0];
         var executor = new RecordingExecutor((_, _, _) => Result(success: true));
-        var suspension = await WindowsServiceControl.SuspendAsync(
-            executor,
-            [service],
-            progress: null,
-            CancellationToken.None);
+        var suspension = new ServiceSuspension(executor, ["WSearch"], [], _ => state, _ => Task.CompletedTask);
 
         var failures = await suspension.ResumeAsync();
 
         Assert.HasCount(0, failures);
-        Assert.HasCount(2, executor.Invocations);
-        StringAssert.StartsWith(executor.Invocations[1].Arguments, "start");
-        Assert.IsFalse(executor.Invocations[1].Token.CanBeCanceled);
-        Assert.AreEqual(WindowsServiceControl.ServiceStartTimeout, executor.Invocations[1].Timeout);
+        Assert.HasCount(expectedCalls, executor.Invocations);
+        if (expectedCalls > 0)
+        {
+            StringAssert.StartsWith(executor.Invocations[0].Arguments, "start");
+            Assert.IsFalse(executor.Invocations[0].Token.CanBeCanceled);
+            Assert.AreEqual(WindowsServiceControl.ServiceStartTimeout, executor.Invocations[0].Timeout);
+        }
     }
 
     [TestMethod]
     public async Task 再開要求が失敗してもSCMの自動回復で稼働すれば成功とする()
     {
         var states = new Queue<WindowsServiceState?>(
-            [WindowsServiceState.Stopped, WindowsServiceState.Transitioning, WindowsServiceState.Running]);
+            [WindowsServiceState.Stopped, WindowsServiceState.Stopped, WindowsServiceState.Transitioning, WindowsServiceState.Running]);
         var delays = new List<TimeSpan>();
         var executor = new RecordingExecutor((_, _, _) => Result(success: false));
         var suspension = new ServiceSuspension(
@@ -141,7 +166,7 @@ public sealed class WindowsServiceControlTests
 
         CollectionAssert.AreEqual(new[] { "WSearch" }, failures.ToArray());
         Assert.AreEqual(WindowsServiceControl.ServiceStartRecoveryTimeout, elapsed);
-        Assert.AreEqual(31, queryCount, "初回と2秒間隔の確認を含め、60秒で打ち切ります");
+        Assert.AreEqual(32, queryCount, "開始前の確認と初回・2秒間隔の確認を含め、60秒で打ち切ります");
         Assert.HasCount(1, executor.Invocations, "net start を再試行してはいけません");
     }
 
@@ -166,26 +191,6 @@ public sealed class WindowsServiceControlTests
         CollectionAssert.AreEqual(new[] { "WSearch" }, failures.ToArray());
         Assert.IsFalse(delayCalled);
         Assert.HasCount(1, executor.Invocations);
-    }
-
-    /// <summary>
-    /// 稼働中でないサービスは <see cref="WindowsServiceControl.SuspendAsync"/> が読み飛ばすため、
-    /// 停止経路を通すには実際に Running のサービス名が要る。Windows で常時稼働の候補から選ぶ。
-    /// </summary>
-    private static string[] RequireRunningServices(int count)
-    {
-        string[] candidates = ["EventLog", "Schedule", "Dhcp", "Winmgmt", "RpcSs"];
-        var running = candidates
-            .Where(name => WindowsServiceControl.TryQueryState(name) is WindowsServiceState.Running)
-            .Take(count)
-            .ToArray();
-
-        if (running.Length < count)
-        {
-            Assert.Inconclusive($"稼働中のサービスが {count} 件揃わないため停止経路を検証できません");
-        }
-
-        return running;
     }
 
     private static CommandExecutionResult Result(bool success) =>
