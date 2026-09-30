@@ -553,22 +553,6 @@ public sealed class FileCleanupTests
     }
 
     [TestMethod]
-    public void パターン指定の対象だけがパターンを持つ()
-    {
-        foreach (var target in AllStaticTargets())
-        {
-            if (target.Kind == CleanupTargetKind.Files)
-            {
-                Assert.IsFalse(string.IsNullOrWhiteSpace(target.Pattern), target.RawPath);
-            }
-            else
-            {
-                Assert.IsNull(target.Pattern, target.RawPath);
-            }
-        }
-    }
-
-    [TestMethod]
     public void 同じ対象を複数のグループが重複して持たない()
     {
         var paths = AllStaticTargets().Select(t => $"{t.RawPath}|{t.Pattern}").ToList();
@@ -696,21 +680,4 @@ public sealed class FileCleanupTests
         CollectionAssert.DoesNotContain(FileCleanupGroups.BrowserSharedCaches, @"User Data\WidevineCdm");
     }
 
-    [TestMethod]
-    public void グループは全てクリーンアップカテゴリの実行型項目になる()
-    {
-        var groups = FileCleanupGroups.CreateAll(new NoopExecutor()).ToList();
-
-        Assert.AreEqual(8, groups.Count);
-        CollectionAssert.DoesNotContain(groups.Select(g => g.Id).ToArray(), "cleanup-drive-root-leftovers");
-        CollectionAssert.DoesNotContain(groups.Select(g => g.Id).ToArray(), "cleanup-outlook-offline-cache");
-        CollectionAssert.DoesNotContain(groups.Select(g => g.Id).ToArray(), "cleanup-nul-files");
-        CollectionAssert.DoesNotContain(groups.Select(g => g.Id).ToArray(), "cleanup-recycle-bin");
-        foreach (var group in groups)
-        {
-            Assert.IsInstanceOfType<IMaintenanceAction>(group, group.Id);
-            Assert.AreEqual(CommandCategory.Cleanup, group.Category, group.Id);
-            StringAssert.StartsWith(group.Id, "cleanup-", group.Id);
-        }
-    }
 }

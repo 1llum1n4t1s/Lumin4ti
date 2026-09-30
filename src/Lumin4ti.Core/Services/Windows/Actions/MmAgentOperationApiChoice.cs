@@ -126,18 +126,26 @@ public sealed class MmAgentOperationApiChoice : IMaintenanceChoice
         var result = await RunAsync(
             "Get-MMAgent -ErrorAction Stop | Select-Object -ExpandProperty MaxOperationAPIFiles | ConvertTo-Json -Compress",
             ct);
-        if (!result.Success)
+        if (!result.Success || string.IsNullOrWhiteSpace(result.StandardOutput))
         {
+            LoggerBootstrap.Log.Error($"{Id}: 記録ファイル数を取得できません ({CommandFailureDiagnostic.Format(result)})");
             return null;
         }
 
         try
         {
             using var doc = JsonDocument.Parse(result.StandardOutput.Trim());
-            return doc.RootElement.ValueKind == JsonValueKind.Number ? doc.RootElement.GetInt32() : null;
+            if (doc.RootElement.ValueKind == JsonValueKind.Number && doc.RootElement.TryGetInt32(out var maxFiles))
+            {
+                return maxFiles;
+            }
+
+            LoggerBootstrap.Log.Error($"{Id}: 記録ファイル数 JSON が整数ではありません ({CommandFailureDiagnostic.Format(result)})");
+            return null;
         }
-        catch (Exception ex) when (ex is JsonException or FormatException)
+        catch (JsonException)
         {
+            LoggerBootstrap.Log.Error($"{Id}: 記録ファイル数 JSON を解析できません ({CommandFailureDiagnostic.Format(result)})");
             return null;
         }
     }

@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services.Windows.Actions;
+using Lumin4ti.Core.Services.Windows;
 
 namespace Lumin4ti.Core.Services;
 
@@ -15,6 +16,7 @@ namespace Lumin4ti.Core.Services;
 [JsonSerializable(typeof(UwpBackgroundJournal))]
 [JsonSerializable(typeof(VirtualizationSecuritySnapshot))]
 [JsonSerializable(typeof(QuickAccessScriptResult))]
+[JsonSerializable(typeof(WindowsPerMachineMigration.PendingMigration))]
 internal sealed partial class Lumin4tiJsonContext : JsonSerializerContext;
 
 internal static class Lumin4tiJson

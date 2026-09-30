@@ -23,31 +23,45 @@ public sealed class NtpConfigAction : IMaintenanceAction
     private readonly ICommandExecutor _executor;
     private readonly Func<bool> _isServiceRunning;
     private readonly INtpConfigurationStore _configuration;
+    private readonly Func<string, WindowsServiceState?> _queryState;
+    private readonly Func<TimeSpan, Task>? _recoveryDelay;
+    private readonly Func<string, bool>? _canStopWithoutDependents;
 
     public NtpConfigAction(ICommandExecutor executor)
         : this(
             executor,
             IsWindowsTimeRunning,
-            new NtpConfigurationStore(WindowsRegistryValueAccessor.Instance))
+            new NtpConfigurationStore(WindowsRegistryValueAccessor.Instance),
+            WindowsServiceControl.TryQueryState,
+            canStopWithoutDependents: WindowsServiceControl.CanStopWithoutDependents)
     {
     }
 
     internal NtpConfigAction(
         ICommandExecutor executor,
         Func<bool> isServiceRunning,
-        Action writeConfiguration)
-        : this(executor, isServiceRunning, new DelegateNtpConfigurationStore(writeConfiguration))
+        Action writeConfiguration,
+        Func<string, WindowsServiceState?>? queryState = null,
+        Func<TimeSpan, Task>? recoveryDelay = null,
+        Func<string, bool>? canStopWithoutDependents = null)
+        : this(executor, isServiceRunning, new DelegateNtpConfigurationStore(writeConfiguration), queryState, recoveryDelay, canStopWithoutDependents)
     {
     }
 
     internal NtpConfigAction(
         ICommandExecutor executor,
         Func<bool> isServiceRunning,
-        INtpConfigurationStore configuration)
+        INtpConfigurationStore configuration,
+        Func<string, WindowsServiceState?>? queryState = null,
+        Func<TimeSpan, Task>? recoveryDelay = null,
+        Func<string, bool>? canStopWithoutDependents = null)
     {
         _executor = executor ?? throw new ArgumentNullException(nameof(executor));
         _isServiceRunning = isServiceRunning ?? throw new ArgumentNullException(nameof(isServiceRunning));
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _queryState = queryState ?? (_ => _isServiceRunning() ? WindowsServiceState.Running : WindowsServiceState.Stopped);
+        _recoveryDelay = recoveryDelay;
+        _canStopWithoutDependents = canStopWithoutDependents;
     }
 
     public string Id => "ntp-config";
@@ -73,36 +87,27 @@ public sealed class NtpConfigAction : IMaintenanceAction
         }
 
         var wasRunning = _isServiceRunning();
-        var stoppedByThisAction = false;
+        ServiceSuspension? suspension = null;
         ExceptionDispatchInfo? operationFailure = null;
-        CommandExecutionResult? restartResult = null;
-        Exception? restartException = null;
+        IReadOnlyList<string> resumeFailures = [];
+        var applied = false;
 
         try
         {
             if (wasRunning)
             {
-                // 停止要求にはキャンセルトークンを渡さない。実行中に打ち切ると停止できたかが
-                // 確定せず、stoppedByThisAction が false のまま finally の再起動補償から漏れて
-                // w32time が停止したまま残る。キャンセル境界は停止の前後 (下の判定) に置く。
-                var stop = await _executor.RunAsync(
-                    "net.exe",
-                    "stop w32time",
-                    CancellationToken.None,
-                    timeout: WindowsServiceControl.ServiceStopTimeout);
-                if (!stop.Success)
-                {
-                    var reason = FailureReason(stop);
-                    LoggerBootstrap.Log.Error($"{Id}: w32time stop exit={stop.ExitCode}: {reason}");
-                    return MaintenanceActionResult.Fail($"w32time の停止に失敗したため NTP 設定を変更しませんでした: {reason}");
-                }
-
-                stoppedByThisAction = true;
+                // 要求前に復帰対象へ登録し、timeout や停止確認失敗でも finally へ返す。
+                suspension = await WindowsServiceControl.SuspendAsync(
+                    _executor, ["w32time"], null, ct, _queryState, _recoveryDelay, _canStopWithoutDependents);
             }
 
             // stop 完了直後のキャンセルでも、finally で元の稼働状態へ戻してから伝播する。
             ct.ThrowIfCancellationRequested();
-            _configuration.Apply();
+            if (suspension is not { FailedToStop.Count: > 0 })
+            {
+                _configuration.Apply();
+                applied = true;
+            }
         }
         catch (Exception ex)
         {
@@ -110,41 +115,30 @@ public sealed class NtpConfigAction : IMaintenanceAction
         }
         finally
         {
-            if (stoppedByThisAction)
+            if (suspension is not null)
             {
-                try
-                {
-                    // 設定失敗や利用者キャンセル後も、元の稼働状態への補償は最後まで完了させる。
-                    restartResult = await _executor.RunAsync(
-                        "net.exe",
-                        "start w32time",
-                        CancellationToken.None);
-                }
-                catch (Exception ex)
-                {
-                    restartException = ex;
-                }
+                resumeFailures = await suspension.ResumeAsync();
             }
         }
 
-        if (restartException is not null || restartResult is { Success: false })
+        if (resumeFailures.Count > 0)
         {
-            var reason = restartException?.Message ?? FailureReason(restartResult!);
+            var reason = string.Join("; ", suspension!.ResumeFailureDetails);
             LoggerBootstrap.Log.Error($"{Id}: w32time の復旧に失敗: {reason}");
-            if (operationFailure is not null)
-            {
-                throw new InvalidOperationException(
-                    $"NTP 設定中に失敗し、w32time の再起動にも失敗しました: {reason}",
-                    operationFailure.SourceException);
-            }
-
             return MaintenanceActionResult.Fail(
-                $"NTP サーバは設定しましたが w32time の起動に失敗しました: {reason}");
+                (operationFailure?.SourceException is OperationCanceledException ? "操作はキャンセルされました。" : string.Empty) +
+                (applied ? "NTP サーバは設定しましたが " : "NTP 設定を変更しませんでした。") +
+                $"w32time の復帰に失敗しました: {reason}。Windows のサービス管理で Windows Time を開始し、開始できない場合は PC を再起動してください");
         }
 
         if (operationFailure is not null)
         {
             operationFailure.Throw();
+        }
+
+        if (!applied)
+        {
+            return MaintenanceActionResult.Fail("w32time の停止を確認できなかったため NTP 設定を変更しませんでした");
         }
 
         LoggerBootstrap.Log.Info(wasRunning
@@ -154,11 +148,6 @@ public sealed class NtpConfigAction : IMaintenanceAction
             ? MaintenanceActionResult.Ok($"  - NTP サーバを {NtpServer} に設定し、w32time を再起動しました")
             : MaintenanceActionResult.Ok($"  - NTP サーバを {NtpServer} に設定しました (w32time は元の停止状態を維持)");
     }
-
-    private static string FailureReason(CommandExecutionResult result) =>
-        string.IsNullOrWhiteSpace(result.StandardError)
-            ? $"exit={result.ExitCode}"
-            : result.StandardError.Trim();
 
     /// <summary>
     /// w32time の稼働状態。SCM の照会は <see cref="WindowsServiceControl"/> と共通化している。
@@ -320,8 +309,9 @@ public sealed class StoreCacheResetAction(ICommandExecutor executor) : IMaintena
             return MaintenanceActionResult.Ok("  - Store キャッシュをクリアしました");
         }
 
-        LoggerBootstrap.Log.Error($"{Id}: exit={result.ExitCode}");
-        return MaintenanceActionResult.Fail($"WSReset が失敗しました (exit={result.ExitCode})");
+        var diagnostic = CommandFailureDiagnostic.Format(result);
+        LoggerBootstrap.Log.Error($"{Id}: {diagnostic}");
+        return MaintenanceActionResult.Fail($"WSReset が失敗しました ({diagnostic})");
     }
 }
 
@@ -361,6 +351,8 @@ public sealed class TrimOptimizeAction(ICommandExecutor executor) : IMaintenance
                      || l.Contains("空き領域")
                      || l.Contains("ボリューム サイズ"))
             .Select(l => $"  {l}")
+            .Select(CommandFailureDiagnostic.Sanitize)
+            .Take(12)
             .ToList();
 
         if (result.Success)
@@ -371,7 +363,8 @@ public sealed class TrimOptimizeAction(ICommandExecutor executor) : IMaintenance
                 : "  - TRIM と空き領域の統合を実行しました");
         }
 
-        LoggerBootstrap.Log.Error($"{Id}: exit={result.ExitCode}");
-        return MaintenanceActionResult.Fail($"defrag が失敗しました (exit={result.ExitCode}): {result.StandardError}");
+        var diagnostic = CommandFailureDiagnostic.Format(result);
+        LoggerBootstrap.Log.Error($"{Id}: {diagnostic}");
+        return MaintenanceActionResult.Fail($"defrag が失敗しました ({diagnostic})");
     }
 }

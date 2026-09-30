@@ -25,6 +25,9 @@ public partial class VersionViewModel : ObservableObject
     private readonly ISettingsService _settingsService;
     private readonly MaintenanceOperationCoordinator _operationCoordinator;
     private bool _updateDialogOpen;
+    private string? _updateStatusKey;
+    private string _updateStatusFallback = string.Empty;
+    private object[] _updateStatusArgs = [];
 
     [ObservableProperty]
     private string versionText = "…";
@@ -82,7 +85,20 @@ public partial class VersionViewModel : ObservableObject
 
         // 現在のロケールを選択状態に反映 (App.SetLocale は起動時に適用済み)
         _selectedLocale = Locales.FirstOrDefault(l => l.Key == App.CurrentLocaleKey) ?? Locales.FirstOrDefault();
+        App.LocaleChanged += RefreshUpdateStatus;
     }
+
+    private void SetUpdateStatus(string? key = null, string fallback = "", params object[] args)
+    {
+        _updateStatusKey = key;
+        _updateStatusFallback = fallback;
+        _updateStatusArgs = args;
+        RefreshUpdateStatus();
+    }
+
+    private void RefreshUpdateStatus() => UpdateStatusText = _updateStatusKey is null
+        ? string.Empty
+        : App.Text(_updateStatusKey, _updateStatusFallback, _updateStatusArgs);
 
     public void Initialize()
     {
@@ -114,7 +130,7 @@ public partial class VersionViewModel : ObservableObject
 
         _settingsService.Current.IgnoreUpdateTag = null;
         IgnoredUpdateTag = string.Empty;
-        await _settingsService.SaveAsync();
+        await SaveSettingsAsync();
     }
 
     /// <summary>
@@ -137,7 +153,7 @@ public partial class VersionViewModel : ObservableObject
         {
             if (manually)
             {
-                UpdateStatusText = App.Text(
+                SetUpdateStatus(
                     "Status.Busy",
                     "別のメンテナンス操作が実行中です。完了後にもう一度お試しください。");
             }
@@ -163,7 +179,7 @@ public partial class VersionViewModel : ObservableObject
         {
             if (manually)
             {
-                UpdateStatusText = "開発ビルドのため更新確認はスキップされます (インストール版でのみ動作)";
+                SetUpdateStatus("UpdateDialog.DevelopmentBuild", "開発ビルドのため更新確認はスキップされます (インストール版でのみ動作)");
             }
 
             LoggerBootstrap.Log.Info("更新確認をスキップ: Velopack のインストール環境ではありません");
@@ -175,7 +191,7 @@ public partial class VersionViewModel : ObservableObject
         LoggerBootstrap.Log.Info($"更新確認を開始します: mode={mode}");
         _updateDialogOpen = true;
         IsChecking = true;
-        UpdateStatusText = string.Empty;
+        SetUpdateStatus();
         try
         {
             var options = new UpdateDialogOptions
@@ -203,12 +219,12 @@ public partial class VersionViewModel : ObservableObject
         }
         catch (OperationCanceledException) when (activeOperation.Token.IsCancellationRequested)
         {
-            UpdateStatusText = string.Empty;
+            SetUpdateStatus();
             LoggerBootstrap.Log.Info($"更新確認をキャンセルしました: mode={mode}");
         }
         catch (Exception ex)
         {
-            UpdateStatusText = $"更新の確認に失敗しました: {ex.Message}";
+            SetUpdateStatus("UpdateDialog.CheckFailed", "更新の確認に失敗しました: {0}", ex.Message);
             LoggerBootstrap.Log.Error("更新ダイアログの表示に失敗しました", ex);
         }
         finally

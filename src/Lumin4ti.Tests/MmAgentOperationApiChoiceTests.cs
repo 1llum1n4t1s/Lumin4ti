@@ -34,21 +34,6 @@ public sealed class MmAgentOperationApiChoiceTests
         new(executor, new MmAgentStateProvider(executor));
 
     [TestMethod]
-    public void 選択肢は記録ファイル数だけを持ち既定は512()
-    {
-        var choice = CreateChoice(new FakeExecutor(_ => Ok()));
-
-        // 「無効」はアプリ起動プリフェッチを OFF にするのと同義で単独では選べないため、選択肢に持たない。
-        CollectionAssert.AreEqual(
-            new[] { "128", "256", "512", "1024" },
-            choice.Options.Select(o => o.Value).ToArray());
-        // 既定印と公開する既定値は同じ情報源から導出されること (片方だけ変えられない)
-        Assert.AreEqual(
-            MmAgentOperationApiChoice.DefaultValue,
-            choice.Options.Single(o => o.IsDefault).Value);
-    }
-
-    [TestMethod]
     public async Task 無効化は行わない()
     {
         // 回帰防止: どの選択値でも Disable-MMAgent を実行しない。

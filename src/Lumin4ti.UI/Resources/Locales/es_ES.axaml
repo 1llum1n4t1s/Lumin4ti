@@ -193,4 +193,19 @@
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">Elegir qué se elimina</x:String>
   <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">Elegir qué se ejecuta al iniciar sesión</x:String>
   <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">No se pudo guardar la selección (consulta el registro)</x:String>
+  <!-- ===== Update dialog / operation status ===== -->
+  <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">Actualización</x:String>
+  <x:String x:Key="Text.UpdateDialog.AvailableHeader" xml:space="preserve">Hay una nueva versión disponible</x:String>
+  <x:String x:Key="Text.UpdateDialog.DownloadAndInstall" xml:space="preserve">Descargar e instalar</x:String>
+  <x:String x:Key="Text.UpdateDialog.IgnoreThisVersion" xml:space="preserve">Omitir esta versión</x:String>
+  <x:String x:Key="Text.UpdateDialog.UpToDateMessage" xml:space="preserve">Su versión está actualizada</x:String>
+  <x:String x:Key="Text.UpdateDialog.ErrorHeader" xml:space="preserve">No se pudieron buscar actualizaciones</x:String>
+  <x:String x:Key="Text.UpdateDialog.Close" xml:space="preserve">Cerrar</x:String>
+  <x:String x:Key="Text.UpdateDialog.CheckingMessage" xml:space="preserve">Buscando actualizaciones…</x:String>
+  <x:String x:Key="Text.UpdateDialog.DevelopmentBuild" xml:space="preserve">Las compilaciones de desarrollo omiten la búsqueda de actualizaciones (solo disponible en versiones instaladas)</x:String>
+  <x:String x:Key="Text.UpdateDialog.CheckFailed" xml:space="preserve">No se pudieron buscar actualizaciones: {0}</x:String>
+  <x:String x:Key="Text.Status.Applying" xml:space="preserve">Aplicando {0}…</x:String>
+  <x:String x:Key="Text.Status.Applied" xml:space="preserve">Se cambió {0}</x:String>
+  <x:String x:Key="Text.Status.ApplyFailed" xml:space="preserve">No se pudo cambiar {0} (consulte el registro)</x:String>
+  <x:String x:Key="Text.Shutdown.BlockReason" xml:space="preserve">Lumin4ti está esperando a que termine la operación de mantenimiento…</x:String>
 </ResourceDictionary>

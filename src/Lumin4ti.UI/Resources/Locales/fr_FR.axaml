@@ -193,4 +193,19 @@
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">Choisir ce qui est supprimé</x:String>
   <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">Choisir ce qui s'exécute à la connexion</x:String>
   <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">Impossible d'enregistrer la sélection (consultez le journal)</x:String>
+  <!-- ===== Update dialog / operation status ===== -->
+  <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">Mise à jour</x:String>
+  <x:String x:Key="Text.UpdateDialog.AvailableHeader" xml:space="preserve">Une nouvelle version est disponible</x:String>
+  <x:String x:Key="Text.UpdateDialog.DownloadAndInstall" xml:space="preserve">Télécharger et installer</x:String>
+  <x:String x:Key="Text.UpdateDialog.IgnoreThisVersion" xml:space="preserve">Ignorer cette version</x:String>
+  <x:String x:Key="Text.UpdateDialog.UpToDateMessage" xml:space="preserve">Votre version est à jour</x:String>
+  <x:String x:Key="Text.UpdateDialog.ErrorHeader" xml:space="preserve">Impossible de rechercher les mises à jour</x:String>
+  <x:String x:Key="Text.UpdateDialog.Close" xml:space="preserve">Fermer</x:String>
+  <x:String x:Key="Text.UpdateDialog.CheckingMessage" xml:space="preserve">Recherche de mises à jour…</x:String>
+  <x:String x:Key="Text.UpdateDialog.DevelopmentBuild" xml:space="preserve">La recherche de mises à jour est ignorée dans les builds de développement (disponible uniquement dans les versions installées)</x:String>
+  <x:String x:Key="Text.UpdateDialog.CheckFailed" xml:space="preserve">Impossible de rechercher les mises à jour : {0}</x:String>
+  <x:String x:Key="Text.Status.Applying" xml:space="preserve">Application de {0}…</x:String>
+  <x:String x:Key="Text.Status.Applied" xml:space="preserve">{0} a été modifié</x:String>
+  <x:String x:Key="Text.Status.ApplyFailed" xml:space="preserve">Impossible de modifier {0} (consultez le journal)</x:String>
+  <x:String x:Key="Text.Shutdown.BlockReason" xml:space="preserve">Lumin4ti attend la fin de l’opération de maintenance…</x:String>
 </ResourceDictionary>

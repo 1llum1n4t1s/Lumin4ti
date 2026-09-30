@@ -20,17 +20,19 @@ public enum WindowsServiceState
 /// <summary>
 /// サービスの状態照会を Service Control Manager から直接行う。
 /// 状態取得は C# ネイティブ (advapi32)、停止・開始だけ net.exe を使う
-/// (SCM の制御要求は依存サービスの連鎖停止を自前で解決する必要があり、net.exe が唯一の簡潔な手段)。
+/// (依存サービスの停止は拒否し、指定されたサービスだけを扱う)。
 /// </summary>
 [SupportedOSPlatform("windows")]
 public static class WindowsServiceControl
 {
     private const uint ScManagerConnect = 0x0001;
     private const uint ServiceQueryStatus = 0x0004;
+    private const uint ServiceEnumerateDependents = 0x0008;
     private const uint ServiceStopped = 0x00000001;
     private const uint ServiceRunning = 0x00000004;
     private const int ScStatusProcessInfo = 0;
     private const int ErrorServiceDoesNotExist = 1060;
+    private const int ErrorMoreData = 234;
 
     /// <summary>
     /// net stop 1 件あたりの上限。停止要求自体はキャンセルさせない代わりに、
@@ -111,14 +113,39 @@ public static class WindowsServiceControl
         IReadOnlyList<string> serviceNames,
         IProgress<string>? progress,
         CancellationToken ct)
-        => SuspendAsync(executor, serviceNames, progress, ct, TryQueryState);
+        => SuspendAsync(executor, serviceNames, progress, ct, TryQueryState,
+            canStopWithoutDependents: CanStopWithoutDependents);
+
+    /// <summary>稼働中の依存サービスがないことを SCM で確認する。確認不能なら停止しない。</summary>
+    internal static bool CanStopWithoutDependents(string serviceName)
+    {
+        try
+        {
+            using var manager = OpenSCManager(null, null, ScManagerConnect);
+            if (manager.IsInvalid) throw new Win32Exception(Marshal.GetLastWin32Error());
+            using var service = OpenService(manager, serviceName, ServiceEnumerateDependents);
+            if (service.IsInvalid) throw new Win32Exception(Marshal.GetLastWin32Error());
+            // SERVICE_ACTIVE は Running だけでなく Paused・遷移中も含む。停止中以外は保護する。
+            if (EnumDependentServices(service, 1, 0, 0, out _, out var count)) return count == 0;
+            var error = Marshal.GetLastWin32Error();
+            if (error == ErrorMoreData) return false;
+            throw new Win32Exception(error);
+        }
+        catch (Exception ex)
+        {
+            LoggerBootstrap.Log.Error($"{serviceName} の依存サービスを確認できません: {CommandFailureDiagnostic.Sanitize(ex.Message)}");
+            return false;
+        }
+    }
 
     internal static async Task<ServiceSuspension> SuspendAsync(
         ICommandExecutor executor,
         IReadOnlyList<string> serviceNames,
         IProgress<string>? progress,
         CancellationToken ct,
-        Func<string, WindowsServiceState?> queryState)
+        Func<string, WindowsServiceState?> queryState,
+        Func<TimeSpan, Task>? recoveryDelay = null,
+        Func<string, bool>? canStopWithoutDependents = null)
     {
         ArgumentNullException.ThrowIfNull(executor);
         ArgumentNullException.ThrowIfNull(serviceNames);
@@ -136,7 +163,14 @@ public static class WindowsServiceControl
                 break;
             }
 
-            var initialState = queryState(name);
+            WindowsServiceState? initialState;
+            try { initialState = queryState(name); }
+            catch (Exception ex)
+            {
+                LoggerBootstrap.Log.Error($"{name} サービスの初期状態を取得できませんでした", ex);
+                failures.Add(name);
+                continue;
+            }
             if (initialState is WindowsServiceState.Stopped or WindowsServiceState.NotInstalled)
             {
                 continue;
@@ -149,7 +183,23 @@ public static class WindowsServiceControl
                 continue;
             }
 
-            progress?.Report($"  - {name} サービスを停止しています…");
+            // 注入経路の既定は純粋なサービスfixture。製品経路は必ず SCM の依存照会を渡す。
+            try
+            {
+                if (canStopWithoutDependents is not null && !canStopWithoutDependents(name))
+                {
+                    LoggerBootstrap.Log.Error($"{name}: 稼働中の依存サービスがあるか、依存関係を確認できないため停止を中止しました");
+                    failures.Add(name);
+                    continue;
+                }
+            }
+            catch (Exception ex)
+            {
+                LoggerBootstrap.Log.Error($"{name}: 依存サービス照会に失敗: {CommandFailureDiagnostic.Sanitize(ex.Message)}");
+                failures.Add(name);
+                continue;
+            }
+
             // 停止要求そのものにはキャンセルトークンを渡さない。実行中に net.exe を打ち切ると
             // SCM への停止要求だけが残って「停止したか」が確定せず、stopped から漏れたサービスが
             // 再開されないまま残る。キャンセルはサービスとサービスの間 (ループ先頭) で効かせる。
@@ -158,9 +208,10 @@ public static class WindowsServiceControl
             stopped.Add(name);
             try
             {
+                progress?.Report($"  - {name} サービスを停止しています…");
                 var stop = await executor.RunAsync(
                     "net.exe",
-                    $"stop \"{name}\" /y",
+                    $"stop \"{name}\"",
                     CancellationToken.None,
                     timeout: ServiceStopTimeout);
                 var state = queryState(name);
@@ -169,20 +220,18 @@ public static class WindowsServiceControl
                     continue;
                 }
 
-                var reason = string.IsNullOrWhiteSpace(stop.StandardError)
-                    ? $"exit={stop.ExitCode}"
-                    : stop.StandardError.Trim();
+                var reason = CommandFailureDiagnostic.Format(stop);
                 LoggerBootstrap.Log.Error($"{name} サービスの停止を確認できません: 状態={state?.ToString() ?? "取得不能"}, {reason}");
             }
             catch (Exception ex)
             {
-                LoggerBootstrap.Log.Error($"{name} サービスの停止に失敗しました", ex);
+                LoggerBootstrap.Log.Error($"{name} サービスの停止に失敗しました: {CommandFailureDiagnostic.Sanitize(ex.Message)}");
             }
             failures.Add(name);
         }
 
         return new ServiceSuspension(executor, stopped, failures, queryState,
-            static delay => Task.Delay(delay, CancellationToken.None));
+            recoveryDelay ?? (static delay => Task.Delay(delay, CancellationToken.None)));
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -232,6 +281,13 @@ public static class WindowsServiceControl
         out ServiceStatusProcess buffer,
         uint bufferSize,
         out uint bytesNeeded);
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("advapi32.dll", EntryPoint = "EnumDependentServicesW", ExactSpelling = true, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool EnumDependentServices(
+        SafeServiceHandle service, uint state, nint buffer, uint bufferSize,
+        out uint bytesNeeded, out uint servicesReturned);
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [DllImport("advapi32.dll", ExactSpelling = true)]
@@ -289,6 +345,9 @@ public sealed class ServiceSuspension
     /// <summary>停止を確認できなかったサービス (初期状態が取得不能・遷移中の場合も含む)。</summary>
     public IReadOnlyList<string> FailedToStop { get; }
 
+    /// <summary>直近の復帰処理で失敗したサービスの、表示用に制限した診断。</summary>
+    public IReadOnlyList<string> ResumeFailureDetails { get; private set; } = [];
+
     /// <summary>
     /// 停止したサービスを開始し直す。削除処理が失敗・キャンセルされた場合でも
     /// 元の稼働状態への復帰は最後まで実行するため、キャンセルトークンは受け取らない。
@@ -296,11 +355,12 @@ public sealed class ServiceSuspension
     public async Task<IReadOnlyList<string>> ResumeAsync()
     {
         var failures = new List<string>();
+        var details = new List<string>();
         foreach (var name in Stopped)
         {
             try
             {
-                if (_queryState(name) is WindowsServiceState.Running)
+                if (QueryRecoveryState(name) is WindowsServiceState.Running)
                 {
                     continue;
                 }
@@ -316,7 +376,7 @@ public sealed class ServiceSuspension
                 }
 
                 LoggerBootstrap.Log.Info(
-                    $"{name} サービスの開始コマンド失敗後、稼働状態への復帰を最大 " +
+                    $"{name} サービスの開始コマンド失敗 ({CommandFailureDiagnostic.Format(start)}) 後、稼働状態への復帰を最大 " +
                     $"{WindowsServiceControl.ServiceStartRecoveryTimeout.TotalSeconds:0} 秒待機します");
                 if (await WaitForRunningAsync(name))
                 {
@@ -325,16 +385,23 @@ public sealed class ServiceSuspension
                 else
                 {
                     failures.Add(name);
-                    LoggerBootstrap.Log.Error($"{name} サービスの再開に失敗: exit={start.ExitCode}");
+                    var diagnostic = $"{name}: {CommandFailureDiagnostic.Format(start)}";
+                    details.Add(diagnostic);
+                    LoggerBootstrap.Log.Error($"サービスの再開に失敗: {diagnostic}");
                 }
             }
             catch (Exception ex)
             {
+                // timeout 等で開始要求だけが届いている場合も、SCM の復帰を確認する。
+                if (await WaitForRunningAsync(name)) continue;
                 failures.Add(name);
-                LoggerBootstrap.Log.Error($"{name} サービスの再開に失敗しました", ex);
+                var diagnostic = $"{name}: {CommandFailureDiagnostic.Sanitize(ex.Message)}";
+                details.Add(diagnostic);
+                LoggerBootstrap.Log.Error($"サービスの再開に失敗: {diagnostic}");
             }
         }
 
+        ResumeFailureDetails = details;
         return failures;
     }
 
@@ -343,7 +410,7 @@ public sealed class ServiceSuspension
         var elapsed = TimeSpan.Zero;
         while (true)
         {
-            var state = _queryState(serviceName);
+            var state = QueryRecoveryState(serviceName);
             if (state is WindowsServiceState.Running)
             {
                 return true;
@@ -362,6 +429,16 @@ public sealed class ServiceSuspension
                 : WindowsServiceControl.ServiceStartRecoveryPollInterval;
             await _delay(delay);
             elapsed += delay;
+        }
+    }
+
+    private WindowsServiceState? QueryRecoveryState(string name)
+    {
+        try { return _queryState(name); }
+        catch (Exception ex)
+        {
+            LoggerBootstrap.Log.Error($"{name} サービスの復帰状態を照会できません: {CommandFailureDiagnostic.Sanitize(ex.Message)}");
+            return null;
         }
     }
 }

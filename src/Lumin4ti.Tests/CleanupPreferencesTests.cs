@@ -8,17 +8,6 @@ namespace Lumin4ti.Tests;
 [TestClass]
 public sealed class CleanupPreferencesTests
 {
-    private sealed class NoopExecutor : ICommandExecutor
-    {
-        public Task<CommandExecutionResult> RunAsync(
-            string fileName,
-            string arguments,
-            CancellationToken ct = default,
-            IProgress<string>? onOutputLine = null,
-            TimeSpan? timeout = null) =>
-            Task.FromResult(new CommandExecutionResult(true, string.Empty, 0, string.Empty, string.Empty));
-    }
-
     private sealed class FakeSettingsService : ISettingsService
     {
         public AppSettings Current { get; } = new();
@@ -49,20 +38,6 @@ public sealed class CleanupPreferencesTests
         CollectionAssert.AreEqual(
             new[] { @"%LOCALAPPDATA%\Temp" },
             settings.Current.CleanupExclusions["cleanup-user-temp"]);
-    }
-
-    [TestMethod]
-    public void 戻したときは除外リストごと畳む()
-    {
-        var settings = new FakeSettingsService();
-        var preferences = new CleanupPreferences(settings);
-
-        preferences.SetTargetEnabled("cleanup-user-temp", @"%LOCALAPPDATA%\Temp", enabled: false);
-        preferences.SetTargetEnabled("cleanup-user-temp", @"%LOCALAPPDATA%\Temp", enabled: true);
-
-        Assert.IsFalse(
-            settings.Current.CleanupExclusions.ContainsKey("cleanup-user-temp"),
-            "空の除外リストを残すと設定ファイルが項目 Id で埋まっていきます");
     }
 
     [TestMethod]
@@ -100,16 +75,6 @@ public sealed class CleanupPreferencesTests
         preferences.SetTargetEnabled("cleanup-user-temp", @"%LOCALAPPDATA%\Temp", enabled: false);
 
         Assert.IsFalse(preferences.IsTargetEnabled("cleanup-user-temp", @"%localappdata%\temp"));
-    }
-
-    [TestMethod]
-    public void 定期実行の項目は未設定なら既定セットを返す()
-    {
-        var preferences = new CleanupPreferences(new FakeSettingsService());
-
-        CollectionAssert.AreEqual(
-            CleanupPreferences.DefaultScheduledGroupIds.ToArray(),
-            preferences.ScheduledGroupIds.ToArray());
     }
 
     [TestMethod]
@@ -176,30 +141,6 @@ public sealed class CleanupPreferencesTests
     }
 
     [TestMethod]
-    public void ブラウザのチェックリストはブラウザ単位に畳む()
-    {
-        // プロファイル数 × キャッシュ種別で対象は数千件になるため、チェックは
-        // 実際にキャッシュを検出したブラウザの数までしか増えてはいけない。
-        var action = FileCleanupGroups.CreateBrowserCache();
-        var detectedRoots = action.EnumerateAllTargets()
-            .Where(FileCleanupEngine.HasCleanupCandidates)
-            .Select(action.GetCheckListKey)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-
-        var entries = action.GetCheckListEntries();
-
-        CollectionAssert.AreEquivalent(detectedRoots, entries.Select(e => e.Value).ToArray());
-        CollectionAssert.IsSubsetOf(
-            entries.Select(e => e.Value).ToArray(),
-            FileCleanupGroups.BrowserRoots,
-            "保存キーは未展開のルートにして、ユーザー名に依存させないでください");
-        Assert.IsTrue(
-            entries.All(e => !e.Label.Contains('%') && !Path.IsPathFullyQualified(e.Label)),
-            "画面には保存キーのパスでなくブラウザ名を表示してください");
-    }
-
-    [TestMethod]
     public void ブラウザを1つ外すとその配下の対象がすべて外れる()
     {
         var preferences = new CleanupPreferences(new FakeSettingsService());
@@ -219,33 +160,6 @@ public sealed class CleanupPreferencesTests
         Assert.IsTrue(
             action.EnumerateAllTargets().Any(t => action.GetCheckListKey(t) == excluded),
             "一覧には外したブラウザも表示し続ける必要があります");
-    }
-
-    [TestMethod]
-    public void アプリキャッシュのチェックリストはアプリ単位に畳む()
-    {
-        var action = FileCleanupGroups.CreateAppCache();
-        var allGroups = FileCleanupGroups.AppCacheTargets
-            .Select(FileCleanupGroups.GetAppCacheGroupName)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-        var detectedGroups = action.EnumerateAllTargets()
-            .Where(FileCleanupEngine.HasCleanupCandidates)
-            .Select(action.GetCheckListKey)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToArray();
-
-        var entries = action.GetCheckListEntries();
-
-        CollectionAssert.AreEquivalent(
-            new[]
-            {
-                "Antigravity", "Aqua Voice", "Claude", "Cursor", "Discord",
-                "AMD", "NVIDIA", "Logitech G HUB",
-            },
-            allGroups);
-        CollectionAssert.AreEquivalent(detectedGroups, entries.Select(e => e.Value).ToArray());
-        Assert.IsTrue(entries.All(e => e.Label == e.Value));
     }
 
     [TestMethod]
@@ -303,53 +217,6 @@ public sealed class CleanupPreferencesTests
             {
                 Directory.Delete(root, recursive: true);
             }
-        }
-    }
-
-    [TestMethod]
-    public void 各削除項目のチェックリストはアプリまたは用途単位に畳む()
-    {
-        var executor = new NoopExecutor();
-        var expected = new Dictionary<FileCleanupAction, string[]>
-        {
-            [FileCleanupGroups.CreateUserTemp()] =
-            [
-                "Windows Temp", "CrashDumps", "Direct3D Shader Cache", "Internet Cache",
-                "Microsoft IME", "Microsoft Office / Outlook", "CryptnetUrlCache",
-            ],
-            [FileCleanupGroups.CreateSystemTemp(executor)] =
-            [
-                "Windows Temp", "ETL Trace Logs", "Windows Update Logs", "Microsoft Edge Update",
-                "Delivery Optimization", "Microsoft Defender",
-            ],
-            [FileCleanupGroups.CreatePackageCache()] =
-            [
-                "pip", "Yarn", "NuGet", "uv", "npm", "pnpm", "Cargo", "Gradle", "Bun",
-            ],
-            [FileCleanupGroups.CreateShellCache(executor)] = ["Windows Explorer", "Windows Font Cache"],
-            [FileCleanupGroups.CreateWindowsUpdateCache(executor)] = ["Update Downloads"],
-            [FileCleanupGroups.CreateOsIndex(executor)] = ["Prefetch", "Windows Search"],
-        };
-
-        foreach (var (action, expectedLabels) in expected)
-        {
-            var entries = action.GetCheckListEntries();
-            var allLabels = action.EnumerateAllTargets()
-                .Select(action.GetCheckListKey)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToArray();
-            var detectedLabels = action.EnumerateAllTargets()
-                .Where(FileCleanupEngine.HasCleanupCandidates)
-                .Select(action.GetCheckListKey)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToArray();
-
-            CollectionAssert.AreEquivalent(expectedLabels, allLabels, $"{action.Id}: 全対象の分類");
-            CollectionAssert.AreEquivalent(detectedLabels, entries.Select(e => e.Label).ToArray(),
-                $"{action.Id}: 検出済み対象だけを表示");
-            Assert.IsTrue(
-                entries.All(e => !e.Label.Contains('%') && !Path.IsPathFullyQualified(e.Label)),
-                $"{action.Id}: 画面へフルパスを表示しないでください");
         }
     }
 

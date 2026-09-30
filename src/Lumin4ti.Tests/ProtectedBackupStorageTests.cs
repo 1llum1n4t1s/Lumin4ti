@@ -70,17 +70,4 @@ public sealed class ProtectedBackupStorageTests
         Assert.ThrowsExactly<ArgumentException>(() => storage.GetFullPath("..\\forged.json"));
     }
 
-    [TestMethod]
-    public void 正本はProgramData配下でAppDataとは分離される()
-    {
-        var expected = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-            "Lumin4ti",
-            "backups");
-
-        Assert.AreEqual(expected, AppPaths.ProtectedBackupsDirectory);
-        Assert.AreNotEqual(
-            Path.GetFullPath(AppPaths.AppDataDirectory),
-            Path.GetFullPath(AppPaths.ProtectedBackupsDirectory));
-    }
 }

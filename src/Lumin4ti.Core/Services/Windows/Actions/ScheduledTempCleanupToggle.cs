@@ -289,8 +289,6 @@ public sealed class ScheduledTempCleanupToggle(
         return MaintenanceActionResult.Fail(message);
     }
 
-    internal static string BuildQueryArguments() => $"/query /tn \"{TaskName}\"";
-
     internal static string BuildQueryXmlArguments() => $"/query /tn \"{TaskName}\" /xml ONE";
 
     internal static string BuildDeleteArguments() => $"/delete /tn \"{TaskName}\" /f";
@@ -361,16 +359,6 @@ public sealed class ScheduledTempCleanupToggle(
             return false;
         }
     }
-
-    /// <summary>
-    /// 固定名を共有する既存タスクが、現在とは別のユーザーを Principal に明示しているか確認する。
-    /// 旧形式では LogonTrigger の UserId が無いため、所有者の正本は Principal の UserId とする。
-    /// </summary>
-    internal static bool IsExplicitOtherUserTaskDefinition(
-        string xml,
-        string currentAccountName,
-        string? currentSid) =>
-        GetTaskOwnership(xml, currentAccountName, currentSid) == TaskOwnership.OtherUser;
 
     private static TaskOwnership GetTaskOwnership(
         string xml,

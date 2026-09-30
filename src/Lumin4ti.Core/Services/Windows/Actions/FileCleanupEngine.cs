@@ -387,12 +387,11 @@ public static class FileCleanupEngine
 
         using var pinnedDirectory = directoryGuard;
 
-        FileInfo[] files;
-        DirectoryInfo[] subdirectories;
+        FileSystemInfo[] entries;
         try
         {
-            files = directory.GetFiles();
-            subdirectories = directory.GetDirectories();
+            // 一度の列挙でスナップショットを確定し、ファイル→子フォルダの処理順は維持する。
+            entries = directory.GetFileSystemInfos();
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
         {
@@ -400,13 +399,13 @@ public static class FileCleanupEngine
             return;
         }
 
-        foreach (var file in files)
+        foreach (var file in entries.OfType<FileInfo>())
         {
             ct.ThrowIfCancellationRequested();
             TryDeleteFile(file, outcome, scheduleBlockedForReboot);
         }
 
-        foreach (var subdirectory in subdirectories)
+        foreach (var subdirectory in entries.OfType<DirectoryInfo>())
         {
             ct.ThrowIfCancellationRequested();
 

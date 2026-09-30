@@ -59,7 +59,7 @@ public sealed class DisconnectedDeviceTests
                     RequiresRestart: true),
                 [second.InstanceId] = new(DisconnectedDeviceRemovalStatus.Reconnected),
             });
-        var coordinator = new MaintenanceOperationCoordinator();
+        var coordinator = new MaintenanceOperationCoordinator(() => new TestOperationLock());
         var viewModel = new DeviceCleanupViewModel(
             service,
             coordinator,
@@ -117,7 +117,7 @@ public sealed class DisconnectedDeviceTests
             });
         var viewModel = new DeviceCleanupViewModel(
             service,
-            new MaintenanceOperationCoordinator(),
+            new MaintenanceOperationCoordinator(() => new TestOperationLock()),
             action =>
             {
                 action();
@@ -185,4 +185,9 @@ public sealed class DisconnectedDeviceTests
             return Task.FromResult(result);
         }
     }
+    private sealed class TestOperationLock : IDisposable
+    {
+        public void Dispose() { }
+    }
+
 }

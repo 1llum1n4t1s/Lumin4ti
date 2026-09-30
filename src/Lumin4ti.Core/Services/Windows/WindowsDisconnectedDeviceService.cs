@@ -44,10 +44,9 @@ public sealed class WindowsDisconnectedDeviceService : IDisconnectedDeviceServic
     private static IReadOnlyList<DisconnectedDevice> EnumerateDisconnectedDevices(CancellationToken ct)
     {
         var presentIds = EnumerateDeviceIds(DigcfAllClasses | DigcfPresent, ct);
-        var installedDevices = EnumerateDevices(DigcfAllClasses, ct);
+        var installedDevices = EnumerateDevices(DigcfAllClasses, presentIds, ct);
 
         return installedDevices
-            .Where(device => IsDisconnectedCandidate(device.InstanceId, presentIds.Contains(device.InstanceId)))
             .OrderBy(device => device.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ThenBy(device => device.ClassName, StringComparer.CurrentCultureIgnoreCase)
             .ThenBy(device => device.InstanceId, StringComparer.OrdinalIgnoreCase)
@@ -125,7 +124,8 @@ public sealed class WindowsDisconnectedDeviceService : IDisconnectedDeviceServic
         return ids;
     }
 
-    private static IReadOnlyList<DisconnectedDevice> EnumerateDevices(uint flags, CancellationToken ct)
+    private static IReadOnlyList<DisconnectedDevice> EnumerateDevices(
+        uint flags, IReadOnlySet<string> presentIds, CancellationToken ct)
     {
         var devices = new Dictionary<string, DisconnectedDevice>(StringComparer.OrdinalIgnoreCase);
         using var deviceInfoSet = OpenDeviceInfoSet(flags);
@@ -133,7 +133,8 @@ public sealed class WindowsDisconnectedDeviceService : IDisconnectedDeviceServic
         EnumerateDeviceInfo(deviceInfoSet, ct, (set, data) =>
         {
             var instanceId = TryGetInstanceId(set, data);
-            if (string.IsNullOrEmpty(instanceId))
+            // 接続済みの詳細は表示に使わない。同じ接続スナップショットで絞ってから属性を取得する。
+            if (!IsDisconnectedCandidate(instanceId, presentIds.Contains(instanceId)))
             {
                 return;
             }

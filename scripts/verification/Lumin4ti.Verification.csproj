@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>Lumin4ti.Verification</AssemblyName>
+    <RootNamespace>Lumin4ti.Verification</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Lumin4ti.Core/Lumin4ti.Core.csproj" />
+    <ProjectReference Include="../../src/Lumin4ti.UI/Lumin4ti.UI.csproj" />
+  </ItemGroup>
+</Project>

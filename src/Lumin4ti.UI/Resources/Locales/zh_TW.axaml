@@ -193,4 +193,19 @@
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">選擇要刪除的對象</x:String>
   <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">選擇登入時執行的項目</x:String>
   <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">無法儲存選擇（請查看記錄）</x:String>
+  <!-- ===== Update dialog / operation status ===== -->
+  <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">更新</x:String>
+  <x:String x:Key="Text.UpdateDialog.AvailableHeader" xml:space="preserve">有新版本可用</x:String>
+  <x:String x:Key="Text.UpdateDialog.DownloadAndInstall" xml:space="preserve">下載並安裝</x:String>
+  <x:String x:Key="Text.UpdateDialog.IgnoreThisVersion" xml:space="preserve">略過此版本</x:String>
+  <x:String x:Key="Text.UpdateDialog.UpToDateMessage" xml:space="preserve">您的版本已是最新</x:String>
+  <x:String x:Key="Text.UpdateDialog.ErrorHeader" xml:space="preserve">檢查更新失敗</x:String>
+  <x:String x:Key="Text.UpdateDialog.Close" xml:space="preserve">關閉</x:String>
+  <x:String x:Key="Text.UpdateDialog.CheckingMessage" xml:space="preserve">正在檢查更新…</x:String>
+  <x:String x:Key="Text.UpdateDialog.DevelopmentBuild" xml:space="preserve">開發版本會略過更新檢查 (僅適用於已安裝的版本)</x:String>
+  <x:String x:Key="Text.UpdateDialog.CheckFailed" xml:space="preserve">檢查更新失敗: {0}</x:String>
+  <x:String x:Key="Text.Status.Applying" xml:space="preserve">正在套用 {0}…</x:String>
+  <x:String x:Key="Text.Status.Applied" xml:space="preserve">已變更 {0}</x:String>
+  <x:String x:Key="Text.Status.ApplyFailed" xml:space="preserve">變更 {0} 失敗 (請查看記錄)</x:String>
+  <x:String x:Key="Text.Shutdown.BlockReason" xml:space="preserve">Lumin4ti 正在等待維護操作完成…</x:String>
 </ResourceDictionary>

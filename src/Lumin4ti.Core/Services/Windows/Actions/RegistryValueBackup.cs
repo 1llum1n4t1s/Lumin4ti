@@ -23,7 +23,7 @@ internal sealed class RegistryValueBackup(
         WindowsRegistryValueAccessor.Instance);
 
     /// <summary>
-    /// 退避先。保存場所はマシン共通 (%ProgramData%) なので、HKCU を含む項目は利用者ごとに分ける。
+    /// 利用者原本の退避先。混合項目の共有原本は別途マシン共通で所有者を管理する。
     /// 分けないと、同じ PC の別利用者が同じ項目を操作したときに互いの元値を壊してしまう。
     /// </summary>
     private string RelativePath(string id, IReadOnlyList<RegistryToggleSpec> specs)
@@ -34,19 +34,19 @@ internal sealed class RegistryValueBackup(
         }
 
         var currentUserScope = _currentUserScopeProvider();
-        if (string.IsNullOrWhiteSpace(currentUserScope))
+        if (!IsValidUserScope(currentUserScope))
         {
             throw new InvalidOperationException(
                 "現在の利用者 SID を取得できないため、レジストリ復元バックアップを安全に使用できません。");
         }
 
-        return Path.Combine("registry", currentUserScope, id + ".json");
+        return Path.Combine("registry", currentUserScope!, id + ".json");
     }
 
     /// <summary>利用者スコープを導入する前の退避先 (既存バックアップを読み落とさないために残す)。</summary>
     private static string LegacyRelativePath(string id) => Path.Combine("registry", id + ".json");
 
-    private static string? CurrentUserScope()
+    internal static string? CurrentUserScope()
     {
         try
         {
@@ -66,6 +66,11 @@ internal sealed class RegistryValueBackup(
     public void Save(string id, IReadOnlyList<RegistryToggleSpec> specs)
     {
         ValidateSpecs(specs);
+        if (IsMixed(specs))
+        {
+            SaveMixed(id, specs);
+            return;
+        }
         var relativePath = RelativePath(id, specs);
 
         if (storage.FileExists(relativePath))
@@ -98,6 +103,38 @@ internal sealed class RegistryValueBackup(
             stream => Lumin4tiJson.Serialize(stream, document));
     }
 
+    /// <summary>今回の ON 準備で追加した原本・所有登録だけを取り消す。OFF の復元とは分離する。</summary>
+    internal Action PrepareApply(string id, IReadOnlyList<RegistryToggleSpec> specs)
+    {
+        var paths = IsMixed(specs)
+            ? new[] { LegacyRelativePath(id), RelativePath(id, specs) }
+            : new[] { RelativePath(id, specs) };
+        var before = paths.Select(path => storage.FileExists(path) ? storage.ReadAllText(path) : null).ToArray();
+        Save(id, specs);
+        var after = paths.Select(path => storage.FileExists(path) ? storage.ReadAllText(path) : null).ToArray();
+        return () =>
+        {
+            // 他の原本を取り消さないよう、全件の同一性を検証してから変更する。
+            for (var i = 0; i < paths.Length; i++)
+            {
+                var current = storage.FileExists(paths[i]) ? storage.ReadAllText(paths[i]) : null;
+                if (!string.Equals(current, after[i], StringComparison.Ordinal))
+                    throw new InvalidDataException("ON 準備後に復元原本が変化したため、原本と所有登録を保持しました。");
+            }
+            // 混合項目は共有所有登録を先に戻す。失敗した場合は利用者原本を保持する。
+            for (var i = 0; i < paths.Length; i++)
+            {
+                if (string.Equals(before[i], after[i], StringComparison.Ordinal)) continue;
+                if (before[i] is null) storage.Delete(paths[i]);
+                else
+                {
+                    var original = System.Text.Encoding.UTF8.GetBytes(before[i]!);
+                    storage.WriteAtomically(paths[i], stream => stream.Write(original));
+                }
+            }
+        };
+    }
+
     /// <summary>
     /// 全エントリの schema・対応 spec・型付き値を検証して復元計画を確定してから書き戻す。
     /// 旧形式・破損・spec 不一致では一件も変更せず Invalid を返す。
@@ -107,6 +144,11 @@ internal sealed class RegistryValueBackup(
         IReadOnlyList<RegistryToggleSpec> specs,
         List<string> lines)
     {
+        if (IsMixed(specs))
+        {
+            return RestoreMixed(id, specs, lines);
+        }
+
         string relativePath;
         try
         {
@@ -159,9 +201,215 @@ internal sealed class RegistryValueBackup(
         return new(RegistryBackupRestoreStatus.Restored);
     }
 
+    internal static bool IsValidUserScope(string? scope)
+    {
+        if (string.IsNullOrWhiteSpace(scope)) return false;
+        try { return new System.Security.Principal.SecurityIdentifier(scope).Value == scope; }
+        catch (ArgumentException) { return false; }
+    }
+
+    private static bool IsMixed(IReadOnlyList<RegistryToggleSpec> specs) =>
+        specs.Any(spec => spec.Hive == RegistryHive.CurrentUser) &&
+        specs.Any(spec => spec.Hive != RegistryHive.CurrentUser);
+
+    private void RejectLegacyMixed(string id)
+    {
+        // 他 SID の旧混合原本も検査する。適用済み HKLM を真の元値として再保存してはいけない。
+        foreach (var path in storage.EnumerateUserBackupPaths(id))
+        {
+            var document = Lumin4tiJson.Deserialize<RegistryValueBackupDocument>(storage.ReadAllText(path));
+            if (document?.SchemaVersion != RegistryValueBackupDocument.CurrentSchemaVersion ||
+                document.Entries is null || document.Entries.Any(entry => entry?.Hive != RegistryHive.CurrentUser))
+                throw new InvalidDataException("旧混合バックアップの共有元値を証明できないため、変更しません。");
+        }
+    }
+
+    private RegistryValueBackupDocument Capture(IReadOnlyList<RegistryToggleSpec> specs) => new()
+    {
+        SchemaVersion = RegistryValueBackupDocument.CurrentSchemaVersion,
+        Entries = specs.Select(spec =>
+        {
+            var value = registry.Read(spec);
+            value.Validate();
+            return RegistryValueBackupEntry.Create(spec, value);
+        }).ToList(),
+    };
+
+    private RegistryValueBackupDocument LoadShared(string path, IReadOnlyList<RegistryToggleSpec> specs)
+    {
+        var plan = LoadRestorePlan(path, specs, shared: true);
+        if (!plan.IsValid) throw new InvalidDataException(plan.FailureReason);
+        return Lumin4tiJson.Deserialize<RegistryValueBackupDocument>(storage.ReadAllText(path))!;
+    }
+
+    private void SaveMixed(string id, IReadOnlyList<RegistryToggleSpec> specs)
+    {
+        var userPath = RelativePath(id, specs); // SID 取得不能では共有退避にも触れない。
+        var scope = Path.GetFileName(Path.GetDirectoryName(userPath));
+        RejectLegacyMixed(id);
+        var userSpecs = specs.Where(spec => spec.Hive == RegistryHive.CurrentUser).ToArray();
+        var machineSpecs = specs.Where(spec => spec.Hive != RegistryHive.CurrentUser).ToArray();
+        if (storage.FileExists(userPath) && !LoadRestorePlan(userPath, userSpecs).IsValid)
+            throw new InvalidDataException("利用者バックアップが現在の仕様と一致しません。");
+        var machinePath = LegacyRelativePath(id);
+        var originalSharedJson = storage.FileExists(machinePath) ? storage.ReadAllText(machinePath) : null;
+        var shared = originalSharedJson is not null ? LoadShared(machinePath, machineSpecs) : null;
+        if (shared?.OwnerScopes!.Contains(scope!, StringComparer.Ordinal) == true && !storage.FileExists(userPath))
+            throw new InvalidDataException("適用中利用者の原本が欠落しているため再取得できません。");
+        // 所有解除の置換後にエラーとなると、呼出元の補償で共有値だけ適用値へ戻り得る。
+        // 利用者原本が残る場合は共有実値が原本と型付きで一致することを確かめてから再取得する。
+        // 復元成功後の削除失敗なら一致するため、UI が OFF を表示した状態からも ON で回復できる。
+        if (shared is not null && shared.OwnerScopes!.Count == 0 &&
+            storage.EnumerateUserBackupPaths(id).Count != 0)
+        {
+            var restored = LoadRestorePlan(machinePath, machineSpecs, shared: true);
+            if (!restored.IsValid || restored.Plan!.Any(operation =>
+                    !registry.Read(operation.Spec).EquivalentTo(operation.Value)))
+                throw new InvalidDataException("共有設定の復元完了を確認できません。OFF を再実行してください。");
+        }
+        // 他 SID の利用者原本は読み戻さず保持する。共有原値の一致を確認できたときだけ再取得する。
+        if (shared is null || shared.OwnerScopes!.Count == 0)
+            shared = Capture(machineSpecs) with { SchemaVersion = RegistryValueBackupDocument.SharedSchemaVersion, OwnerScopes = [] };
+        if (!shared.OwnerScopes!.Contains(scope!, StringComparer.Ordinal))
+            shared = shared with { OwnerScopes = [..shared.OwnerScopes!, scope!] };
+        var newUserBackup = storage.FileExists(userPath) ? null : Capture(userSpecs);
+        var newUserJson = newUserBackup is null ? null : Lumin4tiJson.Serialize(newUserBackup);
+        var attemptedUserCreation = false;
+        // 所有登録より先に利用者原本を確定する。置換後の検証失敗も同じ取消境界で扱う。
+        try
+        {
+            if (newUserBackup is not null)
+            {
+                attemptedUserCreation = true;
+                storage.WriteNewAtomically(userPath, stream => Lumin4tiJson.Serialize(stream, newUserBackup));
+            }
+            storage.WriteAtomically(machinePath, stream => Lumin4tiJson.Serialize(stream, shared));
+        }
+        catch (Exception saveError) when (saveError is not OperationCanceledException)
+        {
+            if (attemptedUserCreation)
+            {
+                try
+                {
+                    // Save の完了前なので製品レジストリは未変更。共有正本が更新前と完全一致するときだけ
+                    // 今回新規作成した利用者原本を取り消し、次の ON で準備をやり直せるようにする。
+                    // 原子的置換後のエラーでは所有情報が変わるため、利用者原本を削除しない。
+                    var unchanged = originalSharedJson is null
+                        ? !storage.FileExists(machinePath)
+                        : storage.FileExists(machinePath) && string.Equals(
+                            storage.ReadAllText(machinePath), originalSharedJson, StringComparison.Ordinal);
+                    if (unchanged)
+                    {
+                        if (storage.FileExists(userPath))
+                        {
+                            // 新規作成の置換後に例外となった場合も、今回の退避内容と一致する原本だけ取り消す。
+                            if (string.Equals(storage.ReadAllText(userPath), newUserJson, StringComparison.Ordinal))
+                                storage.Delete(userPath);
+                            else LoggerBootstrap.Log.Error($"{id}: 新規利用者原本の同一性を確認できないため保持しました", saveError);
+                        }
+                    }
+                    else LoggerBootstrap.Log.Error($"{id}: 共有原本の更新完了を判定できないため利用者原本を保持しました", saveError);
+                }
+                catch (Exception cleanupError) when (cleanupError is not OperationCanceledException)
+                {
+                    LoggerBootstrap.Log.Error($"{id}: 適用準備の取消に失敗したため利用者原本を保持しました", cleanupError);
+                }
+            }
+            throw;
+        }
+    }
+
+    private RegistryBackupRestoreResult RestoreMixed(string id, IReadOnlyList<RegistryToggleSpec> specs, List<string> lines)
+    {
+        string userPath;
+        RegistryValueBackupDocument shared;
+        bool ownsShared;
+        RegistryRestorePlanLoadResult? userPlan;
+        List<RegistryRestoreOperation> operations;
+        string machinePath;
+        string? scope;
+        try
+        {
+            ValidateSpecs(specs);
+            userPath = RelativePath(id, specs);
+            scope = Path.GetFileName(Path.GetDirectoryName(userPath));
+            RejectLegacyMixed(id);
+            machinePath = LegacyRelativePath(id);
+            var userSpecs = specs.Where(spec => spec.Hive == RegistryHive.CurrentUser).ToArray();
+            var machineSpecs = specs.Where(spec => spec.Hive != RegistryHive.CurrentUser).ToArray();
+            if (!storage.FileExists(machinePath))
+            {
+                if (storage.FileExists(userPath)) throw new InvalidDataException("共有バックアップが欠落しています。");
+                return new(RegistryBackupRestoreStatus.Missing);
+            }
+            shared = LoadShared(machinePath, machineSpecs);
+            ownsShared = shared.OwnerScopes!.Contains(scope!, StringComparer.Ordinal);
+            userPlan = storage.FileExists(userPath) ? LoadRestorePlan(userPath, userSpecs) : null;
+            if (userPlan is not null && !userPlan.IsValid) throw new InvalidDataException(userPlan.FailureReason);
+            if (ownsShared && userPlan is null) throw new InvalidDataException("適用中利用者のバックアップが欠落しています。");
+            // 全原本を検証した後に書く。別利用者の適用中は HKLM を保持する。
+            var machinePlan = LoadRestorePlan(machinePath, machineSpecs, shared: true);
+            if (!machinePlan.IsValid) throw new InvalidDataException(machinePlan.FailureReason);
+            operations = new List<RegistryRestoreOperation>();
+            if (userPlan is not null) operations.AddRange(userPlan.Plan!);
+            // 所有解除の置換後に保存エラーとなり呼出元が補償した場合も、利用者原本が残れば再復元する。
+            // 別の所有者がいるときは共有設定へ触れない。
+            if ((ownsShared && shared.OwnerScopes!.Count == 1) ||
+                (shared.OwnerScopes!.Count == 0 && userPlan is not null))
+                operations.AddRange(machinePlan.Plan!);
+        }
+        catch (Exception ex) when (ex is InvalidDataException or InvalidOperationException or JsonException)
+        {
+            return new(RegistryBackupRestoreStatus.Invalid, ex.Message);
+        }
+        foreach (var operation in operations)
+        {
+            registry.Write(operation.Spec, operation.Value);
+            lines.Add($"  - {operation.Spec.Name} を元の状態へ復元しました");
+        }
+        if (ownsShared)
+        {
+            var released = shared with { OwnerScopes = shared.OwnerScopes!.Where(owner => owner != scope).ToList() };
+            // この境界では全値の復元が完了している。所有更新の成否が不明なまま
+            // レジストリだけ ON へ戻すと、所有登録を失った ON が残ってしまう。
+            try
+            {
+                storage.WriteAtomically(machinePath, stream => Lumin4tiJson.Serialize(stream, released));
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                try
+                {
+                    if (!string.Equals(storage.ReadAllText(machinePath), Lumin4tiJson.Serialize(released), StringComparison.Ordinal))
+                        return new(RegistryBackupRestoreStatus.Incomplete, ex.Message);
+                    LoggerBootstrap.Log.Error($"{id}: 所有更新の例外後に更新済み原本を照合し、復元完了を確認しました", ex);
+                }
+                catch (Exception verifyError) when (verifyError is not OperationCanceledException)
+                {
+                    LoggerBootstrap.Log.Error($"{id}: 設定復元は完了しましたが、所有更新を確認できないため原本を保持しました", verifyError);
+                    return new(RegistryBackupRestoreStatus.Incomplete, ex.Message);
+                }
+            }
+        }
+        if (userPlan is not null)
+        {
+            try { storage.Delete(userPath); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException)
+            {
+                lines.Add("  - 復元済み利用者バックアップを削除できなかったため保持しました");
+                LoggerBootstrap.Log.Error($"{id}: 利用者バックアップの削除失敗", ex);
+            }
+        }
+        if (shared.OwnerScopes!.Count > (ownsShared ? 1 : 0))
+            lines.Add("  - 別の利用者が適用中の共有設定と元値は保持しました");
+        // owner ゼロの共有 journal は retry の完了印として残す。再実行で既定値を上書きしない。
+        return new(RegistryBackupRestoreStatus.Restored);
+    }
+
     private RegistryRestorePlanLoadResult LoadRestorePlan(
         string relativePath,
-        IReadOnlyList<RegistryToggleSpec> specs)
+        IReadOnlyList<RegistryToggleSpec> specs,
+        bool shared = false)
     {
         try
         {
@@ -182,11 +430,16 @@ internal sealed class RegistryValueBackup(
             return RegistryRestorePlanLoadResult.Invalid(ex.Message);
         }
 
-        if (document?.SchemaVersion != RegistryValueBackupDocument.CurrentSchemaVersion)
+        if (document?.SchemaVersion != (shared ? RegistryValueBackupDocument.SharedSchemaVersion : RegistryValueBackupDocument.CurrentSchemaVersion))
         {
             return RegistryRestorePlanLoadResult.Invalid(
                 $"未対応の schema version です ({document?.SchemaVersion?.ToString() ?? "未指定"})");
         }
+
+        if (shared && (document.OwnerScopes is null ||
+            document.OwnerScopes.Any(owner => !IsValidUserScope(owner)) ||
+            document.OwnerScopes.Distinct(StringComparer.Ordinal).Count() != document.OwnerScopes.Count))
+            return RegistryRestorePlanLoadResult.Invalid("共有バックアップの所有者情報が不正です");
 
         if (document.Entries is null)
         {
@@ -299,6 +552,7 @@ internal enum RegistryBackupRestoreStatus
     Missing,
     Restored,
     Invalid,
+    Incomplete,
 }
 
 internal readonly record struct RegistryBackupRestoreResult(
@@ -309,10 +563,14 @@ internal sealed record RegistryValueBackupDocument
 {
     public const int CurrentSchemaVersion = 1;
 
+    public const int SharedSchemaVersion = 2;
+
     // nullable にして、SchemaVersion を持たない旧 Dictionary 形式を確実に拒否する。
     public int? SchemaVersion { get; init; }
 
     public List<RegistryValueBackupEntry>? Entries { get; init; }
+
+    public List<string>? OwnerScopes { get; init; }
 }
 
 internal sealed record RegistryValueBackupEntry
@@ -343,6 +601,12 @@ internal interface IRegistryBackupStorage
     void WriteNewAtomically(string relativePath, Action<Stream> write);
 
     void Delete(string relativePath);
+
+    void WriteAtomically(string relativePath, Action<Stream> write) =>
+        throw new InvalidOperationException("共有バックアップの原子的更新が未対応です。");
+
+    IReadOnlyList<string> EnumerateUserBackupPaths(string id) =>
+        throw new InvalidOperationException("旧混合バックアップの検査が未対応です。");
 }
 
 internal sealed class ProtectedRegistryBackupStorage(ProtectedBackupStorage storage) : IRegistryBackupStorage
@@ -355,6 +619,24 @@ internal sealed class ProtectedRegistryBackupStorage(ProtectedBackupStorage stor
         storage.WriteNewAtomically(relativePath, write);
 
     public void Delete(string relativePath) => storage.Delete(relativePath);
+
+    public void WriteAtomically(string relativePath, Action<Stream> write) => storage.WriteAtomically(relativePath, write);
+
+    public IReadOnlyList<string> EnumerateUserBackupPaths(string id)
+    {
+        // 親を ACL / 再解析ポイント検証した後、直下の SID フォルダだけ調べる。
+        _ = storage.FileExists(Path.Combine("registry", ".scope-probe"));
+        var root = storage.GetFullPath("registry");
+        var paths = new List<string>();
+        foreach (var directory in Directory.EnumerateDirectories(root))
+        {
+            var scope = Path.GetFileName(directory);
+            if (!RegistryValueBackup.IsValidUserScope(scope)) continue;
+            var path = Path.Combine("registry", scope, id + ".json");
+            if (storage.FileExists(path)) paths.Add(path);
+        }
+        return paths;
+    }
 }
 
 internal interface IRegistryValueAccessor

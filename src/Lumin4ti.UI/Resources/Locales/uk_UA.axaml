@@ -193,4 +193,19 @@
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">Виберіть, що видаляти</x:String>
   <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">Виберіть, що виконувати під час входу</x:String>
   <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">Не вдалося зберегти вибір (див. журнал)</x:String>
+  <!-- ===== Update dialog / operation status ===== -->
+  <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">Оновлення</x:String>
+  <x:String x:Key="Text.UpdateDialog.AvailableHeader" xml:space="preserve">Доступна нова версія</x:String>
+  <x:String x:Key="Text.UpdateDialog.DownloadAndInstall" xml:space="preserve">Завантажити та встановити</x:String>
+  <x:String x:Key="Text.UpdateDialog.IgnoreThisVersion" xml:space="preserve">Пропустити цю версію</x:String>
+  <x:String x:Key="Text.UpdateDialog.UpToDateMessage" xml:space="preserve">Ваша версія актуальна</x:String>
+  <x:String x:Key="Text.UpdateDialog.ErrorHeader" xml:space="preserve">Не вдалося перевірити оновлення</x:String>
+  <x:String x:Key="Text.UpdateDialog.Close" xml:space="preserve">Закрити</x:String>
+  <x:String x:Key="Text.UpdateDialog.CheckingMessage" xml:space="preserve">Перевірка оновлень…</x:String>
+  <x:String x:Key="Text.UpdateDialog.DevelopmentBuild" xml:space="preserve">У збірках для розробки перевірка оновлень пропускається (доступна лише у встановленій версії)</x:String>
+  <x:String x:Key="Text.UpdateDialog.CheckFailed" xml:space="preserve">Не вдалося перевірити оновлення: {0}</x:String>
+  <x:String x:Key="Text.Status.Applying" xml:space="preserve">Застосування {0}…</x:String>
+  <x:String x:Key="Text.Status.Applied" xml:space="preserve">{0} змінено</x:String>
+  <x:String x:Key="Text.Status.ApplyFailed" xml:space="preserve">Не вдалося змінити {0} (див. журнал)</x:String>
+  <x:String x:Key="Text.Shutdown.BlockReason" xml:space="preserve">Lumin4ti очікує завершення операції обслуговування…</x:String>
 </ResourceDictionary>

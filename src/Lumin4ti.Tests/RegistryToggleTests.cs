@@ -98,7 +98,7 @@ public sealed class RegistryToggleTests
     }
 
     [TestMethod]
-    public void HKCUを含む退避は利用者ごとに分かれHKLMだけならマシン共通に置く()
+    public void 混合退避は利用者の元値を分離し最後の所有者がOFFになるまでマシン原本を保持する()
     {
         var userSpecs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
         var machineSpecs = new[]
@@ -122,10 +122,53 @@ public sealed class RegistryToggleTests
         backup.Save("machine-toggle-test", machineSpecs);
         backup.Save("mixed-toggle-test", mixedSpecs);
 
-        // HKCU を 1 件でも含めば利用者 SID 配下、HKLM だけなら従来どおりの位置
+        // 利用者値とマシン値を別々の正本へ退避する。
         Assert.IsTrue(storage.FileExists(Path.Combine("registry", CurrentUserSid(), ToggleId + ".json")));
         Assert.IsTrue(storage.FileExists(Path.Combine("registry", "machine-toggle-test.json")));
         Assert.IsTrue(storage.FileExists(Path.Combine("registry", CurrentUserSid(), "mixed-toggle-test.json")));
+        var sharedPath = Path.Combine("registry", "mixed-toggle-test.json");
+        Assert.IsTrue(storage.FileExists(sharedPath));
+        using (var shared = JsonDocument.Parse(storage.GetJson(sharedPath)))
+        {
+            Assert.AreEqual(2, shared.RootElement.GetProperty("SchemaVersion").GetInt32());
+            Assert.AreEqual(1, shared.RootElement.GetProperty("Entries").GetArrayLength());
+            Assert.AreEqual(CurrentUserSid(), shared.RootElement.GetProperty("OwnerScopes")[0].GetString());
+        }
+        using (var user = JsonDocument.Parse(storage.GetJson(Path.Combine("registry", CurrentUserSid(), "mixed-toggle-test.json"))))
+        {
+            Assert.AreEqual(1, user.RootElement.GetProperty("Entries").GetArrayLength());
+        }
+
+        registry.Set(mixedSpecs[0], RegistryValueSnapshot.Dword(1));
+        registry.Set(mixedSpecs[1], RegistryValueSnapshot.Dword(1));
+        const string secondSid = "S-1-5-21-111-222-333-1002";
+        // 別利用者の HKCU は別 accessor で表し、HKLM の適用状態は共有する。
+        var secondRegistry = new FakeRegistryValueAccessor();
+        secondRegistry.Set(mixedSpecs[0], RegistryValueSnapshot.Dword(20));
+        secondRegistry.Set(mixedSpecs[1], RegistryValueSnapshot.Dword(1));
+        var secondBackup = new RegistryValueBackup(storage, secondRegistry, () => secondSid);
+        secondBackup.Save("mixed-toggle-test", mixedSpecs);
+        secondRegistry.Set(mixedSpecs[0], RegistryValueSnapshot.Dword(1));
+
+        Assert.AreEqual(RegistryBackupRestoreStatus.Restored, backup.TryRestore("mixed-toggle-test", mixedSpecs, []).Status);
+        AssertSnapshot(RegistryValueSnapshot.Dword(9), registry.Read(mixedSpecs[0]), "最初の利用者値");
+        AssertSnapshot(RegistryValueSnapshot.Dword(1), registry.Read(mixedSpecs[1]), "他利用者が使用中のマシン値");
+        using (var shared = JsonDocument.Parse(storage.GetJson(sharedPath)))
+        {
+            Assert.AreEqual(1, shared.RootElement.GetProperty("OwnerScopes").GetArrayLength());
+            Assert.AreEqual(secondSid, shared.RootElement.GetProperty("OwnerScopes")[0].GetString());
+        }
+
+        Assert.AreEqual(RegistryBackupRestoreStatus.Restored, secondBackup.TryRestore("mixed-toggle-test", mixedSpecs, []).Status);
+        AssertSnapshot(RegistryValueSnapshot.Dword(20), secondRegistry.Read(mixedSpecs[0]), "最後の利用者値");
+        AssertSnapshot(RegistryValueSnapshot.Dword(9), secondRegistry.Read(mixedSpecs[1]), "マシン原本");
+        using var completed = JsonDocument.Parse(storage.GetJson(sharedPath));
+        Assert.AreEqual(0, completed.RootElement.GetProperty("OwnerScopes").GetArrayLength());
+        secondRegistry.Set(mixedSpecs[1], RegistryValueSnapshot.Dword(42));
+        var writeAttempts = secondRegistry.WriteAttempts;
+        _ = secondBackup.TryRestore("mixed-toggle-test", mixedSpecs, []);
+        Assert.AreEqual(writeAttempts, secondRegistry.WriteAttempts, "完了済みの OFF は共有元値を再適用しない");
+        AssertSnapshot(RegistryValueSnapshot.Dword(42), secondRegistry.Read(mixedSpecs[1]), "OFF 後の外部変更");
     }
 
     [TestMethod]
@@ -508,7 +551,12 @@ public sealed class RegistryToggleTests
             () => toggle.SetStateAsync(true, cancellation.Token));
 
         Assert.AreEqual(0, registry.WriteAttempts);
-        Assert.IsTrue(storage.FileExists(BackupPath(ToggleId)));
+        Assert.IsFalse(storage.FileExists(BackupPath(ToggleId)), "未適用の新規準備は取り消す");
+        AssertSnapshot(RegistryValueSnapshot.Dword(0), registry.Read(specs[0]), specs[0].Name);
+        registry.Set(specs[0], RegistryValueSnapshot.Dword(5));
+        Assert.IsTrue((await toggle.SetStateAsync(true)).Success);
+        Assert.IsTrue((await toggle.SetStateAsync(false)).Success);
+        AssertSnapshot(RegistryValueSnapshot.Dword(5), registry.Read(specs[0]), specs[0].Name);
     }
 
     private static RegistryToggle CreateToggle(
@@ -571,6 +619,22 @@ public sealed class RegistryToggleTests
         }
 
         public void Delete(string relativePath) => _files.Remove(relativePath);
+
+        public void WriteAtomically(string relativePath, Action<Stream> write)
+        {
+            using var stream = new MemoryStream();
+            write(stream);
+            _files[relativePath] = Encoding.UTF8.GetString(stream.ToArray());
+        }
+
+        public IReadOnlyList<string> EnumerateUserBackupPaths(string id) =>
+            _files.Keys.Where(path =>
+            {
+                var parts = path.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                return parts.Length == 3
+                    && parts[0] == "registry"
+                    && parts[2] == id + ".json";
+            }).ToArray();
 
         public void SetJson(string relativePath, string json) => _files[relativePath] = json;
 

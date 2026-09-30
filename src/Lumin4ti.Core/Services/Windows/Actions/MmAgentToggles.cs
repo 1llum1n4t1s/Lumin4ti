@@ -9,7 +9,7 @@ namespace Lumin4ti.Core.Services.Windows.Actions;
 
 /// <summary>
 /// Get-MMAgent の成功結果を取得・キャッシュする共有プロバイダ。
-/// 並行取得を 1 プロセスへ集約し、失敗時だけ次回取得で再試行する。
+/// 並行取得を 1 プロセスへ集約し、失敗時や一括再読込時に完了済みのキャッシュを更新する。
 /// </summary>
 public sealed class MmAgentStateProvider(ICommandExecutor executor)
 {
@@ -19,6 +19,27 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
         new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, byte> _unsupported =
         new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>一括再読込の開始時に古い実値を捨てる。同じ再読込内では共有ロードへ集約する。</summary>
+    public void ResetSnapshot()
+    {
+        lock (_cacheSync)
+        {
+            // 待機側がタイムアウトしても共有ロード自体は続くため、未完了の Task は保持する。
+            // 再アクティブのたびに同じ問い合わせを重複起動させない。
+            if (_cacheTask?.IsCompleted != false)
+            {
+                if (_cacheTask?.IsFaulted == true)
+                {
+                    _ = _cacheTask.Exception;
+                }
+
+                _cacheTask = null;
+            }
+
+            _overrides.Clear();
+        }
+    }
 
     public async Task<bool?> GetAsync(string propertyName, CancellationToken ct = default)
     {
@@ -154,12 +175,19 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
             ct);
         if (!result.Success || string.IsNullOrWhiteSpace(result.StandardOutput))
         {
+            LoggerBootstrap.Log.Error($"Get-MMAgent: 状態取得に失敗 ({CommandFailureDiagnostic.Format(result)})");
             return null;
         }
 
         try
         {
             using var doc = JsonDocument.Parse(result.StandardOutput);
+            if (doc.RootElement.ValueKind != JsonValueKind.Object)
+            {
+                LoggerBootstrap.Log.Error($"Get-MMAgent: 状態 JSON がオブジェクトではありません ({CommandFailureDiagnostic.Format(result)})");
+                return null;
+            }
+
             var dict = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
             foreach (var prop in doc.RootElement.EnumerateObject())
             {
@@ -169,10 +197,17 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
                 }
             }
 
+            if (dict.Count == 0)
+            {
+                LoggerBootstrap.Log.Error($"Get-MMAgent: 状態 JSON に真偽値がありません ({CommandFailureDiagnostic.Format(result)})");
+                return null;
+            }
+
             return dict;
         }
         catch (JsonException)
         {
+            LoggerBootstrap.Log.Error($"Get-MMAgent: 状態 JSON を解析できません ({CommandFailureDiagnostic.Format(result)})");
             return null;
         }
     }
@@ -193,6 +228,9 @@ public sealed class MmAgentFeatureToggle(
     string description) : IMaintenanceToggle
 {
     private readonly SemaphoreSlim _setGate = new(1, 1);
+
+    /// <summary>一括状態読込が共有スナップショットを更新するためのプロバイダ。</summary>
+    public MmAgentStateProvider StateProvider => stateProvider;
 
     public string Id => id;
 

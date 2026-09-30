@@ -13,17 +13,20 @@ namespace Lumin4ti.Tests;
 public sealed class WindowsServiceControlTests
 {
     [TestMethod]
-    [DataRow(WindowsServiceState.Running, WindowsServiceState.Stopped, true, false)]
-    [DataRow(WindowsServiceState.Running, WindowsServiceState.Stopped, false, false)]
-    [DataRow(WindowsServiceState.Running, WindowsServiceState.Running, true, true)]
-    [DataRow(WindowsServiceState.Running, WindowsServiceState.Transitioning, true, true)]
-    [DataRow(WindowsServiceState.Running, null, true, true)]
-    [DataRow(null, null, true, true)]
-    [DataRow(WindowsServiceState.Transitioning, null, true, true)]
-    [DataRow(WindowsServiceState.Stopped, null, true, false)]
-    [DataRow(WindowsServiceState.NotInstalled, null, true, false)]
+    [DataRow(WindowsServiceState.Running, WindowsServiceState.Stopped, true, false, true)]
+    [DataRow(WindowsServiceState.Running, WindowsServiceState.Stopped, false, false, true)]
+    [DataRow(WindowsServiceState.Running, WindowsServiceState.Running, true, true, true)]
+    [DataRow(WindowsServiceState.Running, WindowsServiceState.Transitioning, true, true, true)]
+    [DataRow(WindowsServiceState.Running, null, true, true, true)]
+    [DataRow(null, null, true, true, true)]
+    [DataRow(WindowsServiceState.Transitioning, null, true, true, true)]
+    [DataRow(WindowsServiceState.Stopped, null, true, false, true)]
+    [DataRow(WindowsServiceState.NotInstalled, null, true, false, true)]
+    [DataRow(WindowsServiceState.Running, null, true, true, false)]
+    [DataRow(WindowsServiceState.Running, null, true, true, null)]
     public async Task 停止要求と実状態を照合して未確認のまま掃除を許可しない(
-        WindowsServiceState? initialState, WindowsServiceState? finalState, bool success, bool failed)
+        WindowsServiceState? initialState, WindowsServiceState? finalState, bool success, bool failed,
+        bool? dependentsSafe)
     {
         const string service = "WSearch";
         using var cancellation = new CancellationTokenSource();
@@ -35,14 +38,18 @@ public sealed class WindowsServiceControlTests
             [service],
             progress: null,
             cancellation.Token,
-            _ => states.Dequeue());
+            _ => states.Dequeue(),
+            canStopWithoutDependents: _ => dependentsSafe
+                ?? throw new InvalidOperationException("依存関係を確認できません"));
 
-        var requested = initialState is WindowsServiceState.Running;
+        var requested = initialState is WindowsServiceState.Running && dependentsSafe == true;
         Assert.HasCount(requested ? 1 : 0, executor.Invocations);
         if (requested)
         {
             Assert.IsFalse(executor.Invocations[0].Token.CanBeCanceled);
             Assert.AreEqual(WindowsServiceControl.ServiceStopTimeout, executor.Invocations[0].Timeout);
+            Assert.AreEqual($"stop \"{service}\"", executor.Invocations[0].Arguments,
+                "依存サービスの一括停止を許可する引数を付けない");
         }
         CollectionAssert.AreEqual(requested ? new[] { service } : [], suspension.Stopped.ToArray());
         CollectionAssert.AreEqual(failed ? new[] { service } : [], suspension.FailedToStop.ToArray());

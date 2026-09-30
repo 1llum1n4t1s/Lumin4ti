@@ -33,13 +33,13 @@ public sealed class NtpConfigActionTests
             events.Add(arguments);
             return Result(success: true);
         });
-        var action = new NtpConfigAction(executor, () => true, () => events.Add("write"));
+        var action = CreateRunningAction(executor, () => events.Add("write"));
 
         var result = await action.ExecuteAsync();
 
         Assert.IsTrue(result.Success, result.Detail);
         CollectionAssert.AreEqual(
-            new[] { "stop w32time", "write", "start w32time" },
+            new[] { "stop \"w32time\"", "write", "start \"w32time\"" },
             events);
         Assert.HasCount(2, executor.Invocations);
         Assert.IsFalse(executor.Invocations[1].Token.CanBeCanceled, "再起動は補償用の CancellationToken.None で実行します");
@@ -59,15 +59,15 @@ public sealed class NtpConfigActionTests
 
             return Result(success: true);
         });
-        var action = new NtpConfigAction(executor, () => true, () => writes++);
+        var action = CreateRunningAction(executor, () => writes++);
 
         await Assert.ThrowsAsync<OperationCanceledException>(
             () => action.ExecuteAsync(cancellation.Token));
 
         Assert.AreEqual(0, writes, "キャンセル後に設定を書き始めてはいけません");
         Assert.HasCount(2, executor.Invocations);
-        Assert.AreEqual("stop w32time", executor.Invocations[0].Arguments);
-        Assert.AreEqual("start w32time", executor.Invocations[1].Arguments);
+        Assert.AreEqual("stop \"w32time\"", executor.Invocations[0].Arguments);
+        Assert.AreEqual("start \"w32time\"", executor.Invocations[1].Arguments);
         Assert.IsFalse(executor.Invocations[1].Token.CanBeCanceled, "キャンセル済み token を補償へ渡してはいけません");
     }
 
@@ -89,28 +89,27 @@ public sealed class NtpConfigActionTests
             ct.ThrowIfCancellationRequested();
             return Result(success: true);
         });
-        var action = new NtpConfigAction(executor, () => true, () => writes++);
+        var action = CreateRunningAction(executor, () => writes++);
 
         await Assert.ThrowsAsync<OperationCanceledException>(
             () => action.ExecuteAsync(cancellation.Token));
 
         Assert.AreEqual(0, writes, "キャンセル後に設定を書き始めてはいけません");
         Assert.HasCount(2, executor.Invocations);
-        Assert.AreEqual("stop w32time", executor.Invocations[0].Arguments);
+        Assert.AreEqual("stop \"w32time\"", executor.Invocations[0].Arguments);
         Assert.IsFalse(
             executor.Invocations[0].Token.CanBeCanceled,
             "停止コマンドを打ち切ると停止できたか確定せず、再起動補償から漏れます");
         Assert.AreEqual(WindowsServiceControl.ServiceStopTimeout, executor.Invocations[0].Timeout);
-        Assert.AreEqual("start w32time", executor.Invocations[1].Arguments);
+        Assert.AreEqual("start \"w32time\"", executor.Invocations[1].Arguments);
     }
 
     [TestMethod]
     public async Task 設定書き込みが失敗しても再起動してから元の例外を伝播する()
     {
         var executor = new RecordingExecutor((_, _, _, _) => Result(success: true));
-        var action = new NtpConfigAction(
+        var action = CreateRunningAction(
             executor,
-            () => true,
             () => throw new InvalidOperationException("write failed"));
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(
@@ -118,7 +117,7 @@ public sealed class NtpConfigActionTests
 
         Assert.AreEqual("write failed", exception.Message);
         Assert.HasCount(2, executor.Invocations);
-        Assert.AreEqual("start w32time", executor.Invocations[1].Arguments);
+        Assert.AreEqual("start \"w32time\"", executor.Invocations[1].Arguments);
         Assert.IsFalse(executor.Invocations[1].Token.CanBeCanceled);
     }
 
@@ -126,16 +125,25 @@ public sealed class NtpConfigActionTests
     public async Task サービス停止に失敗したら設定を書き込まない()
     {
         var writes = 0;
-        var executor = new RecordingExecutor((_, _, _, _) => Result(success: false, error: "stop failed"));
-        var action = new NtpConfigAction(executor, () => true, () => writes++);
+        var executor = new RecordingExecutor((call, _, _, _) => call == 1
+            ? Result(success: false, error: "stop failed")
+            : Result(success: true));
+        var action = CreateRunningAction(executor, () => writes++);
 
         var result = await action.ExecuteAsync();
 
         Assert.IsFalse(result.Success);
         StringAssert.Contains(result.Detail, "設定を変更しませんでした");
         Assert.AreEqual(0, writes);
-        Assert.HasCount(1, executor.Invocations);
+        Assert.HasCount(2, executor.Invocations);
+        Assert.AreEqual("start \"w32time\"", executor.Invocations[1].Arguments);
+        Assert.IsFalse(executor.Invocations[1].Token.CanBeCanceled);
     }
+
+    private static NtpConfigAction CreateRunningAction(RecordingExecutor executor, Action writeConfiguration) =>
+        new(executor, () => true, writeConfiguration,
+            queryState: _ => executor.ServiceState,
+            recoveryDelay: _ => Task.CompletedTask);
 
     private static CommandExecutionResult Result(bool success, string error = "") =>
         new(success, "net.exe", success ? 0 : 1, string.Empty, error);
@@ -153,6 +161,8 @@ public sealed class NtpConfigActionTests
 
         public List<Invocation> Invocations { get; } = [];
 
+        public WindowsServiceState ServiceState { get; private set; } = WindowsServiceState.Running;
+
         public Task<CommandExecutionResult> RunAsync(
             string fileName,
             string arguments,
@@ -162,7 +172,11 @@ public sealed class NtpConfigActionTests
         {
             var call = Interlocked.Increment(ref _callCount);
             Invocations.Add(new Invocation(fileName, arguments, ct, timeout));
-            return Task.FromResult(callback(call, fileName, arguments, ct));
+            var result = callback(call, fileName, arguments, ct);
+            ServiceState = arguments.StartsWith("stop ", StringComparison.Ordinal)
+                ? result.Success ? WindowsServiceState.Stopped : WindowsServiceState.Transitioning
+                : result.Success ? WindowsServiceState.Running : WindowsServiceState.Stopped;
+            return Task.FromResult(result);
         }
     }
 

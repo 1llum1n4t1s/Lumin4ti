@@ -9,6 +9,7 @@ using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services;
 using Lumin4ti.Core.Services.Windows;
+using Lumin4ti.Core.Services.Windows.Actions;
 using Lumin4ti.UI.Services;
 
 namespace Lumin4ti.UI.ViewModels;
@@ -93,6 +94,14 @@ public partial class CommandCategoryViewModel : ObservableObject
     {
         var toggles = AllItems.Where(i => i.Item is IMaintenanceToggle).ToList();
         var choices = AllItems.Where(i => i.Item is IMaintenanceChoice).ToList();
+
+        // OS 外部変更と直近操作の override を再読込へ持ち越さない。
+        // すべて破棄してから並行取得を開始し、同一再読込は Get-MMAgent 1 回へ集約する。
+        foreach (var provider in toggles.Select(i => i.Item).OfType<MmAgentFeatureToggle>()
+                     .Select(i => i.StateProvider).Distinct())
+        {
+            provider.ResetSnapshot();
+        }
 
         // 状態取得は外部プロセス (Get-MMAgent / dism / bcdedit) を伴うため、
         // 遅い 1 項目が同じカテゴリの他項目を巻き添えにしないよう項目ごとに上限を持たせる。

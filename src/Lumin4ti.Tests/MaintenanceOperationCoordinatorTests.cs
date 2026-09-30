@@ -9,7 +9,7 @@ public sealed class MaintenanceOperationCoordinatorTests
     [TestMethod]
     public async Task 終了要求は全操作をキャンセルし補償完了まで待つ()
     {
-        var coordinator = new MaintenanceOperationCoordinator();
+        var coordinator = new MaintenanceOperationCoordinator(() => new TestOperationLock());
         Assert.IsTrue(coordinator.TryBegin(out var first));
         Assert.IsNotNull(first);
 
@@ -22,13 +22,16 @@ public sealed class MaintenanceOperationCoordinatorTests
         first.Dispose();
         await idle;
         Assert.AreEqual(0, coordinator.ActiveCount);
+        Assert.IsTrue(coordinator.IsStopping);
+        Assert.IsFalse(coordinator.TryBegin(out var afterShutdown));
+        Assert.IsNull(afterShutdown);
     }
 
 
     [TestMethod]
     public void 状態変更操作はアプリ全体で一つに直列化する()
     {
-        var coordinator = new MaintenanceOperationCoordinator();
+        var coordinator = new MaintenanceOperationCoordinator(() => new TestOperationLock());
         Assert.IsTrue(coordinator.TryBegin(out var first));
         Assert.IsFalse(coordinator.TryBegin(out var rejected));
         Assert.IsNull(rejected);
@@ -49,19 +52,9 @@ public sealed class MaintenanceOperationCoordinatorTests
     }
 
     [TestMethod]
-    public async Task 操作がなければ待機は即座に完了する()
-    {
-        var coordinator = new MaintenanceOperationCoordinator();
-
-        await coordinator.WaitForIdleAsync();
-
-        Assert.AreEqual(0, coordinator.ActiveCount);
-    }
-
-    [TestMethod]
     public async Task 状態再読込中は状態変更操作を開始できない()
     {
-        var coordinator = new MaintenanceOperationCoordinator();
+        var coordinator = new MaintenanceOperationCoordinator(() => new TestOperationLock());
         var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -84,7 +77,7 @@ public sealed class MaintenanceOperationCoordinatorTests
     [TestMethod]
     public async Task 状態変更中は状態再読込を開始しない()
     {
-        var coordinator = new MaintenanceOperationCoordinator();
+        var coordinator = new MaintenanceOperationCoordinator(() => new TestOperationLock());
         Assert.IsTrue(coordinator.TryBegin(out var operation));
         var invoked = false;
 
@@ -102,7 +95,7 @@ public sealed class MaintenanceOperationCoordinatorTests
     [TestMethod]
     public async Task 起動時更新確認は初回状態再読込の完了後に開始する()
     {
-        var coordinator = new MaintenanceOperationCoordinator();
+        var coordinator = new MaintenanceOperationCoordinator(() => new TestOperationLock());
         var reloadStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var releaseReload = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var updateStarted = false;
@@ -131,4 +124,9 @@ public sealed class MaintenanceOperationCoordinatorTests
         Assert.IsTrue(updateStarted);
         Assert.AreEqual(0, coordinator.ActiveCount);
     }
+    private sealed class TestOperationLock : IDisposable
+    {
+        public void Dispose() { }
+    }
+
 }

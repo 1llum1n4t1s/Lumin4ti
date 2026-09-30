@@ -17,6 +17,18 @@ public sealed class MaintenanceOperationCoordinator
     private readonly HashSet<CancellationTokenSource> _active = [];
     private readonly Func<IDisposable?> _tryAcquireProcessLock;
     private TaskCompletionSource? _idleSignal;
+    private bool _isStopping;
+
+    public bool IsStopping
+    {
+        get
+        {
+            lock (_sync)
+            {
+                return _isStopping;
+            }
+        }
+    }
 
     public MaintenanceOperationCoordinator()
         : this(MaintenanceOperationProcessLock.TryAcquire)
@@ -46,7 +58,7 @@ public sealed class MaintenanceOperationCoordinator
     {
         lock (_sync)
         {
-            if (_active.Count != 0)
+            if (_isStopping || _active.Count != 0)
             {
                 lease = null;
                 return false;
@@ -83,6 +95,8 @@ public sealed class MaintenanceOperationCoordinator
         CancellationTokenSource[] sources;
         lock (_sync)
         {
+            // 終了受付と新規操作の拒否を同じ同期境界で確定する。
+            _isStopping = true;
             sources = _active.ToArray();
         }
 

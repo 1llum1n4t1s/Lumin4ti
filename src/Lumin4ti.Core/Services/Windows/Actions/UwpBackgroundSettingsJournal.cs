@@ -9,6 +9,10 @@ internal readonly record struct UwpBackgroundValues(int? Disabled, int? Disabled
     public static UwpBackgroundValues Applied => new(AppliedValue, AppliedValue);
 
     private const int AppliedValue = 1;
+
+    public bool IsCombinationOf(UwpBackgroundValues before, UwpBackgroundValues after) =>
+        (Disabled == before.Disabled || Disabled == after.Disabled) &&
+        (DisabledByUser == before.DisabledByUser || DisabledByUser == after.DisabledByUser);
 }
 
 internal interface IUwpBackgroundSettingsStore
@@ -104,14 +108,15 @@ internal sealed record UwpBackgroundJournalLoadResult(
     UwpBackgroundJournal? Journal = null,
     string? Error = null);
 
-internal sealed record UwpBackgroundJournal(int? SchemaVersion, List<UwpBackgroundJournalEntry>? Entries)
+internal sealed record UwpBackgroundJournal(int? SchemaVersion, List<UwpBackgroundJournalEntry>? Entries, string? UserScope = null)
 {
-    public const int CurrentSchemaVersion = 1;
+    public const int CurrentSchemaVersion = 2;
 
     public static UwpBackgroundJournal Create(IEnumerable<UwpBackgroundJournalEntry> entries) =>
         new(
             CurrentSchemaVersion,
-            entries.OrderBy(entry => entry.FamilyName, StringComparer.OrdinalIgnoreCase).ToList());
+            entries.OrderBy(entry => entry.FamilyName, StringComparer.OrdinalIgnoreCase).ToList(),
+            RegistryValueBackup.CurrentUserScope());
 }
 
 internal sealed record UwpBackgroundJournalEntry(
@@ -128,6 +133,11 @@ internal sealed record UwpBackgroundJournalEntry(
     public UwpBackgroundValues GetBefore() => Before!.ToValues();
 
     public UwpBackgroundValues GetApplied() => Applied!.ToValues();
+
+    // ペアの一部だけが before/applied と一致する場合、途中書込みと外部変更を区別できない。
+    public bool IsAmbiguousPartial(UwpBackgroundValues current) =>
+        current != GetBefore() && current != GetApplied() &&
+        current.IsCombinationOf(GetBefore(), GetApplied());
 }
 
 internal sealed record UwpBackgroundJournalValues(
@@ -151,48 +161,19 @@ internal static class UwpBackgroundJournalStore
 {
     private const int AppliedValue = 1;
 
-    public static UwpBackgroundJournalLoadResult Load(
-        ProtectedBackupStorage storage,
-        string relativePath,
-        string legacyPath) =>
-        Load(
-            () => storage.FileExists(relativePath),
-            () => storage.ReadAllText(relativePath),
-            journal => SaveAtomic(storage, relativePath, journal),
-            legacyPath);
-
-    internal static UwpBackgroundJournalLoadResult Load(
-        Func<bool> protectedFileExists,
-        Func<string> readProtectedFile,
-        Action<UwpBackgroundJournal> saveProtectedFile,
-        string legacyPath)
+    internal static UwpBackgroundJournalLoadResult LoadScoped(
+        Func<bool> fileExists, Func<string> readFile, Func<bool> legacyExists, string? userScope)
     {
+        if (!RegistryValueBackup.IsValidUserScope(userScope))
+            return new(UwpBackgroundJournalLoadStatus.Invalid, Error: "現在の利用者 SID を取得できません。");
         try
         {
-            if (protectedFileExists())
-            {
-                return Deserialize(readProtectedFile());
-            }
+            if (!fileExists()) return legacyExists()
+                ? new(UwpBackgroundJournalLoadStatus.Invalid, Error: "旧 journal の所有者 SID を証明できません。")
+                : new(UwpBackgroundJournalLoadStatus.Missing);
+            return Deserialize(readFile(), userScope);
         }
         catch (Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException or InvalidOperationException)
-        {
-            return new(UwpBackgroundJournalLoadStatus.Invalid, Error: ex.Message);
-        }
-
-        // 旧 AppData journal は読み取り専用で取り込み、以後は保護領域だけを正本にする。
-        // 旧パスへ書いたり削除したりしないため、ジャンクションを介した昇格書き込みは発生しない。
-        var legacy = Load(legacyPath);
-        if (legacy.Status != UwpBackgroundJournalLoadStatus.Valid)
-        {
-            return legacy;
-        }
-
-        try
-        {
-            saveProtectedFile(legacy.Journal!);
-            return legacy;
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
         {
             return new(UwpBackgroundJournalLoadStatus.Invalid, Error: ex.Message);
         }
@@ -255,33 +236,17 @@ internal static class UwpBackgroundJournalStore
         }
     }
 
-    public static bool TryDelete(string path)
-    {
-        try
-        {
-            File.Delete(path);
-            return true;
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            return false;
-        }
-    }
-
     public static void SaveAtomic(
         ProtectedBackupStorage storage,
         string relativePath,
         UwpBackgroundJournal journal) =>
         storage.WriteAtomically(relativePath, stream => Serialize(stream, journal));
 
-    public static bool TryClear(ProtectedBackupStorage storage, string relativePath)
-        => TryClear(journal => SaveAtomic(storage, relativePath, journal));
-
     internal static bool TryClear(Action<UwpBackgroundJournal> saveProtectedFile)
     {
         try
         {
-            // 空の有効 journal を残して旧 AppData 正本の再取り込みを防ぐ。
+            // 利用者スコープの空 journal を残し、旧所有者不明な正本との混同を防ぐ。
             saveProtectedFile(UwpBackgroundJournal.Create([]));
             return true;
         }
@@ -291,10 +256,10 @@ internal static class UwpBackgroundJournalStore
         }
     }
 
-    private static UwpBackgroundJournalLoadResult Deserialize(string json)
+    private static UwpBackgroundJournalLoadResult Deserialize(string json, string? userScope = null)
     {
         var journal = Lumin4tiJson.Deserialize<UwpBackgroundJournal>(json);
-        var validationError = Validate(journal);
+        var validationError = Validate(journal, userScope ?? RegistryValueBackup.CurrentUserScope());
         return validationError is null
             ? new(UwpBackgroundJournalLoadStatus.Valid, journal)
             : new(UwpBackgroundJournalLoadStatus.Invalid, Error: validationError);
@@ -303,12 +268,15 @@ internal static class UwpBackgroundJournalStore
     private static void Serialize(Stream stream, UwpBackgroundJournal journal) =>
         Lumin4tiJson.Serialize(stream, journal);
 
-    private static string? Validate(UwpBackgroundJournal? journal)
+    private static string? Validate(UwpBackgroundJournal? journal, string? userScope)
     {
         if (journal?.SchemaVersion != UwpBackgroundJournal.CurrentSchemaVersion)
         {
             return "schemaVersion が未対応です。";
         }
+
+        if (!RegistryValueBackup.IsValidUserScope(userScope) || journal.UserScope != userScope)
+            return "journal の所有者 SID が現在の利用者と一致しません。";
 
         if (journal.Entries is null)
         {

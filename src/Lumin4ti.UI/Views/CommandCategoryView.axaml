@@ -30,17 +30,21 @@
                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                   <ProgressBar IsIndeterminate="True" Width="60" IsVisible="{Binding IsRunning}" />
                   <!--  実行ボタン型  -->
-                  <Button Content="{DynamicResource Text.Button.Run}" Command="{Binding RunCommand}" IsVisible="{Binding IsAction}" />
+                  <Button Content="{DynamicResource Text.Button.Run}" Command="{Binding RunCommand}" IsVisible="{Binding IsAction}"
+                          AutomationProperties.Name="{Binding RunAutomationName}" />
                   <!--  実行中のキャンセルボタン (長時間コマンド用)  -->
-                  <Button Content="{DynamicResource Text.Button.Cancel}" Command="{Binding CancelCommand}" IsVisible="{Binding CanCancel}" />
+                  <Button Content="{DynamicResource Text.Button.Cancel}" Command="{Binding CancelCommand}" IsVisible="{Binding CanCancel}"
+                          AutomationProperties.Name="{Binding CancelAutomationName}" />
                   <!--  ON/OFF トグル型 (ON = 最適化適用 / OFF = Windows 既定)。実行中・状態不明時は操作不可  -->
                   <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding IsToggle}" VerticalAlignment="Center">
                     <ToggleSwitch IsChecked="{Binding IsChecked}" IsEnabled="{Binding CanToggle}"
+                                  AutomationProperties.Name="{Binding Label}"
                                   IsVisible="{Binding IsStateKnown}"
                                   OnContent="ON" OffContent="OFF" />
                   </StackPanel>
                   <!--  選択式 (ON/OFF に収まらない数値・段階設定)。実行中・状態不明時は操作不可  -->
                   <ComboBox ItemsSource="{Binding ChoiceOptions}" SelectedItem="{Binding SelectedChoice}"
+                            AutomationProperties.Name="{Binding Label}"
                             IsEnabled="{Binding CanChoose}" IsVisible="{Binding IsChoice}"
                             MinWidth="140" VerticalAlignment="Center">
                     <ComboBox.ItemTemplate>
@@ -59,7 +63,10 @@
                              Foreground="{DynamicResource Brush.FG2}" />
                 </Border>
                 <!--  実行結果 (成功/キャンセル=通常色 / 部分成功=黄 / 失敗=赤)  -->
-                <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,0"
+                <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+                  <TextBlock Text="{Binding StateErrorText}" Margin="0,8,0,0" FontSize="12" TextWrapping="Wrap" Foreground="#FF3B30"
+                             IsVisible="{Binding StateErrorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                <Border Margin="0,8,0,0"
                         Background="{DynamicResource Brush.Window}" CornerRadius="6" Padding="10,6"
                         IsVisible="{Binding ResultText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                   <SelectableTextBlock Text="{Binding ResultText}" FontSize="12" TextWrapping="Wrap"
@@ -77,10 +84,12 @@
                     </SelectableTextBlock.Styles>
                   </SelectableTextBlock>
                 </Border>
+                </StackPanel>
                 <!--  削除対象 / 実行項目のチェックリスト。既定は畳んでおき、必要なときだけ開く  -->
                 <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="-8,6,0,0"
                             IsVisible="{Binding HasCheckList}" Spacing="0">
-                  <ToggleButton Classes="disclosure" IsChecked="{Binding IsCheckListExpanded}">
+                  <ToggleButton Classes="disclosure" IsChecked="{Binding IsCheckListExpanded}"
+                                AutomationProperties.Name="{Binding CheckListCaption}">
                     <StackPanel Orientation="Horizontal" Spacing="7">
                       <TextBlock Text="{Binding CheckListChevron}" FontSize="10" Width="10"
                                  VerticalAlignment="Center" />
@@ -97,6 +106,7 @@
                         <ItemsControl.ItemTemplate>
                           <DataTemplate x:DataType="vm:CheckListEntryViewModel">
                             <CheckBox Classes="entry" IsChecked="{Binding IsSelected}"
+                                      AutomationProperties.Name="{Binding Display}"
                                       ToolTip.Tip="{Binding Display}">
                               <TextBlock Text="{Binding Display}" FontSize="12"
                                          TextTrimming="CharacterEllipsis"
@@ -122,7 +132,12 @@
                           </StackPanel>
                           <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                             <ProgressBar IsIndeterminate="True" Width="60" IsVisible="{Binding IsRunning}" />
+                            <Button Content="{DynamicResource Text.Button.Run}" Command="{Binding RunCommand}"
+                                    IsVisible="{Binding IsAction}" AutomationProperties.Name="{Binding RunAutomationName}" />
+                            <Button Content="{DynamicResource Text.Button.Cancel}" Command="{Binding CancelCommand}"
+                                    IsVisible="{Binding CanCancel}" AutomationProperties.Name="{Binding CancelAutomationName}" />
                             <ComboBox ItemsSource="{Binding ChoiceOptions}" SelectedItem="{Binding SelectedChoice}"
+                                      AutomationProperties.Name="{Binding Label}"
                                       IsEnabled="{Binding CanChoose}" IsVisible="{Binding IsChoice}"
                                       MinWidth="140" VerticalAlignment="Center">
                               <ComboBox.ItemTemplate>
@@ -132,11 +147,15 @@
                               </ComboBox.ItemTemplate>
                             </ComboBox>
                             <ToggleSwitch IsChecked="{Binding IsChecked}" IsEnabled="{Binding CanToggle}"
+                                          AutomationProperties.Name="{Binding Label}"
                                           IsVisible="{Binding IsToggle}"
                                           OnContent="ON" OffContent="OFF" />
                           </StackPanel>
                           <!--  子項目の実行結果  -->
-                          <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,0"
+                          <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
+                            <TextBlock Text="{Binding StateErrorText}" Margin="0,8,0,0" FontSize="12" TextWrapping="Wrap" Foreground="#FF3B30"
+                                       IsVisible="{Binding StateErrorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                          <Border Margin="0,8,0,0"
                                   Background="{DynamicResource Brush.Window}" CornerRadius="6" Padding="10,6"
                                   IsVisible="{Binding ResultText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                             <SelectableTextBlock Text="{Binding ResultText}" FontSize="12" TextWrapping="Wrap"
@@ -154,6 +173,7 @@
                               </SelectableTextBlock.Styles>
                             </SelectableTextBlock>
                           </Border>
+                          </StackPanel>
                         </Grid>
                       </Border>
                     </DataTemplate>

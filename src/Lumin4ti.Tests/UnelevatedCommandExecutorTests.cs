@@ -11,12 +11,6 @@ namespace Lumin4ti.Tests;
 public sealed class UnelevatedCommandExecutorTests
 {
     [TestMethod]
-    public void Explorerプロセスの検証ハンドルは待機権限も要求する()
-    {
-        Assert.AreEqual(0x00101000u, UnelevatedCommandExecutor.GetShellProcessAccessMask());
-    }
-
-    [TestMethod]
     [SupportedOSPlatform("windows")]
     public void Explorer検証用アクセスマスクで稼働中プロセスを待機確認できる()
     {
@@ -51,18 +45,6 @@ public sealed class UnelevatedCommandExecutorTests
         Assert.IsFalse(UnelevatedCommandExecutor.IsExpectedShellPath(
             @"C:\Users\test\explorer.exe",
             @"C:\Windows"));
-    }
-
-    [TestMethod]
-    public void 結果パスはLocalAppData内のランダム名になる()
-    {
-        const string nonce = "0123456789abcdef0123456789abcdef";
-
-        var path = UnelevatedCommandExecutor.BuildResultPath(@"C:\Users\test\AppData\Local", nonce);
-
-        Assert.AreEqual(
-            @"C:\Users\test\AppData\Local\Lumin4ti\command-results\operation-0123456789abcdef0123456789abcdef.json",
-            path);
     }
 
     [TestMethod]

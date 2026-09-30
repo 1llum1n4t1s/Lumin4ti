@@ -442,10 +442,6 @@ public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanc
 
     private sealed record TextToken(int Start, string Value);
 
-    /// <summary>winget 出力から更新に成功したパッケージ数を数える (日英両ロケール対応)。</summary>
-    internal static int CountSuccessfulInstalls(IEnumerable<string> lines) =>
-        lines.Count(l => l.Contains("正常にインストールされました") || l.Contains("Successfully installed"));
-
     /// <summary>プログレスバー (█▒)・スピナー (-\|/)・罫線だけの行を除外する。</summary>
     internal static bool IsMeaningfulLine(string line)
     {

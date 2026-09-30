@@ -107,7 +107,8 @@ public sealed class CleanupPreferences(ISettingsService settings) : ICleanupPref
             }
             else if (!enabled && index >= 0)
             {
-                ids.RemoveAt(index);
+                // 設定ファイル由来の重複も解除し、OFF にした項目を自動実行へ残さない。
+                ids.RemoveAll(id => string.Equals(id, groupId, StringComparison.OrdinalIgnoreCase));
             }
         }
     }

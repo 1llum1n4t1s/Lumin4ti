@@ -193,4 +193,19 @@
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">किं लोपनीयम् इति चिनु</x:String>
   <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">प्रवेशकाले किं चालनीयम् इति चिनु</x:String>
   <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">चयनं रक्षितुं न शक्तम् (अभिलेखं पश्य)</x:String>
+  <!-- ===== Update dialog / operation status ===== -->
+  <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">अद्यतनीकरणम्</x:String>
+  <x:String x:Key="Text.UpdateDialog.AvailableHeader" xml:space="preserve">नूतना आवृत्तिः उपलब्धा अस्ति</x:String>
+  <x:String x:Key="Text.UpdateDialog.DownloadAndInstall" xml:space="preserve">अवरोपयतु संस्थापयतु च</x:String>
+  <x:String x:Key="Text.UpdateDialog.IgnoreThisVersion" xml:space="preserve">इमाम् आवृत्तिं त्यजतु</x:String>
+  <x:String x:Key="Text.UpdateDialog.UpToDateMessage" xml:space="preserve">भवतः आवृत्तिः नवीनतमा अस्ति</x:String>
+  <x:String x:Key="Text.UpdateDialog.ErrorHeader" xml:space="preserve">अद्यतनानां परीक्षणं विफलम्</x:String>
+  <x:String x:Key="Text.UpdateDialog.Close" xml:space="preserve">पिदधातु</x:String>
+  <x:String x:Key="Text.UpdateDialog.CheckingMessage" xml:space="preserve">अद्यतनानि परीक्ष्यन्ते…</x:String>
+  <x:String x:Key="Text.UpdateDialog.DevelopmentBuild" xml:space="preserve">विकाससंस्करणेषु अद्यतनपरीक्षणं त्यज्यते (केवलं संस्थापितसंस्करणेषु उपलब्धम्)</x:String>
+  <x:String x:Key="Text.UpdateDialog.CheckFailed" xml:space="preserve">अद्यतनानां परीक्षणं विफलम्: {0}</x:String>
+  <x:String x:Key="Text.Status.Applying" xml:space="preserve">{0} प्रयुज्यते…</x:String>
+  <x:String x:Key="Text.Status.Applied" xml:space="preserve">{0} परिवर्तितम्</x:String>
+  <x:String x:Key="Text.Status.ApplyFailed" xml:space="preserve">{0} परिवर्तनं विफलम् (अभिलेखं पश्यतु)</x:String>
+  <x:String x:Key="Text.Shutdown.BlockReason" xml:space="preserve">Lumin4ti अनुरक्षणकार्यस्य समाप्तिं प्रतीक्षते…</x:String>
 </ResourceDictionary>

@@ -28,6 +28,11 @@ public partial class CommandItemViewModel : ObservableObject
     /// <summary>表示用ラベル (ローカライズ済み。辞書に訳が無ければ日本語マスター)。</summary>
     public string Label => App.Text(Item.LabelKey, Item.Label);
 
+    /// <summary>項目と操作を区別できる、ローカライズ済みのアクセシビリティ名。</summary>
+    public string RunAutomationName => $"{Label}: {App.Text("Button.Run", "実行")}";
+
+    public string CancelAutomationName => $"{Label}: {App.Text("Button.Cancel", "中断")}";
+
     /// <summary>表示用説明 (ローカライズ済み)。</summary>
     public string Description => App.Text(Item.DescriptionKey, Item.Description);
 
@@ -100,6 +105,7 @@ public partial class CommandItemViewModel : ObservableObject
         foreach (var child in children)
         {
             child.Parent = this;
+            child.NotifyParentStateChanged();
         }
 
         OnPropertyChanged(nameof(Children));
@@ -107,7 +113,7 @@ public partial class CommandItemViewModel : ObservableObject
     }
 
     /// <summary>ドロップダウンを操作できるか (状態既知・非実行中・親が有効)。</summary>
-    public bool CanChoose => IsStateKnown && !IsRunning && (Parent is null || Parent.IsChecked);
+    public bool CanChoose => IsStateKnown && !IsRunning && (Parent is null || (Parent.IsStateKnown && Parent.IsChecked));
 
     /// <summary>直近に「実状態として確認できた」選択値 (適用できなかったときの戻し先)。</summary>
     private ChoiceOptionViewModel? _lastKnownChoice;
@@ -147,7 +153,7 @@ public partial class CommandItemViewModel : ObservableObject
     /// <summary>
     /// トグルを操作可能か。状態既知かつ実行中でなく (多重操作レース防止)、親が有効なときのみ。
     /// </summary>
-    public bool CanToggle => IsStateKnown && !IsRunning && (Parent is null || Parent.IsChecked);
+    public bool CanToggle => IsStateKnown && !IsRunning && (Parent is null || (Parent.IsStateKnown && Parent.IsChecked));
 
     /// <summary>実行中のアクションをキャンセルするための CTS (実行中のみ非 null)。</summary>
     private CancellationTokenSource? _cts;
@@ -159,6 +165,35 @@ public partial class CommandItemViewModel : ObservableObject
     /// <summary>直近の実行結果の要約 (成功/失敗 + 出力)。未実行時は空。</summary>
     [ObservableProperty]
     private string resultText = string.Empty;
+
+    /// <summary>状態読込の診断。操作結果と分け、再取得成功時にだけ消す。</summary>
+    public string StateErrorText
+    {
+        get => _isGenericStateError
+            ? App.Text(
+                "Toggle.StateUnknown",
+                "状態を取得できませんでした (管理者権限がないか、この PC では利用できない機能です。デバッグ起動は昇格されないため、通常起動でお試しください)")
+            : _stateErrorText;
+        set
+        {
+            // 明示的な診断は翻訳対象にせず、その内容を保持する。
+            var wasGeneric = _isGenericStateError;
+            _isGenericStateError = false;
+            if (!SetProperty(ref _stateErrorText, value) && wasGeneric)
+            {
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    private string _stateErrorText = string.Empty;
+    private bool _isGenericStateError;
+
+    private void ShowGenericStateError()
+    {
+        _isGenericStateError = true;
+        OnPropertyChanged(nameof(StateErrorText));
+    }
 
     /// <summary>実行中のライブ出力 (直近数行)。完了したらクリアされ ResultText に置き換わる。</summary>
     [ObservableProperty]
@@ -225,8 +260,14 @@ public partial class CommandItemViewModel : ObservableObject
     private void OnLocaleChanged()
     {
         OnPropertyChanged(nameof(Label));
+        OnPropertyChanged(nameof(RunAutomationName));
+        OnPropertyChanged(nameof(CancelAutomationName));
         OnPropertyChanged(nameof(Description));
         OnPropertyChanged(nameof(CheckListCaption));
+        if (_isGenericStateError)
+        {
+            OnPropertyChanged(nameof(StateErrorText));
+        }
         foreach (var option in ChoiceOptions)
         {
             option.NotifyLocaleChanged();
@@ -304,9 +345,7 @@ public partial class CommandItemViewModel : ObservableObject
             if (value is null)
             {
                 IsStateKnown = false;
-                ResultText = App.Text(
-                    "Toggle.StateUnknown",
-                    "状態を取得できませんでした (管理者権限がないか、この PC では利用できない機能です。デバッグ起動は昇格されないため、通常起動でお試しください)");
+                ShowGenericStateError();
                 return;
             }
 
@@ -320,6 +359,7 @@ public partial class CommandItemViewModel : ObservableObject
             SelectedChoice = option;
             _lastKnownChoice = option;
             IsStateKnown = true;
+            StateErrorText = string.Empty;
         }
         finally
         {
@@ -336,14 +376,13 @@ public partial class CommandItemViewModel : ObservableObject
             if (state is null)
             {
                 IsStateKnown = false;
-                ResultText = App.Text(
-                    "Toggle.StateUnknown",
-                    "状態を取得できませんでした (管理者権限がないか、この PC では利用できない機能です。デバッグ起動は昇格されないため、通常起動でお試しください)");
+                ShowGenericStateError();
             }
             else
             {
                 IsChecked = state.Value;
                 IsStateKnown = true;
+                StateErrorText = string.Empty;
             }
         }
         finally
@@ -357,8 +396,7 @@ public partial class CommandItemViewModel : ObservableObject
         // 親が OFF になったら子は操作不可になるので、子の活性表示を更新する。
         foreach (var child in Children)
         {
-            child.OnPropertyChanged(nameof(CanChoose));
-            child.OnPropertyChanged(nameof(CanToggle));
+            child.NotifyParentStateChanged();
         }
 
         if (_suppressToggleWrite || !IsToggle)
@@ -367,6 +405,20 @@ public partial class CommandItemViewModel : ObservableObject
         }
 
         _ = _setToggle(this, value);
+    }
+
+    partial void OnIsStateKnownChanged(bool value)
+    {
+        foreach (var child in Children)
+        {
+            child.NotifyParentStateChanged();
+        }
+    }
+
+    private void NotifyParentStateChanged()
+    {
+        OnPropertyChanged(nameof(CanChoose));
+        OnPropertyChanged(nameof(CanToggle));
     }
 
     partial void OnSelectedChoiceChanged(ChoiceOptionViewModel? value)

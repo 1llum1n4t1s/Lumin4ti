@@ -1,4 +1,5 @@
 using System.Runtime.Versioning;
+using System.Runtime.ExceptionServices;
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
 
@@ -19,6 +20,7 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
     private readonly ICleanupPreferences? _preferences;
     private readonly Func<CleanupTarget, string> _checkListKeySelector;
     private readonly Func<CleanupTarget, string> _checkListLabelSelector;
+    private readonly Func<ICommandExecutor, IReadOnlyList<string>, IProgress<string>?, CancellationToken, Task<ServiceSuspension>> _suspendServices;
 
     /// <param name="id">項目 Id (ローカライズキーの基点)。</param>
     /// <param name="label">日本語マスターのラベル。</param>
@@ -50,7 +52,8 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
         bool scheduleBlockedForReboot = false,
         ICleanupPreferences? preferences = null,
         Func<CleanupTarget, string>? checkListKeySelector = null,
-        Func<CleanupTarget, string>? checkListLabelSelector = null)
+        Func<CleanupTarget, string>? checkListLabelSelector = null,
+        Func<ICommandExecutor, IReadOnlyList<string>, IProgress<string>?, CancellationToken, Task<ServiceSuspension>>? suspendServices = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         ArgumentException.ThrowIfNullOrWhiteSpace(label);
@@ -74,6 +77,7 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
         _preferences = preferences;
         _checkListKeySelector = checkListKeySelector ?? DescribeTarget;
         _checkListLabelSelector = checkListLabelSelector ?? _checkListKeySelector;
+        _suspendServices = suspendServices ?? WindowsServiceControl.SuspendAsync;
     }
 
     /// <summary>
@@ -181,6 +185,7 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
         ServiceSuspension? suspension = null;
         IReadOnlyList<string> resumeFailures = [];
         CleanupOutcome? outcome = null;
+        ExceptionDispatchInfo? operationFailure = null;
 
         var targets = EnumerateSelectedTargets();
         if (targets.Count == 0)
@@ -194,7 +199,7 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
         {
             if (_servicesToStop.Count > 0)
             {
-                suspension = await WindowsServiceControl.SuspendAsync(_executor!, _servicesToStop, progress, ct);
+                suspension = await _suspendServices(_executor!, _servicesToStop, progress, ct);
             }
 
             ct.ThrowIfCancellationRequested();
@@ -205,6 +210,10 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
                     ct);
             }
         }
+        catch (Exception ex)
+        {
+            operationFailure = ExceptionDispatchInfo.Capture(ex);
+        }
         finally
         {
             if (suspension is not null)
@@ -212,6 +221,23 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
                 // 削除の失敗・キャンセルにかかわらず、止めたサービスは必ず元へ戻す。
                 resumeFailures = await suspension.ResumeAsync();
             }
+        }
+
+        // 補償結果を確認してからキャンセル・例外を確定する。復帰失敗を OCE で隠さない。
+        if (operationFailure is not null)
+        {
+            var detail = operationFailure.SourceException is OperationCanceledException
+                ? "  - 操作はキャンセルされました"
+                : $"  - 削除処理に失敗しました: {CommandFailureDiagnostic.Sanitize(operationFailure.SourceException.Message)}";
+            if (resumeFailures.Count > 0)
+            {
+                return MaintenanceActionResult.Fail(detail + Environment.NewLine + DescribeResumeFailure(suspension!));
+            }
+            if (operationFailure.SourceException is OperationCanceledException)
+            {
+                return MaintenanceActionResult.Canceled(detail);
+            }
+            operationFailure.Throw();
         }
 
         if (outcome is null)
@@ -223,8 +249,7 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
             };
             if (resumeFailures.Count > 0)
             {
-                failureLines.Add($"  - 停止したサービスを再開できませんでした: {string.Join(", ", resumeFailures)}");
-                failureLines.Add("  - PC を再起動すると自動的に開始されます");
+                failureLines.Add(DescribeResumeFailure(suspension!));
             }
 
             LoggerBootstrap.Log.Error($"{Id}: サービス停止失敗のため削除を中止: {failedServices}");
@@ -249,8 +274,7 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
 
         if (resumeFailures.Count > 0)
         {
-            lines.Add($"  - 停止したサービスを再開できませんでした: {string.Join(", ", resumeFailures)}");
-            lines.Add("  - PC を再起動すると自動的に開始されます");
+            lines.Add(DescribeResumeFailure(suspension!));
             return MaintenanceActionResult.Fail(string.Join(Environment.NewLine, lines));
         }
 
@@ -261,4 +285,9 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
 
     internal static bool CanRunCleanup(ServiceSuspension? suspension) =>
         suspension is not { FailedToStop.Count: > 0 };
+
+    private static string DescribeResumeFailure(ServiceSuspension suspension) =>
+        $"  - 停止したサービスを再開できませんでした: {string.Join("; ", suspension.ResumeFailureDetails)}" +
+        Environment.NewLine +
+        "  - Windows のサービス管理で対象サービスを開始し、開始できない場合は PC を再起動してください";
 }

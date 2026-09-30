@@ -28,7 +28,6 @@ public static class WindowsPerMachineMigration
     private const string ProtectedPendingFileName = "per-machine-location.pending.json";
     private const string RunOnceValueName = "Lumin4tiPerMachineMigrationCleanup";
     private const long MaximumMsiSizeBytes = 250_000_000;
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
     private static readonly ProtectedBackupStorage ProtectedMigrationStorage = new(
         Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
@@ -187,6 +186,7 @@ public static class WindowsPerMachineMigration
         }
         catch (Exception ex) when (ex is
             HttpRequestException or
+            TimeoutException or
             InvalidDataException or
             IOException or
             InvalidOperationException or
@@ -497,6 +497,7 @@ public static class WindowsPerMachineMigration
         }
         catch (Exception ex) when (ex is
             HttpRequestException or
+            TimeoutException or
             InvalidDataException or
             IOException or
             InvalidOperationException or
@@ -516,9 +517,32 @@ public static class WindowsPerMachineMigration
 
     private static async Task DownloadMsiAsync(string destinationPath, CancellationToken ct)
     {
-        using var client = new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
+        using var client = new HttpClient { Timeout = Timeout.InfiniteTimeSpan };
         client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue(AppId, "PerMachineMigration"));
         var uri = new Uri($"{AppSettings.DefaultUpdateBaseUrl}/{MsiFileName}");
+        await using var destination = new FileStream(
+            destinationPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+        await DownloadMsiAsync(client, uri, destination, TimeSpan.FromMinutes(5), ct);
+    }
+
+    internal static async Task DownloadMsiAsync(
+        HttpClient client, Uri uri, Stream destination, TimeSpan timeout, CancellationToken ct)
+    {
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        deadline.CancelAfter(timeout);
+        try
+        {
+            await CopyMsiAsync(client, uri, destination, deadline.Token);
+        }
+        catch (OperationCanceledException ex) when (!ct.IsCancellationRequested && deadline.IsCancellationRequested)
+        {
+            throw new TimeoutException("MSIのダウンロードが制限時間を超えました。再試行してください。", ex);
+        }
+    }
+
+    private static async Task CopyMsiAsync(HttpClient client, Uri uri, Stream destination, CancellationToken ct)
+    {
+        // ResponseHeadersRead の HttpClient.Timeout は本文に及ばないため、全転送に同じ期限を渡す。
         using var response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, ct);
         response.EnsureSuccessStatusCode();
         if (response.Content.Headers.ContentLength is > MaximumMsiSizeBytes)
@@ -527,11 +551,6 @@ public static class WindowsPerMachineMigration
         }
 
         await using var source = await response.Content.ReadAsStreamAsync(ct);
-        await using var destination = new FileStream(
-            destinationPath,
-            FileMode.CreateNew,
-            FileAccess.Write,
-            FileShare.None);
         var buffer = new byte[81_920];
         long totalBytes = 0;
         while (true)
@@ -699,7 +718,7 @@ public static class WindowsPerMachineMigration
     {
         Directory.CreateDirectory(AppPaths.AppDataDirectory);
         var pending = new PendingMigration(legacyRoot, parentProcessId, installedExecutable);
-        File.WriteAllText(PendingFilePath, JsonSerializer.Serialize(pending, JsonOptions));
+        File.WriteAllText(PendingFilePath, Lumin4tiJson.Serialize(pending));
         if (installedExecutable is not null)
         {
             RegisterCleanupRunOnce(installedExecutable);
@@ -713,7 +732,7 @@ public static class WindowsPerMachineMigration
     {
         ProtectedMigrationStorage.Delete(ProtectedPendingFileName);
         var pending = new PendingMigration(legacyRoot, parentProcessId, installedExecutable);
-        var json = JsonSerializer.SerializeToUtf8Bytes(pending, JsonOptions);
+        var json = JsonSerializer.SerializeToUtf8Bytes(pending, Lumin4tiJsonContext.Default.PendingMigration);
         ProtectedMigrationStorage.WriteNewAtomically(
             ProtectedPendingFileName,
             stream => stream.Write(json));
@@ -725,9 +744,7 @@ public static class WindowsPerMachineMigration
         try
         {
             return File.Exists(PendingFilePath)
-                ? JsonSerializer.Deserialize<PendingMigration>(
-                    File.ReadAllText(PendingFilePath),
-                    JsonOptions)
+                ? Lumin4tiJson.Deserialize<PendingMigration>(File.ReadAllText(PendingFilePath))
                 : null;
         }
         catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
@@ -741,9 +758,7 @@ public static class WindowsPerMachineMigration
         try
         {
             return ProtectedMigrationStorage.FileExists(ProtectedPendingFileName)
-                ? JsonSerializer.Deserialize<PendingMigration>(
-                    ProtectedMigrationStorage.ReadAllText(ProtectedPendingFileName),
-                    JsonOptions)
+                ? Lumin4tiJson.Deserialize<PendingMigration>(ProtectedMigrationStorage.ReadAllText(ProtectedPendingFileName))
                 : null;
         }
         catch (Exception ex) when (ex is
@@ -1066,7 +1081,7 @@ public static class WindowsPerMachineMigration
     private static string PendingFilePath =>
         Path.Combine(AppPaths.AppDataDirectory, PendingFileName);
 
-    private sealed record PendingMigration(
+    internal sealed record PendingMigration(
         string LegacyRoot,
         int ParentProcessId,
         string? InstalledExecutable);

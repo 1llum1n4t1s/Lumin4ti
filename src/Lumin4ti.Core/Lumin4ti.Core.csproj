@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Lumin4ti.Tests" />
+    <InternalsVisibleTo Include="Lumin4ti.Verification" />
   </ItemGroup>
 
 </Project>

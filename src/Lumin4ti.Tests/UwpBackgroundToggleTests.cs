@@ -106,7 +106,10 @@ public sealed class UwpBackgroundToggleTests
         Assert.IsTrue(restored.Success, restored.Detail);
         Assert.AreEqual(originalA, settings.Values["Package.A"]);
         Assert.AreEqual(UwpBackgroundValues.Applied, settings.Values["Package.B"]);
-        Assert.IsFalse(File.Exists(JournalPath));
+        var cleared = UwpBackgroundJournalStore.Load(JournalPath);
+        Assert.AreEqual(UwpBackgroundJournalLoadStatus.Valid, cleared.Status);
+        Assert.HasCount(0, cleared.Journal!.Entries!);
+        Assert.AreEqual(RegistryValueBackup.CurrentUserScope(), cleared.Journal.UserScope);
     }
 
     [TestMethod]
@@ -117,6 +120,13 @@ public sealed class UwpBackgroundToggleTests
         settings.Values["Package.A"] = default;
         var toggle = CreateToggle(targets, settings);
         Assert.IsTrue((await toggle.SetStateAsync(true)).Success);
+
+        var foreignToggle = new UwpBackgroundToggle(
+            () => targets.ToArray(), settings, JournalPath, () => "S-1-5-21-111-222-333-1002");
+        settings.Writes.Clear();
+        Assert.IsFalse((await foreignToggle.SetStateAsync(false)).Success);
+        Assert.IsFalse((await foreignToggle.SetStateAsync(true)).Success);
+        Assert.HasCount(0, settings.Writes, "別利用者の journal は設定変更に使わない");
 
         var externalA = new UwpBackgroundValues(0, 1);
         var newPackage = new UwpBackgroundValues(7, 8);
@@ -193,7 +203,7 @@ public sealed class UwpBackgroundToggleTests
     }
 
     [TestMethod]
-    public void 旧AppDataJournalは保護領域へ読み取り移行して以後再利用しない()
+    public void 所有者不明の旧AppDataJournalは保護領域へ移行せず保持する()
     {
         var protectedPath = Path.Combine(_tempDirectory, "protected", "uwp-background.json");
         var journal = UwpBackgroundJournal.Create(
@@ -203,25 +213,26 @@ public sealed class UwpBackgroundToggleTests
                 new UwpBackgroundValues(null, 0),
                 UwpBackgroundValues.Applied),
         ]);
-        UwpBackgroundJournalStore.SaveAtomic(JournalPath, journal);
+        UwpBackgroundJournalStore.SaveAtomic(JournalPath, journal with { SchemaVersion = 1, UserScope = null });
 
-        var migrated = UwpBackgroundJournalStore.Load(
+        var rejected = UwpBackgroundJournalStore.LoadScoped(
             () => File.Exists(protectedPath),
             () => File.ReadAllText(protectedPath),
-            value => UwpBackgroundJournalStore.SaveAtomic(protectedPath, value),
-            JournalPath);
+            () => File.Exists(JournalPath),
+            RegistryValueBackup.CurrentUserScope());
 
-        Assert.AreEqual(UwpBackgroundJournalLoadStatus.Valid, migrated.Status, migrated.Error);
-        Assert.IsTrue(File.Exists(protectedPath));
+        Assert.AreEqual(UwpBackgroundJournalLoadStatus.Invalid, rejected.Status);
+        StringAssert.Contains(rejected.Error, "所有者");
+        Assert.IsFalse(File.Exists(protectedPath));
         Assert.IsTrue(File.Exists(JournalPath), "旧パスは昇格状態から変更しない");
 
         Assert.IsTrue(UwpBackgroundJournalStore.TryClear(
             value => UwpBackgroundJournalStore.SaveAtomic(protectedPath, value)));
-        var cleared = UwpBackgroundJournalStore.Load(
+        var cleared = UwpBackgroundJournalStore.LoadScoped(
             () => File.Exists(protectedPath),
             () => File.ReadAllText(protectedPath),
-            value => UwpBackgroundJournalStore.SaveAtomic(protectedPath, value),
-            JournalPath);
+            () => File.Exists(JournalPath),
+            RegistryValueBackup.CurrentUserScope());
         Assert.AreEqual(UwpBackgroundJournalLoadStatus.Valid, cleared.Status);
         Assert.HasCount(0, cleared.Journal!.Entries!);
     }

@@ -15,12 +15,15 @@ internal static partial class StartupCommandParser
         "powershell.exe", "pwsh.exe", "conhost.exe", "explorer.exe",
     ];
 
-    [GeneratedRegex(@"^(.+?\.exe)\b", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"^([^\s""]+\.exe)(?=\s|$)", RegexOptions.IgnoreCase)]
     private static partial Regex UnquotedExePattern();
+
+    [GeneratedRegex(@"\.exe(?=\s|$)", RegexOptions.IgnoreCase)]
+    private static partial Regex ExecutableSuffixPattern();
 
     public static string? TryResolveExecutable(string command)
     {
-        var value = command.Trim();
+        var value = Environment.ExpandEnvironmentVariables(command).Trim();
         if (value.Length == 0)
         {
             return null;
@@ -37,6 +40,15 @@ internal static partial class StartupCommandParser
         }
         else if (UnquotedExePattern().Match(value) is { Success: true } match)
         {
+            var arguments = value[match.Length..].TrimStart();
+            // 裸の引数や '-' は空白入りパスの続きとも解釈でき、末尾の .exe も省略できる。
+            // パスの続きと区別できる '/' または引用符で始まる引数以外は保持する。
+            if ((arguments.Length > 0 && arguments[0] is not ('/' or '"')) ||
+                ExecutableSuffixPattern().IsMatch(arguments))
+            {
+                return null;
+            }
+
             exe = match.Groups[1].Value;
         }
 
@@ -44,8 +56,6 @@ internal static partial class StartupCommandParser
         {
             return null;
         }
-
-        exe = Environment.ExpandEnvironmentVariables(exe);
 
         if (Wrappers.Contains(Path.GetFileName(exe), StringComparer.OrdinalIgnoreCase))
         {

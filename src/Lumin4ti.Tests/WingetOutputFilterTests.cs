@@ -22,21 +22,6 @@ public sealed class WingetOutputFilterTests
     }
 
     [TestMethod]
-    public void 成功件数を日英ロケールで数えられる()
-    {
-        string[] lines =
-        [
-            "見つかりました uv [astral-sh.uv] バージョン 0.11.26",
-            "正常にインストールされました",
-            "Successfully installed",
-            "インストーラーが終了コードで失敗しました: 0x8a150003",
-        ];
-
-        Assert.AreEqual(2, WingetUpgradeAction.CountSuccessfulInstalls(lines));
-        Assert.AreEqual(0, WingetUpgradeAction.CountSuccessfulInstalls(["失敗しました"]));
-    }
-
-    [TestMethod]
     public void 意味のある行は通過する()
     {
         Assert.IsTrue(WingetUpgradeAction.IsMeaningfulLine("Google Chrome を更新しています"));
@@ -191,21 +176,6 @@ public sealed class WingetOutputFilterTests
         Assert.IsFalse(executor.Calls.Any(call =>
             call.Arguments.StartsWith("upgrade ", StringComparison.Ordinal)));
         StringAssert.Contains(result.Detail, "安全確認で除外 1 件");
-    }
-
-    [TestMethod]
-    public async Task 安全確認の除外だけなら失敗扱いにしない()
-    {
-        var executor = new RecordingExecutor(
-            Success(OfficialSource),
-            Success(PackageTable(("Git", "Git.Git"))),
-            Success(PackageTable(("Coin Miner", "Git.Git"))));
-        var action = new WingetUpgradeAction(executor);
-
-        var result = await action.ExecuteAsync();
-
-        Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
-        StringAssert.Contains(result.Detail, "成功 0 件 / 失敗 0 件 / 安全確認で除外 1 件");
     }
 
     [TestMethod]

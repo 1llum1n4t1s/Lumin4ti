@@ -8,18 +8,6 @@ namespace Lumin4ti.Tests;
 public sealed class MaintenanceActionResultTests
 {
     [TestMethod]
-    public void 部分成功とcancelは完全成功にならない()
-    {
-        var partial = MaintenanceActionResult.Partial("partial");
-        var canceled = MaintenanceActionResult.Canceled();
-
-        Assert.AreEqual(MaintenanceActionStatus.Partial, partial.Status);
-        Assert.IsFalse(partial.Success);
-        Assert.AreEqual(MaintenanceActionStatus.Canceled, canceled.Status);
-        Assert.IsFalse(canceled.Success);
-    }
-
-    [TestMethod]
     public void Explorer再起動失敗は元の成功詳細を保った部分成功になる()
     {
         var result = CommandCategoryViewModel.MarkExplorerRestartFailed(
@@ -30,27 +18,6 @@ public sealed class MaintenanceActionResultTests
         Assert.IsFalse(result.Success);
         StringAssert.Contains(result.Detail, "設定変更済み");
         StringAssert.Contains(result.Detail, "Explorer再起動失敗");
-    }
-
-    [TestMethod]
-    public void 主要UIは部分成功を警告色用状態へ割り当てる()
-    {
-        var item = new CommandItemViewModel(
-            new StubAction(),
-            _ => Task.CompletedTask,
-            (_, _) => Task.CompletedTask);
-
-        item.ApplyResultStatus(MaintenanceActionStatus.Partial);
-        Assert.IsTrue(item.LastRunWarning);
-        Assert.IsFalse(item.LastRunFailed);
-
-        item.ApplyResultStatus(MaintenanceActionStatus.Failed);
-        Assert.IsFalse(item.LastRunWarning);
-        Assert.IsTrue(item.LastRunFailed);
-
-        item.ApplyResultStatus(MaintenanceActionStatus.Canceled);
-        Assert.IsFalse(item.LastRunWarning);
-        Assert.IsFalse(item.LastRunFailed);
     }
 
     [TestMethod]
@@ -71,22 +38,6 @@ public sealed class MaintenanceActionResultTests
         Assert.IsFalse(item.HasCheckList);
         Assert.HasCount(0, item.CheckListEntries);
         Assert.AreEqual("0/0", item.CheckListSummary);
-    }
-
-    private sealed class StubAction : IMaintenanceAction
-    {
-        public string Id => "test";
-
-        public string Label => "テスト";
-
-        public string Description => "テスト用";
-
-        public CommandCategory Category => CommandCategory.System;
-
-        public bool RequiresReboot => false;
-
-        public Task<MaintenanceActionResult> ExecuteAsync(CancellationToken ct = default) =>
-            Task.FromResult(MaintenanceActionResult.Ok());
     }
 
     private sealed class MutableCheckListAction : IMaintenanceAction, IMaintenanceCheckList

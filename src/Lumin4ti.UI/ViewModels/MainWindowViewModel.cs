@@ -157,7 +157,7 @@ public class MainWindowViewModel
     public void RefreshStatesOnActivated()
     {
         var lastStateLoadAt = Interlocked.Read(ref _lastStateLoadAt);
-        if (_operationCoordinator.ActiveCount != 0 ||
+        if (_operationCoordinator.IsStopping || _operationCoordinator.ActiveCount != 0 ||
             (lastStateLoadAt != 0 && Stopwatch.GetElapsedTime(lastStateLoadAt) < StateReloadInterval))
         {
             return;

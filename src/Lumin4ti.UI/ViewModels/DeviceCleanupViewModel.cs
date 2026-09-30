@@ -17,6 +17,10 @@ public partial class DeviceCleanupViewModel : ObservableObject
     private bool _suppressSelectionUpdates;
     private DisconnectedDevice[] _pendingRemoval = [];
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEmpty))]
+    private bool hasSuccessfulLoad;
+
     public ObservableCollection<DisconnectedDeviceItemViewModel> Devices { get; } = [];
 
     [ObservableProperty]
@@ -53,7 +57,7 @@ public partial class DeviceCleanupViewModel : ObservableObject
 
     public bool HasDevices => Devices.Count > 0;
 
-    public bool IsEmpty => !IsLoading && !HasDevices;
+    public bool IsEmpty => HasSuccessfulLoad && !IsLoading && !HasDevices;
 
     public bool CanRefresh => !IsBusy;
 
@@ -104,6 +108,7 @@ public partial class DeviceCleanupViewModel : ObservableObject
         await _dispatchAsync(() =>
         {
             IsLoading = true;
+            HasSuccessfulLoad = false;
             StatusText = App.Text("DeviceCleanup.Loading", "未接続デバイスを検索しています…");
         }).ConfigureAwait(false);
 
@@ -117,6 +122,7 @@ public partial class DeviceCleanupViewModel : ObservableObject
             await _dispatchAsync(() =>
             {
                 ReplaceDevices(devices);
+                HasSuccessfulLoad = true;
                 StatusText = App.Text(
                     "DeviceCleanup.Loaded",
                     "未接続デバイスを {0} 件検出しました。",
@@ -336,9 +342,11 @@ public partial class DeviceCleanupViewModel : ObservableObject
                 if (refreshedDevices is not null)
                 {
                     ReplaceDevices(refreshedDevices);
+                    HasSuccessfulLoad = true;
                 }
                 else
                 {
+                    HasSuccessfulLoad = false;
                     RemoveCompletedDevices(removedInstanceIds);
                 }
 

@@ -87,25 +87,6 @@ public sealed class ScheduledTempCleanupTests
     }
 
     [TestMethod]
-    public void 照会コマンドはタスク名を含む()
-    {
-        var arguments = ScheduledTempCleanupToggle.BuildQueryArguments();
-
-        StringAssert.Contains(arguments, "/query");
-        StringAssert.Contains(arguments, ScheduledTempCleanupToggle.TaskName);
-    }
-
-    [TestMethod]
-    public void 削除コマンドは確認なしでタスク名を消す()
-    {
-        var arguments = ScheduledTempCleanupToggle.BuildDeleteArguments();
-
-        StringAssert.Contains(arguments, "/delete");
-        StringAssert.Contains(arguments, ScheduledTempCleanupToggle.TaskName);
-        StringAssert.Contains(arguments, "/f");
-    }
-
-    [TestMethod]
     public void 登録コマンドはタスク定義XMLのパスをクォートして渡す()
     {
         const string xmlPath = @"C:\Users\Test\AppData\Local\Temp\Lumin4ti-task.xml";
@@ -484,46 +465,6 @@ public sealed class ScheduledTempCleanupTests
 
         Assert.AreEqual(0, exitCode);
         Assert.IsNull(executor.LastFileName);
-    }
-
-    [TestMethod]
-    public void 定期実行の既定項目はすべてカタログに存在する()
-    {
-        var ids = FileCleanupGroups.CreateCleanupActions(new RecordingExecutor())
-            .Select(a => a.Id)
-            .ToArray();
-
-        foreach (var id in CleanupPreferences.DefaultScheduledGroupIds)
-        {
-            CollectionAssert.Contains(ids, id);
-        }
-    }
-
-    [TestMethod]
-    public void 実行項目のチェックリストはカタログの全項目を出す()
-    {
-        var toggle = new ScheduledTempCleanupToggle(new RecordingExecutor());
-        var expected = FileCleanupGroups.CreateCleanupActions(new RecordingExecutor()).Select(a => a.Id).ToArray();
-
-        var entries = toggle.GetCheckListEntries();
-
-        CollectionAssert.AreEqual(expected, entries.Select(e => e.Value).ToArray());
-        Assert.IsTrue(
-            entries.Where(e => CleanupPreferences.DefaultScheduledGroupIds.Contains(e.Value)).All(e => e.IsSelected),
-            "既定セットの項目は初期状態でチェック済みである必要があります");
-    }
-
-    [TestMethod]
-    public void ストア型キャッシュは開発ツールキャッシュ群にも含まれる()
-    {
-        // 手動実行のグループとサインイン時の定期削除で対象がずれないようにする。
-        var packagePaths = FileCleanupGroups.PackageCacheTargets.Select(t => t.RawPath).ToArray();
-
-        Assert.IsTrue(FileCleanupGroups.StoreCacheTargets.Length > 0);
-        foreach (var target in FileCleanupGroups.StoreCacheTargets)
-        {
-            CollectionAssert.Contains(packagePaths, target.RawPath);
-        }
     }
 
     [TestMethod]
