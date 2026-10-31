@@ -6,7 +6,7 @@
 # 前提:
 #   - SimplySign Desktop が接続済み (証明書が CurrentUser\My に見えていること)
 #   - Directory.Build.props の <Version> がリリースしたいバージョンになっていること (/vava 済み)
-#   - C:\Users\IMT\dev\Secret\secrets.json に cloudflare.api_token があること
+#   - D:\Dev\Secret\secrets.json に cloudflare.api_token があること
 #
 # 使い方:
 #   pwsh scripts/release-local.ps1                # フルリリース (build + sign + upload + cleanup)
@@ -52,17 +52,89 @@ function Remove-LocalWorkItem {
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
+# 展開・実行せず、実際に配布するパッケージの版と win-x64 構成を確認する。
+function Assert-ReleasePackage {
+    param([string]$PackagePath, [string]$ExpectedVersion)
+    $archive = [IO.Compression.ZipFile]::OpenRead($PackagePath)
+    try {
+        $readText = {
+            param([string]$Name)
+            $entry = $archive.GetEntry($Name)
+            if ($null -eq $entry -or $entry.Length -eq 0) { throw "パッケージに必須ファイルがありません: $Name" }
+            $reader = [IO.StreamReader]::new($entry.Open())
+            try { $reader.ReadToEnd() } finally { $reader.Dispose() }
+        }
+        [xml]$nuspec = & $readText 'Lumin4ti.nuspec'
+        $metadata = $nuspec.SelectSingleNode('/*[local-name()="package"]/*[local-name()="metadata"]')
+        if ($null -eq $metadata -or $metadata.id -cne 'Lumin4ti' -or $metadata.version -cne $ExpectedVersion) {
+            throw "パッケージの ID または版が一致しません: $PackagePath"
+        }
+        foreach ($name in @('Lumin4ti.UI.exe', 'Lumin4ti.UI.dll', 'Lumin4ti.UI.deps.json', 'Lumin4ti.UI.runtimeconfig.json')) {
+            $entry = $archive.GetEntry("lib/app/$name")
+            if ($null -eq $entry -or $entry.Length -eq 0) { throw "パッケージに必須ファイルがありません: $name" }
+        }
+        $deps = (& $readText 'lib/app/Lumin4ti.UI.deps.json') | ConvertFrom-Json
+        if (-not ([string]$deps.runtimeTarget.name).EndsWith('/win-x64', [StringComparison]::Ordinal)) {
+            throw "パッケージの runtimeTarget が win-x64 ではありません: $PackagePath"
+        }
+        $apphost = [IO.MemoryStream]::new()
+        $exeStream = $archive.GetEntry('lib/app/Lumin4ti.UI.exe').Open()
+        $binary = $null
+        try {
+            $exeStream.CopyTo($apphost)
+            $apphost.Position = 0
+            $binary = [IO.BinaryReader]::new($apphost)
+            if ($binary.ReadUInt16() -ne 0x5A4D) { throw 'apphost の DOS ヘッダーが不正です' }
+            $apphost.Position = 0x3C
+            $peOffset = $binary.ReadUInt32()
+            $apphost.Position = $peOffset
+            if ($binary.ReadUInt32() -ne 0x00004550 -or $binary.ReadUInt16() -ne 0x8664) {
+                throw "apphost の PE machine が x64 ではありません: $PackagePath"
+            }
+        }
+        finally {
+            if ($null -ne $binary) { $binary.Dispose() }
+            $exeStream.Dispose()
+            $apphost.Dispose()
+        }
+    }
+    finally { $archive.Dispose() }
+}
+
+function Assert-MsiVersion {
+    param([string]$MsiPath, [string]$ExpectedVersion)
+    $installer = $database = $view = $record = $null
+    try {
+        $installer = New-Object -ComObject WindowsInstaller.Installer
+        $database = $installer.GetType().InvokeMember('OpenDatabase', [Reflection.BindingFlags]::InvokeMethod, $null, $installer, @($MsiPath, 0))
+        $view = $database.GetType().InvokeMember('OpenView', [Reflection.BindingFlags]::InvokeMethod, $null, $database, @('SELECT `Value` FROM `Property` WHERE `Property` = ''ProductVersion'''))
+        $view.GetType().InvokeMember('Execute', [Reflection.BindingFlags]::InvokeMethod, $null, $view, $null) | Out-Null
+        $record = $view.GetType().InvokeMember('Fetch', [Reflection.BindingFlags]::InvokeMethod, $null, $view, $null)
+        if ($null -eq $record) { throw "MSI に ProductVersion がありません: $MsiPath" }
+        $productVersion = $record.GetType().InvokeMember('StringData', [Reflection.BindingFlags]::GetProperty, $null, $record, @(1))
+        # Velopack MSI は 3 桁の製品版に末尾 .0 を付けるため、その表現だけも許容する。
+        if ($productVersion -cne $ExpectedVersion -and $productVersion -cne "$ExpectedVersion.0") {
+            throw "MSI の ProductVersion が一致しません: $productVersion (期待値: $ExpectedVersion)"
+        }
+    }
+    finally {
+        foreach ($com in @($record, $view, $database, $installer)) {
+            if ($null -ne $com) { [void][Runtime.InteropServices.Marshal]::FinalReleaseComObject($com) }
+        }
+    }
+}
+
 # ---- 定数 ----
 # リリースの再現性を保つため、vpk はリポジトリ内で明示的に固定する。
 # 更新時は公式 NuGet の安定版を確認し、-SkipUpload で署名成果物を検証してから変更する。
 $VpkVersion = '1.2.161'
 Write-Host "vpk 固定バージョン: $VpkVersion"
-$WranglerVersion = '4.144.0'        # サプライチェーン対策でバージョン固定
+$WranglerVersion = '4.156.0'        # サプライチェーン対策でバージョン固定
 $Bucket = 'lumin4ti-updates'
 $BaseUrl = 'https://lumin4ti.kagayoi.com'
 $AccountId = '10901bfadbf1005164774a7350082985'
 $KeepVersionCount = 2                # 全プロジェクト共通の保持ポリシー: 直近 2 バージョン
-$SecretsPath = 'C:\Users\IMT\dev\Secret\secrets.json'
+$SecretsPath = 'D:\Dev\Secret\secrets.json'
 $CertSubjectName = 'Open Source Developer Yuichiro Shinozaki'
 # /n (Subject 名) で選択: 証明書の年次更新で thumbprint が変わっても動く
 $SignParams = "/n `"$CertSubjectName`" /fd SHA256 /td SHA256 /tr http://time.certum.pl"
@@ -265,12 +337,6 @@ foreach ($signedArtifact in Get-ChildItem $ArtifactsDir -File | Where-Object { $
     Write-Host "  ✅ $($signedArtifact.Name): Valid ($($sig.SignerCertificate.Subject -replace ',.*$'))"
 }
 
-if ($SkipUpload) {
-    Write-Host "`n✅ -SkipUpload 指定のためここで終了。成果物: $ArtifactsDir" -ForegroundColor Green
-    Get-ChildItem $ArtifactsDir | Format-Table Name, @{n='Size(MB)'; e={[math]::Round($_.Length/1MB,1)}}
-    return
-}
-
 # ---- 2. R2 アップロード (asset → 取得検証 → manifest commit point) ----
 $artifacts = @(Get-ChildItem $ArtifactsDir -File)
 $legacySetupFiles = @($artifacts | Where-Object { $_.Name -like '*-Setup.exe' })
@@ -296,6 +362,43 @@ foreach ($expectedManifestName in $expectedManifestNames) {
 $unexpectedManifests = @($manifestFiles | Where-Object { $_.Name -notin $expectedManifestNames })
 if ($unexpectedManifests.Count -gt 0) {
     throw "対象外 channel の manifest が artifacts にあります: $($unexpectedManifests.Name -join ', ')"
+}
+
+Write-Host '== 公開前の版・構成・SHA256 検証 ==' -ForegroundColor Cyan
+foreach ($msiFile in $msiFiles) {
+    Assert-MsiVersion -MsiPath $msiFile.FullName -ExpectedVersion $version
+}
+$artifactByName = @{}
+foreach ($artifact in $artifacts) { $artifactByName[$artifact.Name] = $artifact }
+$referencedAssets = @{}
+foreach ($manifestFile in $manifestFiles) {
+    $manifest = Get-Content $manifestFile.FullName -Raw | ConvertFrom-Json
+    $assetsProperty = $manifest.PSObject.Properties['Assets']
+    if (-not $assetsProperty -or @($assetsProperty.Value).Count -eq 0) {
+        throw "manifest に asset がありません: $($manifestFile.Name)"
+    }
+    foreach ($asset in @($assetsProperty.Value)) {
+        $fileName = [string]$asset.FileName
+        if ([string]::IsNullOrWhiteSpace($fileName) -or -not $artifactByName.ContainsKey($fileName)) {
+            throw "manifest がローカルに存在しない asset を参照しています: $($manifestFile.Name) → $fileName"
+        }
+        if ($asset.Version -cne $version -or $asset.PackageId -cne 'Lumin4ti') {
+            throw "manifest asset の ID または版が一致しません: $fileName"
+        }
+        $assetFile = $artifactByName[$fileName]
+        if ([long]$asset.Size -ne $assetFile.Length) { throw "manifest とローカル asset のサイズが一致しません: $fileName" }
+        if ($asset.SHA256 -notmatch '^[A-Fa-f0-9]{64}$' -or $asset.SHA256 -ne (Get-FileHash -LiteralPath $assetFile.FullName -Algorithm SHA256).Hash) {
+            throw "manifest とローカル asset の SHA256 が一致しません: $fileName"
+        }
+        Assert-ReleasePackage -PackagePath $assetFile.FullName -ExpectedVersion $version
+        $referencedAssets[$fileName] = $assetFile
+    }
+}
+
+if ($SkipUpload) {
+    Write-Host "`n✅ -SkipUpload 指定のためここで終了。成果物: $ArtifactsDir" -ForegroundColor Green
+    Get-ChildItem $ArtifactsDir | Format-Table Name, @{n='Size(MB)'; e={[math]::Round($_.Length/1MB,1)}}
+    return
 }
 
 # manifest 更新直前の世代は、経路上のキャッシュや既に更新確認を済ませたクライアントが
@@ -340,33 +443,6 @@ foreach ($manifestName in $expectedManifestNames) {
 
 $preCommitFiles = @($publishArtifacts | Where-Object { $_.Name -notlike 'releases.*.json' } | Sort-Object Name)
 if ($preCommitFiles.Count -eq 0) { throw 'manifest より先に公開する asset がありません' }
-
-$artifactByName = @{}
-foreach ($artifact in $artifacts) { $artifactByName[$artifact.Name] = $artifact }
-$referencedAssets = @{}
-foreach ($manifestFile in $manifestFiles) {
-    $manifest = Get-Content $manifestFile.FullName -Raw | ConvertFrom-Json
-    $assetsProperty = $manifest.PSObject.Properties['Assets']
-    if (-not $assetsProperty -or @($assetsProperty.Value).Count -eq 0) {
-        throw "manifest に asset がありません: $($manifestFile.Name)"
-    }
-
-    foreach ($asset in @($assetsProperty.Value)) {
-        $fileNameProperty = $asset.PSObject.Properties['FileName']
-        $fileName = if ($fileNameProperty) { [string]$fileNameProperty.Value } else { '' }
-        if ([string]::IsNullOrWhiteSpace($fileName) -or -not $artifactByName.ContainsKey($fileName)) {
-            throw "manifest がローカルに存在しない asset を参照しています: $($manifestFile.Name) → $fileName"
-        }
-
-        $assetFile = $artifactByName[$fileName]
-        $sizeProperty = $asset.PSObject.Properties['Size']
-        if ($sizeProperty -and [long]$sizeProperty.Value -ne $assetFile.Length) {
-            throw "manifest とローカル asset のサイズが一致しません: $fileName"
-        }
-
-        $referencedAssets[$fileName] = $assetFile
-    }
-}
 
 Write-Host '== R2 asset アップロード ==' -ForegroundColor Cyan
 $uploaded = 0
