@@ -63,12 +63,12 @@ public partial class CommandCategoryViewModel : ObservableObject
         // 前提設定を持つ項目 (ParentId) は親カードの中へ入れ子表示する。
         // 親が同じカテゴリに無い場合は独立項目として扱い、迷子にしない。
         var byId = all.ToDictionary(vm => vm.Item.Id);
-        foreach (var parent in all)
+        foreach (var children in all.Where(vm => vm.Item.ParentId is not null)
+                     .GroupBy(vm => vm.Item.ParentId!))
         {
-            var children = all.Where(c => c.Item.ParentId == parent.Item.Id).ToList();
-            if (children.Count > 0)
+            if (byId.TryGetValue(children.Key, out var parent))
             {
-                parent.AttachChildren(children);
+                parent.AttachChildren(children.ToList());
             }
         }
 
