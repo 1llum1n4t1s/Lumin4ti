@@ -105,6 +105,8 @@ MMAgentの状態は一括再読込ごとに完了済みキャッシュと操作�
 - `%LOCALAPPDATA%\Lumin4ti\logs\`: 起動、操作、例外、移行の診断ログ。旧インストール先を回収するときも保持する。
 - `%ProgramData%\Lumin4ti\backups\`: HKLMやBCDなど特権状態を戻すためのバックアップ。AdministratorsとSYSTEMだけが変更できるACLを検証する。
 
+Windowsでは`LoggerBootstrap.Initialize()`がログ構成前に、旧`%APPDATA%\Lumin4ti\logs`と`%LOCALAPPDATA%\Kagayoi\Lumin4ti\logs`から現行ログ保存先へ移行する。`LegacyLogMigration`は直下の既知ログ（日付形式の`Lumin4ti_*.log`と`msi-per-machine.log`）だけを一意な`legacy-<GUID>-`接頭辞付きで移し、既存ログや他の利用者ファイルを上書きしない。パス要素とファイルの再解析ポイントは辿らず、使用中・競合・別ボリュームなどで移動できないログは元に残して次回起動で再試行する。移行失敗は起動を妨げず、移行元ログフォルダーと旧Kagayoi配下のアプリフォルダーは空の場合だけ除去する。
+
 設定保存は一時ファイルからの置換で行い、保存要求を直列化する。既存設定の読込に失敗した場合は既定値でUIを起動するが、壊れた原本を既定値で上書きしない。
 
 復元可能なトグルは適用直前の実値を保存し、OFFでその値へ戻す。HKCUは利用者SIDごとのschema 1、HKLMはマシン共通で保持する。HKLM/HKCU混在項目ではHKLMをschema 2の共有退避とし、適用中の所有者SID集合を記録する。HKCUは各利用者の退避から復元し、HKLMは最後の所有者が解除するときだけ復元する。SID取得不能、所有者不明の旧混在退避、SIDスコープ導入前の共有HKCU退避は変更前に拒否し、現在利用者へ移行・復元・削除しない。UWPの復元ジャーナルも利用者SIDごとのschema 2を使い、旧共有ジャーナルを復元元にしない。保護バックアップのACL、所有者、パス、再解析ポイントを検証できない場合は、危険な要素を隔離して当該操作をfail closedにする。
@@ -141,7 +143,7 @@ UI文字列は`src/Lumin4ti.UI/Resources/Locales/*.axaml`の17辞書で管理す
 
 インストール先は`VELOPACK_INSTALLDIR=<Program Files>\Lumin4ti`を明示する。署名・MSI登録・`.msi-installed`を確認できる既知の誤配置（ドライブ直下の`Lumin4ti`と`Program Files\ゆろち\Lumin4ti`）も固定MSIで配置を修復する。同一ProductCode/Versionで通常の`/i`が配置を変えない場合だけ`REINSTALL=ALL REINSTALLMODE=vamus`で全再配置・再キャッシュする。任意のカスタム配置は自動回収しない。
 
-信頼済みPerMachine起動側が旧プロセスの終了を待って、既知の旧本体・Updater・キャッシュ・HKCUアンインストール登録・ユーザーショートカットだけを回収する。`Update.exe`や`packages`だけが残る部分移行も次回起動で再回収し、ユーザー書込み可能な旧Updaterは実行しない。設定・ログ・保護バックアップを保持し、ショートカット削除後は`SHChangeNotify`でStartメニューの表示キャッシュを更新する。
+信頼済みPerMachine起動側が旧プロセスの終了を待って、既知の旧本体・Updater・キャッシュ・HKCUアンインストール登録・ユーザーショートカットだけを回収する。`Update.exe`や`packages`だけが残る部分移行も次回起動で再回収し、ユーザー書込み可能な旧Updaterは実行しない。設定・ログ・保護バックアップを保持する。現行ログ保存先は旧PerUser配置と同じ基点を使うため、旧配置の回収では直下の`logs`を除外し、ログだけが残る状態を回収完了として扱う。ログ自体の移行は[状態と永続化](#状態と永続化)の独立した処理が担う。ショートカット削除後は`SHChangeNotify`でStartメニューの表示キャッシュを更新する。
 
 ### 製品ページと更新ファイルの経路
 

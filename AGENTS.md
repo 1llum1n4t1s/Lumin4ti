@@ -19,7 +19,7 @@ dotnet test Lumin4ti.slnx --filter "Name=既存の現行バックアップは再
 ```
 
 - TFM は `net10.0-windows10.0.20348.0` ([Directory.Build.props](Directory.Build.props))。UWP パッケージ列挙 (WinRT `PackageManager`) のため Windows SDK 付き。
-- **`.github/workflows/` は存在せず CI は無い**。`.github/dependabot.yml` は NuGet 更新の監視だけを担う。変更後はローカルの `dotnet build` (0 warnings) と `dotnet test` を必ず両方通す。
+- `.github/workflows/dependency-validation.yml` は Dependabot PR と手動実行を対象に Windows 上で restore・Release build・test を行う。`dependabot-auto-merge.yml` は必須検証と変更内容を確認して対象の Dependabot PR を merge する。通常の変更後もローカルの `dotnet build` (0 warnings) と `dotnet test` を必ず両方通す。
 - **バージョン (`Directory.Build.props` の `<Version>`) は `/vava` 経由でのみ更新**。コード修正のついでに触らない。
 - 復元・サービス補償・終了時排他・状態表示などの操作フローを変更したら、`pwsh -NoProfile -File scripts/verify-review-fixes.ps1` も実行する。対象ケースと再現方法は [WORKFLOWS.md](scripts/verification/WORKFLOWS.md) を参照し、成果物 `local-release/review-fixes-verification.json` を保持する。検証の境界は [DESIGN.md](DESIGN.md#主要コンポーネント) に記載し、実 GUI の E2E 検証と区別する。
 
@@ -54,6 +54,10 @@ dotnet test Lumin4ti.slnx --filter "Name=既存の現行バックアップは再
 ### 破壊的操作の復元性
 
 復元可能な項目は、適用前の実値を保護ストレージへ保存して戻す。[RegistryValueBackup](src/Lumin4ti.Core/Services/Windows/Actions/RegistryValueBackup.cs) の型付き値検証、SID 分離、共有設定の所有管理、失敗補償は [DESIGN.md の状態と永続化](DESIGN.md#状態と永続化) に従う。旧 AppData・所有者不明の退避を復元元にしない。変更時は `RegistryToggleTests` と `UwpBackgroundToggleTests` の該当検証、および操作フロー検証を通す。Defender も保護バックアップを使い、不可逆操作を足すときは同様の復元手段を検討する。
+
+### ログの保存と移行
+
+ログ保存先・旧ログ移行を変更したら `LegacyLogMigrationTests` を通し、[DESIGN.md の状態と永続化](DESIGN.md#状態と永続化) にある既知ログ限定・リンク非追従・失敗時保持の境界を維持する。
 
 ### winget によるアプリ更新
 
@@ -131,6 +135,15 @@ dotnet test Lumin4ti.slnx --filter "Name=既存の現行バックアップは再
 - 製品ページの配信は `../vps-web/deploy/deploy-lp.ps1` を使う。配信先は [DESIGN.md](DESIGN.md#製品ページの配信先) を参照し、公開ホスト・更新ファイルの既存経路を維持する。
 - R2 バケット `lumin4ti-updates` (account `10901bfadbf1005164774a7350082985` / zone `kagayoi.com`)。`local-release/` は `.gitignore` 済み。
 
+### ローカルリリースの実行
+
+リポジトリルートで事前確認を行い、失敗時は「署名証明書が見つからないよ。SimplySign Desktop を起動してトークンでログインしてから /vava を再実行してね」。公開依頼時に成功を確認してから実行する。
+
+```powershell
+pwsh -NoProfile -Command 'if (-not (Get-ChildItem Cert:\CurrentUser\My | Where-Object { $_.Subject -like "CN=Open Source Developer Yuichiro Shinozaki*" -and $_.NotAfter -gt (Get-Date) })) { exit 1 }'
+if ($LASTEXITCODE -eq 0) { pwsh -NoProfile -File scripts/release-local.ps1 } else { throw '署名証明書が見つからないよ。SimplySign Desktop を起動してトークンでログインしてから /vava を再実行してね' }
+```
+
 ## コードレビュー時の注意点 (このコードベース特有)
 
 - トグルの多重操作レース: `ToggleSwitch` の `IsEnabled` は `CanToggle` (= 状態既知 かつ 非実行中) にバインドすること。
@@ -150,12 +163,3 @@ dotnet test Lumin4ti.slnx --filter "Name=既存の現行バックアップは再
 - `nephilim.jp` の Redirect Rules は `/` だけを 301 する。`releases.*.json` / `*.nupkg` / `*-Setup.exe` は転送せず R2 が配信を続ける。
 - 配信は `lumin4ti.kagayoi.com`（R2 `lumin4ti-updates`）。旧 `lumin4ti.nephilim.jp` は route に併記して残してある。
 - アプリ名 `Lumin4ti` 自体は既存ユーザーが混乱するので改名しない。
-
-### ローカルリリースの実行
-
-リポジトリルートで事前確認を行い、失敗時は「署名証明書が見つからないよ。SimplySign Desktop を起動してトークンでログインしてから /vava を再実行してね」。公開依頼時に成功を確認してから実行する。
-
-```powershell
-pwsh -NoProfile -Command 'if (-not (Get-ChildItem Cert:\CurrentUser\My | Where-Object { $_.Subject -like "CN=Open Source Developer Yuichiro Shinozaki*" -and $_.NotAfter -gt (Get-Date) })) { exit 1 }'
-if ($LASTEXITCODE -eq 0) { pwsh -NoProfile -File scripts/release-local.ps1 } else { throw '署名証明書が見つからないよ。SimplySign Desktop を起動してトークンでログインしてから /vava を再実行してね' }
-```
