@@ -241,6 +241,24 @@ public sealed class DefenderActionTests
             SecurityAppResetAction.DescribeFailure(result));
     }
 
+    [TestMethod]
+    [DataRow(true)]
+    [DataRow(false)]
+    public void 失敗表示の最終行も秘密値と制御文字を除いて長さを制限する(bool securityApp)
+    {
+        var result = Failure(1, "前の診断\n\u001b[31mtoken=private-value\u001b[0m\t失敗 " + new string('x', 2000));
+
+        var detail = securityApp
+            ? SecurityAppResetAction.DescribeFailure(result)
+            : DefenderCommandSupport.DescribeFailure(result);
+
+        StringAssert.Contains(detail, "token=[redacted]");
+        Assert.IsFalse(detail.Contains("private-value", StringComparison.Ordinal));
+        Assert.IsFalse(detail.Contains("前の診断", StringComparison.Ordinal));
+        Assert.IsFalse(detail.Any(char.IsControl));
+        Assert.IsTrue(detail.Length <= (securityApp ? 501 : 305));
+    }
+
     private static CommandExecutionResult Success() =>
         new(true, string.Empty, 0, string.Empty, string.Empty);
 

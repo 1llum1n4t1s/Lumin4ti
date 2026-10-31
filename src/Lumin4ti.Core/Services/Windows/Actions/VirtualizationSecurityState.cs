@@ -262,7 +262,7 @@ internal sealed class WindowsVirtualizationSecurityPlatform(ICommandExecutor exe
         var result = await executor.RunAsync("bcdedit.exe", "/enum {current}", ct);
         if (!result.Success)
         {
-            throw new InvalidOperationException($"bcdedit の読み取りに失敗しました (exit={result.ExitCode}): {result.StandardError}");
+            throw new InvalidOperationException($"bcdedit の読み取りに失敗しました ({CommandFailureDiagnostic.Format(result)})");
         }
 
         var line = result.StandardOutput.Split('\n')
@@ -275,7 +275,7 @@ internal sealed class WindowsVirtualizationSecurityPlatform(ICommandExecutor exe
         var fields = line.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
         if (fields.Length < 2)
         {
-            throw new InvalidDataException($"hypervisorlaunchtype を解析できません: {line.Trim()}");
+            throw new InvalidDataException($"hypervisorlaunchtype を解析できません: {CommandFailureDiagnostic.Sanitize(line)}");
         }
 
         return BcdValueSnapshot.Present(fields[^1]);
@@ -297,7 +297,7 @@ internal sealed class WindowsVirtualizationSecurityPlatform(ICommandExecutor exe
         var current = await ReadHypervisorLaunchTypeAsync(ct);
         if (!current.EquivalentTo(value))
         {
-            throw new InvalidOperationException($"bcdedit の設定に失敗しました (exit={result.ExitCode}): {result.StandardError}");
+            throw new InvalidOperationException($"bcdedit の設定に失敗しました ({CommandFailureDiagnostic.Format(result)})");
         }
     }
 

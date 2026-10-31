@@ -87,7 +87,7 @@ public sealed class MmAgentOperationApiChoice : IMaintenanceChoice
                 // 有効化できたか分からないまま古い値を残さない (実際の状態は最後に読み直す)。
                 _stateProvider.Invalidate("OperationAPI");
                 LoggerBootstrap.Log.Info(
-                    $"{Id}: Enable-MMAgent -OperationAPI が失敗: {FirstLine(enable.StandardError)}");
+                    $"{Id}: Enable-MMAgent -OperationAPI が失敗: {CommandFailureDiagnostic.Format(enable)}");
             }
         }
 
@@ -96,10 +96,10 @@ public sealed class MmAgentOperationApiChoice : IMaintenanceChoice
             ct);
         if (!result.Success)
         {
-            var reason = FirstLine(result.StandardError);
+            var reason = CommandFailureDiagnostic.Format(result);
             LoggerBootstrap.Log.Error($"{Id}: Set-MMAgent -MaxOperationAPIFiles {maxFiles} が失敗: {reason}");
             return MaintenanceActionResult.Fail(
-                $"記録ファイル数を変更できませんでした{(reason.Length > 0 ? $": {reason}" : string.Empty)}");
+                $"記録ファイル数を変更できませんでした: {reason}");
         }
 
         LoggerBootstrap.Log.Info($"{Id}: 記録ファイル数を {maxFiles} に設定");
@@ -152,9 +152,6 @@ public sealed class MmAgentOperationApiChoice : IMaintenanceChoice
 
     private Task<CommandExecutionResult> RunAsync(string command, CancellationToken ct) =>
         _executor.RunAsync("powershell.exe", $"-NoProfile -NonInteractive -Command \"{command}\"", ct);
-
-    private static string FirstLine(string text) =>
-        text.Split('\n', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim() ?? string.Empty;
 
     /// <summary>既定値 (Windows の初期状態) の選択値。</summary>
     public static string DefaultValue => DefaultMaxFiles.ToString(CultureInfo.InvariantCulture);

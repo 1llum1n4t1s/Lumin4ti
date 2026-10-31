@@ -89,7 +89,7 @@ public sealed class RecallToggle(ICommandExecutor executor) : IMaintenanceToggle
             return MaintenanceActionResult.Ok($"  - Recall を{(on ? "無効化" : "有効化")}しました (反映には再起動が必要です)");
         }
 
-        LoggerBootstrap.Log.Error($"{Id}: dism {verb}-feature (exit={result.ExitCode}): {result.StandardError}");
+        LoggerBootstrap.Log.Error($"{Id}: dism {verb}-feature: {CommandFailureDiagnostic.Format(result)}");
         return MaintenanceActionResult.Fail($"DISM が失敗しました (exit={result.ExitCode})。非対応の PC の可能性があります。");
     }
 }

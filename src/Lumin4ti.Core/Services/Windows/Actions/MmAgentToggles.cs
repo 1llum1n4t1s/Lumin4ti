@@ -314,7 +314,6 @@ public sealed class MmAgentFeatureToggle(
                 return MaintenanceActionResult.Ok($"  - {propertyName} は既に{(on ? "有効" : "無効")}です");
             }
 
-            var reason = result.StandardError.Split('\n', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim() ?? string.Empty;
             if (isNotSupported)
             {
                 stateProvider.MarkUnsupported(propertyName);
@@ -322,9 +321,10 @@ public sealed class MmAgentFeatureToggle(
                 return UnsupportedResult();
             }
 
-            LoggerBootstrap.Log.Error($"{Id}: {cmdlet} (exit={result.ExitCode}): {reason}");
+            var reason = CommandFailureDiagnostic.Format(result);
+            LoggerBootstrap.Log.Error($"{Id}: {cmdlet}: {reason}");
             return MaintenanceActionResult.Fail(
-                $"{cmdlet} が失敗しました{(reason.Length > 0 ? $": {reason}" : string.Empty)}{FailureHint()}");
+                $"{cmdlet} が失敗しました: {reason}{FailureHint()}");
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {

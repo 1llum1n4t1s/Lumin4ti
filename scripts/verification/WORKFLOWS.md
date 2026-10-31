@@ -24,7 +24,7 @@
 | 状態と結果 | 状態不明が実行結果を上書き、回復しても error 残留 | StateErrorText と ResultText が共存し既知状態で error のみ消える |
 | デバイス列挙 | 例外を空一覧成功と表示、retry できない | 失敗時 IsEmpty=false、retry 空成功時 true、削除呼出し禁止 |
 | パーサ | canary 入力を shell に渡す、解決不能コマンドを欠損と断定 | RERE_CANARY を純粋パーサにだけ渡し安全に拒否 |
-| 診断 | 非英語出力、失敗 tool の stdout を捨てる | mock 失敗の終了コード/出力が診断に残る |
+| 診断 | 失敗 tool の stdout を捨てる | mock 失敗の終了コード/出力が診断に残り、秘密値を伏せる（OEM 復号は `ProcessCommandExecutorDecodeTests` で検証） |
 | MSI 取得 | headers 到着で timeout が解除され body が無期限に待つ、利用者 cancel を timeout と誤判定 | mock HTTP body で timeout / OCE / 正常 copy を区別、外部通信なし |
 | 自動実行の選択解除 | 設定に大文字小文字違いの重複 ID があり、OFF 後もサインイン時に実行 | 実 checklist 操作→保存→選択を通し、全重複を解除。無関係な ID と順序、繰返し OFF/ON の冪等性を保持。削除対象の解決や task 実行は禁止 |
 | 更新スキップ解除 | 保存先の障害が生成 command へ未処理例外として伝播 | 正常保存と IOException 注入の両方で実 command を完了、画面・設定の tag を解除、空 tag の再実行は保存不要 |

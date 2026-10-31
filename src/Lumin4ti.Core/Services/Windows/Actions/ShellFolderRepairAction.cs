@@ -33,7 +33,7 @@ public sealed class ShellFolderRepairAction(ICommandExecutor executor) : IMainte
             return MaintenanceActionResult.Ok("  - shell32.dll を再登録しました");
         }
 
-        LoggerBootstrap.Log.Error($"{Id}: exit={result.ExitCode}: {result.StandardError}");
+        LoggerBootstrap.Log.Error($"{Id}: {CommandFailureDiagnostic.Format(result)}");
         return MaintenanceActionResult.Fail($"regsvr32 が失敗しました (exit={result.ExitCode})");
     }
 }

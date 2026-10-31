@@ -632,7 +632,7 @@ public sealed class DefenderSignatureUpdateAction : IMaintenanceAction
             if (!recovery.Success)
             {
                 LoggerBootstrap.Log.Error(
-                    $"{Id}: キャンセル後の定義再取得にも失敗 exit={recovery.ExitCode}: {recovery.StandardError}");
+                    $"{Id}: キャンセル後の定義再取得にも失敗: {CommandFailureDiagnostic.Format(recovery)}");
                 return MaintenanceActionResult.Fail(
                     "定義ファイル削除中にキャンセルされ、保護のために試した定義再取得にも失敗しました。" +
                     Environment.NewLine + DefenderCommandSupport.DescribeFailure(recovery));
@@ -823,7 +823,7 @@ public sealed class DefenderResetAction : IMaintenanceAction
                 $"{detail}{Environment.NewLine}  - 削除前の除外設定を保存しました: {backupFile}{Environment.NewLine}  - 除外設定を全削除し、主要オプションを既定値に戻しました");
         }
 
-        LoggerBootstrap.Log.Error($"{Id}: exit={result.ExitCode}: {result.StandardError}");
+        LoggerBootstrap.Log.Error($"{Id}: {CommandFailureDiagnostic.Format(result)}");
         return MaintenanceActionResult.Fail(
             $"リセットに失敗しました (exit={result.ExitCode}){Environment.NewLine}" +
             DefenderCommandSupport.DescribeFailure(result) +
@@ -1179,7 +1179,8 @@ internal static class DefenderCommandSupport
         }
 
         const int maxLength = 300;
-        var detail = lastLine.Length <= maxLength ? lastLine : lastLine[..maxLength] + "…";
+        var sanitized = CommandFailureDiagnostic.Sanitize(lastLine);
+        var detail = sanitized.Length <= maxLength ? sanitized : sanitized[..maxLength] + "…";
         return $"  - {detail}";
     }
 
@@ -1233,7 +1234,7 @@ public sealed class SecurityAppResetAction(ICommandExecutor executor) : IMainten
             return MaintenanceActionResult.Ok("  - Windows セキュリティ アプリをリセットしました");
         }
 
-        LoggerBootstrap.Log.Error($"{Id}: exit={result.ExitCode}: {result.StandardError}");
+        LoggerBootstrap.Log.Error($"{Id}: {CommandFailureDiagnostic.Format(result)}");
         var failure = DescribeFailure(result);
         return MaintenanceActionResult.Fail(
             $"リセットに失敗しました (exit={result.ExitCode})" +
@@ -1255,7 +1256,8 @@ public sealed class SecurityAppResetAction(ICommandExecutor executor) : IMainten
         }
 
         const int maximumLength = 500;
-        return failure.Length <= maximumLength ? failure : failure[..maximumLength] + "…";
+        var sanitized = CommandFailureDiagnostic.Sanitize(failure);
+        return sanitized.Length <= maximumLength ? sanitized : sanitized[..maximumLength] + "…";
     }
 
     internal static string BuildResetScript() =>

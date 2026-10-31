@@ -82,7 +82,7 @@ internal static class Program
         await Run("uwp-sid-journal-isolation", UwpWorkflow);
         await Run("uwp-partial-pair-compensation-restart-and-external-change", UwpPairWorkflow);
         await Run("mmagent-failure-diagnostic-and-retry", MmAgentDiagnosticWorkflow);
-        await Run("parser-diagnostic-and-effective-oem", ParserWorkflow);
+        await Run("parser-and-diagnostic", ParserWorkflow);
         await Run("migration-download-body-timeout-and-cancel", DownloadWorkflow);
         await Run("scheduled-checklist-duplicate-off-selection", ScheduledSelectionWorkflow);
         await Run("clear-ignored-update-save-failure-boundary", IgnoredUpdateWorkflow);
@@ -473,17 +473,9 @@ internal static class Program
         Require(StartupCommandParser.TryResolveExecutable(@"C:\Tool\app.exe /quiet") == @"C:\Tool\app.exe", "unambiguous path plus switches rejected");
         Require(StartupCommandParser.TryResolveExecutable("C:\\Tool\\app.exe \"argument\"") == @"C:\Tool\app.exe", "unambiguous path plus quoted argument rejected");
         Require(!StartupCommandParser.IsConfirmedMissing(@"C:\RERE_CANARY\missing.exe", _ => (DriveType.Fixed, true), _ => throw new UnauthorizedAccessException()), "access denial treated as missing");
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        var oem = (Encoding)typeof(ProcessCommandExecutor).GetField("OemEncoding", BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null)!;
-        var bytes = Enumerable.Range(128, 64).Select(value => new[] { (byte)value })
-            .Concat(Enumerable.Range(128, 64).SelectMany(first => Enumerable.Range(0, 256).Select(second => new[] { (byte)first, (byte)second })))
-            .First(candidate => oem.GetBytes(oem.GetString(candidate)).SequenceEqual(candidate));
-        try { _ = new UTF8Encoding(false, true).GetString(bytes); throw new InvalidOperationException("OEM canary was valid UTF-8"); }
-        catch (DecoderFallbackException) { }
-        Require(ProcessCommandExecutor.DecodeConsoleOutput(bytes) == oem.GetString(bytes), "effective OEM output decoding changed");
         var diagnostic = CommandFailureDiagnostic.Format(MockExecutor.Result(false, "RERE_CANARY 診断", "token=RERE_CANARY_SECRET"));
         Require(diagnostic.Contains("exit=5") && diagnostic.Contains("RERE_CANARY 診断") && !diagnostic.Contains("RERE_CANARY_SECRET"), "failed-tool diagnosis lost stdout or exposed secret");
-        return Task.FromResult($"Pure parser rejected wrapper/access denied; effective OEM {oem.CodePage} decoded; failure exit/stdout retained and synthetic secret redacted; no shell execution");
+        return Task.FromResult("Pure parser rejected wrapper/access denied; failure exit/stdout retained and synthetic secret redacted; no shell execution");
     }
     private static async Task<string> DownloadWorkflow()
     {

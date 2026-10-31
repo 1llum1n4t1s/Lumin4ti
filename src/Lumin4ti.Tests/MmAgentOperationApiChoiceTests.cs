@@ -34,6 +34,52 @@ public sealed class MmAgentOperationApiChoiceTests
         new(executor, new MmAgentStateProvider(executor));
 
     [TestMethod]
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task 設定失敗は出力元にかかわらず保護した診断と終了コードを返す(bool standardError)
+    {
+        var output = "\u001b[31mtoken=private-value\u001b[0m\t診断 " + new string('x', 2000);
+        var executor = new FakeExecutor(command =>
+            command.Contains("Get-MMAgent | ConvertTo-Json", StringComparison.Ordinal)
+                ? Ok("{\"OperationAPI\":true}")
+                : new(false, "powershell.exe", -1, standardError ? "" : output, standardError ? output : ""));
+
+        var result = await CreateChoice(executor).SetSelectedValueAsync("256");
+
+        Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
+        StringAssert.Contains(result.Detail, "exit=-1/0xFFFFFFFF");
+        StringAssert.Contains(result.Detail, standardError ? "stderr=" : "stdout=");
+        StringAssert.Contains(result.Detail, "token=[redacted]");
+        Assert.IsFalse(result.Detail.Contains("private-value", StringComparison.Ordinal));
+        Assert.IsFalse(result.Detail.Any(char.IsControl));
+        Assert.IsTrue(result.Detail.Length < 750);
+    }
+
+    [TestMethod]
+    public async Task 有効化失敗でも数値設定を続行して機能の実状態を読み直す()
+    {
+        var reads = 0;
+        var executor = new FakeExecutor(command =>
+        {
+            if (command.Contains("Get-MMAgent | ConvertTo-Json", StringComparison.Ordinal))
+            {
+                return Ok($"{{\"OperationAPI\":{(++reads == 1 ? "false" : "true")}}}");
+            }
+            return command.Contains("Enable-MMAgent", StringComparison.Ordinal)
+                ? Fail("token=private-value\u001b[31m\t" + new string('x', 2000))
+                : Ok();
+        });
+        var provider = new MmAgentStateProvider(executor);
+
+        var result = await new MmAgentOperationApiChoice(executor, provider).SetSelectedValueAsync("128");
+
+        Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
+        Assert.IsTrue(executor.Commands.Any(command => command.Contains("Set-MMAgent -MaxOperationAPIFiles 128", StringComparison.Ordinal)));
+        Assert.AreEqual(2, reads);
+        Assert.AreEqual(true, await provider.GetAsync("OperationAPI"));
+    }
+
+    [TestMethod]
     public async Task 無効化は行わない()
     {
         // 回帰防止: どの選択値でも Disable-MMAgent を実行しない。

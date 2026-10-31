@@ -59,8 +59,9 @@ public sealed class HibernateToggle : IMaintenanceToggle
                 : "  - 休止状態を有効化しました (Windows 既定)");
         }
 
-        LoggerBootstrap.Log.Error($"{Id}: powercfg /hibernate (exit={result.ExitCode}): {result.StandardError}");
-        return MaintenanceActionResult.Fail($"powercfg が失敗しました: {result.StandardError}");
+        var reason = CommandFailureDiagnostic.Format(result);
+        LoggerBootstrap.Log.Error($"{Id}: powercfg /hibernate: {reason}");
+        return MaintenanceActionResult.Fail($"powercfg が失敗しました: {reason}");
     }
 
     private static bool IsHiberFilePresent()

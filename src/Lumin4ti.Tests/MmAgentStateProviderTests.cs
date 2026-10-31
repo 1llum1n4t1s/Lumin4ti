@@ -148,7 +148,7 @@ public sealed class MmAgentStateProviderTests
     {
         var executor = new SequenceExecutor(
             Result(success: true, output: "{\"MemoryCompression\":true}"),
-            Result(success: false, error: "enable failed"),
+            Result(success: false, output: "通常出力", error: "enable failed token=private-value\u001b[31m\t" + new string('x', 2000)),
             Result(success: true, output: "{\"MemoryCompression\":false}"));
         var provider = new MmAgentStateProvider(executor);
         var toggle = CreateToggle(executor, provider);
@@ -158,6 +158,11 @@ public sealed class MmAgentStateProviderTests
         var result = await toggle.SetStateAsync(true);
 
         Assert.IsFalse(result.Success);
+        StringAssert.Contains(result.Detail, "stdout=通常出力");
+        StringAssert.Contains(result.Detail, "token=[redacted]");
+        Assert.IsFalse(result.Detail.Contains("private-value", StringComparison.Ordinal));
+        Assert.IsFalse(result.Detail.Any(char.IsControl));
+        Assert.IsTrue(result.Detail.Length < 850);
         Assert.AreEqual(false, await toggle.GetStateAsync());
         Assert.AreEqual(3, executor.CallCount);
     }
