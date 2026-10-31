@@ -102,7 +102,7 @@ MMAgentの状態は一括再読込ごとに完了済みキャッシュと操作�
 ## 状態と永続化
 
 - `%APPDATA%\Lumin4ti\settings.json`: 言語、自動更新確認、除外パス、スケジュール整理項目などの利用者設定。
-- `%APPDATA%\Lumin4ti\logs\`: 起動、操作、例外、移行の診断ログ。
+- `%LOCALAPPDATA%\Lumin4ti\logs\`: 起動、操作、例外、移行の診断ログ。旧インストール先を回収するときも保持する。
 - `%ProgramData%\Lumin4ti\backups\`: HKLMやBCDなど特権状態を戻すためのバックアップ。AdministratorsとSYSTEMだけが変更できるACLを検証する。
 
 設定保存は一時ファイルからの置換で行い、保存要求を直列化する。既存設定の読込に失敗した場合は既定値でUIを起動するが、壊れた原本を既定値で上書きしない。

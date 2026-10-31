@@ -36,6 +36,13 @@ public static class LoggerBootstrap
         _initialized = true;
         try
         {
+            if (OperatingSystem.IsWindows())
+            {
+                LegacyLogMigration.Migrate(Path.Combine(AppPaths.AppDataDirectory, "logs"), AppPaths.LogsDirectory);
+                var oldLocalLogs = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Kagayoi", "Lumin4ti", "logs");
+                LegacyLogMigration.Migrate(oldLocalLogs, AppPaths.LogsDirectory);
+                LegacyLogMigration.RemoveEmptyParent(oldLocalLogs);
+            }
             Directory.CreateDirectory(AppPaths.LogsDirectory);
 
             LogManager.Configure(builder =>

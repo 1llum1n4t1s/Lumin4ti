@@ -310,6 +310,37 @@ public sealed class WindowsPerMachineMigrationTests
     }
 
     [TestMethod]
+    public void 旧インストール回収時にログは保持して回収を完了する()
+    {
+        var legacyRoot = Path.Combine(_testRoot, "LocalAppData", "Lumin4ti");
+        var logs = Path.Combine(legacyRoot, "logs");
+        Directory.CreateDirectory(logs);
+        Directory.CreateDirectory(Path.Combine(legacyRoot, "current"));
+        File.WriteAllText(Path.Combine(logs, "Lumin4ti_2026-10-30.log"), "keep");
+        File.WriteAllText(Path.Combine(legacyRoot, "current", "Lumin4ti.UI.exe"), "old");
+
+        var cleaned = WindowsPerMachineMigration.TryCleanupLegacyArtifacts(
+            legacyRoot, legacyRoot, Path.Combine(_testRoot, "Programs"), Path.Combine(_testRoot, "Desktop"));
+
+        Assert.IsTrue(cleaned);
+        Assert.AreEqual("keep", File.ReadAllText(Path.Combine(logs, "Lumin4ti_2026-10-30.log")));
+        Assert.IsFalse(Directory.Exists(Path.Combine(legacyRoot, "current")));
+    }
+
+    [TestMethod]
+    public void 旧ルートが空なら回収後に削除する()
+    {
+        var legacyRoot = Path.Combine(_testRoot, "LocalAppData", "Lumin4ti");
+        Directory.CreateDirectory(legacyRoot);
+
+        var cleaned = WindowsPerMachineMigration.TryCleanupLegacyArtifacts(
+            legacyRoot, legacyRoot, Path.Combine(_testRoot, "Programs"), Path.Combine(_testRoot, "Desktop"));
+
+        Assert.IsTrue(cleaned);
+        Assert.IsFalse(Directory.Exists(legacyRoot));
+    }
+
+    [TestMethod]
     public void 想定外のルートは削除しない()
     {
         var expectedRoot = Path.Combine(_testRoot, "LocalAppData", "Lumin4ti");

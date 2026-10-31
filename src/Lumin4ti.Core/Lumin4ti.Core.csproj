@@ -5,9 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SuperLightLogger" Version="1.0.17" />
+    <PackageReference Include="SuperLightLogger" Version="1.0.18" />
     <!-- EventLogSession (イベントログの列挙・クリアを wevtutil なしで行う) 用 -->
-    <PackageReference Include="System.Diagnostics.EventLog" Version="10.0.12" />
+    <PackageReference Include="System.Diagnostics.EventLog" Version="10.0.13" />
   </ItemGroup>
 
   <ItemGroup>

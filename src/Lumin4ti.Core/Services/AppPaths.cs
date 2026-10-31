@@ -10,7 +10,9 @@ public static class AppPaths
 
     public static string SettingsFilePath => Path.Combine(AppDataDirectory, "settings.json");
 
-    public static string LogsDirectory => Path.Combine(AppDataDirectory, "logs");
+    public static string LogsDirectory => OperatingSystem.IsWindows()
+        ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppFolderName, "logs")
+        : Path.Combine(AppDataDirectory, "logs");
 
     /// <summary>
     /// HKLM / BCD へ復元する値の正本。ACL の作成・検証は

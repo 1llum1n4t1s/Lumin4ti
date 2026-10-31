@@ -122,9 +122,9 @@ public sealed class DistributionContractTests
             $"未承認のインストーラー／NativeAOT設定があります: {string.Join(", ", packagingConfigurations)}");
     }
 
-    private static string FindRepositoryRoot()
+    private static string FindRepositoryRoot([System.Runtime.CompilerServices.CallerFilePath] string sourceFile = "")
     {
-        for (var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        for (var directory = new DirectoryInfo(Path.GetDirectoryName(sourceFile)!);
              directory is not null;
              directory = directory.Parent)
         {

@@ -310,14 +310,15 @@ public static class WindowsPerMachineMigration
             return false;
         }
 
-        for (var attempt = 0; attempt < 20 && Directory.Exists(legacyRoot); attempt++)
+        for (var attempt = 0; attempt < 20 && HasCleanupEntries(legacyRoot); attempt++)
         {
-            TryDeleteTreeWithoutFollowingReparsePoints(legacyRoot);
-            if (Directory.Exists(legacyRoot))
+            TryDeleteTreeWithoutFollowingReparsePoints(legacyRoot, preserveLogs: true);
+            if (HasCleanupEntries(legacyRoot))
             {
                 Thread.Sleep(300);
             }
         }
+        TryDeleteEmptyDirectory(legacyRoot);
 
         DeleteIfExists(Path.Combine(userProgramsDirectory, "Lumin4ti.lnk"));
         DeleteIfExists(Path.Combine(userProgramsDirectory, "ゆろち", "Lumin4ti.lnk"));
@@ -326,7 +327,22 @@ public static class WindowsPerMachineMigration
         refreshStartMenu?.Invoke(userProgramsDirectory);
         TryRemoveLegacyUninstallEntry(expectedLegacyRoot);
 
-        return !Directory.Exists(legacyRoot);
+        return !HasCleanupEntries(legacyRoot);
+    }
+
+    private static bool HasCleanupEntries(string root)
+    {
+        try
+        {
+            if (!Directory.Exists(root)) return false;
+            if ((File.GetAttributes(root) & FileAttributes.ReparsePoint) != 0) return true;
+            return Directory.EnumerateFileSystemEntries(root).Any(entry =>
+                !Path.GetFileName(entry).Equals("logs", StringComparison.OrdinalIgnoreCase));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException)
+        {
+            return true;
+        }
     }
 
     private static async Task CompletePendingMigrationAsync(
@@ -933,7 +949,7 @@ public static class WindowsPerMachineMigration
         }
     }
 
-    internal static void TryDeleteTreeWithoutFollowingReparsePoints(string directoryPath)
+    internal static void TryDeleteTreeWithoutFollowingReparsePoints(string directoryPath, bool preserveLogs = false)
     {
         if (!Directory.Exists(directoryPath))
         {
@@ -977,6 +993,7 @@ public static class WindowsPerMachineMigration
 
         foreach (var entry in entries)
         {
+            if (preserveLogs && Path.GetFileName(entry).Equals("logs", StringComparison.OrdinalIgnoreCase)) continue;
             TryDeleteFileSystemEntryWithoutFollowingReparsePoints(entry);
         }
 
