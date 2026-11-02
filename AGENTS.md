@@ -60,6 +60,8 @@ ON/OFF設定切り替えとDefenderの既定設定へのリセットは永続バ
 
 ログ保存先・旧ログ移行を変更したら `LegacyLogMigrationTests` を通し、[DESIGN.md の状態と永続化](DESIGN.md#状態と永続化) にある既知ログ限定・リンク非追従・失敗時保持の境界を維持する。
 
+デバッグ画面・追加ログ出力・進捗オーバーレイを変更したら、`DebuggerIntegrationTests`、`LoggerProviderAttachmentTests`、`MaintenanceOperationCoordinatorTests` の該当検証を通す。デバッグ画面の初期化範囲とログ転送の境界は [DESIGN.md](DESIGN.md#主要コンポーネント) を維持し、実画面は [WORKFLOWS.md のプレビュー手順](scripts/verification/WORKFLOWS.md#再現) で背面操作禁止・中断後の待機・ファイルログとの併存を確認する。
+
 ### winget によるアプリ更新
 
 [WingetUpgradeAction](src/Lumin4ti.Core/Services/Windows/Actions/UpdateActions.cs) の更新候補は、公式ソース、Package ID、表示名と更新チャネルの整合性を確認してから個別に実行する。`upgrade --all` へ置き換えず、確認不能な一覧では更新を中止し、確認不能な個別候補は除外して他の候補を続行すること。
