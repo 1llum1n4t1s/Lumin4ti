@@ -84,7 +84,10 @@
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Nabigong i-restart ang Explorer (pakiusap i-restart ito nang manu-mano)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Hindi mabasa ang estado (walang admin rights, o hindi available ang feature sa PC na ito. Ang mga debug launch ay hindi elevated, kaya subukan ang normal na paglunsad).</x:String>
   <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">Hindi makuha ng DISM ang estado ng Recall. Maaaring hindi suportado ang feature sa PC na ito o kulang ang mga karapatan ng administrator. Tingnan ang log para sa mga detalye.</x:String>
-  <x:String x:Key="Text.Toggle.SetOff" xml:space="preserve">I-OFF</x:String>
+  <x:String x:Key="Text.Setting.DefaultFormat" xml:space="preserve">Default: {0}</x:String>
+  <x:String x:Key="Text.Setting.DefaultEnvironment" xml:space="preserve">Depende sa kapaligiran / hindi alam</x:String>
+  <x:String x:Key="Text.Toggle.CustomState" xml:space="preserve">Custom (piliin ang ON/OFF)</x:String>
+  <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">Custom</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">Walang estado ng Recall sa output ng DISM. Tingnan ang log para sa mga detalye.</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">Hindi maunawaan ang estado ng Recall na ibinalik ng DISM. Tingnan ang log para sa mga detalye.</x:String>
   <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">Ibang Windows user ang nagrehistro sa task na ito, kaya hindi ito maaaring baguhin.</x:String>
@@ -126,7 +129,7 @@
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">Burahin ang mga cache ng browser</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Binubura ang Chromium web at shader cache, Service Worker cache storage, crash report, at pansamantalang extension data. Hindi binubura ang Service Worker registration, DRM component, bookmark, password, o sign-in state.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">Muling buuin ang cache ng icon, thumbnail, at font</x:String>
-  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">Binubura ang icon cache, thumbnail cache, at font cache ng File Explorer upang muli itong buuin ng Windows. Ito ang karaniwang pag-aayos sa blangko o maling icon, thumbnail na hindi na nag-a-update, at maling pagpapakita ng teksto. Ang mga file na hawak pa ng shell ay buburahin sa susunod na pag-restart ng Windows. I-restart ang Windows upang makumpleto ang muling pagbuo. Bahagyang bumabagal ang display habang muling binubuo ang mga cache.</x:String>
+  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">Binubura ang icon cache, thumbnail cache, at font cache ng File Explorer upang muli itong buuin ng Windows. Ito ang karaniwang pag-aayos sa blangko o maling icon, thumbnail na hindi na nag-a-update, at maling pagpapakita ng teksto. Hindi sapilitang isinasara ang Explorer. Sa susunod na pagsisimula ng Windows, muling inililista mula sa isang pinagkakatiwalaang installation ang mga napiling cache na ginagamit pa, at sinusubukang burahin ang mga ito. Hanggang tatlong pagtakbo lamang sa loob ng pitong araw; pinapanatili ang mga target na naka-lock pa rin at itinatala ang mga resulta sa log. Bahagyang bumabagal ang display habang muling binubuo ang mga cache.</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">Burahin ang download cache ng Windows Update</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">Tanging mada-download-muling file sa SoftwareDistribution\Download ang binubura. Hindi binubura ang update history o catroot2. Ibinabalik ang mga kaugnay na serbisyo.</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">Burahin at muling buuin ang prefetch data at search index</x:String>
@@ -152,8 +155,8 @@
   <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">Ini-disable ang Virtualization-Based Security (VBS) at Hypervisor-Enforced Code Integrity (HVCI) para palayain ang ~1–2 GB ng memory na palaging nakalaan. Ito ay isang trade-off sa seguridad; iwanang OFF (default) kung gumagamit ka ng Hyper-V, WSL2, Windows Sandbox, Docker Desktop, o Credential Guard. Tinatanggal ng OFF ang tahasang mga setting ng BCD at registry at ipinauubaya sa mga default at patakaran ng Windows. Hindi sine-save o ibinabalik ang mga dating setting.</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">Pagsamahin ang mga SvcHost na proseso (pigilan ang paghahati)</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">Bilang default, sinisimulan ng Windows ang svchost.exe nang nakahati kada feature (sa mga PC na may higit sa 3.5 GB RAM). Ang pag-ON nito ay pinapataas ang split threshold sa maximum at pinagsasama ang mga serbisyong maaaring i-grupo sa mas kaunting proseso, na binabawasan ang bilang ng proseso at paggamit ng memory (ilang sampu hanggang mahigit isang daang MB). Ang mga serbisyong itinuturing na security boundary (DiagTrack, Dnscache, atbp.) ay hindi pinagsasama. Ang OFF ay inaalis ang threshold at ibinabalik sa default na paghahati.</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">I-off ang UWP sa background / gamitin ang mga default ng Windows (tipid 200–500 MB)</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">Itinatakda ng ON ang background execution ng lahat ng Store (UWP) app sa “Always off”. Tinatanggal ng OFF ang tahasang mga setting ng mga target na app at ginagamit ang mga default ng Windows. Hindi sine-save o ibinabalik ang dating setting ng bawat app.</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">UWP background execution</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">Hinaharang ng Lahat OFF ang background execution ng mga naka-install na Store (UWP) app; tahasang pinapayagan ito ng Lahat ON. Hindi ibinabalik ng ON ang Windows defaults. Patakbuhin muli pagkatapos mag-install ng bagong app. Hindi sine-save o ibinabalik ang dating setting ng bawat app. Mga setting ng bawat app lang ang binabago. Ang aktuwal na pagpapahintulot o pagharang ay nakadepende rin sa pangkalahatang setting ng Windows, mga patakaran ng organisasyon, at mga limitasyon ng app.</x:String>
   <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">I-disable ang Windows Recall</x:String>
   <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">Ini-disable ang Recall feature, na pana-panahong nagre-record ng mga screen snapshot para sa AI search (pinapanatili ang iba pang AI feature tulad ng Click-to-do at semantic search). Binabawasan nito ang paggamit ng memory/disk ng recording process at ang mga alalahanin sa privacy. Available lamang sa Windows 11 24H2 + Copilot+ na PC; sa mga hindi suportadong PC ay hindi mababasa ang estado at hindi ito ma-toggle.</x:String>
   <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">I-disable ang power throttling</x:String>
@@ -198,7 +201,7 @@
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Dini-disable sa pamamagitan ng policy ang Edge background mode at Startup Boost. Kung bihira mong gamitin ang Edge, maaari itong magpalaya ng humigit-kumulang 100–300 MB na memory. Maaaring bahagyang bumagal ang pagbukas ng Edge at mawala ang mga notification ng extension. I-OFF ito para alisin ang mga policy at ibalik ang mga default ng Edge.</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">Piliin kung ano ang buburahin</x:String>
   <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">Piliin kung ano ang tatakbo sa pag-sign in</x:String>
-  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">Hindi na-save ang pinili (tingnan ang log)</x:String>
+  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">Nabigo ang huling pag-save ng pagpiling ito (tingnan ang log).</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">Update</x:String>
   <x:String x:Key="Text.UpdateDialog.AvailableHeader" xml:space="preserve">May bagong bersyon</x:String>
@@ -214,4 +217,13 @@
   <x:String x:Key="Text.Status.Applied" xml:space="preserve">Nabago ang {0}</x:String>
   <x:String x:Key="Text.Status.ApplyFailed" xml:space="preserve">Hindi nabago ang {0} (tingnan ang log)</x:String>
   <x:String x:Key="Text.Shutdown.BlockReason" xml:space="preserve">Hinihintay ng Lumin4ti na matapos ang pagpapanatili…</x:String>
+  <x:String x:Key="Text.Button.BatchOn" xml:space="preserve">Lahat ON</x:String>
+  <x:String x:Key="Text.Button.BatchOff" xml:space="preserve">Lahat OFF</x:String>
+  <x:String x:Key="Text.Setting.DefaultSystemManaged" xml:space="preserve">Windows / default ng bawat app</x:String>
+  <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">Development build</x:String>
+  <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">Hindi makuha ang bersyon</x:String>
+  <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">Nabigo ang huling pag-save ng mga setting ng wika at update (tingnan ang log).</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Hindi mabasa ang settings. Naka-disable ang pag-save para protektahan ang orihinal na file, at hindi tatakbo ang sign-in cleanup. Sa session na ito lang may bisa ang mga pagbabago.</x:String>
+  <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">Walang nakitang target noong huling pagsusuri.</x:String>
+  <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">Buksan muli ang listahan upang i-refresh ito. Kasama rin ang mga bagong nahanap na target na hindi ibinukod kapag pinatakbo ang aksyon.</x:String>
 </ResourceDictionary>

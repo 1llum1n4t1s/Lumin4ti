@@ -14,16 +14,25 @@ namespace Lumin4ti.UI.Services;
 /// </summary>
 public sealed class UpdateService
 {
-    private readonly AppSettings _settings;
+    private readonly Func<UpdateManager?> _createManager;
+    private readonly string? _currentVersion;
+    private bool _versionReadFailed;
 
     public UpdateService(AppSettings settings)
+        : this(() => BuildManager(settings))
     {
-        _settings = settings;
-        CurrentVersion = ResolveCurrentVersion();
+    }
+
+    internal UpdateService(Func<UpdateManager?> createManager)
+    {
+        _createManager = createManager;
+        _currentVersion = ResolveCurrentVersion();
     }
 
     /// <summary>実行中アプリのバージョン。開発実行時は "開発ビルド"。</summary>
-    public string CurrentVersion { get; }
+    public string CurrentVersion => _versionReadFailed
+        ? App.Text("Version.Unavailable", "バージョンを取得できませんでした")
+        : _currentVersion ?? App.Text("Version.DevelopmentBuild", "開発ビルド");
 
     /// <summary>
     /// インストール版なら Velopack の <see cref="UpdateManager"/> を新規生成して返す。
@@ -31,40 +40,32 @@ public sealed class UpdateService
     /// </summary>
     public UpdateManager? TryCreateInstalledManager()
     {
-        try
-        {
-            var manager = BuildManager();
-            return manager.IsInstalled ? manager : null;
-        }
-        catch (Exception ex)
-        {
-            LoggerBootstrap.Log.Error("UpdateManager の生成に失敗しました", ex);
-            return null;
-        }
+        var manager = _createManager();
+        return manager is { IsInstalled: true } ? manager : null;
     }
 
-    private UpdateManager BuildManager()
+    private static UpdateManager BuildManager(AppSettings settings)
     {
         // SimpleWebSource は {baseUrl}/releases.{channel}.json を取得する。
-        var source = new SimpleWebSource(_settings.UpdateBaseUrl);
-        var options = new UpdateOptions { ExplicitChannel = _settings.UpdateChannel };
+        var source = new SimpleWebSource(settings.UpdateBaseUrl);
+        var options = new UpdateOptions { ExplicitChannel = settings.UpdateChannel };
         return new UpdateManager(source, options);
     }
 
-    private string ResolveCurrentVersion()
+    private string? ResolveCurrentVersion()
     {
         try
         {
-            var manager = BuildManager();
-            return manager.IsInstalled && manager.CurrentVersion is not null
+            var manager = _createManager();
+            return manager is { IsInstalled: true, CurrentVersion: not null }
                 ? manager.CurrentVersion.ToString()
-                : "開発ビルド";
+                : null;
         }
         catch (Exception ex)
         {
-            // インストール版なのに「開発ビルド」と出る場合の原因を追えるようにする。
-            LoggerBootstrap.Log.Error("現在バージョンを取得できないため開発ビルド扱いにします", ex);
-            return "開発ビルド";
+            _versionReadFailed = true;
+            LoggerBootstrap.Log.Error("現在バージョンを取得できませんでした", ex);
+            return null;
         }
     }
 }

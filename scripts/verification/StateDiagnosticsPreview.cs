@@ -5,6 +5,7 @@ using Avalonia.Layout;
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services.Windows;
+using Lumin4ti.Core.Services.Windows.Actions;
 using Lumin4ti.UI;
 using Lumin4ti.UI.Services;
 using Lumin4ti.UI.ViewModels;
@@ -34,8 +35,19 @@ internal static class StateDiagnosticsPreview
             SetLocale("ja_JP");
             var catalog = new MaintenanceActionCatalog(new IMaintenanceItem[]
             {
-                new PreviewToggle("vbs-hvci-off", "VBS / HVCI を無効化", false),
-                new PreviewToggle("uwp-background-off", "UWP バックグラウンド実行を一括オフ / Windows 既定", false),
+                new PreviewToggle("vbs-hvci-off", "VBS / HVCI を無効化", false, defaultState: false),
+                new PreviewBatchSetting(),
+                new PreviewCheckListAction(),
+                new PreviewCheckListAction(startEmpty: true),
+                new PreviewCheckListAction(failSave: true),
+                new FileCleanupAction("preview-real-cleanup", "削除一覧の案内（メモリ内）", "対象は空配列です。OS操作は行いません。", () => []),
+                new PreviewShellCacheDescription(),
+                new PreviewToggle("preview-custom-vbs", "VBS カスタム / 一部適用（メモリ内）", false,
+                    defaultState: false, customState: true),
+                new PreviewToggle("mmagent-memory-compression", "メモリ圧縮", true, defaultState: true),
+                new PreviewToggle("preview-parent", "親設定（メモリ内）", true, defaultState: false),
+                new PreviewToggle("preview-child", "子設定（メモリ内）", false, defaultState: true, parentId: "preview-parent"),
+                new PreviewChoice(),
                 new PreviewToggle("recall-off", "Recall を無効化", null,
                     new MaintenanceStateDiagnostic("Toggle.RecallStateMissing", "Recall の状態が返されませんでした。")),
                 new PreviewToggle("scheduled-temp-cleanup", "サインイン時に一時ファイルを掃除", null,
@@ -72,6 +84,12 @@ internal static class StateDiagnosticsPreview
             controls.Children.Add(japanese);
             controls.Children.Add(english);
             controls.Children.Add(reload);
+            var unreadableSettings = new Button { Content = "設定読込失敗（模擬）" };
+            unreadableSettings.Click += (_, _) => ShowSettingsPreview(catalog, new MemorySettings { LoadStatus = SettingsLoadStatus.Failed });
+            controls.Children.Add(unreadableSettings);
+            var unwritableSettings = new Button { Content = "設定保存失敗（模擬）" };
+            unwritableSettings.Click += (_, _) => ShowSettingsPreview(catalog, new MemorySettings { FailSave = true });
+            controls.Children.Add(unwritableSettings);
             var content = new Grid { RowDefinitions = new RowDefinitions("Auto,*"), Margin = new Thickness(12) };
             content.Children.Add(controls);
             Grid.SetRow(category, 1);
@@ -89,13 +107,89 @@ internal static class StateDiagnosticsPreview
                 desktop.MainWindow = window;
             }
         }
+
+        private static void ShowSettingsPreview(MaintenanceActionCatalog catalog, MemorySettings settings)
+        {
+            var coordinator = new MaintenanceOperationCoordinator(() => new PreviewLease());
+            var version = new VersionViewModel(new UpdateService(() => null), settings, coordinator);
+            var devices = new DeviceCleanupViewModel(new MockDevices { FailEnumeration = false }, coordinator);
+            new MainWindow(coordinator)
+            {
+                Title = "Lumin4ti — Settings preview (fake state only)",
+                DataContext = new MainWindowViewModel(catalog, devices, version, coordinator),
+            }.Show();
+        }
+    }
+
+    private sealed class PreviewShellCacheDescription : IMaintenanceAction
+    {
+        private readonly FileCleanupAction _metadata = FileCleanupGroups.CreateShellCache(
+            new MockExecutor((_, _, _) => throw new InvalidOperationException("metadata only")),
+            rebootScheduler: new PreviewRebootScheduler());
+        public string Id => _metadata.Id;
+        public string Label => _metadata.Label;
+        public string Description => _metadata.Description;
+        public CommandCategory Category => CommandCategory.Cleanup;
+        public bool RequiresReboot => true;
+        public Task<MaintenanceActionResult> ExecuteAsync(CancellationToken ct = default) =>
+            Task.FromResult(MaintenanceActionResult.Ok("説明表示専用の模擬操作です。OS操作・予約は行っていません。"));
+    }
+
+    private sealed class PreviewRebootScheduler : IRebootCacheCleanupScheduler
+    {
+        public Task<RebootCleanupQueueResult> QueueAsync(IReadOnlyList<CleanupTarget> selected,
+            IReadOnlyList<CleanupTarget> blocked, CancellationToken ct) =>
+            Task.FromResult(new RebootCleanupQueueResult(true, 0, "memory only"));
+    }
+
+    private sealed class PreviewCheckListAction(bool startEmpty = false, bool failSave = false) : IMaintenanceAction, IMaintenanceCheckList
+    {
+        private bool _selected = true;
+        private int _queries;
+        public string Id => failSave ? "preview-save-failure" : startEmpty ? "preview-empty-checklist" : "preview-checklist";
+        public string Label => failSave ? "選択保存失敗（メモリ内）" : startEmpty ? "空の一覧の再確認（メモリ内）" : "実行中のチェック操作（メモリ内）";
+        public string Description => "実行中の15秒間はチェックを変更できず、中断後は操作できます。OS変更はありません。";
+        public string CheckListCaption => "模擬対象";
+        public CommandCategory Category => CommandCategory.Performance;
+        public bool RequiresReboot => false;
+        public IReadOnlyList<MaintenanceCheckListEntry> GetCheckListEntries() =>
+            startEmpty && ++_queries <= 2 ? [] : [new("preview-target", "模擬キャッシュ", _selected)];
+        public Task SetCheckListEntrySelectedAsync(string value, bool selected, CancellationToken ct = default)
+        {
+            _selected = selected;
+            return failSave ? Task.FromException(new IOException("preview selection save failure")) : Task.CompletedTask;
+        }
+        public async Task<MaintenanceActionResult> ExecuteAsync(CancellationToken ct = default)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(15), ct);
+            return MaintenanceActionResult.Ok("OPOP_CANARY simulated cleanup completed");
+        }
+    }
+
+    private sealed class PreviewBatchSetting : IMaintenanceBatchSetting
+    {
+        private int _runs;
+        public string Id => "uwp-background-off";
+        public string Label => "UWP バックグラウンド実行";
+        public string Description => "一括OFF／一括ONの繰り返し適用を確認します。変更はメモリ内だけです。";
+        public CommandCategory Category => CommandCategory.Performance;
+        public bool RequiresReboot => false;
+        public bool SupportsCancellation => true;
+
+        public async Task<MaintenanceActionResult> ApplyAsync(bool enabled, CancellationToken ct = default)
+        {
+            await Task.Delay(300, ct);
+            return MaintenanceActionResult.Ok($"  - 一括{(enabled ? "ON" : "OFF")}: メモリ内への実行 {++_runs} 回目");
+        }
     }
 
     private sealed class PreviewToggle(
         string id, string label, bool? state,
-        MaintenanceStateDiagnostic? diagnostic = null, string? resourceId = null) : IMaintenanceToggle
+        MaintenanceStateDiagnostic? diagnostic = null, string? resourceId = null,
+        bool? defaultState = null, string? parentId = null, bool customState = false) : IMaintenanceToggle
     {
         private bool? _state = state;
+        private bool _customState = customState;
         public string Id => id;
         public string Label => label;
         public string Description => "メモリ内の模擬状態を表示します。";
@@ -103,7 +197,9 @@ internal static class StateDiagnosticsPreview
         public string DescriptionKey => $"Action.{resourceId ?? id}.Desc";
         public CommandCategory Category => CommandCategory.Performance;
         public bool RequiresReboot => false;
-        public bool SupportsExplicitOff => id is "vbs-hvci-off" or "uwp-background-off";
+        public bool? DefaultState => defaultState;
+        public bool IsCustomState => _customState;
+        public string? ParentId => parentId;
         public MaintenanceStateDiagnostic? StateDiagnostic => diagnostic;
         public Task<bool?> GetStateAsync(CancellationToken ct = default) => Task.FromResult(_state);
 
@@ -111,6 +207,26 @@ internal static class StateDiagnosticsPreview
         {
             ct.ThrowIfCancellationRequested();
             _state = on;
+            _customState = false;
+            return Task.FromResult(MaintenanceActionResult.Ok());
+        }
+    }
+
+    private sealed class PreviewChoice : IMaintenanceChoice
+    {
+        private string _selected = "512";
+        public string Id => "preview-choice";
+        public string Label => "記録ファイル数（メモリ内）";
+        public string Description => "選択肢と既定値の表示確認用。変更はメモリ内だけに保持します。";
+        public CommandCategory Category => CommandCategory.Performance;
+        public bool RequiresReboot => false;
+        public IReadOnlyList<MaintenanceChoiceOption> Options { get; } =
+            [new("256", "256"), new("512", "512", IsDefault: true), new("1024", "1024")];
+        public Task<string?> GetSelectedValueAsync(CancellationToken ct = default) => Task.FromResult<string?>(_selected);
+        public Task<MaintenanceActionResult> SetSelectedValueAsync(string value, CancellationToken ct = default)
+        {
+            ct.ThrowIfCancellationRequested();
+            _selected = value;
             return Task.FromResult(MaintenanceActionResult.Ok());
         }
     }

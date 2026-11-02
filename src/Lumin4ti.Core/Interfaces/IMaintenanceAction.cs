@@ -105,8 +105,11 @@ public interface IMaintenanceChoice : IMaintenanceItem
 /// </summary>
 public interface IMaintenanceToggle : IMaintenanceItem
 {
-    /// <summary>既知の OFF 表示や混在設定からも直接解除できる操作を提供する。</summary>
-    bool SupportsExplicitOff => false;
+    /// <summary>この項目の標準状態。null は Windows の版・機器・構成による差異、または一律の既定値が未確認であることを表す。現在値や推奨値ではない。</summary>
+    bool? DefaultState => null;
+
+    /// <summary>直近の照会値が ON の適用値にも OFF の解除値にも一致しない。状態取得不能とは区別する。</summary>
+    bool IsCustomState => false;
 
     /// <summary>直近の状態照会が不明だった具体的な理由。正常取得時は null。</summary>
     MaintenanceStateDiagnostic? StateDiagnostic => null;
@@ -116,4 +119,11 @@ public interface IMaintenanceToggle : IMaintenanceItem
 
     /// <summary>ON (適用) / OFF (項目の解除値へ設定または明示上書きを削除) を設定する。</summary>
     Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default);
+}
+
+/// <summary>現在の対象全件へ同じ設定を適用する。同じ方向への繰り返し実行も受け付ける。</summary>
+public interface IMaintenanceBatchSetting : IMaintenanceItem
+{
+    /// <summary>対象機能を一括で有効 (true) または無効 (false) にする。</summary>
+    Task<MaintenanceActionResult> ApplyAsync(bool enabled, CancellationToken ct = default);
 }

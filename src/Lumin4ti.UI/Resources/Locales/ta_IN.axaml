@@ -84,7 +84,10 @@
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Explorer-ஐ மறுதொடக்கம் செய்ய முடியவில்லை (கைமுறையாக மறுதொடக்கம் செய்யவும்)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">நிலையைப் படிக்க முடியவில்லை (நிர்வாக உரிமை இல்லை, அல்லது இந்த PC-யில் அம்சம் கிடைக்கவில்லை. Debug தொடக்கங்கள் உயர்த்தப்படாதவை, எனவே இயல்பான தொடக்கத்தை முயற்சிக்கவும்).</x:String>
   <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">DISM மூலம் Recall நிலையைப் பெற முடியவில்லை. இந்தக் கணினியில் இவ்வசதிக்கான ஆதரவு இல்லாமல் இருக்கலாம் அல்லது நிர்வாக உரிமைகள் போதாமல் இருக்கலாம். விவரங்களுக்குப் பதிவைப் பார்க்கவும்.</x:String>
-  <x:String x:Key="Text.Toggle.SetOff" xml:space="preserve">OFF செய்</x:String>
+  <x:String x:Key="Text.Setting.DefaultFormat" xml:space="preserve">இயல்புநிலை: {0}</x:String>
+  <x:String x:Key="Text.Setting.DefaultEnvironment" xml:space="preserve">சூழலைப் பொறுத்தது / தெரியவில்லை</x:String>
+  <x:String x:Key="Text.Toggle.CustomState" xml:space="preserve">தனிப்பயன் (ON/OFF தேர்ந்தெடுக்கவும்)</x:String>
+  <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">தனிப்பயன்</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">DISM வெளியீட்டில் Recall நிலை இல்லை. விவரங்களுக்குப் பதிவைப் பார்க்கவும்.</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">DISM வழங்கிய Recall நிலையைப் புரிந்துகொள்ள முடியவில்லை. விவரங்களுக்குப் பதிவைப் பார்க்கவும்.</x:String>
   <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">இந்தப் பணியை மற்றொரு Windows பயனர் பதிவு செய்துள்ளதால் மாற்ற முடியாது.</x:String>
@@ -126,7 +129,7 @@
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">உலாவித் தேக்ககங்களை நீக்கு</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Deletes Chromium web and shader caches, Service Worker cache storage, crash reports, and extension temporary data. Service Worker registrations, DRM components, bookmarks, passwords, and sign-in state are not deleted.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">சின்னம், சிறுபடம், எழுத்துரு தேக்ககங்களை மீண்டும் உருவாக்கு</x:String>
-  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">File Explorer-இன் சின்னத் தேக்ககம், சிறுபடத் தேக்ககம், எழுத்துரு தேக்ககம் ஆகியவற்றை நீக்கி Windows அவற்றை மீண்டும் உருவாக்கச் செய்கிறது. வெற்று அல்லது தவறான சின்னங்கள், புதுப்பிக்கப்படாத சிறுபடங்கள், சரியாகக் காட்டப்படாத எழுத்துகள் ஆகியவற்றுக்கான வழக்கமான சரிசெய்தல் இது. shell இன்னும் திறந்து வைத்துள்ள கோப்புகள் அடுத்த Windows மறுதொடக்கத்தில் நீக்கப்படும். மீளுருவாக்கத்தை முடிக்க Windows-ஐ மறுதொடக்கம் செய்யவும். தேக்ககங்கள் மீண்டும் உருவாகும் வரை காட்சி சற்று மெதுவாக இருக்கும்.</x:String>
+  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">File Explorer-இன் சின்னத் தேக்ககம், சிறுபடத் தேக்ககம், எழுத்துரு தேக்ககம் ஆகியவற்றை நீக்கி Windows அவற்றை மீண்டும் உருவாக்கச் செய்கிறது. வெற்று அல்லது தவறான சின்னங்கள், புதுப்பிக்கப்படாத சிறுபடங்கள், சரியாகக் காட்டப்படாத எழுத்துகள் ஆகியவற்றுக்கான வழக்கமான சரிசெய்தல் இது. Explorer கட்டாயமாக மூடப்படாது. அடுத்த Windows தொடக்கத்தில், பயன்பாட்டில் உள்ள தேர்ந்தெடுக்கப்பட்ட தேக்ககங்கள் நம்பகமான நிறுவலிலிருந்து மீண்டும் பட்டியலிடப்பட்டு நீக்க முயற்சிக்கப்படும். ஏழு நாட்களுக்குள் அதிகபட்சம் மூன்று முறை இயக்கப்படும்; தொடர்ந்து பூட்டப்பட்ட இலக்குகள் வைத்திருக்கப்பட்டு முடிவுகள் பதிவில் எழுதப்படும். தேக்ககங்கள் மீண்டும் உருவாகும் வரை காட்சி சற்று மெதுவாக இருக்கும்.</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">Windows Update-இன் பதிவிறக்கத் தேக்ககத்தை நீக்கு</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">Deletes only re-downloadable files from SoftwareDistribution\Download. Update history and catroot2 are not deleted. Related services are restored after cleanup.</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">முன்பதிவுத் தரவையும் தேடல் அட்டவணையையும் நீக்கி மீண்டும் உருவாக்கு</x:String>
@@ -152,8 +155,8 @@
   <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">எப்போதும் ஒதுக்கப்படும் ~1–2 GB நினைவகத்தை விடுவிக்க Virtualization-Based Security (VBS) மற்றும் Hypervisor-Enforced Code Integrity (HVCI) ஆகியவற்றை முடக்குகிறது. இது பாதுகாப்புடன் ஒரு பரிமாற்றம்; Hyper-V, WSL2, Windows Sandbox, Docker Desktop அல்லது Credential Guard பயன்படுத்தினால் OFF (இயல்புநிலை) ஆகவே விடுங்கள். OFF என்பது BCD மற்றும் பதிவகத்தில் வெளிப்படையாக அமைக்கப்பட்ட மதிப்புகளை நீக்கி Windows இயல்புநிலைகள் மற்றும் கொள்கைகளைப் பின்பற்றும். முந்தைய அமைப்புகள் சேமிக்கப்படவோ மீட்டமைக்கப்படவோ மாட்டாது.</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">SvcHost செயல்முறைகளை ஒருங்கிணை (பிரிப்பை அடக்கு)</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">இயல்பாக Windows svchost.exe-ஐ ஒவ்வொரு அம்சத்துக்கும் தனித்தனியாக (3.5 GB-க்கு மேல் RAM உள்ள PC-களில்) தொடங்கும். இதை ON செய்வது பிரிப்பு வரம்பை அதிகபட்சமாக்கி, குழுவாக்கக்கூடிய சேவைகளை குறைவான செயல்முறைகளாக ஒருங்கிணைத்து, செயல்முறை எண்ணிக்கையையும் நினைவகப் பயன்பாட்டையும் (பல்லாயிரம் MB) குறைக்கிறது. பாதுகாப்பு எல்லைகளாகக் கருதப்படும் சேவைகள் (DiagTrack, Dnscache போன்றவை) ஒருங்கிணைக்கப்படாது. OFF வரம்பை நீக்கி இயல்புநிலைப் பிரிப்புக்குத் திரும்பும்.</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">UWP பின்னணி இயக்கத்தை முடக்கு / Windows இயல்புநிலையைப் பயன்படுத்து (200–500 MB சேமிப்பு)</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">ON என்பது அனைத்து Store (UWP) பயன்பாடுகளின் பின்னணி இயக்கத்தையும் “எப்போதும் முடக்கு” என அமைக்கும். OFF என்பது இலக்குப் பயன்பாடுகளின் வெளிப்படையான அமைப்புகளை நீக்கி Windows இயல்புநிலையைப் பயன்படுத்தும். ஒவ்வொரு பயன்பாட்டின் முந்தைய அமைப்புகளும் சேமிக்கப்படவோ மீட்டமைக்கப்படவோ மாட்டாது.</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">UWP பின்னணி இயக்கம்</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">அனைத்தும் OFF நிறுவப்பட்ட Store (UWP) பயன்பாடுகளின் பின்னணி இயக்கத்தைத் தடுக்கிறது; அனைத்தும் ON அதை வெளிப்படையாக அனுமதிக்கிறது. ON என்பது Windows இயல்புநிலைகளை மீட்டமைப்பது அல்ல. புதிய பயன்பாடுகளை நிறுவியபின் மீண்டும் இயக்கவும். முந்தைய தனிப்பயன்பாட்டு அமைப்புகள் சேமிக்கப்படவோ மீட்டமைக்கப்படவோ மாட்டாது. ஒவ்வொரு பயன்பாட்டின் அமைப்புகள் மட்டுமே மாற்றப்படுகின்றன. நடைமுறையில் அனுமதிப்பது அல்லது தடுப்பது Windows முழு அமைப்புகள், நிறுவனக் கொள்கைகள் மற்றும் பயன்பாட்டின் கட்டுப்பாடுகளையும் சார்ந்துள்ளது.</x:String>
   <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">Windows Recall-ஐ முடக்கு</x:String>
   <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">AI தேடலுக்காக அவ்வப்போது திரை ஸ்னாப்ஷாட்களைப் பதிவுசெய்யும் Recall அம்சத்தை முடக்குகிறது (Click-to-do, சொற்பொருள் தேடல் போன்ற பிற AI அம்சங்கள் தக்கவைக்கப்படும்). பதிவு செயல்முறையின் நினைவகம்/வட்டு நுகர்வையும் தனியுரிமைக் கவலைகளையும் குறைக்கிறது. Windows 11 24H2 + Copilot+ PC-களில் மட்டுமே கிடைக்கும்; ஆதரிக்கப்படாத PC-களில் நிலையைப் படிக்கவோ நிலைமாற்றவோ முடியாது.</x:String>
   <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">Power throttling-ஐ முடக்கு</x:String>
@@ -198,7 +201,7 @@
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">கொள்கை மூலம் Edge பின்னணி முறை மற்றும் Startup Boost ஆகியவற்றை முடக்குகிறது. Edge-ஐ அரிதாகப் பயன்படுத்தினால் சுமார் 100–300 MB நினைவகத்தை விடுவிக்கலாம். Edge தொடக்கம் சற்று மெதுவாகலாம்; நீட்டிப்பு அறிவிப்புகள் வராமல் போகலாம். கொள்கைகளை நீக்கி Edge இயல்புநிலைகளை மீட்டமைக்க இதை OFF செய்யவும்.</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">நீக்க வேண்டியவற்றைத் தேர்ந்தெடுக்கவும்</x:String>
   <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">உள்நுழையும்போது இயங்க வேண்டியவற்றைத் தேர்ந்தெடுக்கவும்</x:String>
-  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">தேர்வைச் சேமிக்க முடியவில்லை (பதிவைப் பார்க்கவும்)</x:String>
+  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">இந்தத் தேர்வைக் கடைசியாகச் சேமிக்க முயன்றது தோல்வியடைந்தது (பதிவைப் பார்க்கவும்).</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">புதுப்பிப்பு</x:String>
   <x:String x:Key="Text.UpdateDialog.AvailableHeader" xml:space="preserve">புதிய பதிப்பு உள்ளது</x:String>
@@ -214,4 +217,13 @@
   <x:String x:Key="Text.Status.Applied" xml:space="preserve">{0} மாற்றப்பட்டது</x:String>
   <x:String x:Key="Text.Status.ApplyFailed" xml:space="preserve">{0} மாற்றப்படவில்லை (பதிவைப் பார்க்கவும்)</x:String>
   <x:String x:Key="Text.Shutdown.BlockReason" xml:space="preserve">பராமரிப்புச் செயல்பாடு முடியும் வரை Lumin4ti காத்திருக்கிறது…</x:String>
+  <x:String x:Key="Text.Button.BatchOn" xml:space="preserve">அனைத்தும் ON</x:String>
+  <x:String x:Key="Text.Button.BatchOff" xml:space="preserve">அனைத்தும் OFF</x:String>
+  <x:String x:Key="Text.Setting.DefaultSystemManaged" xml:space="preserve">Windows / ஒவ்வொரு பயன்பாட்டின் இயல்புநிலைகள்</x:String>
+  <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">மேம்பாட்டுப் பதிப்பு</x:String>
+  <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">பதிப்பு கிடைக்கவில்லை</x:String>
+  <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">மொழி மற்றும் புதுப்பிப்பு அமைப்புகளைக் கடைசியாகச் சேமிக்க முயன்றது தோல்வியடைந்தது (பதிவைப் பார்க்கவும்).</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">அமைப்புகளைப் படிக்க முடியவில்லை. அசல் கோப்பைப் பாதுகாக்க சேமிப்பு நிறுத்தப்பட்டுள்ளது; உள்நுழைவு நேரத் துப்புரவும் இயங்காது. மாற்றங்கள் இந்த அமர்வில் மட்டுமே பொருந்தும்.</x:String>
+  <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">கடைசிச் சரிபார்ப்பில் இலக்குகள் எதுவும் கிடைக்கவில்லை.</x:String>
+  <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">பட்டியலைப் புதுப்பிக்க மீண்டும் திறக்கவும். செயலை இயக்கும்போது விலக்கப்படாத புதிய இலக்குகளும் சேர்க்கப்படும்.</x:String>
 </ResourceDictionary>

@@ -82,7 +82,10 @@
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Failed to restart Explorer (please restart it manually)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Could not read the state (no admin rights, or the feature is unavailable on this PC. Debug launches are not elevated, so try a normal launch).</x:String>
   <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">DISM could not retrieve the Recall state. This PC may not support the feature, or administrator rights may be missing. Check the log for details.</x:String>
-  <x:String x:Key="Text.Toggle.SetOff" xml:space="preserve">Turn OFF</x:String>
+  <x:String x:Key="Text.Setting.DefaultFormat" xml:space="preserve">Default: {0}</x:String>
+  <x:String x:Key="Text.Setting.DefaultEnvironment" xml:space="preserve">Environment-dependent / unknown</x:String>
+  <x:String x:Key="Text.Toggle.CustomState" xml:space="preserve">Custom (select ON/OFF)</x:String>
+  <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">Custom</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">The DISM output does not contain the Recall state. Check the log for details.</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">The Recall state returned by DISM could not be interpreted. Check the log for details.</x:String>
   <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">This task was registered by another Windows user and cannot be modified.</x:String>
@@ -124,7 +127,7 @@
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">Delete browser caches</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Detects installed Chromium-based browsers and deletes web caches, GPU shader caches, Service Worker cache storage, crash reports, and extension temporary data. Service Worker registrations, DRM components, bookmarks, passwords, and sign-in state are not deleted.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">Rebuild icon, thumbnail, and font caches</x:String>
-  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">Deletes Explorer's icon cache, thumbnail cache, and font cache so that Windows rebuilds them. A standard repair for blank or wrong icons, thumbnails that never refresh, and text that renders incorrectly. Files the shell still holds open are removed at the next Windows restart. Restart Windows to complete the rebuild. Display is briefly slower while the caches are rebuilt.</x:String>
+  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">Deletes Explorer's icon cache, thumbnail cache, and font cache so that Windows rebuilds them. A standard repair for blank or wrong icons, thumbnails that never refresh, and text that renders incorrectly. Explorer is not forcibly closed. Selected caches that are in use are enumerated again from a trusted installation at the next Windows startup, and deletion is attempted. Attempts are limited to three runs within seven days; targets that remain locked are kept, and results are written to the log. Display is briefly slower while the caches are rebuilt.</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">Delete the Windows Update download cache</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">Deletes only re-downloadable Windows Update files from SoftwareDistribution\Download. The update-history data store and signature catalog (catroot2) are not deleted. Related services are stopped during the run and restored afterwards.</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">Delete and rebuild prefetch data and the search index</x:String>
@@ -150,8 +153,8 @@
   <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">Disables Virtualization-Based Security (VBS) and Hypervisor-Enforced Code Integrity (HVCI) to free the ~1–2 GB of memory reserved at all times. This is a trade-off with security; leave it OFF (default) if you use Hyper-V, WSL2, Windows Sandbox, Docker Desktop, or Credential Guard. OFF removes explicit BCD and registry settings and lets Windows defaults and policies take effect. Previous settings are not saved or restored.</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">Consolidate SvcHost processes (suppress splitting)</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">By default Windows starts svchost.exe split per feature (on PCs with more than 3.5 GB RAM). Turning this ON maximizes the split threshold and consolidates group-able services into fewer processes, reducing process count and memory usage (tens to a hundred-plus MB). Services treated as security boundaries (DiagTrack, Dnscache, etc.) are not consolidated. OFF removes the threshold and reverts to default splitting.</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">Turn off UWP background execution / use Windows defaults (save 200–500 MB)</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">ON sets background execution for all Store (UWP) apps to “Always off”. OFF deletes explicit settings for the target apps and lets Windows use its defaults. Previous per-app settings are not saved or restored.</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">UWP background execution</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">Batch OFF blocks background execution for currently installed Store (UWP) apps; Batch ON explicitly allows it. ON does not restore Windows defaults. Run again after installing new apps. Previous per-app settings are not saved or restored. Only per-app settings are changed. Effective permission or blocking also depends on system-wide Windows settings, organization policies, and app restrictions.</x:String>
   <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">Disable Windows Recall</x:String>
   <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">Disables the Recall feature, which periodically records screen snapshots for AI search (other AI features such as Click-to-do and semantic search are kept). Reduces the memory/disk consumption of the recording process and privacy concerns. Only available on Windows 11 24H2 + Copilot+ PCs; on unsupported PCs the state cannot be read and it cannot be toggled.</x:String>
   <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">Disable power throttling</x:String>
@@ -196,7 +199,7 @@
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Disables Edge background mode and Startup Boost through policy. If you rarely use Edge, this can free around 100–300 MB of memory. Edge may start a little slower and extension notifications may stop. Turn this OFF to remove the policies and restore Edge defaults.</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">Choose what gets deleted</x:String>
   <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">Choose which items run at sign-in</x:String>
-  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">Could not save your selection (check the log)</x:String>
+  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">The last save of this selection failed (check the log).</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">Update</x:String>
   <x:String x:Key="Text.UpdateDialog.AvailableHeader" xml:space="preserve">A new version is available</x:String>
@@ -212,4 +215,13 @@
   <x:String x:Key="Text.Status.Applied" xml:space="preserve">Changed {0}</x:String>
   <x:String x:Key="Text.Status.ApplyFailed" xml:space="preserve">Could not change {0} (check the log)</x:String>
   <x:String x:Key="Text.Shutdown.BlockReason" xml:space="preserve">Lumin4ti is waiting for the maintenance operation to finish…</x:String>
+  <x:String x:Key="Text.Button.BatchOn" xml:space="preserve">Batch ON</x:String>
+  <x:String x:Key="Text.Button.BatchOff" xml:space="preserve">Batch OFF</x:String>
+  <x:String x:Key="Text.Setting.DefaultSystemManaged" xml:space="preserve">Windows / per-app defaults</x:String>
+  <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">Development build</x:String>
+  <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">Version unavailable</x:String>
+  <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">The last save of language and update settings failed (check the log).</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Settings could not be read. Saving is disabled to protect the original file, and sign-in cleanup will not run. Changes apply only during this session.</x:String>
+  <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">No targets were found at the last check.</x:String>
+  <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">Reopen the list to refresh it. Newly found targets that are not excluded are also included when you run the action.</x:String>
 </ResourceDictionary>

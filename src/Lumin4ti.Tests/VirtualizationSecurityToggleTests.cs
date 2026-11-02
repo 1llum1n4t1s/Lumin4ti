@@ -31,10 +31,14 @@ public sealed class VirtualizationSecurityToggleTests
         var platform = new FakePlatform(CustomState());
         var toggle = new VirtualizationSecurityToggle(platform);
 
+        Assert.AreEqual(false, await toggle.GetStateAsync());
+        Assert.IsTrue(toggle.IsCustomState);
         var reset = await toggle.SetStateAsync(false);
 
         Assert.IsTrue(reset.Success, reset.Detail);
         Assert.IsTrue(platform.State.EquivalentTo(VirtualizationSecuritySnapshot.Default()));
+        Assert.AreEqual(false, await toggle.GetStateAsync());
+        Assert.IsFalse(toggle.IsCustomState);
         StringAssert.Contains(reset.Detail!, "Windows の既定値とポリシー");
     }
 
@@ -45,6 +49,7 @@ public sealed class VirtualizationSecurityToggleTests
         var toggle = new VirtualizationSecurityToggle(platform);
 
         Assert.AreEqual(true, await toggle.GetStateAsync());
+        Assert.IsFalse(toggle.IsCustomState);
         foreach (var component in Enum.GetValues<VirtualizationSecurityComponent>())
         {
             platform.State = component switch
@@ -58,21 +63,32 @@ public sealed class VirtualizationSecurityToggleTests
                 _ => VirtualizationSecuritySnapshot.Applied() with { Lsa = RegistryValueSnapshot.Dword(1) },
             };
             Assert.AreEqual(false, await toggle.GetStateAsync(), component.ToString());
+            Assert.IsTrue(toggle.IsCustomState, component.ToString());
             Assert.IsNull(toggle.StateDiagnostic);
+            Assert.IsTrue((await toggle.SetStateAsync(false)).Success);
+            Assert.IsTrue(platform.State.EquivalentTo(VirtualizationSecuritySnapshot.Default()));
+            Assert.AreEqual(false, await toggle.GetStateAsync());
+            Assert.IsFalse(toggle.IsCustomState);
         }
     }
 
     [TestMethod]
     public async Task 状態読込例外は原因を残して不明とし回復後に解除する()
     {
-        var platform = new FakePlatform(VirtualizationSecuritySnapshot.Default()) { ReadFailure = true };
+        var platform = new FakePlatform(CustomState());
         var toggle = new VirtualizationSecurityToggle(platform);
 
+        Assert.AreEqual(false, await toggle.GetStateAsync());
+        Assert.IsTrue(toggle.IsCustomState);
+        platform.ReadFailure = true;
         Assert.IsNull(await toggle.GetStateAsync());
+        Assert.IsFalse(toggle.IsCustomState);
         StringAssert.Contains(toggle.StateFailureReason!, "読込失敗注入");
 
         platform.ReadFailure = false;
+        platform.State = VirtualizationSecuritySnapshot.Default();
         Assert.AreEqual(false, await toggle.GetStateAsync());
+        Assert.IsFalse(toggle.IsCustomState);
         Assert.IsNull(toggle.StateFailureReason);
     }
 

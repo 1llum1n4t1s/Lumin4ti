@@ -32,6 +32,7 @@ public sealed class RegistryToggle : IMaintenanceToggle
     private readonly IReadOnlyList<RegistryToggleSpec> _specs;
     private readonly bool _requiresReboot;
     private readonly bool _affectsExplorer;
+    private readonly bool? _defaultState;
     private readonly IRegistryValueAccessor _registry;
 
     public RegistryToggle(
@@ -41,7 +42,8 @@ public sealed class RegistryToggle : IMaintenanceToggle
         CommandCategory category,
         IReadOnlyList<RegistryToggleSpec> specs,
         bool requiresReboot = false,
-        bool affectsExplorer = false)
+        bool affectsExplorer = false,
+        bool? defaultState = false)
         : this(
             id,
             label,
@@ -50,7 +52,8 @@ public sealed class RegistryToggle : IMaintenanceToggle
             specs,
             requiresReboot,
             affectsExplorer,
-            WindowsRegistryValueAccessor.Instance)
+            WindowsRegistryValueAccessor.Instance,
+            defaultState)
     {
     }
 
@@ -62,7 +65,8 @@ public sealed class RegistryToggle : IMaintenanceToggle
         IReadOnlyList<RegistryToggleSpec> specs,
         bool requiresReboot,
         bool affectsExplorer,
-        IRegistryValueAccessor registry)
+        IRegistryValueAccessor registry,
+        bool? defaultState = false)
     {
         _id = id;
         _label = label;
@@ -72,6 +76,7 @@ public sealed class RegistryToggle : IMaintenanceToggle
         _requiresReboot = requiresReboot;
         _affectsExplorer = affectsExplorer;
         _registry = registry;
+        _defaultState = defaultState;
     }
 
     public string Id => _id;
@@ -86,7 +91,9 @@ public sealed class RegistryToggle : IMaintenanceToggle
 
     public bool AffectsExplorer => _affectsExplorer;
 
-    public bool SupportsExplicitOff => true;
+    public bool? DefaultState => _defaultState;
+
+    public bool IsCustomState { get; private set; }
 
     internal IReadOnlyList<RegistryToggleSpec> Specs => _specs;
 
@@ -95,17 +102,22 @@ public sealed class RegistryToggle : IMaintenanceToggle
 
     private bool? GetState(CancellationToken ct)
     {
+        IsCustomState = false;
+        var allApplied = true;
+        var allDefault = true;
         foreach (var spec in _specs)
         {
             ct.ThrowIfCancellationRequested();
             var current = _registry.Read(spec);
-            if (!ValueEqualsApplied(current, spec))
-            {
-                return false;
-            }
+            allApplied &= ValueEqualsApplied(current, spec);
+            var off = spec.DefaultValue is null
+                ? RegistryValueSnapshot.Missing()
+                : SnapshotFor(spec.DefaultValue, spec.Kind);
+            allDefault &= current.EquivalentTo(off);
         }
 
-        return true;
+        IsCustomState = !allApplied && !allDefault;
+        return allApplied;
     }
 
     public Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default) =>

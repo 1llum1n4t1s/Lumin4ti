@@ -76,7 +76,7 @@ internal static class Program
         await Run("mmagent-external-change-and-parent-state", StateWorkflow);
         await Run("mmagent-inflight-reset-coalescing", MmAgentInflightWorkflow);
         await Run("device-enumeration-failure-retry", DeviceWorkflow);
-        await Run("uwp-current-targets-windows-defaults", UwpWorkflow);
+        await Run("uwp-batch-repeat-current-targets", UwpWorkflow);
         await Run("uwp-pair-memory-compensation-and-external-change", UwpPairWorkflow);
         await Run("vbs-default-release-and-memory-compensation", VbsDefaultsWorkflow);
         await Run("toggle-persistent-backup-boundary", TogglePersistenceBoundaryWorkflow);
@@ -88,6 +88,7 @@ internal static class Program
         await Run("migration-pending-json-legacy-compatibility", PendingJsonWorkflow);
         await Run("item-operation-failure-partial-busy-log-causes", OperationFailureLogWorkflow);
         await Run("actual-app-locale-version-vm-update-getters", LocaleWorkflow);
+        await Run("retained-operation-and-device-results-locale", RetainedResultsLocaleWorkflow);
         await Run("item-state-null-exception-timeout-log-causes", StateFailureLogWorkflow);
         await Run("locale-and-accessibility-static-supplement", StaticWorkflow);
         Directory.CreateDirectory(Path.GetDirectoryName(artifact)!);
@@ -217,12 +218,13 @@ internal static class Program
         foreach (var partial in new[] { false, true })
         {
             var result = partial ? MaintenanceActionResult.Partial(LogCanaryDetail) : MaintenanceActionResult.Fail(LogCanaryDetail);
-            foreach (var kind in new[] { "toggle", "choice", "action" })
+            foreach (var kind in new[] { "toggle", "choice", "action", "batch-on", "batch-off" })
             {
                 LogProbeItem item = kind switch
                 {
                     "toggle" => new LogProbeToggle(kind + "-" + result.Status) { Result = result },
                     "choice" => new LogProbeChoice(kind + "-" + result.Status) { Result = result },
+                    "batch-on" or "batch-off" => new LogProbeBatch(kind + "-" + result.Status) { Result = result },
                     _ => new LogProbeAction(kind + "-" + result.Status) { Result = result },
                 };
                 var coordinator = new MaintenanceOperationCoordinator(() => new NoopLease());
@@ -237,12 +239,13 @@ internal static class Program
             }
         }
 
-        foreach (var kind in new[] { "toggle", "choice", "action" })
+        foreach (var kind in new[] { "toggle", "choice", "action", "batch-on", "batch-off" })
         {
             LogProbeItem item = kind switch
             {
                 "toggle" => new LogProbeToggle(kind + "-busy"),
                 "choice" => new LogProbeChoice(kind + "-busy"),
+                "batch-on" or "batch-off" => new LogProbeBatch(kind + "-busy"),
                 _ => new LogProbeAction(kind + "-busy"),
             };
             var category = new CommandCategoryViewModel(new MaintenanceActionCatalog(new IMaintenanceItem[] { item }),
@@ -252,15 +255,21 @@ internal static class Program
             RequireItemCauseLog(before, item, "別のメンテナンス操作");
             Require(item.OperationCalls == 0, "busy operation reached OS fake for " + item.Id);
         }
-        var offItem = new LogProbeToggle("direct-off-known-false");
-        var offCategory = new CommandCategoryViewModel(new MaintenanceActionCatalog(new IMaintenanceItem[] { offItem }),
-            new MaintenanceOperationCoordinator(() => new NoopLease()), CommandCategory.System, "検証", "検証");
-        var offVm = offCategory.Items.Single();
-        offVm.ApplyState(false);
-        Require(offVm.SetOffCommand.CanExecute(null), "known OFF disabled explicit default-reset command");
-        TriggerLogProbe(offVm, "off");
-        Require(offItem.OperationCalls == 1 && offItem.RequestedState == false && !offVm.IsChecked,
-            "explicit OFF did not call actual category set-toggle path from known false");
+        foreach (var enabled in new[] { false, true })
+        {
+            var item = new LogProbeBatch("batch-canceled") { Result = MaintenanceActionResult.Canceled() };
+            var category = new CommandCategoryViewModel(new MaintenanceActionCatalog(new IMaintenanceItem[] { item }),
+                new MaintenanceOperationCoordinator(() => new NoopLease()), CommandCategory.System, "検証", "検証");
+            var before = Logs.Messages.Count;
+            var vm = category.Items.Single();
+            TriggerLogProbe(vm, enabled ? "batch-on" : "batch-off");
+            var name = enabled ? App.Text("Button.BatchOn", "一括ON") : App.Text("Button.BatchOff", "一括OFF");
+            Require(Logs.Messages.Skip(before).Any(line => line.Contains(item.Id, StringComparison.Ordinal) &&
+                line.Contains(name, StringComparison.Ordinal)), "batch terminal log omitted ON/OFF operation");
+            Require(vm.ResultText.Contains(name, StringComparison.Ordinal) && !vm.IsRunning &&
+                vm.ApplyBatchOnCommand.CanExecute(null) && vm.ApplyBatchOffCommand.CanExecute(null),
+                "batch canceled result or command reset lost");
+        }
         var scheduledFailed = new LogProbeAction("scheduled-failed") { Result = MaintenanceActionResult.Fail(LogCanaryDetail) };
         var scheduledPartial = new LogProbeAction("scheduled-partial") { Result = MaintenanceActionResult.Partial(LogCanaryDetail) };
         var scheduledException = new LogProbeAction("scheduled-exception") { Failure = new IOException(LogCanaryDetail) };
@@ -280,7 +289,8 @@ internal static class Program
         switch (kind)
         {
             case "toggle": vm.ApplyState(false); vm.IsChecked = true; break;
-            case "off": action = vm.SetOffCommand.ExecuteAsync(null); break;
+            case "batch-on": action = vm.ApplyBatchOnCommand.ExecuteAsync(null); break;
+            case "batch-off": action = vm.ApplyBatchOffCommand.ExecuteAsync(null); break;
             case "choice": vm.ApplySelectedValue("off"); vm.SelectedChoice = vm.ChoiceOptions.Single(option => option.Value == "on"); break;
             default: action = vm.RunCommand.ExecuteAsync(null); break;
         }
@@ -308,7 +318,7 @@ internal static class Program
 
     private sealed class LogProbeToggle(string id) : LogProbeItem(id), IMaintenanceToggle
     {
-        public bool SupportsExplicitOff => true;
+        public bool? DefaultState { get; init; }
         public MaintenanceStateDiagnostic? Diagnostic { get; init; }
         public MaintenanceStateDiagnostic? StateDiagnostic => Diagnostic;
         public bool? RequestedState { get; private set; }
@@ -316,6 +326,12 @@ internal static class Program
         public Task<bool?> GetStateAsync(CancellationToken ct = default) => Query(ct);
         public Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default)
         { OperationCalls++; RequestedState = on; return Task.FromResult(Result); }
+    }
+
+    private sealed class LogProbeBatch(string id) : LogProbeItem(id), IMaintenanceBatchSetting
+    {
+        public Task<MaintenanceActionResult> ApplyAsync(bool enabled, CancellationToken ct = default)
+        { OperationCalls++; return Task.FromResult(Result); }
     }
 
     private sealed class LogProbeChoice(string id) : LogProbeItem(id), IMaintenanceChoice
@@ -512,43 +528,46 @@ internal static class Program
         var targets = new List<string> { "GOGO_CANARY_A", "GOGO_CANARY_B" };
         var settings = new MemoryUwpSettings();
         settings.Values[targets[0]] = new(7, null); settings.Values[targets[1]] = new(0, 0);
-        Require((await new UwpBackgroundToggle(() => targets, settings).SetStateAsync(true)).Success &&
-            settings.Values.Values.All(value => value == UwpBackgroundValues.Applied), "UWP ON did not apply both values");
-        settings.Values[targets[0]] = new(5, 6);
-        targets.Add("GOGO_CANARY_NEW"); settings.Values[targets[2]] = new(9, 9);
-        var fresh = new UwpBackgroundToggle(() => targets, settings);
-        Require(await fresh.GetStateAsync() == false, "UWP mixed current state reported ON");
-        Require((await fresh.SetStateAsync(false)).Success && settings.Values.Values.All(value => value == default),
-            "fresh UWP OFF did not remove all current overrides including new/external settings");
-        return "Actual UWP fresh-instance OFF removed both explicit values for all currently installed targets, including externally changed/new packages; no saved originals required";
+        var batch = new UwpBackgroundBatchSetting(() => targets, settings);
+        Require((await batch.ApplyAsync(false)).Success &&
+            settings.Values.Values.All(value => value == UwpBackgroundValues.DisabledValues), "UWP bulk OFF did not disable both values");
+        targets.Add("GOGO_CANARY_NEW"); settings.Values[targets[2]] = default;
+        Require((await batch.ApplyAsync(false)).Success &&
+            settings.Values.Values.All(value => value == UwpBackgroundValues.DisabledValues), "repeated bulk OFF omitted the newly installed app");
+        Require((await batch.ApplyAsync(true)).Success &&
+            settings.Values.Values.All(value => value == UwpBackgroundValues.Enabled), "bulk ON did not explicitly permit all current apps");
+        targets.Add("GOGO_CANARY_NEW_ON"); settings.Values[targets[3]] = new(1, 1);
+        Require((await batch.ApplyAsync(true)).Success &&
+            settings.Values.Values.All(value => value == UwpBackgroundValues.Enabled), "repeated bulk ON omitted the newly installed app");
+        return "Actual UWP batch re-enumerated installed families on repeated OFF and ON, set both DWORDs to 1 or 0 respectively, and included newly installed apps without an opposite operation";
     }
     private static async Task<string> UwpPairWorkflow()
     {
         const string family = "GOGO_CANARY_A", other = "GOGO_CANARY_B";
         var settings = new MemoryUwpSettings();
-        UwpBackgroundToggle NewToggle() => new(() => [family, other], settings);
+        UwpBackgroundBatchSetting NewBatch() => new(() => [family, other], settings);
         settings.Values[family] = new(null, 0); settings.Values[other] = new(0, 0);
         settings.FailPairs = 1;
-        Require(!(await NewToggle().SetStateAsync(true)).Success && settings.Values[family] == new UwpBackgroundValues(null, 0),
-            "ON partial pair not compensated to immediate state");
-        Require((await NewToggle().SetStateAsync(true)).Success, "normal UWP ON failed");
+        Require(!(await NewBatch().ApplyAsync(false)).Success && settings.Values[family] == new UwpBackgroundValues(null, 0),
+            "bulk bulk ON partial pair not compensated to immediate state");
+        Require((await NewBatch().ApplyAsync(false)).Success, "normal bulk OFF failed");
         settings.FailPairs = 1;
-        Require(!(await NewToggle().SetStateAsync(false)).Success && settings.Values[family] == UwpBackgroundValues.Applied,
-            "OFF partial pair did not compensate to immediate ON");
-        Require((await NewToggle().SetStateAsync(false)).Success && settings.Values.Values.All(value => value == default),
-            "OFF retry did not remove overrides");
+        Require(!(await NewBatch().ApplyAsync(true)).Success && settings.Values[family] == UwpBackgroundValues.DisabledValues,
+            "bulk ON partial pair did not compensate to immediate disabled values");
+        Require((await NewBatch().ApplyAsync(true)).Success && settings.Values.Values.All(value => value == UwpBackgroundValues.Enabled),
+            "bulk ON retry did not permit all apps");
         settings.Values[family] = new(null, 0);
         settings.FailPairs = 2;
-        var result = await NewToggle().SetStateAsync(true);
+        var result = await NewBatch().ApplyAsync(false);
         Require(result.Status == MaintenanceActionStatus.Failed && result.Detail.Contains("補償"), "pair compensation failure hidden");
         settings.FailPairs = 0; settings.FailBeforeFirstValue = false;
-        Require((await NewToggle().SetStateAsync(false)).Success && settings.Values.Values.All(value => value == default),
-            "fresh OFF was blocked by old partial state");
+        Require((await NewBatch().ApplyAsync(true)).Success && settings.Values.Values.All(value => value == UwpBackgroundValues.Enabled),
+            "bulk ON was blocked by old partial state");
         settings.Values[family] = new(null, 0);
         settings.FailPairs = 1; settings.ExternalOnFailure = new(7, 8);
-        Require(!(await NewToggle().SetStateAsync(true)).Success && settings.Values[family] == new UwpBackgroundValues(7, 8),
+        Require(!(await NewBatch().ApplyAsync(false)).Success && settings.Values[family] == new UwpBackgroundValues(7, 8),
             "failure compensation overwrote external change");
-        return "Actual UWP pair failures: ON/OFF compensated immediate values in memory, compensation failure remained Failed, fresh OFF cleared partial state, external change during failure preserved";
+        return "Actual UWP bulk OFF/ON pair failures compensated immediate values in memory, compensation failure remained Failed, repeat ON repaired partial state, external changes during failure preserved";
     }
 
     private static async Task<string> VbsDefaultsWorkflow()
@@ -572,13 +591,13 @@ internal static class Program
 
     private static Task<string> TogglePersistenceBoundaryWorkflow()
     {
-        foreach (var file in new[] { "RegistryToggle.cs", "UwpBackgroundToggle.cs", "VirtualizationSecurityToggle.cs" })
+        foreach (var file in new[] { "RegistryToggle.cs", "UwpBackgroundBatchSetting.cs", "VirtualizationSecurityToggle.cs" })
         {
             var source = File.ReadAllText(Path.Combine(_repo, "src/Lumin4ti.Core/Services/Windows/Actions", file));
             Require(!new[] { "RegistryValueBackup", "UwpBackgroundJournal", "VirtualizationSecurityBackupStore", "ProtectedBackupStorage", "File.Read", "File.Write" }
                 .Any(source.Contains), "toggle still references persistent backup: " + file);
         }
-        return Task.FromResult("Static supplement: three toggle implementations have no persistent backup/file API references; legacy backup files are never opened, migrated or deleted by these paths; PATH/QuickAccess data backups excluded");
+        return Task.FromResult("Static supplement: setting implementations do not persist or read legacy state backups; UWP reads only installed package manifests for classification; PATH/QuickAccess data backups excluded");
     }
     private static async Task<string> MmAgentDiagnosticWorkflow()
     {
@@ -697,7 +716,7 @@ internal static class Program
         var locales = Directory.GetFiles(Path.Combine(_repo, "src/Lumin4ti.UI/Resources/Locales"), "*.axaml");
         Require(locales.Length == 17, "locale count differs from 17");
         string[] added = ["UpdateDialog.Title", "UpdateDialog.AvailableHeader", "UpdateDialog.DownloadAndInstall", "UpdateDialog.IgnoreThisVersion", "UpdateDialog.UpToDateMessage", "UpdateDialog.ErrorHeader", "UpdateDialog.Close", "UpdateDialog.CheckingMessage", "UpdateDialog.DevelopmentBuild", "UpdateDialog.CheckFailed", "Status.Applying", "Status.Applied", "Status.ApplyFailed", "Shutdown.BlockReason"];
-        added = [.. added, "Toggle.SetOff",
+        added = [.. added, "Setting.DefaultFormat", "Setting.DefaultEnvironment",
             "Toggle.RecallQueryFailed", "Toggle.RecallStateMissing", "Toggle.RecallStateUnsupported",
             "Toggle.ScheduledTaskOtherUser", "Toggle.ScheduledTaskOwnershipUnknown"];
         foreach (var path in locales)
@@ -712,18 +731,99 @@ internal static class Program
         {
             ["{Binding RunCommand}"] = "{Binding RunAutomationName}",
             ["{Binding CancelCommand}"] = "{Binding CancelAutomationName}",
-            ["{Binding SetOffCommand}"] = "{Binding SetOffAutomationName}",
+            ["{Binding ApplyBatchOnCommand}"] = "{Binding BatchOnAutomationName}",
+            ["{Binding ApplyBatchOffCommand}"] = "{Binding BatchOffAutomationName}",
         };
         var actionButtons = XDocument.Load(Path.Combine(_repo, "src/Lumin4ti.UI/Views/CommandCategoryView.axaml"))
             .Descendants().Where(element => element.Name.LocalName == "Button" &&
                 expectedNames.ContainsKey((string?)element.Attribute("Command") ?? "")).ToArray();
-        Require(actionButtons.Length == 6 && expectedNames.Keys.All(command => actionButtons.Count(button =>
+        Require(actionButtons.Length == 8 && expectedNames.Keys.All(command => actionButtons.Count(button =>
             (string?)button.Attribute("Command") == command) == 2) && actionButtons.All(button => button.Attributes().Any(attribute =>
                 attribute.Name.LocalName == "AutomationProperties.Name" && attribute.Value == expectedNames[button.Attribute("Command")!.Value])),
-            "parent/child run/cancel/default-reset names not correctly bound");
+            "parent/child run/cancel names not correctly bound");
         return Task.FromResult($"Supplement only: 17 XML dictionaries parsed, {added.Length} required keys/no duplicates, getter and automation-name source present; this is not GUI accessibility validation");
     }
-    private static Task<string> LocaleWorkflow()
+    private sealed class LocaleDevices : IDisconnectedDeviceService
+    {
+        private bool _removed;
+        public Task<IReadOnlyList<DisconnectedDevice>> GetDisconnectedDevicesAsync(CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<DisconnectedDevice>>(_removed ? [] : [new("OPOP_FAKE_DEVICE", "Memory device", "Test", "Test")]);
+        public Task<DisconnectedDeviceRemovalResult> RemoveDisconnectedDeviceAsync(string instanceId, CancellationToken ct = default)
+        {
+            Require(instanceId == "OPOP_FAKE_DEVICE", "unexpected fake removal target");
+            _removed = true;
+            return Task.FromResult(new DisconnectedDeviceRemovalResult(DisconnectedDeviceRemovalStatus.Removed, RequiresRestart: true));
+        }
+    }
+
+    private static Task<string> RetainedResultsLocaleWorkflow()
+    {
+        const string detail = "OPOP_CANARY 技術明細";
+        var results = new[] { MaintenanceActionResult.Ok(detail), MaintenanceActionResult.Partial(detail),
+            MaintenanceActionResult.Fail(detail), MaintenanceActionResult.Canceled(detail) };
+        foreach (var result in results)
+        foreach (var kind in new[] { "action", "toggle", "choice", "batch-on", "batch-off" })
+        {
+            App.SetLocale("ja_JP");
+            LogProbeItem item = kind switch
+            {
+                "toggle" => new LogProbeToggle("locale") { Result = result },
+                "choice" => new LogProbeChoice("locale") { Result = result },
+                "batch-on" or "batch-off" => new LogProbeBatch("locale") { Result = result },
+                _ => new LogProbeAction("locale") { Result = result },
+            };
+            var category = new CommandCategoryViewModel(new MaintenanceActionCatalog(new IMaintenanceItem[] { item }),
+                new MaintenanceOperationCoordinator(() => new NoopLease()), CommandCategory.System, "検証", "検証");
+            var card = category.Items.Single();
+            TriggerLogProbe(card, kind);
+            var japaneseResult = card.ResultText;
+            var japaneseStatus = category.StatusText;
+            App.SetLocale("en_US");
+            Require(card.ResultText != japaneseResult && category.StatusText != japaneseStatus,
+                $"retained {kind}/{result.Status} result or status did not relocalize");
+            Require(card.ResultText.Contains(detail), "technical result detail was changed");
+            if (kind.StartsWith("batch-"))
+                Require(card.ResultText.StartsWith(App.Text(kind == "batch-on" ? "Button.BatchOn" : "Button.BatchOff", "")),
+                    "batch operation label retained old locale");
+            App.SetLocale("ja_JP");
+            Require(card.ResultText == japaneseResult && category.StatusText == japaneseStatus,
+                "retained result did not return to Japanese");
+        }
+
+        var device = new DeviceCleanupViewModel(new LocaleDevices(), new MaintenanceOperationCoordinator(() => new NoopLease()),
+            action => { action(); return Task.CompletedTask; });
+        device.LoadDisconnectedDevicesAsync().GetAwaiter().GetResult();
+        var loaded = device.StatusText;
+        App.SetLocale("en_US");
+        Require(device.StatusText != loaded && device.StatusText.Contains('1'), "device count did not relocalize");
+        App.SetLocale("ja_JP");
+        device.SelectAllCommand.Execute(null);
+        device.RequestRemovalCommand.Execute(null);
+        device.ConfirmRemovalCommand.ExecuteAsync(null).GetAwaiter().GetResult();
+        var removed = device.StatusText;
+        App.SetLocale("en_US");
+        Require(device.StatusText != removed && device.StatusText.Contains('1'), "device removal summary did not relocalize");
+        App.SetLocale("ja_JP");
+        Require(device.StatusText == removed, "device removal summary did not return to Japanese");
+        foreach (var succeeded in new[] { true, false })
+        {
+            var logResult = succeeded ? MaintenanceActionResult.Ok(detail + "\n  - エクスプローラーを再起動しました")
+                : CommandCategoryViewModel.MarkExplorerRestartFailed(MaintenanceActionResult.Ok(detail),
+                    "  - エクスプローラーの再起動に失敗しました (手動で再起動してください)");
+            var japanese = CommandCategoryViewModel.RenderResultDetail(logResult, succeeded, detail);
+            App.SetLocale("en_US");
+            var english = CommandCategoryViewModel.RenderResultDetail(logResult, succeeded, detail);
+            Require(english != japanese && english.Contains(detail)
+                && english.EndsWith(App.Text(succeeded ? "Result.ExplorerRestarted" : "Result.ExplorerRestartFailed", "")),
+                "Explorer restart instruction retained previous locale or lost technical detail");
+            App.SetLocale("ja_JP");
+            Require(CommandCategoryViewModel.RenderResultDetail(logResult, succeeded, detail) == japanese,
+                "Explorer restart instruction did not return to Japanese");
+        }
+        return Task.FromResult("Success/Partial/Failed/Canceled action/toggle/choice/batch results, device counts/removal and Explorer restart instructions followed ja→en→ja; technical details preserved; fake OS only");
+    }
+
+    private static async Task<string> LocaleWorkflow()
     {
         var app = new App();
         // OS platform、ApplicationLifetime、製品 Initialize は起動しない。
@@ -752,7 +852,23 @@ internal static class Program
         }
         App.SetLocale("en_US");
         var settings = new MemorySettings();
-        var vm = new VersionViewModel(new UpdateService(settings.Current), settings, new MaintenanceOperationCoordinator(() => new NoopLease()));
+        var developmentUpdate = new UpdateService(() => null);
+        var vm = new VersionViewModel(developmentUpdate, settings, new MaintenanceOperationCoordinator(() => new NoopLease()));
+        var failedUpdate = new UpdateService(() => throw new IOException("OPOP_CANARY manager creation failure"));
+        var failedVersion = new VersionViewModel(failedUpdate, new MemorySettings(), new MaintenanceOperationCoordinator(() => new NoopLease()));
+        var threwManagerFailure = false;
+        try { failedUpdate.TryCreateInstalledManager(); }
+        catch (IOException) { threwManagerFailure = true; }
+        Require(threwManagerFailure, "manager initialization failure was hidden as an uninstalled build");
+        var unsavedSettings = new MemorySettings { FailSave = true };
+        var unsaved = new VersionViewModel(developmentUpdate, unsavedSettings, new MaintenanceOperationCoordinator(() => new NoopLease()));
+        var protectedSettings = new MemorySettings { LoadStatus = SettingsLoadStatus.Failed };
+        var protectedVm = new VersionViewModel(developmentUpdate, protectedSettings, new MaintenanceOperationCoordinator(() => new NoopLease()));
+        Require(protectedVm.SettingsSaveStatusText.Length > 0, "unreadable settings warning required an attempted change");
+        var saveSettings = typeof(VersionViewModel).GetMethod("SaveSettingsAsync", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        await (Task)saveSettings.Invoke(unsaved, null)!;
+        await (Task)saveSettings.Invoke(protectedVm, null)!;
+        Require(protectedSettings.SaveCount == 0, "unreadable settings were sent to the persistence boundary");
         var setStatus = typeof(VersionViewModel).GetMethod("SetUpdateStatus", BindingFlags.Instance | BindingFlags.NonPublic)!;
         setStatus.Invoke(vm, ["UpdateDialog.CheckFailed", "検証失敗: {0}", new object[] { "RERE_CANARY" }]);
         var instance = Lumin4tiUpdateStrings.Instance;
@@ -766,6 +882,8 @@ internal static class Program
             Query = _ => Task.FromResult<bool?>(null),
         };
         var stateDiagnostic = Vm(diagnosticItem);
+        var defaultOn = Vm(new LogProbeToggle("locale-default-on") { DefaultState = true });
+        var defaultOff = Vm(new LogProbeToggle("locale-default-off") { DefaultState = false });
         stateDiagnostic.ApplyState(null);
         stateDiagnostic.ResultText = "GOGO_CANARY previous diagnostic result";
         genericToggle.ApplyState(null); genericChoice.ApplySelectedValue(null); specific.ApplyState(null);
@@ -785,6 +903,10 @@ internal static class Program
                 Require(value == expected[locale.Key]["Text.UpdateDialog." + property.Name], "same singleton getter stale: " + locale.Key + "/" + property.Name);
             }
             Require(vm.UpdateStatusText == string.Format(expected[locale.Key]["Text.UpdateDialog.CheckFailed"], "RERE_CANARY"), "persisted status did not relocalize: " + locale.Key);
+            Require(vm.VersionText == expected[locale.Key]["Text.Version.DevelopmentBuild"], "development version remained in old language: " + locale.Key);
+            Require(failedVersion.VersionText == expected[locale.Key]["Text.Version.Unavailable"], "version read failure was hidden or stale: " + locale.Key);
+            Require(unsaved.SettingsSaveStatusText == expected[locale.Key]["Text.Settings.SaveFailed"]
+                && protectedVm.SettingsSaveStatusText == expected[locale.Key]["Text.Settings.SaveSuppressed"], "unsaved/temporary settings status remained in old language: " + locale.Key);
             Require(App.Text("RERE_CANARY_MISSING", "fallback {0}", "RERE_CANARY") == "fallback RERE_CANARY", "missing key fallback changed");
             const string unknownFallback = "状態を取得できませんでした (管理者権限がないか、この PC では利用できない機能です。デバッグ起動は昇格されないため、通常起動でお試しください)";
             Require(genericToggle.StateErrorText == expected[locale.Key].GetValueOrDefault("Text.Toggle.StateUnknown", unknownFallback) && genericChoice.StateErrorText == genericToggle.StateErrorText, "generic toggle/choice error remained in old language: " + locale.Key);
@@ -792,7 +914,16 @@ internal static class Program
             Require(stateDiagnostic.StateErrorText == expected[locale.Key]["Text.Toggle.RecallStateMissing"]
                 && !stateDiagnostic.CanToggle, "state diagnostic remained generic, stale or enabled: " + locale.Key);
             Require(genericToggle.RunAutomationName.Contains(App.Text("Button.Run", "実行")) && genericToggle.CancelAutomationName.Contains(App.Text("Button.Cancel", "中断")) && genericToggle.RunAutomationName != genericToggle.CancelAutomationName, "action automation identities ambiguous/stale");
-            Require(new[] { "StateErrorText", "RunAutomationName", "CancelAutomationName", "SetOffAutomationName" }.All(notifications.Contains), "locale change missed property notification");
+            var defaultFormat = expected[locale.Key]["Text.Setting.DefaultFormat"];
+            Require(defaultOn.DefaultStateText == string.Format(defaultFormat, "ON")
+                && defaultOff.DefaultStateText == string.Format(defaultFormat, "OFF")
+                && stateDiagnostic.DefaultStateText == string.Format(defaultFormat, expected[locale.Key]["Text.Setting.DefaultEnvironment"]),
+                "default ON/OFF/environment text remained in old language: " + locale.Key);
+            var defaultOption = ((IMaintenanceChoice)genericChoice.Item).Options.Single(option => option.IsDefault);
+            var defaultLabel = defaultOption.LabelKey is { } key
+                ? expected[locale.Key].GetValueOrDefault("Text." + key, defaultOption.Label) : defaultOption.Label;
+            Require(genericChoice.DefaultStateText == string.Format(defaultFormat, defaultLabel), "choice default text remained in old language: " + locale.Key);
+            Require(new[] { "StateErrorText", "RunAutomationName", "CancelAutomationName", "DefaultStateText" }.All(notifications.Contains), "locale change missed property notification");
         }
         genericToggle.ApplyState(true); genericChoice.ApplySelectedValue("512");
         stateDiagnostic.ApplyState(false);
@@ -801,6 +932,9 @@ internal static class Program
         Require(genericToggle.StateErrorText.Length == 0 && genericChoice.StateErrorText.Length == 0 && genericToggle.ResultText == "GOGO_CANARY previous result", "known state recovery did not clear only diagnosis");
         setStatus.Invoke(vm, [null, "", Array.Empty<object>()]);
         Require(vm.UpdateStatusText.Length == 0, "status reset retained translated text");
-        return Task.FromResult("Actual App.SetLocale via VersionVM.SelectedLocale: 17 switches saved to memory, same singleton 8 getters and retained failure status relocalized; XML-derived dictionaries, no GUI lifetime");
+        unsavedSettings.FailSave = false;
+        await (Task)saveSettings.Invoke(unsaved, null)!;
+        Require(unsaved.SettingsSaveStatusText.Length == 0, "successful retry retained save failure status");
+        return "Actual App.SetLocale via VersionVM.SelectedLocale: 17 switches saved to memory, update getters/version/save warnings relocalized; manager creation failure propagated and unreadable settings protected; XML-derived dictionaries, no GUI lifetime";
     }
 }

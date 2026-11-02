@@ -124,6 +124,29 @@ public sealed class SettingsServiceTests
     }
 
     [TestMethod]
+    public async Task クリーンアップ選択は読込失敗時も一時反映し保存抑止を通知して原本を保持する()
+    {
+        var settingsPath = Path.Combine(_directory, "settings.json");
+        const string original = "{ invalid json";
+        await File.WriteAllTextAsync(settingsPath, original);
+        var service = new SettingsService(_directory, settingsPath);
+        var preferences = new CleanupPreferences(service);
+
+        preferences.SetTargetEnabled("cleanup-test", "cache", enabled: false);
+        preferences.SetScheduledGroupEnabled("cleanup-user-temp", enabled: false);
+        Assert.IsFalse(preferences.IsTargetEnabled("cleanup-test", "cache"));
+        Assert.IsFalse(preferences.ScheduledGroupIds.Contains("cleanup-user-temp"));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => preferences.SaveAsync());
+
+        // SettingsService 自体の保存抑止契約も維持する。
+        await service.SaveAsync();
+        await service.FlushAsync();
+        Assert.AreEqual(SettingsLoadStatus.Failed, service.LoadStatus);
+        Assert.AreEqual(original, await File.ReadAllTextAsync(settingsPath));
+        Assert.IsFalse(preferences.IsTargetEnabled("cleanup-test", "cache"));
+    }
+
+    [TestMethod]
     public async Task 保存に失敗した場合は呼び出し側へ例外を返す()
     {
         // 保存できないのに成功扱いにすると、設定が消えたことに気付けない。

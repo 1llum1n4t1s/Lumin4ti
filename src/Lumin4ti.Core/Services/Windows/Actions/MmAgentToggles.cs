@@ -256,6 +256,11 @@ public sealed class MmAgentFeatureToggle(
 
     public string Description => description;
 
+    // Windows 10/11 クライアントの標準構成。結合・事前起動は版や構成によるため断定しない。
+    public bool? DefaultState => propertyName is "MemoryCompression" or "ApplicationLaunchPrefetching"
+        ? true
+        : null;
+
     public CommandCategory Category => CommandCategory.Performance;
 
     public bool RequiresReboot => false;

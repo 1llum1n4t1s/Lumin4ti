@@ -4,6 +4,33 @@
              x:Class="Lumin4ti.UI.Views.CommandCategoryView"
              x:DataType="vm:CommandCategoryViewModel">
 
+  <UserControl.Resources>
+    <DataTemplate x:Key="CommandResultTemplate" x:DataType="vm:CommandItemViewModel">
+      <StackPanel>
+        <TextBlock Text="{Binding StateErrorText}" Margin="0,8,0,0" FontSize="12" TextWrapping="Wrap" Foreground="#FF3B30"
+                   IsVisible="{Binding StateErrorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        <Border Margin="0,8,0,0"
+                Background="{DynamicResource Brush.Window}" CornerRadius="6" Padding="10,6"
+                IsVisible="{Binding ResultText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+          <SelectableTextBlock Text="{Binding ResultText}" FontSize="12" TextWrapping="Wrap"
+                               FontFamily="Cascadia Mono, Consolas, monospace"
+                               Foreground="{DynamicResource Brush.FG1}"
+                               Classes.error="{Binding LastRunFailed}"
+                               Classes.warning="{Binding LastRunWarning}">
+            <SelectableTextBlock.Styles>
+              <Style Selector="SelectableTextBlock.warning">
+                <Setter Property="Foreground" Value="#FF9500" />
+              </Style>
+              <Style Selector="SelectableTextBlock.error">
+                <Setter Property="Foreground" Value="#FF3B30" />
+              </Style>
+            </SelectableTextBlock.Styles>
+          </SelectableTextBlock>
+        </Border>
+      </StackPanel>
+    </DataTemplate>
+  </UserControl.Resources>
+
   <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="8,0">
     <TextBlock Grid.Row="0" Classes="h1" Text="{Binding Title}" />
     <TextBlock Grid.Row="1" Classes="caption" TextWrapping="Wrap" Margin="0,0,0,12"
@@ -20,6 +47,8 @@
                 <StackPanel Grid.Row="0" Grid.Column="0" Spacing="2" VerticalAlignment="Center" Margin="0,0,12,0">
                   <TextBlock Text="{Binding Label}" FontWeight="SemiBold" TextWrapping="Wrap" />
                   <TextBlock Text="{Binding Description}" Classes="caption" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding DefaultStateText}" Classes="caption" TextWrapping="Wrap"
+                             IsVisible="{Binding DefaultStateText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                   <TextBlock Text="{DynamicResource Text.Note.RequiresReboot}" FontSize="12" Foreground="#FF3B30"
                              IsVisible="{Binding RequiresReboot}" TextWrapping="Wrap" />
                   <TextBlock Text="{DynamicResource Text.Note.LongRunning}" FontSize="12" Foreground="{DynamicResource Brush.FG2}"
@@ -29,6 +58,10 @@
                 </StackPanel>
                 <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                   <ProgressBar IsIndeterminate="True" Width="60" IsVisible="{Binding IsRunning}" />
+                  <Button Content="{DynamicResource Text.Button.BatchOff}" Command="{Binding ApplyBatchOffCommand}"
+                          IsVisible="{Binding IsBatchSetting}" AutomationProperties.Name="{Binding BatchOffAutomationName}" />
+                  <Button Content="{DynamicResource Text.Button.BatchOn}" Command="{Binding ApplyBatchOnCommand}"
+                          IsVisible="{Binding IsBatchSetting}" AutomationProperties.Name="{Binding BatchOnAutomationName}" />
                   <!--  実行ボタン型  -->
                   <Button Content="{DynamicResource Text.Button.Run}" Command="{Binding RunCommand}" IsVisible="{Binding IsAction}"
                           AutomationProperties.Name="{Binding RunAutomationName}" />
@@ -38,11 +71,13 @@
                   <!--  ON/OFF トグル型 (ON = 最適化適用 / OFF = 項目の解除値へ設定または明示上書きを削除)。実行中・状態不明時は操作不可  -->
                   <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding IsToggle}" VerticalAlignment="Center">
                     <ToggleSwitch IsChecked="{Binding IsChecked}" IsEnabled="{Binding CanToggle}"
-                                  AutomationProperties.Name="{Binding Label}"
-                                  IsVisible="{Binding IsStateKnown}"
+                                  AutomationProperties.Name="{Binding Label}" IsVisible="{Binding CanShowToggle}"
                                   OnContent="ON" OffContent="OFF" />
-                    <Button Content="{DynamicResource Text.Toggle.SetOff}" Command="{Binding SetOffCommand}" IsVisible="{Binding HasExplicitOff}"
-                            AutomationProperties.Name="{Binding SetOffAutomationName}" />
+                    <ComboBox ItemsSource="{Binding CustomToggleOptions}" SelectedItem="{Binding SelectedCustomToggleOption}"
+                              PlaceholderText="{DynamicResource Text.Toggle.CustomPlaceholder}"
+                              ToolTip.Tip="{DynamicResource Text.Toggle.CustomState}"
+                              AutomationProperties.Name="{Binding Label}" IsEnabled="{Binding CanToggle}"
+                              IsVisible="{Binding IsCustomState}" MinWidth="100" VerticalAlignment="Center" />
                   </StackPanel>
                   <!--  選択式 (ON/OFF に収まらない数値・段階設定)。実行中・状態不明時は操作不可  -->
                   <ComboBox ItemsSource="{Binding ChoiceOptions}" SelectedItem="{Binding SelectedChoice}"
@@ -65,32 +100,13 @@
                              Foreground="{DynamicResource Brush.FG2}" />
                 </Border>
                 <!--  実行結果 (成功/キャンセル=通常色 / 部分成功=黄 / 失敗=赤)  -->
-                <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
-                  <TextBlock Text="{Binding StateErrorText}" Margin="0,8,0,0" FontSize="12" TextWrapping="Wrap" Foreground="#FF3B30"
-                             IsVisible="{Binding StateErrorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                <Border Margin="0,8,0,0"
-                        Background="{DynamicResource Brush.Window}" CornerRadius="6" Padding="10,6"
-                        IsVisible="{Binding ResultText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                  <SelectableTextBlock Text="{Binding ResultText}" FontSize="12" TextWrapping="Wrap"
-                                       FontFamily="Cascadia Mono, Consolas, monospace"
-                                       Foreground="{DynamicResource Brush.FG1}"
-                                       Classes.error="{Binding LastRunFailed}"
-                                       Classes.warning="{Binding LastRunWarning}">
-                    <SelectableTextBlock.Styles>
-                      <Style Selector="SelectableTextBlock.warning">
-                        <Setter Property="Foreground" Value="#FF9500" />
-                      </Style>
-                      <Style Selector="SelectableTextBlock.error">
-                        <Setter Property="Foreground" Value="#FF3B30" />
-                      </Style>
-                    </SelectableTextBlock.Styles>
-                  </SelectableTextBlock>
-                </Border>
-                </StackPanel>
+                <ContentControl Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Content="{Binding}" HorizontalContentAlignment="Stretch"
+                                ContentTemplate="{StaticResource CommandResultTemplate}" />
                 <!--  削除対象 / 実行項目のチェックリスト。既定は畳んでおき、必要なときだけ開く  -->
                 <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="-8,6,0,0"
                             IsVisible="{Binding HasCheckList}" Spacing="0">
                   <ToggleButton Classes="disclosure" IsChecked="{Binding IsCheckListExpanded}"
+                                IsEnabled="{Binding CanExpandCheckList}"
                                 AutomationProperties.Name="{Binding CheckListCaption}">
                     <StackPanel Orientation="Horizontal" Spacing="7">
                       <TextBlock Text="{Binding CheckListChevron}" FontSize="10" Width="10"
@@ -102,21 +118,29 @@
                       </Border>
                     </StackPanel>
                   </ToggleButton>
+                  <TextBlock Text="{Binding CheckListSaveErrorText}" Classes="caption" TextWrapping="Wrap" Margin="8,2,0,0"
+                             Foreground="#FF3B30" IsVisible="{Binding HasCheckListSaveError}" />
                   <Border Classes="checklist" Margin="8,2,0,0" IsVisible="{Binding IsCheckListExpanded}">
                     <ScrollViewer MaxHeight="240" VerticalScrollBarVisibility="Auto">
-                      <ItemsControl ItemsSource="{Binding CheckListEntries}">
-                        <ItemsControl.ItemTemplate>
-                          <DataTemplate x:DataType="vm:CheckListEntryViewModel">
-                            <CheckBox Classes="entry" IsChecked="{Binding IsSelected}"
-                                      AutomationProperties.Name="{Binding Display}"
-                                      ToolTip.Tip="{Binding Display}">
-                              <TextBlock Text="{Binding Display}" FontSize="12"
-                                         TextTrimming="CharacterEllipsis"
-                                         VerticalAlignment="Center" />
-                            </CheckBox>
-                          </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                      </ItemsControl>
+                      <StackPanel>
+                        <TextBlock Text="{DynamicResource Text.CheckList.RefreshHint}" Classes="caption" TextWrapping="Wrap" Margin="0,0,0,6"
+                                   IsVisible="{Binding HasDynamicCheckList}" />
+                        <TextBlock Text="{DynamicResource Text.CheckList.Empty}" Classes="caption" TextWrapping="Wrap"
+                                   IsVisible="{Binding !HasCheckListEntries}" />
+                        <ItemsControl ItemsSource="{Binding CheckListEntries}" IsEnabled="{Binding !IsRunning}">
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:CheckListEntryViewModel">
+                              <CheckBox Classes="entry" IsChecked="{Binding IsSelected}"
+                                        AutomationProperties.Name="{Binding Display}"
+                                        ToolTip.Tip="{Binding Display}">
+                                <TextBlock Text="{Binding Display}" FontSize="12"
+                                           TextTrimming="CharacterEllipsis"
+                                           VerticalAlignment="Center" />
+                              </CheckBox>
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                      </StackPanel>
                     </ScrollViewer>
                   </Border>
                 </StackPanel>
@@ -131,9 +155,15 @@
                           <StackPanel Grid.Row="0" Grid.Column="0" Spacing="2" VerticalAlignment="Center" Margin="0,0,12,0">
                             <TextBlock Text="{Binding Label}" FontWeight="SemiBold" FontSize="13" TextWrapping="Wrap" />
                             <TextBlock Text="{Binding Description}" Classes="caption" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding DefaultStateText}" Classes="caption" TextWrapping="Wrap"
+                                       IsVisible="{Binding DefaultStateText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                           </StackPanel>
                           <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                             <ProgressBar IsIndeterminate="True" Width="60" IsVisible="{Binding IsRunning}" />
+                            <Button Content="{DynamicResource Text.Button.BatchOff}" Command="{Binding ApplyBatchOffCommand}"
+                                    IsVisible="{Binding IsBatchSetting}" AutomationProperties.Name="{Binding BatchOffAutomationName}" />
+                            <Button Content="{DynamicResource Text.Button.BatchOn}" Command="{Binding ApplyBatchOnCommand}"
+                                    IsVisible="{Binding IsBatchSetting}" AutomationProperties.Name="{Binding BatchOnAutomationName}" />
                             <Button Content="{DynamicResource Text.Button.Run}" Command="{Binding RunCommand}"
                                     IsVisible="{Binding IsAction}" AutomationProperties.Name="{Binding RunAutomationName}" />
                             <Button Content="{DynamicResource Text.Button.Cancel}" Command="{Binding CancelCommand}"
@@ -149,35 +179,17 @@
                               </ComboBox.ItemTemplate>
                             </ComboBox>
                             <ToggleSwitch IsChecked="{Binding IsChecked}" IsEnabled="{Binding CanToggle}"
-                                          AutomationProperties.Name="{Binding Label}"
-                                          IsVisible="{Binding IsToggle}"
+                                          AutomationProperties.Name="{Binding Label}" IsVisible="{Binding CanShowToggle}"
                                           OnContent="ON" OffContent="OFF" />
-                            <Button Content="{DynamicResource Text.Toggle.SetOff}" Command="{Binding SetOffCommand}" IsVisible="{Binding HasExplicitOff}"
-                                    AutomationProperties.Name="{Binding SetOffAutomationName}" />
+                            <ComboBox ItemsSource="{Binding CustomToggleOptions}" SelectedItem="{Binding SelectedCustomToggleOption}"
+                                      PlaceholderText="{DynamicResource Text.Toggle.CustomPlaceholder}"
+                                      ToolTip.Tip="{DynamicResource Text.Toggle.CustomState}"
+                                      AutomationProperties.Name="{Binding Label}" IsEnabled="{Binding CanToggle}"
+                                      IsVisible="{Binding IsCustomState}" MinWidth="100" VerticalAlignment="Center" />
                           </StackPanel>
                           <!--  子項目の実行結果  -->
-                          <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
-                            <TextBlock Text="{Binding StateErrorText}" Margin="0,8,0,0" FontSize="12" TextWrapping="Wrap" Foreground="#FF3B30"
-                                       IsVisible="{Binding StateErrorText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                          <Border Margin="0,8,0,0"
-                                  Background="{DynamicResource Brush.Window}" CornerRadius="6" Padding="10,6"
-                                  IsVisible="{Binding ResultText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-                            <SelectableTextBlock Text="{Binding ResultText}" FontSize="12" TextWrapping="Wrap"
-                                                 FontFamily="Cascadia Mono, Consolas, monospace"
-                                                 Foreground="{DynamicResource Brush.FG1}"
-                                                 Classes.error="{Binding LastRunFailed}"
-                                                 Classes.warning="{Binding LastRunWarning}">
-                              <SelectableTextBlock.Styles>
-                                <Style Selector="SelectableTextBlock.warning">
-                                  <Setter Property="Foreground" Value="#FF9500" />
-                                </Style>
-                                <Style Selector="SelectableTextBlock.error">
-                                  <Setter Property="Foreground" Value="#FF3B30" />
-                                </Style>
-                              </SelectableTextBlock.Styles>
-                            </SelectableTextBlock>
-                          </Border>
-                          </StackPanel>
+                          <ContentControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Content="{Binding}" HorizontalContentAlignment="Stretch"
+                                          ContentTemplate="{StaticResource CommandResultTemplate}" />
                         </Grid>
                       </Border>
                     </DataTemplate>

@@ -84,7 +84,10 @@
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Не удалось перезапустить Explorer (перезапустите его вручную)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Не удалось прочитать состояние (нет прав администратора или функция недоступна на этом ПК. Запуск в режиме отладки выполняется без повышения прав, поэтому попробуйте обычный запуск).</x:String>
   <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">DISM не удалось получить состояние Recall. Возможно, этот компьютер не поддерживает функцию или недостаточно прав администратора. Подробности см. в журнале.</x:String>
-  <x:String x:Key="Text.Toggle.SetOff" xml:space="preserve">Выключить</x:String>
+  <x:String x:Key="Text.Setting.DefaultFormat" xml:space="preserve">По умолчанию: {0}</x:String>
+  <x:String x:Key="Text.Setting.DefaultEnvironment" xml:space="preserve">Зависит от среды / неизвестно</x:String>
+  <x:String x:Key="Text.Toggle.CustomState" xml:space="preserve">Другое состояние (выберите ON/OFF)</x:String>
+  <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">Другое состояние</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">Вывод DISM не содержит состояния Recall. Подробности см. в журнале.</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">Не удалось интерпретировать состояние Recall, возвращённое DISM. Подробности см. в журнале.</x:String>
   <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">Эта задача зарегистрирована другим пользователем Windows, поэтому её нельзя изменить.</x:String>
@@ -126,7 +129,7 @@
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">Удалить кеши браузеров</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Удаляет веб-кеши и кеши шейдеров Chromium, хранилище кеша Service Worker, отчёты о сбоях и временные данные расширений. Регистрации Service Worker, DRM-компоненты, закладки, пароли и данные входа не удаляются.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">Перестроить кеши значков, эскизов и шрифтов</x:String>
-  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">Удаляет кеш значков, кеш эскизов и кеш шрифтов проводника, чтобы Windows создала их заново. Это стандартное исправление для пустых или неверных значков, эскизов, которые не обновляются, и некорректно отображаемого текста. Файлы, всё ещё открытые оболочкой, удаляются при следующей перезагрузке Windows. Перезагрузите Windows, чтобы завершить перестроение кешей. Пока кеши перестраиваются, отображение временно замедляется.</x:String>
+  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">Удаляет кеш значков, кеш эскизов и кеш шрифтов проводника, чтобы Windows создала их заново. Это стандартное исправление для пустых или неверных значков, эскизов, которые не обновляются, и некорректно отображаемого текста. Проводник не завершается принудительно. При следующем запуске Windows выбранные используемые кеши повторно перечисляются из доверенной установки, после чего предпринимается попытка удаления. Допускается не более трёх запусков в течение семи дней; объекты, которые остаются заблокированными, сохраняются, а результаты записываются в журнал. Пока кеши перестраиваются, отображение временно замедляется.</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">Удалить кеш загрузок Центра обновления Windows</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">Удаляет только повторно загружаемые файлы из SoftwareDistribution\Download. История обновлений и catroot2 не удаляются. Связанные службы восстанавливаются.</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">Удалить и перестроить данные предзагрузки и индекс поиска</x:String>
@@ -152,8 +155,8 @@
   <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">Отключает безопасность на основе виртуализации (VBS) и целостность кода, обеспечиваемую гипервизором (HVCI), чтобы освободить ~1–2 GB памяти, зарезервированной постоянно. Это компромисс с безопасностью; оставьте ВЫКЛ (по умолчанию), если используете Hyper-V, WSL2, Windows Sandbox, Docker Desktop или Credential Guard. OFF удаляет явно заданные настройки BCD и реестра, передавая управление значениям по умолчанию и политикам Windows. Прежние настройки не сохраняются и не восстанавливаются.</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">Объединить процессы SvcHost (подавить разделение)</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">По умолчанию Windows запускает svchost.exe с разделением по функциям (на ПК с более чем 3,5 GB RAM). Включение этого максимально повышает порог разделения и объединяет группируемые службы в меньшее число процессов, сокращая количество процессов и использование памяти (от десятков до сотни с лишним MB). Службы, считающиеся границами безопасности (DiagTrack, Dnscache и др.), не объединяются. ВЫКЛ убирает порог и возвращает разделение по умолчанию.</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">Отключить фоновую работу UWP / использовать настройки Windows по умолчанию (экономия 200–500 МБ)</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">ON запрещает фоновую работу всех приложений Store (UWP), устанавливая «Всегда отключено». OFF удаляет явно заданные настройки целевых приложений и позволяет Windows использовать значения по умолчанию. Прежние настройки отдельных приложений не сохраняются и не восстанавливаются.</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">Фоновое выполнение UWP</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">Все OFF запрещает фоновое выполнение установленных приложений Store (UWP); Все ON явно разрешает его. ON не восстанавливает стандартные настройки Windows. Повторите после установки новых приложений. Прежние настройки отдельных приложений не сохраняются и не восстанавливаются. Изменяются только настройки отдельных приложений. Фактическое разрешение или запрет также зависит от общих настроек Windows, политик организации и ограничений приложений.</x:String>
   <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">Отключить Windows Recall</x:String>
   <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">Отключает функцию Recall, которая периодически записывает снимки экрана для ИИ-поиска (другие функции ИИ, такие как Click-to-do и семантический поиск, сохраняются). Снижает потребление памяти/диска процессом записи и уменьшает опасения о конфиденциальности. Доступно только на ПК с Windows 11 24H2 + Copilot+; на неподдерживаемых ПК состояние прочитать нельзя и переключить его невозможно.</x:String>
   <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">Отключить регулирование мощности</x:String>
@@ -198,7 +201,7 @@
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Отключает с помощью политик фоновый режим Edge и Startup Boost. Если вы редко используете Edge, это может освободить около 100–300 MB памяти. Edge может запускаться немного медленнее, а уведомления расширений могут перестать приходить. Переведите этот параметр в положение ВЫКЛ, чтобы удалить политики и восстановить значения Edge по умолчанию.</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">Выберите, что удалять</x:String>
   <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">Выберите, что выполнять при входе</x:String>
-  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">Не удалось сохранить выбор (см. журнал)</x:String>
+  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">Последнее сохранение этого выбора не удалось (см. журнал).</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">Обновление</x:String>
   <x:String x:Key="Text.UpdateDialog.AvailableHeader" xml:space="preserve">Доступна новая версия</x:String>
@@ -214,4 +217,13 @@
   <x:String x:Key="Text.Status.Applied" xml:space="preserve">{0} изменено</x:String>
   <x:String x:Key="Text.Status.ApplyFailed" xml:space="preserve">Не удалось изменить {0} (см. журнал)</x:String>
   <x:String x:Key="Text.Shutdown.BlockReason" xml:space="preserve">Lumin4ti ожидает завершения операции обслуживания…</x:String>
+  <x:String x:Key="Text.Button.BatchOn" xml:space="preserve">Все ON</x:String>
+  <x:String x:Key="Text.Button.BatchOff" xml:space="preserve">Все OFF</x:String>
+  <x:String x:Key="Text.Setting.DefaultSystemManaged" xml:space="preserve">Стандартные настройки Windows / приложений</x:String>
+  <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">Сборка для разработки</x:String>
+  <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">Версия недоступна</x:String>
+  <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">Последнее сохранение настроек языка и обновления не удалось (см. журнал).</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Не удалось прочитать настройки. Сохранение отключено для защиты исходного файла, очистка при входе не выполняется. Изменения действуют только в этом сеансе.</x:String>
+  <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">При последней проверке объекты не найдены.</x:String>
+  <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">Откройте список заново, чтобы обновить его. При выполнении также учитываются новые объекты, не исключённые из обработки.</x:String>
 </ResourceDictionary>

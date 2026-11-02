@@ -84,7 +84,10 @@
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - 重新啟動 Explorer 失敗（請手動重新啟動）</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">無法讀取狀態（沒有系統管理員權限，或此電腦不支援該功能。偵錯啟動不會提升權限，請嘗試正常啟動）。</x:String>
   <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">無法透過 DISM 取得 Recall 狀態。此電腦可能不支援該功能，或缺少系統管理員權限。請查看記錄以了解詳情。</x:String>
-  <x:String x:Key="Text.Toggle.SetOff" xml:space="preserve">設為 OFF</x:String>
+  <x:String x:Key="Text.Setting.DefaultFormat" xml:space="preserve">預設: {0}</x:String>
+  <x:String x:Key="Text.Setting.DefaultEnvironment" xml:space="preserve">依環境而定／未知</x:String>
+  <x:String x:Key="Text.Toggle.CustomState" xml:space="preserve">自訂（選擇ON/OFF）</x:String>
+  <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">自訂</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">DISM 輸出中未找到 Recall 狀態。請查看記錄以了解詳情。</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">無法解析 DISM 傳回的 Recall 狀態。請查看記錄以了解詳情。</x:String>
   <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">此工作由另一位 Windows 使用者註冊，無法修改。</x:String>
@@ -126,7 +129,7 @@
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">刪除瀏覽器快取</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">刪除 Chromium 網頁與著色器快取、Service Worker 快取儲存區、當機報告及擴充功能暫存資料。不會刪除 Service Worker 註冊、DRM 元件、書籤、密碼或登入狀態。</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">重建圖示、縮圖與字型快取</x:String>
-  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">刪除檔案總管的圖示快取、縮圖快取與字型快取，讓 Windows 重新建立。這是圖示空白或錯亂、縮圖不更新、文字顯示異常時的標準修復方式。被殼層占用而無法刪除的檔案會在下次重新啟動 Windows 時刪除。請重新啟動 Windows 以完成重建。快取重建期間顯示會暫時變慢。</x:String>
+  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">刪除檔案總管的圖示快取、縮圖快取與字型快取，讓 Windows 重新建立。這是圖示空白或錯亂、縮圖不更新、文字顯示異常時的標準修復方式。不會強制關閉檔案總管。對於已選取且仍在使用的快取，將於下次Windows啟動時從受信任的安裝重新列舉並嘗試刪除。最多在7天內執行3次；仍被鎖定的目標會保留，結果會寫入記錄。快取重建期間顯示會暫時變慢。</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">刪除 Windows Update 的下載快取</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">只刪除 SoftwareDistribution\Download 中可重新下載的檔案。不會刪除更新記錄或 catroot2。相關服務會在之後復原。</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">刪除並重建預先擷取資料與搜尋索引</x:String>
@@ -152,8 +155,8 @@
   <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">停用以虛擬化為基礎的安全性（VBS）與 Hypervisor 強制的程式碼完整性（HVCI），釋放始終保留的約 1–2 GB 記憶體。這是與安全性的取捨；若你使用 Hyper-V、WSL2、Windows Sandbox、Docker Desktop 或 Credential Guard，請保持 OFF（預設）。 OFF 會刪除 BCD 和登錄中的明確設定，交由 Windows 預設設定和原則決定。不儲存或還原先前的設定。</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">合併 SvcHost 處理程序（抑制分割）</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">預設情況下，Windows 會依功能分割啟動 svchost.exe（在 RAM 超過 3.5 GB 的電腦上）。將此項設為 ON 會把分割門檻提到最大，將可分組的服務合併到較少的處理程序中，藉此減少處理程序數量與記憶體使用量（數十到一百多 MB）。被視為安全性界限的服務（DiagTrack、Dnscache 等）不會被合併。OFF 會移除門檻並還原為預設分割。</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">批次關閉 UWP 背景執行 / 使用 Windows 預設設定（節省 200–500 MB）</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">ON 會將所有 Store（UWP）應用程式的背景執行設為「永遠關閉」。OFF 會刪除目標應用程式的明確設定，改用 Windows 預設設定。不儲存或還原各應用程式先前的設定。</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">UWP背景執行</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">全部OFF禁止目前已安裝的Store（UWP）應用程式在背景執行；全部ON明確允許背景執行。ON不是還原Windows預設設定。安裝新應用程式後請重新執行。不會儲存或還原先前的各應用程式設定。 僅變更各應用程式設定。實際是否允許或禁止也取決於Windows全域設定、組織原則和應用程式本身的限制。</x:String>
   <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">停用 Windows Recall</x:String>
   <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">停用定期記錄螢幕快照以供 AI 搜尋的 Recall 功能（Click-to-do、語意搜尋等其他 AI 功能予以保留）。減少記錄處理程序的記憶體/磁碟消耗及隱私顧慮。僅在 Windows 11 24H2 + Copilot+ 電腦上可用；在不支援的電腦上無法讀取狀態，也無法切換。</x:String>
   <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">停用電源節流</x:String>
@@ -198,7 +201,7 @@
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">透過原則停用 Edge 背景模式與 Startup Boost。若很少使用 Edge，可釋放約 100–300 MB 記憶體。Edge 啟動可能稍慢，擴充功能通知也可能停止。將此項設為 OFF 可移除原則並還原 Edge 預設值。</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">選擇要刪除的對象</x:String>
   <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">選擇登入時執行的項目</x:String>
-  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">無法儲存選擇（請查看記錄）</x:String>
+  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">上次儲存此選擇失敗（請查看記錄）。</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">更新</x:String>
   <x:String x:Key="Text.UpdateDialog.AvailableHeader" xml:space="preserve">有新版本可用</x:String>
@@ -214,4 +217,13 @@
   <x:String x:Key="Text.Status.Applied" xml:space="preserve">已變更 {0}</x:String>
   <x:String x:Key="Text.Status.ApplyFailed" xml:space="preserve">變更 {0} 失敗 (請查看記錄)</x:String>
   <x:String x:Key="Text.Shutdown.BlockReason" xml:space="preserve">Lumin4ti 正在等待維護操作完成…</x:String>
+  <x:String x:Key="Text.Button.BatchOn" xml:space="preserve">全部ON</x:String>
+  <x:String x:Key="Text.Button.BatchOff" xml:space="preserve">全部OFF</x:String>
+  <x:String x:Key="Text.Setting.DefaultSystemManaged" xml:space="preserve">Windows／各應用程式的預設設定</x:String>
+  <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">開發版本</x:String>
+  <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">無法取得版本</x:String>
+  <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">上次儲存語言與更新設定失敗（請查看記錄）。</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">無法讀取設定。為保護原始檔案，已停止儲存，也不會執行登入時清理。變更僅在本次執行期間有效。</x:String>
+  <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">上次檢查時未找到目標。</x:String>
+  <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">重新開啟清單即可更新。執行時也會包含未被排除的新目標。</x:String>
 </ResourceDictionary>

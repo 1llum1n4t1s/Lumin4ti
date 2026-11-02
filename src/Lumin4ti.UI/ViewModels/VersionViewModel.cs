@@ -9,6 +9,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Lumin4ti.Core.Interfaces;
+using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services;
 using Lumin4ti.UI.Services;
 using VelopackUpdateDialog;
@@ -29,8 +30,12 @@ public partial class VersionViewModel : ObservableObject
     private string _updateStatusFallback = string.Empty;
     private object[] _updateStatusArgs = [];
 
-    [ObservableProperty]
-    private string versionText = "…";
+    public string VersionText => _updateService.CurrentVersion;
+
+    private string? _settingsSaveStatusKey;
+    private string _settingsSaveStatusFallback = string.Empty;
+    public string SettingsSaveStatusText => _settingsSaveStatusKey is { } key
+        ? App.Text(key, _settingsSaveStatusFallback) : string.Empty;
 
     [ObservableProperty]
     private string updateStatusText = string.Empty;
@@ -79,13 +84,21 @@ public partial class VersionViewModel : ObservableObject
         _updateService = updateService;
         _settingsService = settingsService;
         _operationCoordinator = operationCoordinator;
-        VersionText = updateService.CurrentVersion;
         CheckForUpdatesOnStartup = settingsService.Current.CheckForUpdatesOnStartup;
         IgnoredUpdateTag = settingsService.Current.IgnoreUpdateTag ?? string.Empty;
+        if (settingsService.LoadStatus == SettingsLoadStatus.Failed)
+        {
+            ShowSuppressedSaveStatus();
+        }
 
         // 現在のロケールを選択状態に反映 (App.SetLocale は起動時に適用済み)
         _selectedLocale = Locales.FirstOrDefault(l => l.Key == App.CurrentLocaleKey) ?? Locales.FirstOrDefault();
-        App.LocaleChanged += RefreshUpdateStatus;
+        App.LocaleChanged += () =>
+        {
+            RefreshUpdateStatus();
+            OnPropertyChanged(nameof(VersionText));
+            OnPropertyChanged(nameof(SettingsSaveStatusText));
+        };
     }
 
     private void SetUpdateStatus(string? key = null, string fallback = "", params object[] args)
@@ -174,26 +187,25 @@ public partial class VersionViewModel : ObservableObject
             return;
         }
 
-        var manager = _updateService.TryCreateInstalledManager();
-        if (manager is null)
-        {
-            if (manually)
-            {
-                SetUpdateStatus("UpdateDialog.DevelopmentBuild", "開発ビルドのため更新確認はスキップされます (インストール版でのみ動作)");
-            }
-
-            LoggerBootstrap.Log.Info("更新確認をスキップ: Velopack のインストール環境ではありません");
-
-            return;
-        }
-
         var mode = manually ? "手動" : "起動時";
         LoggerBootstrap.Log.Info($"更新確認を開始します: mode={mode}");
         _updateDialogOpen = true;
         IsChecking = true;
         SetUpdateStatus();
+        Velopack.UpdateManager? manager = null;
         try
         {
+            manager = _updateService.TryCreateInstalledManager();
+            if (manager is null)
+            {
+                if (manually)
+                {
+                    SetUpdateStatus("UpdateDialog.DevelopmentBuild", "開発ビルドのため更新確認はスキップされます (インストール版でのみ動作)");
+                }
+                LoggerBootstrap.Log.Info("更新確認をスキップ: Velopack のインストール環境ではありません");
+                return;
+            }
+
             var options = new UpdateDialogOptions
             {
                 Strings = Lumin4tiUpdateStrings.Instance,
@@ -256,13 +268,30 @@ public partial class VersionViewModel : ObservableObject
 
     private async Task SaveSettingsAsync()
     {
+        if (_settingsService.LoadStatus == SettingsLoadStatus.Failed)
+        {
+            ShowSuppressedSaveStatus();
+            return;
+        }
         try
         {
             await _settingsService.SaveAsync();
+            SetSettingsSaveStatus();
         }
         catch (Exception ex)
         {
             LoggerBootstrap.Log.Error("設定の保存に失敗しました", ex);
+            SetSettingsSaveStatus("Settings.SaveFailed", "言語・更新設定の前回の保存に失敗しました（ログを確認してください）。");
         }
     }
+
+    private void SetSettingsSaveStatus(string? key = null, string fallback = "")
+    {
+        _settingsSaveStatusKey = key;
+        _settingsSaveStatusFallback = fallback;
+        OnPropertyChanged(nameof(SettingsSaveStatusText));
+    }
+
+    private void ShowSuppressedSaveStatus() => SetSettingsSaveStatus("Settings.SaveSuppressed",
+        "設定を読み込めないため、原本を保護して保存を停止し、サインイン時クリーンアップも実行しません。変更はこの起動中だけ有効です。");
 }

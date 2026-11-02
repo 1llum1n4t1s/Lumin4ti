@@ -23,46 +23,151 @@ public sealed class UwpBackgroundToggleTests
     [AssemblyCleanup]
     public static void ShutdownLogging() => LogManager.Shutdown();
 
+    private static string Manifest(string applications) =>
+        "<Package xmlns=\"http://schemas.microsoft.com/appx/manifest/foundation/windows10\" " +
+        "xmlns:uap10=\"http://schemas.microsoft.com/appx/manifest/uap/windows10/10\" " +
+        "xmlns:previewsecurity2=\"http://schemas.microsoft.com/appx/manifest/preview/windows10/security/2\"><Applications>" +
+        applications + "</Applications></Package>";
+
     [TestMethod]
-    public async Task 状態は現在の全対象の両方の値が一致した場合だけONになる()
+    [DataRow("<Application uap10:RuntimeBehavior=\"windowsApp\" EntryPoint=\"Example.App\" />", true)]
+    [DataRow("<Application uap10:RuntimeBehavior=\"win32App\" />", false)]
+    [DataRow("<Application uap10:RuntimeBehavior=\"packagedClassicApp\" />", false)]
+    [DataRow("<Application EntryPoint=\"Example.App\" />", true)]
+    [DataRow("<Application StartPage=\"default.html\" />", true)]
+    [DataRow("<Application previewsecurity2:RuntimeBehavior=\"windowsApp\" EntryPoint=\"Example.App\" />", true)]
+    [DataRow("<Application previewsecurity2:RuntimeBehavior=\"win32App\" />", false)]
+    [DataRow("<Application previewsecurity2:RuntimeBehavior=\"packagedClassicApp\" />", false)]
+    [DataRow("<Application previewsecurity2:RuntimeBehavior=\"appSilo\" />", false)]
+    [DataRow("<Application EntryPoint=\"Windows.FullTrustApplication\" />", false)]
+    [DataRow("<Application EntryPoint=\"windows.partialTrustApplication\" />", false)]
+    [DataRow("<Application EntryPoint=\"Windows.FullTrustApplication\" /><Application EntryPoint=\"Example.App\" />", true)]
+    [DataRow("", false)]
+    public async Task UWPを含むパッケージだけへ一括ONを書き込む(string applications, bool expectedTarget)
     {
         var store = new FakeSettingsStore();
-        store.Values["A"] = UwpBackgroundValues.Applied;
-        store.Values["B"] = new(1, 0);
-        var toggle = NewToggle(store);
-        Assert.AreEqual(false, await toggle.GetStateAsync());
-        store.Values["B"] = UwpBackgroundValues.Applied;
-        Assert.AreEqual(true, await toggle.GetStateAsync());
-        Assert.IsNull(toggle.StateDiagnostic);
-        Assert.AreEqual(false, await new UwpBackgroundToggle(() => [], store).GetStateAsync());
+        var setting = new UwpBackgroundBatchSetting(() =>
+        {
+            using var reader = new StringReader(Manifest(applications));
+            return UwpBackgroundBatchSetting.ContainsUwpApplications(reader) ? ["A"] : [];
+        }, store);
+        Assert.IsTrue((await setting.ApplyAsync(true)).Success);
+        Assert.AreEqual(expectedTarget ? 1 : 0, store.WriteCalls);
+        Assert.AreEqual(expectedTarget, store.Values.ContainsKey("A"));
+        if (expectedTarget) Assert.AreEqual(UwpBackgroundValues.Enabled, store.Values["A"]);
     }
 
     [TestMethod]
-    public async Task ON後の別インスタンスのOFFは元値に関係なく現在の全対象をWindows既定へ戻す()
+    [DataRow(0)]
+    [DataRow(1)]
+    [DataRow(2)]
+    [DataRow(3)]
+    [DataRow(4)]
+    [DataRow(5)]
+    [DataRow(6)]
+    public async Task 判別不能やDTDや読込不能は既知UWPも含め全件書込前に失敗する(int failure)
+    {
+        var store = new FakeSettingsStore();
+        var setting = new UwpBackgroundBatchSetting(() =>
+        {
+            using var known = new StringReader(Manifest("<Application EntryPoint=\"Example.App\" />"));
+            Assert.IsTrue(UwpBackgroundBatchSetting.ContainsUwpApplications(known));
+            using TextReader invalid = failure switch
+            {
+                0 => new StringReader("<!DOCTYPE Package [<!ENTITY x 'value'>]>" + Manifest("")),
+                1 => new StringReader(Manifest("<Application />")),
+                2 => new FailingManifestReader(),
+                3 => new StringReader(Manifest("<Application uap10:RuntimeBehavior=\"unknown\" />")),
+                4 => new StringReader(Manifest("<Application uap10:RuntimeBehavior=\"windowsApp\" previewsecurity2:RuntimeBehavior=\"win32App\" />")),
+                5 => new StringReader(Manifest("<Application previewsecurity2:RuntimeBehavior=\"unknown\" />")),
+                _ => new StringReader("<Package xmlns=\"urn:unknown\" />"),
+            };
+            UwpBackgroundBatchSetting.ContainsUwpApplications(invalid);
+            return ["A", "B"];
+        }, store);
+        Assert.AreEqual(MaintenanceActionStatus.Failed, (await setting.ApplyAsync(true)).Status);
+        Assert.AreEqual(0, store.WriteCalls);
+    }
+
+    private sealed class FailingManifestReader : TextReader
+    {
+        public override int Read(char[] buffer, int index, int count) => throw new IOException("MANIFEST_READ_DENIED");
+    }
+
+    [TestMethod]
+    public async Task 旧Windowsパッケージを除外してWindows10のJavaScriptUWPへ適用する()
+    {
+        var store = new FakeSettingsStore();
+        var setting = new UwpBackgroundBatchSetting(() =>
+        {
+            var manifests = new Dictionary<string, string>
+            {
+                ["Legacy"] = "<Package xmlns=\"http://schemas.microsoft.com/appx/2010/manifest\"><Applications><Application StartPage=\"default.html\" /></Applications></Package>",
+                ["JavaScript"] = Manifest("<Application StartPage=\"default.html\" />"),
+                ["Desktop"] = Manifest("<Application previewsecurity2:RuntimeBehavior=\"appSilo\" />"),
+            };
+            return manifests.Where(pair =>
+            {
+                using var reader = new StringReader(pair.Value);
+                return UwpBackgroundBatchSetting.ContainsUwpApplications(reader);
+            }).Select(pair => pair.Key).ToArray();
+        }, store);
+        Assert.IsTrue((await setting.ApplyAsync(true)).Success);
+        CollectionAssert.AreEquivalent(new[] { "JavaScript" }, store.Values.Keys.ToArray());
+        Assert.AreEqual(UwpBackgroundValues.Enabled, store.Values["JavaScript"]);
+    }
+
+    [TestMethod]
+    public async Task 対象の再列挙に失敗したら書き込まず失敗にする()
+    {
+        var store = new FakeSettingsStore();
+        var setting = new UwpBackgroundBatchSetting(() => throw new IOException("ENUMERATION_DENIED"), store);
+        var result = await setting.ApplyAsync(false);
+        Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
+        StringAssert.Contains(result.Detail, "ENUMERATION_DENIED");
+        Assert.AreEqual(0, store.WriteCalls);
+    }
+
+    [TestMethod]
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task 同方向の連続実行と新アプリ追加後の再実行は現在の全対象へ適用する(bool enabled)
     {
         var store = new FakeSettingsStore();
         store.Values["A"] = new(7, 8);
         store.Values["B"] = new(null, 0);
-        Assert.IsTrue((await NewToggle(store).SetStateAsync(true)).Success);
-        Assert.AreEqual(UwpBackgroundValues.Applied, store.Values["A"]);
-        Assert.AreEqual(UwpBackgroundValues.Applied, store.Values["B"]);
-        // 前回の適用後に追加・外部変更されたアプリも、今回の明示的な OFF の対象。
+        var families = new List<string> { "A", "B" };
+        var setting = new UwpBackgroundBatchSetting(() => families.ToArray(), store);
+        var target = enabled ? UwpBackgroundValues.Enabled : UwpBackgroundValues.DisabledValues;
+        var result = await setting.ApplyAsync(enabled);
+        Assert.IsTrue(result.Success);
+        StringAssert.Contains(result.Detail, enabled ? "アプリ別設定を一括ON" : "アプリ別設定を一括OFF");
+        StringAssert.Contains(result.Detail, "Windows 全体設定・ポリシー・アプリの制約");
+        Assert.AreEqual(target, store.Values["A"]);
+        Assert.AreEqual(target, store.Values["B"]);
+        var writes = store.WriteCalls;
+        Assert.IsTrue((await setting.ApplyAsync(enabled)).Success);
+        Assert.AreEqual(writes, store.WriteCalls, "一致済みの値には不要な書込を行わない");
+        // 同じインスタンスでも対象を再列挙し、追加・外部変更されたアプリへ再適用する。
         store.Values["A"] = new(5, 6);
         store.Values["C"] = new(9, 10);
-        Assert.IsTrue((await new UwpBackgroundToggle(() => ["A", "B", "C"], store).SetStateAsync(false)).Success);
-        foreach (var family in new[] { "A", "B", "C" }) Assert.AreEqual(default, store.Values[family]);
-        Assert.IsFalse((await NewToggle(store).GetStateAsync())!.Value);
+        families.Add("C");
+        Assert.IsTrue((await setting.ApplyAsync(enabled)).Success);
+        foreach (var family in families) Assert.AreEqual(target, store.Values[family]);
     }
 
     [TestMethod]
-    public async Task 前回の適用情報なしでもOFFは明示的な上書きを削除する()
+    public async Task 両方向は元値や前回の適用情報に関係なく禁止と許可を明示設定する()
     {
         var store = new FakeSettingsStore();
         store.Values["A"] = new(1, null);
         store.Values["B"] = new(0, 9);
-        Assert.IsTrue((await NewToggle(store).SetStateAsync(false)).Success);
-        Assert.AreEqual(default, store.Values["A"]);
-        Assert.AreEqual(default, store.Values["B"]);
+        Assert.IsTrue((await NewToggle(store).ApplyAsync(false)).Success);
+        Assert.AreEqual(UwpBackgroundValues.DisabledValues, store.Values["A"]);
+        Assert.AreEqual(UwpBackgroundValues.DisabledValues, store.Values["B"]);
+        Assert.IsTrue((await NewToggle(store).ApplyAsync(true)).Success);
+        Assert.AreEqual(UwpBackgroundValues.Enabled, store.Values["A"]);
+        Assert.AreEqual(UwpBackgroundValues.Enabled, store.Values["B"]);
     }
 
     [TestMethod]
@@ -77,7 +182,7 @@ public sealed class UwpBackgroundToggleTests
         {
             if (call == 2) throw new IOException("PAIR_WRITE_DENIED " + family);
         };
-        var result = await NewToggle(store).SetStateAsync(on);
+        var result = await NewToggle(store).ApplyAsync(on);
         Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
         StringAssert.Contains(result.Detail, "PAIR_WRITE_DENIED B");
         Assert.AreEqual(originalA, store.Values["A"]);
@@ -94,7 +199,7 @@ public sealed class UwpBackgroundToggleTests
         var originalA = store.Values["A"];
         var originalB = store.Values["B"];
         store.AfterFirstValue = (_, _, call, _) => { if (call == 2) cancellation.Cancel(); };
-        var result = await NewToggle(store).SetStateAsync(on, cancellation.Token);
+        var result = await NewToggle(store).ApplyAsync(on, cancellation.Token);
         Assert.AreEqual(MaintenanceActionStatus.Canceled, result.Status);
         Assert.AreEqual(originalA, store.Values["A"]);
         Assert.AreEqual(originalB, store.Values["B"]);
@@ -116,7 +221,7 @@ public sealed class UwpBackgroundToggleTests
             cancellation.Cancel();
         };
 
-        var result = await NewToggle(store).SetStateAsync(on, cancellation.Token);
+        var result = await NewToggle(store).ApplyAsync(on, cancellation.Token);
 
         Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
         Assert.AreEqual(originalA, store.Values["A"]);
@@ -140,7 +245,7 @@ public sealed class UwpBackgroundToggleTests
                 throw new IOException("FINAL_READ_DENIED");
         };
 
-        var result = await NewToggle(store).SetStateAsync(true, cancellation.Token);
+        var result = await NewToggle(store).ApplyAsync(true, cancellation.Token);
 
         Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
         Assert.AreEqual(originalA, store.Values["A"]);
@@ -160,7 +265,7 @@ public sealed class UwpBackgroundToggleTests
             if (call == 2) cancellation.Cancel();
             if (call > 2) throw new IOException("COMPENSATION_DENIED");
         };
-        var result = await NewToggle(store).SetStateAsync(true, cancellation.Token);
+        var result = await NewToggle(store).ApplyAsync(true, cancellation.Token);
         Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
         StringAssert.Contains(result.Detail, "補償失敗");
         StringAssert.Contains(result.Detail, "COMPENSATION_DENIED");
@@ -175,7 +280,7 @@ public sealed class UwpBackgroundToggleTests
         {
             if (families.Count == 1 && families[0] == "B") store.Values["B"] = new(7, 8);
         };
-        var result = await NewToggle(store).SetStateAsync(true);
+        var result = await NewToggle(store).ApplyAsync(true);
         Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
         Assert.AreEqual(originalA, store.Values["A"]);
         Assert.AreEqual(new UwpBackgroundValues(7, 8), store.Values["B"]);
@@ -193,7 +298,7 @@ public sealed class UwpBackgroundToggleTests
             store.Values[family] = new(7, 8);
             throw new IOException("WRITE_DENIED");
         };
-        var result = await NewToggle(store).SetStateAsync(true);
+        var result = await NewToggle(store).ApplyAsync(true);
         Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
         Assert.AreEqual(originalA, store.Values["A"]);
         Assert.AreEqual(new UwpBackgroundValues(7, 8), store.Values["B"]);
@@ -206,7 +311,7 @@ public sealed class UwpBackgroundToggleTests
         var store = InitialStore(true);
         var originalA = store.Values["A"];
         store.SkipSecondValueCall = 1;
-        var result = await NewToggle(store).SetStateAsync(true);
+        var result = await NewToggle(store).ApplyAsync(true);
         Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
         StringAssert.Contains(result.Detail, "変更を確認できません");
         Assert.AreEqual(originalA, store.Values["A"]);
@@ -218,22 +323,23 @@ public sealed class UwpBackgroundToggleTests
         var store = InitialStore(true);
         store.AfterFirstValue = (_, _, call, _) => { if (call == 2) throw new IOException("WRITE_DENIED"); };
         store.SkipSecondValueCall = 4;
-        var result = await NewToggle(store).SetStateAsync(true);
+        var result = await NewToggle(store).ApplyAsync(true);
         Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
         StringAssert.Contains(result.Detail, "補償を確認できません");
     }
 
     [TestMethod]
-    public async Task 全対象の事前読込が失敗したら一件も変更しない()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task 全対象の事前読込が失敗したら一件も変更しない(bool enabled)
     {
-        var store = InitialStore(true);
-        store.BeforeRead = (_, _) => throw new IOException("READ_DENIED");
+        var store = InitialStore(enabled);
         var toggle = NewToggle(store);
-        var result = await toggle.SetStateAsync(true);
+        store.BeforeRead = (_, _) => throw new IOException("READ_DENIED");
+        var result = await toggle.ApplyAsync(enabled);
         Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
         Assert.AreEqual(0, store.WriteCalls);
-        Assert.IsNull(await toggle.GetStateAsync());
-        StringAssert.Contains(toggle.StateFailureReason!, "READ_DENIED");
+        StringAssert.Contains(result.Detail, "READ_DENIED");
     }
 
     [TestMethod]
@@ -246,7 +352,7 @@ public sealed class UwpBackgroundToggleTests
             if (call >= 2) throw new IOException("UWP_CAUSE token=UWP_SECRET_CANARY");
         };
         var toggle = NewToggle(store);
-        Assert.AreEqual(MaintenanceActionStatus.Failed, (await toggle.SetStateAsync(true)).Status);
+        Assert.AreEqual(MaintenanceActionStatus.Failed, (await toggle.ApplyAsync(true)).Status);
         var messages = Logs.Messages.Skip(start).ToArray();
         Assert.IsTrue(messages.Any(entry => entry.Level == LogLevel.Error &&
             entry.Message.Contains(toggle.Id) && entry.Message.Contains(toggle.Label) &&
@@ -254,12 +360,12 @@ public sealed class UwpBackgroundToggleTests
         Assert.IsFalse(messages.Any(entry => entry.Message.Contains("UWP_SECRET_CANARY")));
     }
 
-    private static UwpBackgroundToggle NewToggle(FakeSettingsStore store) => new(() => ["A", "B"], store);
+    private static UwpBackgroundBatchSetting NewToggle(FakeSettingsStore store) => new(() => ["A", "B"], store);
     private static FakeSettingsStore InitialStore(bool on)
     {
         var store = new FakeSettingsStore();
-        store.Values["A"] = on ? new(null, 0) : UwpBackgroundValues.Applied;
-        store.Values["B"] = on ? new(0, null) : UwpBackgroundValues.Applied;
+        store.Values["A"] = on ? new(null, 1) : new(null, 0);
+        store.Values["B"] = on ? new(1, null) : new(0, null);
         return store;
     }
 

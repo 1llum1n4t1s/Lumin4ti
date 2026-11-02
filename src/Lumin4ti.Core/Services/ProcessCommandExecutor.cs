@@ -25,18 +25,23 @@ public class ProcessCommandExecutor : ICommandExecutor
     {
         // .NET Core 既定では CP932 等のレガシーコードページが未登録なので、フォールバック用に登録する。
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        OemEncoding = ResolveOemEncoding(CultureInfo.CurrentCulture);
+    }
+
+    internal static Encoding ResolveOemEncoding(CultureInfo culture)
+    {
         try
         {
-            OemEncoding = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage);
+            return Encoding.GetEncoding(culture.TextInfo.OEMCodePage);
         }
         catch (Exception ex)
         {
             // 想定外のコードページでも落ちないよう、全バイトを写像できる Latin1 を最終手段にする。
             // このフォールバックに落ちると外部コマンドの日本語出力が化けるため、必ず残す。
-            OemEncoding = Encoding.Latin1;
             LoggerBootstrap.Log.Error(
-                $"OEM コードページ ({CultureInfo.CurrentCulture.TextInfo.OEMCodePage}) を取得できないため Latin1 で代替します",
+                $"OEM コードページ ({culture.TextInfo.OEMCodePage}) を取得できないため Latin1 で代替します",
                 ex);
+            return Encoding.Latin1;
         }
     }
 
@@ -363,7 +368,9 @@ public class ProcessCommandExecutor : ICommandExecutor
     /// <summary>
     /// まず厳密 UTF-8 として解釈し、不正バイトがあれば OEM コードページにフォールバックする。
     /// </summary>
-    internal static string DecodeConsoleOutput(byte[] bytes)
+    internal static string DecodeConsoleOutput(byte[] bytes) => DecodeConsoleOutput(bytes, OemEncoding);
+
+    internal static string DecodeConsoleOutput(byte[] bytes, Encoding oemEncoding)
     {
         if (bytes.Length == 0)
         {
@@ -392,7 +399,7 @@ public class ProcessCommandExecutor : ICommandExecutor
                 }
             }
 
-            return OemEncoding.GetString(bytes);
+            return oemEncoding.GetString(bytes);
         }
     }
 

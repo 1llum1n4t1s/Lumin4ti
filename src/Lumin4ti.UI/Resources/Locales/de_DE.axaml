@@ -84,7 +84,10 @@
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Neustart des Explorers fehlgeschlagen (bitte manuell neu starten)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Der Status konnte nicht gelesen werden (keine Administratorrechte oder die Funktion ist auf diesem PC nicht verfügbar. Debug-Starts werden nicht mit erhöhten Rechten ausgeführt, versuchen Sie daher einen normalen Start).</x:String>
   <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">DISM konnte den Recall-Status nicht ermitteln. Möglicherweise unterstützt dieser PC die Funktion nicht oder es fehlen Administratorrechte. Details finden Sie im Protokoll.</x:String>
-  <x:String x:Key="Text.Toggle.SetOff" xml:space="preserve">Ausschalten</x:String>
+  <x:String x:Key="Text.Setting.DefaultFormat" xml:space="preserve">Standard: {0}</x:String>
+  <x:String x:Key="Text.Setting.DefaultEnvironment" xml:space="preserve">Umgebungsabhängig / unbekannt</x:String>
+  <x:String x:Key="Text.Toggle.CustomState" xml:space="preserve">Benutzerdefiniert (ON/OFF wählen)</x:String>
+  <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">Benutzerdefiniert</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">Die DISM-Ausgabe enthält keinen Recall-Status. Details finden Sie im Protokoll.</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">Der von DISM zurückgegebene Recall-Status konnte nicht ausgewertet werden. Details finden Sie im Protokoll.</x:String>
   <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">Diese Aufgabe wurde von einem anderen Windows-Benutzer registriert und kann nicht geändert werden.</x:String>
@@ -126,7 +129,7 @@
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">Browser-Caches löschen</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Löscht Chromium-Web- und Shader-Caches, Service-Worker-Cache-Speicher, Absturzberichte und temporäre Erweiterungsdaten. Service-Worker-Registrierungen, DRM-Komponenten, Lesezeichen, Kennwörter und Anmeldestatus werden nicht gelöscht.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">Symbol-, Miniaturansicht- und Schriftart-Caches neu aufbauen</x:String>
-  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">Löscht den Symbolcache, den Miniaturansichtscache und den Schriftartcache des Explorers, damit Windows sie neu aufbaut. Eine bewährte Reparatur für leere oder falsche Symbole, Miniaturansichten, die sich nie aktualisieren, und falsch dargestellten Text. Dateien, die die Shell weiterhin geöffnet hält, werden beim nächsten Windows-Neustart entfernt. Starten Sie Windows neu, um den Neuaufbau abzuschließen. Während des Neuaufbaus ist die Anzeige kurzzeitig langsamer.</x:String>
+  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">Löscht den Symbolcache, den Miniaturansichtscache und den Schriftartcache des Explorers, damit Windows sie neu aufbaut. Eine bewährte Reparatur für leere oder falsche Symbole, Miniaturansichten, die sich nie aktualisieren, und falsch dargestellten Text. Der Explorer wird nicht zwangsweise beendet. Ausgewählte, noch verwendete Caches werden beim nächsten Windows-Start aus einer vertrauenswürdigen Installation erneut erfasst; anschließend wird ihre Löschung versucht. Es erfolgen höchstens drei Ausführungen innerhalb von sieben Tagen. Weiterhin gesperrte Ziele bleiben erhalten, und die Ergebnisse werden protokolliert. Während des Neuaufbaus ist die Anzeige kurzzeitig langsamer.</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">Download-Cache von Windows Update löschen</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">Löscht nur erneut herunterladbare Dateien aus SoftwareDistribution\Download. Updateverlauf und catroot2 werden nicht gelöscht. Zugehörige Dienste werden anschließend wiederhergestellt.</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">Vorabladedaten und Suchindex löschen und neu aufbauen</x:String>
@@ -152,8 +155,8 @@
   <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">Deaktiviert die virtualisierungsbasierte Sicherheit (VBS) und die durch den Hypervisor erzwungene Codeintegrität (HVCI), um die dauerhaft reservierten ~1–2 GB Speicher freizugeben. Dies ist ein Kompromiss mit der Sicherheit; belassen Sie es auf AUS (Standard), wenn Sie Hyper-V, WSL2, Windows-Sandbox, Docker Desktop oder Credential Guard verwenden. AUS entfernt explizite BCD- und Registrierungseinstellungen und überlässt die Konfiguration den Windows-Standardwerten und Richtlinien. Frühere Einstellungen werden weder gespeichert noch wiederhergestellt.</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">SvcHost-Prozesse zusammenfassen (Aufteilung unterdrücken)</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">Standardmäßig startet Windows svchost.exe pro Funktion aufgeteilt (auf PCs mit mehr als 3,5 GB RAM). Das Einschalten dieser Option maximiert die Aufteilungsschwelle und fasst gruppierbare Dienste zu weniger Prozessen zusammen, wodurch Prozessanzahl und Speicherverbrauch sinken (mehrere zehn bis über hundert MB). Als Sicherheitsgrenzen behandelte Dienste (DiagTrack, Dnscache usw.) werden nicht zusammengefasst. AUS entfernt die Schwelle und stellt die Standardaufteilung wieder her.</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">UWP-Hintergrundausführung deaktivieren / Windows-Standard verwenden (200–500 MB sparen)</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">EIN setzt die Hintergrundausführung aller Store-(UWP-)Apps auf „Immer aus“. AUS entfernt die expliziten Einstellungen der betroffenen Apps und überlässt sie den Windows-Standardwerten. Frühere Einstellungen einzelner Apps werden weder gespeichert noch wiederhergestellt.</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">UWP-Hintergrundausführung</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">Alle OFF verhindert die Hintergrundausführung installierter Store-Apps (UWP); Alle ON erlaubt sie ausdrücklich. ON stellt keine Windows-Standardwerte wieder her. Nach der Installation neuer Apps erneut ausführen. Vorherige App-Einstellungen werden weder gespeichert noch wiederhergestellt. Geändert werden nur App-Einstellungen. Die wirksame Erlaubnis oder Sperre hängt auch von systemweiten Windows-Einstellungen, Organisationsrichtlinien und App-Einschränkungen ab.</x:String>
   <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">Windows Recall deaktivieren</x:String>
   <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">Deaktiviert die Recall-Funktion, die regelmäßig Bildschirm-Schnappschüsse für die KI-Suche aufzeichnet (andere KI-Funktionen wie Click-to-do und die semantische Suche bleiben erhalten). Verringert den Speicher-/Festplattenverbrauch des Aufzeichnungsprozesses und Datenschutzbedenken. Nur auf Windows 11 24H2 + Copilot+ PCs verfügbar; auf nicht unterstützten PCs kann der Status nicht gelesen und nicht umgeschaltet werden.</x:String>
   <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">Energiedrosselung deaktivieren</x:String>
@@ -198,7 +201,7 @@
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Deaktiviert per Richtlinie den Edge-Hintergrundmodus und Startup Boost. Wenn Sie Edge selten verwenden, können dadurch etwa 100–300 MB Arbeitsspeicher frei werden. Der Start kann etwas länger dauern und Erweiterungsbenachrichtigungen können ausbleiben. AUS entfernt die Richtlinien und stellt die Edge-Standardwerte wieder her.</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">Auswählen, was gelöscht wird</x:String>
   <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">Auswählen, was bei der Anmeldung läuft</x:String>
-  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">Auswahl konnte nicht gespeichert werden (siehe Protokoll)</x:String>
+  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">Der letzte Speicherversuch dieser Auswahl ist fehlgeschlagen (siehe Protokoll).</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">Update</x:String>
   <x:String x:Key="Text.UpdateDialog.AvailableHeader" xml:space="preserve">Eine neue Version ist verfügbar</x:String>
@@ -214,4 +217,13 @@
   <x:String x:Key="Text.Status.Applied" xml:space="preserve">{0} wurde geändert</x:String>
   <x:String x:Key="Text.Status.ApplyFailed" xml:space="preserve">{0} konnte nicht geändert werden (siehe Protokoll)</x:String>
   <x:String x:Key="Text.Shutdown.BlockReason" xml:space="preserve">Lumin4ti wartet auf den Abschluss des Wartungsvorgangs…</x:String>
+  <x:String x:Key="Text.Button.BatchOn" xml:space="preserve">Alle ON</x:String>
+  <x:String x:Key="Text.Button.BatchOff" xml:space="preserve">Alle OFF</x:String>
+  <x:String x:Key="Text.Setting.DefaultSystemManaged" xml:space="preserve">Windows- / App-Standardwerte</x:String>
+  <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">Entwicklungsversion</x:String>
+  <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">Version nicht verfügbar</x:String>
+  <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">Der letzte Speicherversuch der Sprach- und Aktualisierungseinstellungen ist fehlgeschlagen (siehe Protokoll).</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Die Einstellungen konnten nicht gelesen werden. Zum Schutz der Originaldatei wird nicht gespeichert; die Bereinigung bei der Anmeldung bleibt aus. Änderungen gelten nur für diese Sitzung.</x:String>
+  <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">Bei der letzten Prüfung wurden keine Ziele gefunden.</x:String>
+  <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">Öffnen Sie die Liste erneut, um sie zu aktualisieren. Beim Ausführen werden auch neu gefundene Ziele einbezogen, die nicht ausgeschlossen sind.</x:String>
 </ResourceDictionary>

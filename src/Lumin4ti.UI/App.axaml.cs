@@ -93,6 +93,7 @@ public partial class App : Application
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddSingleton<ICommandExecutor, ProcessCommandExecutor>();
         services.AddSingleton<ICleanupPreferences, CleanupPreferences>();
+        services.AddSingleton<IRebootCacheCleanupScheduler, RebootCacheCleanupService>();
         services.AddSingleton<IDisconnectedDeviceService, WindowsDisconnectedDeviceService>();
         services.AddSingleton<MaintenanceActionCatalog>();
         services.AddSingleton<MaintenanceOperationCoordinator>();

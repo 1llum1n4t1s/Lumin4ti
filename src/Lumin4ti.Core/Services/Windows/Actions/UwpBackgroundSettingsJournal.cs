@@ -5,9 +5,8 @@ namespace Lumin4ti.Core.Services.Windows.Actions;
 
 internal readonly record struct UwpBackgroundValues(int? Disabled, int? DisabledByUser)
 {
-    public static UwpBackgroundValues Applied => new(AppliedValue, AppliedValue);
-
-    private const int AppliedValue = 1;
+    public static UwpBackgroundValues Enabled => new(0, 0);
+    public static UwpBackgroundValues DisabledValues => new(1, 1);
 
     public bool IsCombinationOf(UwpBackgroundValues before, UwpBackgroundValues after) =>
         (Disabled == before.Disabled || Disabled == after.Disabled) &&

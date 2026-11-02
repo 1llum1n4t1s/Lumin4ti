@@ -84,7 +84,10 @@
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Explorer पुनःप्रारम्भयितुं न शक्तम् (कृपया स्वहस्तेन पुनःप्रारभस्व)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">स्थितिं पठितुं न शक्तम् (व्यवस्थापकाधिकाराः न सन्ति, अथवा अस्मिन् PC वैशिष्ट्यम् अनुपलब्धम्। Debug-प्रारम्भाः उन्नताः न भवन्ति, अतः सामान्यप्रारम्भं प्रयत्नस्व)।</x:String>
   <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">DISM द्वारा Recall इत्यस्य स्थितिं प्राप्तुं न शक्यते। अस्मिन् सङ्गणके एतत् वैशिष्ट्यं न समर्थितं स्यात्, अथवा व्यवस्थापकाधिकाराः अपर्याप्ताः स्युः। विवरणार्थं वृत्तान्तं पश्यन्तु।</x:String>
-  <x:String x:Key="Text.Toggle.SetOff" xml:space="preserve">OFF कुरुत</x:String>
+  <x:String x:Key="Text.Setting.DefaultFormat" xml:space="preserve">पूर्वनिर्धारितम्: {0}</x:String>
+  <x:String x:Key="Text.Setting.DefaultEnvironment" xml:space="preserve">परिवेशानुसारम् / अज्ञातम्</x:String>
+  <x:String x:Key="Text.Toggle.CustomState" xml:space="preserve">स्वनिर्धारितम् (ON/OFF चिनोतु)</x:String>
+  <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">स्वनिर्धारितम्</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">DISM इत्यस्य निर्गमे Recall इत्यस्य स्थितिः न दृश्यते। विवरणार्थं वृत्तान्तं पश्यन्तु।</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">DISM द्वारा दत्तां Recall इत्यस्य स्थितिं निर्णेतुं न शक्यते। विवरणार्थं वृत्तान्तं पश्यन्तु।</x:String>
   <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">एतत् कार्यम् अन्येन Windows उपयोक्त्रा पञ्जीकृतम्, अतः परिवर्तयितुं न शक्यते।</x:String>
@@ -126,7 +129,7 @@
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">विचरकसंग्रहान् लोपयतु</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Deletes Chromium web and shader caches, Service Worker cache storage, crash reports, and extension temporary data. Service Worker registrations, DRM components, bookmarks, passwords, and sign-in state are not deleted.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">प्रतीक-लघुचित्र-अक्षरसंग्रहान् पुनः रचयतु</x:String>
-  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">अन्वेषकस्य प्रतीकसंग्रहं, लघुचित्रसंग्रहं, अक्षररूपसंग्रहं च लोपयति येन Windows तान् पुनः रचयति। रिक्ताः भ्रान्ता वा प्रतीकाः, कदापि अनवीकृतानि लघुचित्राणि, दुष्टतया प्रदर्शितः पाठः — एतेषां प्रमाणिकं संस्करणम्। कवचेन धृताः सञ्चिकाः Windows इत्यस्य अग्रिमपुनरारम्भे लोप्यन्ते। पुनर्रचनां सम्पादयितुं Windows पुनरारभध्वम्। संग्रहपुनर्रचनाकाले प्रदर्शनं क्षणं मन्दतरं भवति।</x:String>
+  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">अन्वेषकस्य प्रतीकसंग्रहं, लघुचित्रसंग्रहं, अक्षररूपसंग्रहं च लोपयति येन Windows तान् पुनः रचयति।रिक्ताः भ्रान्ता वा प्रतीकाः, कदापि अनवीकृतानि लघुचित्राणि, दुष्टतया प्रदर्शितः पाठः — एतेषां प्रमाणिकं संस्करणम्।अन्वेषकः बलात् न समाप्यते। उपयुज्यमानाः चयनितसंग्रहाः Windows इत्यस्य अग्रिमारम्भे विश्वस्तस्थापनात् पुनर्गण्यन्ते, ततः लोपनं प्रयत्यते। सप्तदिनाभ्यन्तरे अधिकतमं त्रिवारं निष्पाद्यते; अवरुद्धानि लक्ष्याणि रक्ष्यन्ते, फलितानि वृत्तान्ते लिख्यन्ते।संग्रहपुनर्रचनाकाले प्रदर्शनं क्षणं मन्दतरं भवति।</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">Windows Update इत्यस्य अवतरणसंग्रहं लोपयतु</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">Deletes only re-downloadable files from SoftwareDistribution\Download. Update history and catroot2 are not deleted. Related services are restored after cleanup.</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">पूर्वपठनदत्तांशम् अन्वेषणसूचीं च लोपयित्वा पुनः रचयतु</x:String>
@@ -152,8 +155,8 @@
   <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">सर्वदा आरक्षितं ~1–2 GB स्मृतिं मोचयितुं Virtualization-Based Security (VBS) Hypervisor-Enforced Code Integrity (HVCI) च निष्क्रियं करोति। एतत् सुरक्षया सह विनिमयः; यदि Hyper-V, WSL2, Windows Sandbox, Docker Desktop, Credential Guard वा प्रयुङ्क्षे तर्हि OFF (प्रामाणिकस्थितौ) एव त्यज। OFF BCD तथा पञ्जिकायाः स्पष्टविन्यासान् विलोप्य Windows पूर्वनिर्धारितमूल्यानि नीतीश्च प्रवर्तयति। पूर्वविन्यासाः न संरक्ष्यन्ते न च पुनःस्थाप्यन्ते।</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">SvcHost-प्रक्रियाः संहन्तुं (विभाजनं दमय)</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">प्रामाणिकतया Windows svchost.exe प्रतिवैशिष्ट्यं विभक्तं प्रारभते (3.5 GB-अधिकRAM-युक्तेषु PC-षु)। एतत् ON करणं विभाजनसीमां परमीकरोति, समूहीकरणीयसेवाः च अल्पप्रक्रियासु संहन्ति, प्रक्रियासंख्यां स्मृतिप्रयोगं च (दशकात् शताधिकMB यावत्) न्यूनीकरोति। सुरक्षासीमारूपेण गण्यमानाः सेवाः (DiagTrack, Dnscache इत्यादयः) न संहन्यन्ते। OFF सीमाम् अपनयति प्रामाणिकविभाजनं च प्रत्यानयति।</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">UWP पृष्ठभूमिनिष्पादनं निष्क्रियं कुरुत / Windows पूर्वनिर्धारितमूल्यानि प्रयुङ्क्त (200–500 MB स्मृतिसञ्चयः)</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">ON सर्वेषां Store (UWP) अनुप्रयोगाणां पृष्ठभूमिनिष्पादनं «सर्वदा निष्क्रियम्» इति निर्धारयति। OFF लक्षितानुप्रयोगाणां स्पष्टविन्यासान् विलोप्य Windows पूर्वनिर्धारितमूल्यानि प्रयुङ्क्ते। प्रत्येकानुप्रयोगस्य पूर्वविन्यासाः न संरक्ष्यन्ते न च पुनःस्थाप्यन्ते।</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">UWP पृष्ठभूमिनिष्पादनम्</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">सर्वे OFF इत्यनेन संस्थापितानां Store (UWP) अनुप्रयोगानां पृष्ठभूमिनिष्पादनं निषिध्यते; सर्वे ON इत्यनेन स्पष्टमनुज्ञायते। ON इति Windows पूर्वनिर्धारितविन्यासं न पुनःस्थापयति। नूतनानुप्रयोगस्थापनानन्तरं पुनः निष्पादयतु। पूर्वविन्यासाः न संरक्ष्यन्ते न पुनःस्थाप्यन्ते। केवलं प्रत्येकानुप्रयोगस्य विन्यासाः परिवर्त्यन्ते। वास्तविकानुमतिः निषेधो वा Windows समग्रविन्यासान्, संस्थानीतीः, अनुप्रयोगमर्यादाश्च अनुसरति।</x:String>
   <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">Windows Recall निष्क्रियं कुरु</x:String>
   <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">AI-अन्वेषणार्थं समयान्तरे पटलचित्राणि लेखयन् Recall-वैशिष्ट्यं निष्क्रियं करोति (Click-to-do, अर्थान्वेषणादीनि अन्यानि AI-वैशिष्ट्यानि रक्ष्यन्ते)। लेखनप्रक्रियायाः स्मृति/चक्रव्ययं गोपनीयताचिन्तां च न्यूनीकरोति। केवलं Windows 11 24H2 + Copilot+ PC-षु उपलब्धम्; असमर्थितेषु PC-षु स्थितिं पठितुं परिवर्तयितुं वा न शक्यते।</x:String>
   <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">Power throttling निष्क्रियं कुरु</x:String>
@@ -198,7 +201,7 @@
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">नीत्या Edge-पृष्ठभूमिविधिं Startup Boost च निष्क्रियं करोति। यदि Edge दुर्लभतया उपयुज्यते तर्हि प्रायः 100–300 MB स्मृतिः मुक्ताऽस्ति। Edge आरम्भः किञ्चित् मन्दः भवेत् विस्तारसूचनाश्च न आगच्छेयुः। नीतयः निष्कास्य Edge-पूर्वनिर्धारितमूल्यानि पुनः स्थापयितुं OFF कुरु।</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">किं लोपनीयम् इति चिनु</x:String>
   <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">प्रवेशकाले किं चालनीयम् इति चिनु</x:String>
-  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">चयनं रक्षितुं न शक्तम् (अभिलेखं पश्य)</x:String>
+  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">अस्य चयनस्य पूर्वसंरक्षणप्रयत्नः विफलः (वृत्तान्तं पश्यतु)।</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">अद्यतनीकरणम्</x:String>
   <x:String x:Key="Text.UpdateDialog.AvailableHeader" xml:space="preserve">नूतना आवृत्तिः उपलब्धा अस्ति</x:String>
@@ -214,4 +217,13 @@
   <x:String x:Key="Text.Status.Applied" xml:space="preserve">{0} परिवर्तितम्</x:String>
   <x:String x:Key="Text.Status.ApplyFailed" xml:space="preserve">{0} परिवर्तनं विफलम् (अभिलेखं पश्यतु)</x:String>
   <x:String x:Key="Text.Shutdown.BlockReason" xml:space="preserve">Lumin4ti अनुरक्षणकार्यस्य समाप्तिं प्रतीक्षते…</x:String>
+  <x:String x:Key="Text.Button.BatchOn" xml:space="preserve">सर्वे ON</x:String>
+  <x:String x:Key="Text.Button.BatchOff" xml:space="preserve">सर्वे OFF</x:String>
+  <x:String x:Key="Text.Setting.DefaultSystemManaged" xml:space="preserve">Windows / अनुप्रयोगानां पूर्वनिर्धारितविन्यासाः</x:String>
+  <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">विकाससंस्करणम्</x:String>
+  <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">संस्करणं नोपलभ्यते</x:String>
+  <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">भाषा-अद्यतनविन्यासयोः पूर्वसंरक्षणप्रयत्नः विफलः (वृत्तान्तं पश्यतु)।</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">विन्यासाः पठितुं न शक्यन्ते। मूलसञ्चिकारक्षणार्थं संरक्षणं स्थगितम्, प्रवेशसमये स्वच्छतापि न निष्पाद्यते। परिवर्तनानि अस्मिन्नेव सत्रे प्रभावीणि।</x:String>
+  <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">पूर्वपरीक्षणे लक्ष्याणि न प्राप्तानि।</x:String>
+  <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">सूचीं पुनरुद्घाट्य नवीकरोतु। निष्पादनसमये अवर्जितानि नूतनलक्ष्याण्यपि समाविश्यन्ते।</x:String>
 </ResourceDictionary>

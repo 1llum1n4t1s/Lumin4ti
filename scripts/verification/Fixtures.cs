@@ -143,6 +143,7 @@ internal sealed class MemorySettings : ISettingsService
     public object SyncRoot { get; } = new();
     public int SaveCount { get; private set; }
     public bool FailSave { get; set; }
+    public SettingsLoadStatus LoadStatus { get; set; } = SettingsLoadStatus.Loaded;
     public Task SaveAsync(CancellationToken ct = default)
     {
         SaveCount++;

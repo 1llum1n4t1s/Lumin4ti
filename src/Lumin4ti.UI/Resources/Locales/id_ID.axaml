@@ -84,7 +84,10 @@
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Gagal memulai ulang Explorer (silakan mulai ulang secara manual)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Tidak dapat membaca status (tanpa hak admin, atau fitur tidak tersedia di PC ini. Peluncuran mode debug tidak dijalankan dengan hak elevasi, jadi coba peluncuran normal).</x:String>
   <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">DISM tidak dapat mengambil status Recall. PC ini mungkin tidak mendukung fitur tersebut atau hak administrator tidak mencukupi. Periksa log untuk detailnya.</x:String>
-  <x:String x:Key="Text.Toggle.SetOff" xml:space="preserve">Nonaktifkan</x:String>
+  <x:String x:Key="Text.Setting.DefaultFormat" xml:space="preserve">Bawaan: {0}</x:String>
+  <x:String x:Key="Text.Setting.DefaultEnvironment" xml:space="preserve">Tergantung lingkungan / tidak diketahui</x:String>
+  <x:String x:Key="Text.Toggle.CustomState" xml:space="preserve">Kustom (pilih ON/OFF)</x:String>
+  <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">Kustom</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">Keluaran DISM tidak memuat status Recall. Periksa log untuk detailnya.</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">Status Recall yang dikembalikan DISM tidak dapat ditafsirkan. Periksa log untuk detailnya.</x:String>
   <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">Tugas ini didaftarkan oleh pengguna Windows lain dan tidak dapat diubah.</x:String>
@@ -126,7 +129,7 @@
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">Hapus cache peramban</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Menghapus cache web dan shader Chromium, penyimpanan cache Service Worker, laporan crash, dan data sementara ekstensi. Registrasi Service Worker, komponen DRM, markah, sandi, dan status masuk tidak dihapus.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">Bangun ulang cache ikon, gambar mini, dan fon</x:String>
-  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">Menghapus cache ikon, cache gambar mini, dan cache fon milik File Explorer agar Windows membangunnya kembali. Ini perbaikan baku untuk ikon kosong atau salah, gambar mini yang tidak pernah diperbarui, dan teks yang tampil rusak. Berkas yang masih dibuka oleh shell dihapus saat Windows dimulai ulang berikutnya. Mulai ulang Windows untuk menyelesaikan pembangunan ulang cache. Tampilan sedikit lebih lambat selama cache dibangun ulang.</x:String>
+  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">Menghapus cache ikon, cache gambar mini, dan cache fon milik File Explorer agar Windows membangunnya kembali. Ini perbaikan baku untuk ikon kosong atau salah, gambar mini yang tidak pernah diperbarui, dan teks yang tampil rusak. Explorer tidak ditutup secara paksa. Pada startup Windows berikutnya, cache terpilih yang masih digunakan didata ulang dari instalasi tepercaya, lalu dicoba dihapus. Upaya dibatasi hingga tiga kali eksekusi dalam tujuh hari; target yang tetap terkunci dipertahankan dan hasilnya dicatat dalam log. Tampilan sedikit lebih lambat selama cache dibangun ulang.</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">Hapus cache unduhan Windows Update</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">Hanya menghapus berkas yang dapat diunduh ulang dari SoftwareDistribution\Download. Riwayat pembaruan dan catroot2 tidak dihapus. Layanan terkait dipulihkan.</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">Hapus dan bangun ulang data prefetch serta indeks pencarian</x:String>
@@ -152,8 +155,8 @@
   <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">Menonaktifkan keamanan berbasis virtualisasi (VBS) dan integritas kode yang ditegakkan hypervisor (HVCI) untuk membebaskan ~1–2 GB memori yang dicadangkan setiap saat. Ini adalah trade-off dengan keamanan; biarkan OFF (bawaan) bila Anda memakai Hyper-V, WSL2, Windows Sandbox, Docker Desktop, atau Credential Guard. OFF menghapus pengaturan eksplisit BCD dan registri serta menyerahkannya pada default dan kebijakan Windows. Pengaturan sebelumnya tidak disimpan atau dipulihkan.</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">Konsolidasikan proses SvcHost (tekan pemisahan)</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">Secara bawaan Windows memulai svchost.exe terpisah per fitur (pada PC dengan RAM lebih dari 3,5 GB). Mengaktifkan ini (ON) memaksimalkan ambang pemisahan dan mengonsolidasikan layanan yang bisa dikelompokkan menjadi lebih sedikit proses, sehingga mengurangi jumlah proses dan penggunaan memori (puluhan hingga lebih dari seratus MB). Layanan yang diperlakukan sebagai batas keamanan (DiagTrack, Dnscache, dll.) tidak dikonsolidasikan. OFF menghapus ambang dan kembali ke pemisahan bawaan.</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">Nonaktifkan UWP di latar belakang / gunakan default Windows (hemat 200–500 MB)</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">ON mengatur aktivitas latar belakang semua aplikasi Store (UWP) ke “Selalu nonaktif”. OFF menghapus pengaturan eksplisit aplikasi yang ditargetkan dan membiarkan Windows menggunakan defaultnya. Pengaturan tiap aplikasi sebelumnya tidak disimpan atau dipulihkan.</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">Eksekusi latar belakang UWP</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">Semua OFF memblokir eksekusi latar belakang aplikasi Store (UWP) yang terpasang; Semua ON mengizinkannya secara eksplisit. ON tidak memulihkan pengaturan bawaan Windows. Jalankan lagi setelah memasang aplikasi baru. Pengaturan lama per aplikasi tidak disimpan atau dipulihkan. Hanya pengaturan per aplikasi yang diubah. Izin atau pemblokiran yang berlaku juga bergantung pada pengaturan Windows secara keseluruhan, kebijakan organisasi, dan batasan aplikasi.</x:String>
   <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">Nonaktifkan Windows Recall</x:String>
   <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">Menonaktifkan fitur Recall, yang secara berkala merekam cuplikan layar untuk pencarian AI (fitur AI lain seperti Click-to-do dan pencarian semantik tetap dipertahankan). Mengurangi konsumsi memori/disk proses perekaman dan kekhawatiran privasi. Hanya tersedia pada PC Windows 11 24H2 + Copilot+; pada PC yang tidak didukung status tidak dapat dibaca dan tidak dapat dialihkan.</x:String>
   <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">Nonaktifkan power throttling</x:String>
@@ -198,7 +201,7 @@
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Menonaktifkan mode latar belakang Edge dan Startup Boost melalui kebijakan. Jika Anda jarang menggunakan Edge, tindakan ini dapat membebaskan sekitar 100–300 MB memori. Edge mungkin sedikit lebih lambat saat dibuka dan notifikasi ekstensi mungkin berhenti. Matikan opsi ini (OFF) untuk menghapus kebijakan dan memulihkan pengaturan default Edge.</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">Pilih apa yang dihapus</x:String>
   <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">Pilih apa yang berjalan saat masuk</x:String>
-  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">Tidak dapat menyimpan pilihan (periksa log)</x:String>
+  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">Penyimpanan terakhir pilihan ini gagal (periksa log).</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">Pembaruan</x:String>
   <x:String x:Key="Text.UpdateDialog.AvailableHeader" xml:space="preserve">Versi baru tersedia</x:String>
@@ -214,4 +217,13 @@
   <x:String x:Key="Text.Status.Applied" xml:space="preserve">{0} telah diubah</x:String>
   <x:String x:Key="Text.Status.ApplyFailed" xml:space="preserve">Gagal mengubah {0} (periksa log)</x:String>
   <x:String x:Key="Text.Shutdown.BlockReason" xml:space="preserve">Lumin4ti menunggu operasi pemeliharaan selesai…</x:String>
+  <x:String x:Key="Text.Button.BatchOn" xml:space="preserve">Semua ON</x:String>
+  <x:String x:Key="Text.Button.BatchOff" xml:space="preserve">Semua OFF</x:String>
+  <x:String x:Key="Text.Setting.DefaultSystemManaged" xml:space="preserve">Bawaan Windows / tiap aplikasi</x:String>
+  <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">Versi pengembangan</x:String>
+  <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">Versi tidak tersedia</x:String>
+  <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">Penyimpanan terakhir pengaturan bahasa dan pembaruan gagal (periksa log).</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Pengaturan tidak dapat dibaca. Penyimpanan dinonaktifkan untuk melindungi file asli, dan pembersihan saat masuk tidak akan dijalankan. Perubahan hanya berlaku selama sesi ini.</x:String>
+  <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">Tidak ada target yang ditemukan pada pemeriksaan terakhir.</x:String>
+  <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">Buka kembali daftar untuk memperbaruinya. Target baru yang tidak dikecualikan juga disertakan saat tindakan dijalankan.</x:String>
 </ResourceDictionary>

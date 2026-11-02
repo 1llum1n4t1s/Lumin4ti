@@ -18,15 +18,16 @@ public sealed class MaintenanceActionCatalog
 
     internal MaintenanceActionCatalog(IReadOnlyList<IMaintenanceItem> items) => Items = items;
 
-    public MaintenanceActionCatalog(ICommandExecutor executor, ICleanupPreferences? preferences = null)
-        : this(executor, new UnelevatedCommandExecutor(), preferences)
+    public MaintenanceActionCatalog(ICommandExecutor executor, ICleanupPreferences? preferences = null, IRebootCacheCleanupScheduler? rebootScheduler = null)
+        : this(executor, new UnelevatedCommandExecutor(), preferences, rebootScheduler)
     {
     }
 
     internal MaintenanceActionCatalog(
         ICommandExecutor executor,
         IUnelevatedCommandExecutor unelevatedExecutor,
-        ICleanupPreferences? preferences = null)
+        ICleanupPreferences? preferences = null,
+        IRebootCacheCleanupScheduler? rebootScheduler = null)
     {
         Items =
         [
@@ -41,7 +42,7 @@ public sealed class MaintenanceActionCatalog
             new DeadAssociationCleanupAction(),
             new TrimOptimizeAction(executor),
             // 一時ファイル・キャッシュの削除は用途ごとのグループに分けて、消したいものだけ選べるようにする
-            .. FileCleanupGroups.CreateAll(executor, preferences),
+            .. FileCleanupGroups.CreateAll(executor, preferences, rebootScheduler),
             new ScheduledTempCleanupToggle(executor, preferences),
 
             // ═══ 修復 ═══
@@ -72,7 +73,7 @@ public sealed class MaintenanceActionCatalog
                 category: CommandCategory.Performance,
                 specs: [new(RegistryHive.LocalMachine, @"SYSTEM\CurrentControlSet\Control", "SvcHostSplitThresholdInKB", RegistryValueKind.DWord, 0xFFFFFFFF)],
                 requiresReboot: true),
-            new UwpBackgroundToggle(),
+            new UwpBackgroundBatchSetting(),
             new RegistryToggle(
                 id: "edge-background-off",
                 label: "Edge のバックグラウンド常駐を無効化 (メモリ節約 100〜300MB)",
@@ -115,7 +116,8 @@ public sealed class MaintenanceActionCatalog
                 [
                     new(RegistryHive.LocalMachine, @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Playback", "Priority", RegistryValueKind.DWord, 6),
                     new(RegistryHive.LocalMachine, @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Multimedia\SystemProfile\Tasks\Capture", "Priority", RegistryValueKind.DWord, 6),
-                ]),
+                ],
+                defaultState: null),
             new RegistryToggle(
                 id: "rdp-framerate",
                 label: "リモートデスクトップを 60FPS 化",

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services;
@@ -16,23 +17,15 @@ public sealed class ProcessCommandExecutorDecodeTests
     }
 
     [TestMethod]
-    public void 実効OEMバイト列はフォールバックで正しく解釈される()
+    [DataRow("ja-JP", 932, new byte[] { 0x82, 0xA0 }, "あ")]
+    [DataRow("en-US", 437, new byte[] { 0x82 }, "é")]
+    public void 指定CultureのOEMバイト列は独立した期待値へ復号される(string locale, int codePage, byte[] bytes, string expected)
     {
-        // static 初期化後の実効値を使い、他試験の culture や実行順に左右されない。
-        var field = typeof(ProcessCommandExecutor).GetField(
-            "OemEncoding", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
-        Assert.IsNotNull(field);
-        var oem = field.GetValue(null) as Encoding;
-        Assert.IsNotNull(oem);
-        var bytes = Enumerable.Range(128, 64)
-            .Select(value => new[] { (byte)value })
-            .Concat(Enumerable.Range(128, 64).SelectMany(first =>
-                Enumerable.Range(0, 256).Select(second => new[] { (byte)first, (byte)second })))
-            .FirstOrDefault(candidate => oem.GetBytes(oem.GetString(candidate)).SequenceEqual(candidate));
-        Assert.IsNotNull(bytes, $"OEM {oem.CodePage} に表現可能な非 UTF-8 canary がありません。");
+        var oem = ProcessCommandExecutor.ResolveOemEncoding(CultureInfo.GetCultureInfo(locale));
+        Assert.AreEqual(codePage, oem.CodePage);
         Assert.ThrowsExactly<DecoderFallbackException>(() => new UTF8Encoding(false, true).GetString(bytes));
 
-        Assert.AreEqual(oem.GetString(bytes), ProcessCommandExecutor.DecodeConsoleOutput(bytes));
+        Assert.AreEqual(expected, ProcessCommandExecutor.DecodeConsoleOutput(bytes, oem));
     }
 
     [TestMethod]

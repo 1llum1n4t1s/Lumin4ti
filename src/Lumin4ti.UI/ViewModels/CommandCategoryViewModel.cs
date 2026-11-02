@@ -41,8 +41,15 @@ public partial class CommandCategoryViewModel : ObservableObject
     /// <summary>子項目も含む全項目 (状態読み込み用)。</summary>
     private IReadOnlyList<CommandItemViewModel> AllItems { get; set; } = [];
 
-    [ObservableProperty]
-    private string statusText = string.Empty;
+    private Func<string> _statusText = static () => string.Empty;
+
+    public string StatusText => _statusText();
+
+    private void SetStatus(Func<string> render)
+    {
+        _statusText = render;
+        OnPropertyChanged(nameof(StatusText));
+    }
 
     public CommandCategoryViewModel(
         MaintenanceActionCatalog catalog,
@@ -57,7 +64,7 @@ public partial class CommandCategoryViewModel : ObservableObject
         _captionFallback = caption;
         var all = catalog.Items
             .Where(i => i.Category == category)
-            .Select(i => new CommandItemViewModel(i, RunActionAsync, SetToggleAsync, SetChoiceAsync))
+            .Select(i => new CommandItemViewModel(i, RunActionAsync, SetToggleAsync, SetChoiceAsync, ApplyBatchAsync))
             .ToList();
 
         // 前提設定を持つ項目 (ParentId) は親カードの中へ入れ子表示する。
@@ -79,6 +86,7 @@ public partial class CommandCategoryViewModel : ObservableObject
 
         App.LocaleChanged += () =>
         {
+            OnPropertyChanged(nameof(StatusText));
             OnPropertyChanged(nameof(Title));
             OnPropertyChanged(nameof(Caption));
         };
@@ -105,53 +113,37 @@ public partial class CommandCategoryViewModel : ObservableObject
 
         // 状態取得は外部プロセス (Get-MMAgent / dism / bcdedit) を伴うため、
         // 遅い 1 項目が同じカテゴリの他項目を巻き添えにしないよう項目ごとに上限を持たせる。
-        await Task.WhenAll(toggles.Select(async item =>
-        {
-            bool? state;
-            try
-            {
-                state = await QueryStateAsync(
-                    token => ((IMaintenanceToggle)item.Item).GetStateAsync(token),
-                    item.Item,
-                    ct);
-            }
-            catch (OperationCanceledException) when (ct.IsCancellationRequested)
-            {
-                return;
-            }
-
-            await Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                if (!ct.IsCancellationRequested)
-                {
-                    item.ApplyState(state);
-                }
-            });
-        }).Concat(choices.Select(async item =>
-        {
-            string? value;
-            try
-            {
-                value = await QueryStateAsync(
-                    token => ((IMaintenanceChoice)item.Item).GetSelectedValueAsync(token),
-                    item.Item,
-                    ct);
-            }
-            catch (OperationCanceledException) when (ct.IsCancellationRequested)
-            {
-                return;
-            }
-
-            await Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                if (!ct.IsCancellationRequested)
-                {
-                    item.ApplySelectedValue(value);
-                }
-            });
-        })));
+        await Task.WhenAll(toggles.Select(item => QueryAndApplyStateAsync<bool?>(
+            item, ((IMaintenanceToggle)item.Item).GetStateAsync, item.ApplyState, ct))
+            .Concat(choices.Select(item => QueryAndApplyStateAsync<string>(
+                item, ((IMaintenanceChoice)item.Item).GetSelectedValueAsync, item.ApplySelectedValue, ct))));
     }
 
+    private static async Task QueryAndApplyStateAsync<T>(CommandItemViewModel item,
+        Func<CancellationToken, Task<T?>> query, Action<T?> apply, CancellationToken ct)
+    {
+        T? state;
+        try
+        {
+            state = await QueryStateAsync(query, item.Item, ct);
+        }
+        catch (OperationCanceledException) when (ct.IsCancellationRequested)
+        {
+            return;
+        }
+
+        if (ct.IsCancellationRequested)
+        {
+            return;
+        }
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            if (!ct.IsCancellationRequested)
+            {
+                apply(state);
+            }
+        });
+    }
     internal static Task<T?> QueryStateAsync<T>(
         Func<CancellationToken, Task<T?>> query,
         string itemId,
@@ -231,7 +223,7 @@ public partial class CommandCategoryViewModel : ObservableObject
         }
 
         using var activeOperation = operation!;
-        StatusText = App.Text("Status.Applying", "{0} を適用中…", item.Label);
+        SetStatus(() => App.Text("Status.Applying", "{0} を適用中…", item.Label));
         try
         {
             MaintenanceActionResult result;
@@ -254,8 +246,8 @@ public partial class CommandCategoryViewModel : ObservableObject
             ShowResult(
                 item,
                 result,
-                App.Text("Status.Applied", "{0} を変更しました", item.Label),
-                App.Text("Status.ApplyFailed", "{0} の変更に失敗しました (ログを確認してください)", item.Label));
+                () => App.Text("Status.Applied", "{0} を変更しました", item.Label),
+                () => App.Text("Status.ApplyFailed", "{0} の変更に失敗しました (ログを確認してください)", item.Label));
         }
         finally
         {
@@ -294,25 +286,37 @@ public partial class CommandCategoryViewModel : ObservableObject
         await Dispatcher.UIThread.InvokeAsync(() => item.ApplySelectedValue(actual));
     }
 
-    private async Task RunActionAsync(CommandItemViewModel item)
+    private Task RunActionAsync(CommandItemViewModel item) =>
+        RunActionAsync(item, "実行", () => App.Text("Button.Run", "実行"),
+            (progress, ct) => ((IMaintenanceAction)item.Item).ExecuteAsync(progress, ct));
+
+    private Task ApplyBatchAsync(CommandItemViewModel item, bool enabled) =>
+        RunActionAsync(item, enabled ? "一括ON" : "一括OFF",
+            () => enabled ? App.Text("Button.BatchOn", "一括ON") : App.Text("Button.BatchOff", "一括OFF"),
+            (_, ct) => ((IMaintenanceBatchSetting)item.Item).ApplyAsync(enabled, ct));
+
+    private async Task RunActionAsync(CommandItemViewModel item, string operationName, Func<string> operationLabel,
+        Func<IProgress<string>, CancellationToken, Task<MaintenanceActionResult>> execute)
     {
         var startedAt = Stopwatch.GetTimestamp();
-        LoggerBootstrap.Log.Info($"{item.Item.Id}: 実行開始");
+        string DisplayName() => item.IsBatchSetting ? $"{item.Label}: {operationLabel()}" : item.Label;
+        LoggerBootstrap.Log.Info($"{item.Item.Id}: {operationName} 開始");
         item.IsRunning = true;
         item.ResultText = string.Empty;
         var ct = item.BeginRun();
         if (!_operationCoordinator.TryBegin(out var operation, ct))
         {
-            ShowBusyResult(item);
+            ShowBusyResult(item, item.IsBatchSetting ? operationLabel : null);
             item.EndRun();
             item.IsRunning = false;
             return;
         }
 
         using var activeOperation = operation!;
-        StatusText = item.IsLongRunning
-            ? App.Text("Status.RunningLong", "{0} を実行中… (数分かかることがあります)", item.Label)
-            : App.Text("Status.Running", "{0} を実行中…", item.Label);
+        item.ProgressText = string.Empty;
+        SetStatus(() => item.IsLongRunning
+            ? App.Text("Status.RunningLong", "{0} を実行中… (数分かかることがあります)", DisplayName())
+            : App.Text("Status.Running", "{0} を実行中…", DisplayName()));
         try
         {
             MaintenanceActionResult result;
@@ -340,7 +344,7 @@ public partial class CommandCategoryViewModel : ObservableObject
                     item.ProgressText = string.Join(Environment.NewLine, recentLines);
                 });
 
-                result = await ((IMaintenanceAction)item.Item).ExecuteAsync(progress, activeOperation.Token);
+                result = await execute(progress, activeOperation.Token);
             }
             catch (OperationCanceledException)
             {
@@ -348,7 +352,7 @@ public partial class CommandCategoryViewModel : ObservableObject
             }
             catch (Exception ex)
             {
-                MaintenanceItemLog.LogException(item.Item, "実行", ex);
+                MaintenanceItemLog.LogException(item.Item, operationName, ex);
                 result = MaintenanceActionResult.Fail(ex.Message);
             }
             finally
@@ -356,14 +360,19 @@ public partial class CommandCategoryViewModel : ObservableObject
                 item.ProgressText = string.Empty;
             }
 
-            result = await RestartExplorerIfNeededAsync(item, result);
-            item.RefreshCheckListEntries();
-            LogOperationFinished(item, "実行", result, startedAt);
+            var restart = await RestartExplorerIfNeededAsync(item, result);
+            result = restart.Result;
+            if (result.Status != MaintenanceActionStatus.Canceled && !activeOperation.Token.IsCancellationRequested)
+            {
+                item.RefreshCheckListEntries();
+            }
+            LogOperationFinished(item, operationName, result, startedAt);
             ShowResult(
                 item,
                 result,
-                App.Text("Status.Completed", "{0} が完了しました", item.Label),
-                App.Text("Status.Failed", "{0} が失敗しました (ログを確認してください)", item.Label));
+                () => App.Text("Status.Completed", "{0} が完了しました", DisplayName()),
+                () => App.Text("Status.Failed", "{0} が失敗しました (ログを確認してください)", DisplayName()),
+                item.IsBatchSetting ? operationLabel : null, restart.RestartSucceeded, restart.OriginalDetail);
         }
         finally
         {
@@ -405,9 +414,9 @@ public partial class CommandCategoryViewModel : ObservableObject
         }
 
         using var activeOperation = operation!;
-        StatusText = on
+        SetStatus(() => on
             ? App.Text("Status.TogglingOn", "{0} を ON に設定中…", item.Label)
-            : App.Text("Status.TogglingOff", "{0} を OFF に設定中…", item.Label);
+            : App.Text("Status.TogglingOff", "{0} を OFF に設定中…", item.Label));
         try
         {
             MaintenanceActionResult result;
@@ -440,15 +449,17 @@ public partial class CommandCategoryViewModel : ObservableObject
                 await ReloadChildAsync(child);
             }
 
-            result = await RestartExplorerIfNeededAsync(item, result);
+            var restart = await RestartExplorerIfNeededAsync(item, result);
+            result = restart.Result;
             LogOperationFinished(item, on ? "ON 切り替え" : "OFF 切り替え", result, startedAt);
             ShowResult(
                 item,
                 result,
-                on
+                () => on
                     ? App.Text("Status.ToggledOn", "{0} を ON にしました", item.Label)
                     : App.Text("Status.ToggledOff", "{0} を OFF にしました", item.Label),
-                App.Text("Status.ToggleFailed", "{0} の切り替えに失敗しました (ログを確認してください)", item.Label));
+                () => App.Text("Status.ToggleFailed", "{0} の切り替えに失敗しました (ログを確認してください)", item.Label),
+                explorerRestartSucceeded: restart.RestartSucceeded, originalDetail: restart.OriginalDetail);
         }
         finally
         {
@@ -458,29 +469,26 @@ public partial class CommandCategoryViewModel : ObservableObject
     }
 
     /// <summary>エクスプローラーに影響する変更は、成功時に再起動までをセットで行う。</summary>
-    private static async Task<MaintenanceActionResult> RestartExplorerIfNeededAsync(
+    private static async Task<(MaintenanceActionResult Result, bool? RestartSucceeded, string OriginalDetail)> RestartExplorerIfNeededAsync(
         CommandItemViewModel item, MaintenanceActionResult result)
     {
         if (result.Status is MaintenanceActionStatus.Failed or MaintenanceActionStatus.Canceled ||
             !item.AffectsExplorer)
         {
-            return result;
+            return (result, null, result.Detail);
         }
 
         try
         {
             await Task.Run(ExplorerRestarter.Restart);
-            return result with { Detail = AppendLine(result.Detail, App.Text("Result.ExplorerRestarted", "  - エクスプローラーを再起動しました")) };
+            return (result with { Detail = AppendLine(result.Detail, "  - エクスプローラーを再起動しました") }, true, result.Detail);
         }
         catch (Exception ex)
         {
             MaintenanceItemLog.Failure(item.Item.Id, item.Item.Label, "エクスプローラーの再起動",
                 $"{ex.GetType().Name}: {ex.Message}");
-            return MarkExplorerRestartFailed(
-                result,
-                App.Text(
-                    "Result.ExplorerRestartFailed",
-                    "  - エクスプローラーの再起動に失敗しました (手動で再起動してください)"));
+            return (MarkExplorerRestartFailed(result,
+                "  - エクスプローラーの再起動に失敗しました (手動で再起動してください)"), false, result.Detail);
         }
     }
 
@@ -496,36 +504,55 @@ public partial class CommandCategoryViewModel : ObservableObject
         return MaintenanceActionResult.Partial(AppendLine(result.Detail, restartFailureDetail));
     }
 
-    private void ShowResult(CommandItemViewModel item, MaintenanceActionResult result, string okStatus, string failStatus)
+    private static string ResultSummary(MaintenanceActionStatus status) => status switch
     {
-        var summary = result.Status switch
+        MaintenanceActionStatus.Success => App.Text("Result.Success", "✓ 完了しました"),
+        MaintenanceActionStatus.Partial => App.Text("Result.Partial", "⚠ 一部完了しました"),
+        MaintenanceActionStatus.Canceled => App.Text("Status.Cancelled", "キャンセルされました"),
+        _ => App.Text("Result.Failure", "✗ 失敗しました"),
+    };
+
+    private void ShowResult(CommandItemViewModel item, MaintenanceActionResult result,
+        Func<string> okStatus, Func<string> failStatus, Func<string>? prefix = null,
+        bool? explorerRestartSucceeded = null, string? originalDetail = null)
+    {
+        item.SetResultText(() =>
         {
-            MaintenanceActionStatus.Success => App.Text("Result.Success", "✓ 完了しました"),
-            MaintenanceActionStatus.Partial => App.Text("Result.Partial", "⚠ 一部完了しました"),
-            MaintenanceActionStatus.Canceled => App.Text("Status.Cancelled", "キャンセルされました"),
-            _ => App.Text("Result.Failure", "✗ 失敗しました"),
-        };
-        item.ResultText = string.IsNullOrWhiteSpace(result.Detail)
-            ? summary
-            : $"{summary}\n{result.Detail.Trim()}";
+            var summary = ResultSummary(result.Status);
+            var detail = RenderResultDetail(result, explorerRestartSucceeded, originalDetail);
+            var text = string.IsNullOrWhiteSpace(detail)
+                ? summary
+                : $"{summary}\n{detail.Trim()}";
+            return prefix is null ? text : $"{prefix()}\n{text}";
+        });
         item.ApplyResultStatus(result.Status);
-        StatusText = result.Status switch
+        SetStatus(() => result.Status switch
         {
-            MaintenanceActionStatus.Success => okStatus,
-            MaintenanceActionStatus.Partial => $"{item.Label}: {summary}",
-            MaintenanceActionStatus.Canceled => summary,
-            _ => failStatus,
-        };
+            MaintenanceActionStatus.Success => okStatus(),
+            MaintenanceActionStatus.Partial => $"{item.Label}: {ResultSummary(result.Status)}",
+            MaintenanceActionStatus.Canceled => ResultSummary(result.Status),
+            _ => failStatus(),
+        });
     }
 
-    private void ShowBusyResult(CommandItemViewModel item)
+    internal static string RenderResultDetail(MaintenanceActionResult result, bool? explorerRestartSucceeded = null,
+        string? originalDetail = null) => explorerRestartSucceeded switch
+    {
+        true => AppendLine(originalDetail ?? string.Empty,
+            App.Text("Result.ExplorerRestarted", "  - エクスプローラーを再起動しました")),
+        false => AppendLine(originalDetail ?? string.Empty,
+            App.Text("Result.ExplorerRestartFailed", "  - エクスプローラーの再起動に失敗しました (手動で再起動してください)")),
+        null => result.Detail,
+    };
+
+    private void ShowBusyResult(CommandItemViewModel item, Func<string>? prefix = null)
     {
         MaintenanceItemLog.LogRejected(item.Item,
             "別のメンテナンス操作が実行中、終了処理中、または共有ロックを取得できないため受け付けられませんでした。");
-        var message = App.Text("Status.Busy", "別のメンテナンス操作が実行中です。完了後にもう一度お試しください。");
-        item.ResultText = message;
+        static string Message() => App.Text("Status.Busy", "別のメンテナンス操作が実行中です。完了後にもう一度お試しください。");
+        item.SetResultText(() => prefix is null ? Message() : $"{prefix()}\n{Message()}");
         item.ApplyResultStatus(MaintenanceActionStatus.Failed);
-        StatusText = message;
+        SetStatus(Message);
     }
 
     private static string AppendLine(string detail, string line) =>

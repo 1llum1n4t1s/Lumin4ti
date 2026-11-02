@@ -9,6 +9,7 @@ using CommunityToolkit.Mvvm.Input;
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services;
+using Lumin4ti.Core.Services.Windows.Actions;
 
 namespace Lumin4ti.UI.ViewModels;
 
@@ -21,6 +22,7 @@ public partial class CommandItemViewModel : ObservableObject
     private readonly Func<CommandItemViewModel, Task> _run;
     private readonly Func<CommandItemViewModel, bool, Task> _setToggle;
     private readonly Func<CommandItemViewModel, string, Task>? _setChoice;
+    private readonly Func<CommandItemViewModel, bool, Task>? _applyBatch;
     private bool _suppressToggleWrite;
 
     public IMaintenanceItem Item { get; }
@@ -32,11 +34,41 @@ public partial class CommandItemViewModel : ObservableObject
     public string RunAutomationName => $"{Label}: {App.Text("Button.Run", "実行")}";
 
     public string CancelAutomationName => $"{Label}: {App.Text("Button.Cancel", "中断")}";
-
-    public string SetOffAutomationName => $"{Label}: {App.Text("Toggle.SetOff", "OFFにする")}";
+    public string BatchOnAutomationName => $"{Label}: {App.Text("Button.BatchOn", "一括ON")}";
+    public string BatchOffAutomationName => $"{Label}: {App.Text("Button.BatchOff", "一括OFF")}";
 
     /// <summary>表示用説明 (ローカライズ済み)。</summary>
     public string Description => App.Text(Item.DescriptionKey, Item.Description);
+
+    /// <summary>現在状態とは区別して、設定の既定値を表示する。</summary>
+    public string DefaultStateText
+    {
+        get
+        {
+            var environment = App.Text("Setting.DefaultEnvironment", "環境による／不明");
+            string value;
+            if (Item is IMaintenanceToggle toggle)
+            {
+                value = toggle.DefaultState switch { true => "ON", false => "OFF", null => environment };
+            }
+            else if (Item is IMaintenanceChoice choice)
+            {
+                var option = choice.Options.FirstOrDefault(o => o.IsDefault);
+                value = option is null ? environment
+                    : option.LabelKey is { } key ? App.Text(key, option.Label) : option.Label;
+            }
+            else if (Item is IMaintenanceBatchSetting)
+            {
+                value = App.Text("Setting.DefaultSystemManaged", "Windows / 各アプリの標準設定");
+            }
+            else
+            {
+                return string.Empty;
+            }
+
+            return App.Text("Setting.DefaultFormat", "既定: {0}", value);
+        }
+    }
 
     public bool RequiresReboot => Item.RequiresReboot;
 
@@ -46,9 +78,9 @@ public partial class CommandItemViewModel : ObservableObject
 
     /// <summary>ON/OFF トグル型か (false なら実行ボタン型)。</summary>
     public bool IsToggle => Item is IMaintenanceToggle;
-    public bool HasExplicitOff => Item is IMaintenanceToggle { SupportsExplicitOff: true };
 
     public bool IsAction => Item is IMaintenanceAction;
+    public bool IsBatchSetting => Item is IMaintenanceBatchSetting;
 
     /// <summary>選択式 (ドロップダウン) 型か。</summary>
     public bool IsChoice => Item is IMaintenanceChoice;
@@ -60,18 +92,37 @@ public partial class CommandItemViewModel : ObservableObject
     public ObservableCollection<CheckListEntryViewModel> CheckListEntries { get; }
 
     /// <summary>チェックボックス一覧を持つか (アコーディオンの表示可否)。</summary>
-    public bool HasCheckList => CheckListEntries.Count > 0;
+    public bool HasCheckList => Item is IMaintenanceCheckList;
+
+    public bool HasDynamicCheckList => Item is FileCleanupAction;
+
+    public bool HasCheckListEntries => CheckListEntries.Count > 0;
+
+    public bool CanExpandCheckList => HasCheckList && !IsRunning;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CheckListSaveErrorText))]
+    private bool hasCheckListSaveError;
+
+    public string CheckListSaveErrorText => HasCheckListSaveError
+        ? App.Text("CheckList.SaveFailed", "この選択の前回の保存に失敗しました（ログを確認してください）。") : string.Empty;
 
     /// <summary>アコーディオンが開いているか。</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CheckListChevron))]
-    private bool isCheckListExpanded;
-
-    partial void OnIsCheckListExpandedChanged(bool value)
+    private bool _isCheckListExpanded;
+    public bool IsCheckListExpanded
     {
-        if (value)
+        get => _isCheckListExpanded;
+        set
         {
-            RefreshCheckListEntries();
+            if (!CanExpandCheckList || !SetProperty(ref _isCheckListExpanded, value))
+            {
+                return;
+            }
+            OnPropertyChanged(nameof(CheckListChevron));
+            if (value)
+            {
+                RefreshCheckListEntries();
+            }
         }
     }
 
@@ -123,7 +174,7 @@ public partial class CommandItemViewModel : ObservableObject
 
     private bool? _lastKnownToggleState;
 
-    /// <summary>受付拒否時は、スイッチ操作と直接 OFF 操作のどちらでも最後の確認済み状態へ戻す。</summary>
+    /// <summary>受付拒否時は、スイッチ操作・カスタム選択とも最後の確認済み状態へ戻す。</summary>
     public void RestorePreviousToggleState() => ApplyState(_lastKnownToggleState);
 
     /// <summary>
@@ -146,11 +197,62 @@ public partial class CommandItemViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CanToggle))]
     [NotifyPropertyChangedFor(nameof(CanChoose))]
+    [NotifyPropertyChangedFor(nameof(CanExpandCheckList))]
     private bool isRunning;
 
     /// <summary>トグルの現在状態 (ON = 最適化適用中)。</summary>
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ToggleState))]
     private bool isChecked;
+
+    /// <summary>既知のカスタム状態を区別し、選択した ON/OFF を既存の設定経路へ渡す。</summary>
+    public bool? ToggleState
+    {
+        get => IsCustomState ? null : IsChecked;
+        set
+        {
+            if (_suppressToggleWrite || !IsToggle || value is null)
+            {
+                return;
+            }
+
+            if (!CanToggle)
+            {
+                OnPropertyChanged();
+                return;
+            }
+
+            if (IsCustomState && value == false && !IsChecked)
+            {
+                _ = _setToggle(this, false);
+                return;
+            }
+
+            IsChecked = value.Value;
+        }
+    }
+
+    public bool IsCustomState => IsStateKnown && Item is IMaintenanceToggle { IsCustomState: true };
+
+    public bool CanShowToggle => IsToggle && IsStateKnown && !IsCustomState;
+
+    public IReadOnlyList<string> CustomToggleOptions { get; } = ["ON", "OFF"];
+
+    /// <summary>カスタム状態から適用する側を選ぶ。再照会後は選択前の表示へ戻す。</summary>
+    public string? SelectedCustomToggleOption
+    {
+        get => null;
+        set
+        {
+            if (!IsCustomState || !CanToggle || value is not ("ON" or "OFF"))
+            {
+                OnPropertyChanged();
+                return;
+            }
+
+            ToggleState = value == "ON";
+        }
+    }
 
     /// <summary>トグル状態を読み取れたか。false の間はスイッチを無効表示する。</summary>
     [ObservableProperty]
@@ -171,8 +273,19 @@ public partial class CommandItemViewModel : ObservableObject
     private bool canCancel;
 
     /// <summary>直近の実行結果の要約 (成功/失敗 + 出力)。未実行時は空。</summary>
-    [ObservableProperty]
-    private string resultText = string.Empty;
+    private Func<string> _resultText = static () => string.Empty;
+
+    public string ResultText
+    {
+        get => _resultText();
+        set => SetResultText(() => value);
+    }
+
+    internal void SetResultText(Func<string> render)
+    {
+        _resultText = render;
+        OnPropertyChanged(nameof(ResultText));
+    }
 
     /// <summary>状態読込の診断。操作結果と分け、再取得成功時にだけ消す。</summary>
     public string StateErrorText
@@ -219,8 +332,8 @@ public partial class CommandItemViewModel : ObservableObject
     private bool lastRunWarning;
 
     public IAsyncRelayCommand RunCommand { get; }
-
-    public IAsyncRelayCommand SetOffCommand { get; }
+    public IAsyncRelayCommand ApplyBatchOnCommand { get; }
+    public IAsyncRelayCommand ApplyBatchOffCommand { get; }
 
     public IRelayCommand CancelCommand { get; }
 
@@ -228,19 +341,22 @@ public partial class CommandItemViewModel : ObservableObject
         IMaintenanceItem item,
         Func<CommandItemViewModel, Task> run,
         Func<CommandItemViewModel, bool, Task> setToggle,
-        Func<CommandItemViewModel, string, Task>? setChoice = null)
+        Func<CommandItemViewModel, string, Task>? setChoice = null,
+        Func<CommandItemViewModel, bool, Task>? applyBatch = null)
     {
         Item = item;
         _run = run;
         _setToggle = setToggle;
         _setChoice = setChoice;
+        _applyBatch = applyBatch;
         ChoiceOptions = item is IMaintenanceChoice choice
             ? [.. choice.Options.Select(o => new ChoiceOptionViewModel(o))]
             : [];
         CheckListEntries = [];
         RefreshCheckListEntries();
         RunCommand = new AsyncRelayCommand(() => _run(this), () => !IsRunning);
-        SetOffCommand = new AsyncRelayCommand(SetOffAsync, () => HasExplicitOff && CanToggle);
+        ApplyBatchOnCommand = new AsyncRelayCommand(() => ApplyBatchAsync(true), CanApplyBatch);
+        ApplyBatchOffCommand = new AsyncRelayCommand(() => ApplyBatchAsync(false), CanApplyBatch);
         CancelCommand = new RelayCommand(Cancel, () => CanCancel);
 
         // 言語切替時にローカライズ済みプロパティを再評価する
@@ -264,23 +380,23 @@ public partial class CommandItemViewModel : ObservableObject
             CheckListEntries.Add(new CheckListEntryViewModel(entry, ApplyCheckListEntryAsync));
         }
 
-        if (CheckListEntries.Count == 0)
-        {
-            IsCheckListExpanded = false;
-        }
-
         OnPropertyChanged(nameof(HasCheckList));
+        OnPropertyChanged(nameof(HasCheckListEntries));
         OnPropertyChanged(nameof(CheckListSummary));
     }
 
     private void OnLocaleChanged()
     {
+        OnPropertyChanged(nameof(ResultText));
         OnPropertyChanged(nameof(Label));
         OnPropertyChanged(nameof(RunAutomationName));
         OnPropertyChanged(nameof(CancelAutomationName));
-        OnPropertyChanged(nameof(SetOffAutomationName));
+        OnPropertyChanged(nameof(BatchOnAutomationName));
+        OnPropertyChanged(nameof(BatchOffAutomationName));
         OnPropertyChanged(nameof(Description));
+        OnPropertyChanged(nameof(DefaultStateText));
         OnPropertyChanged(nameof(CheckListCaption));
+        OnPropertyChanged(nameof(CheckListSaveErrorText));
         if (_isGenericStateError)
         {
             OnPropertyChanged(nameof(StateErrorText));
@@ -305,13 +421,13 @@ public partial class CommandItemViewModel : ObservableObject
         try
         {
             await ((IMaintenanceCheckList)Item).SetCheckListEntrySelectedAsync(entry.Value, selected);
+            HasCheckListSaveError = false;
         }
         catch (Exception ex)
         {
             MaintenanceItemLog.Failure(Item.Id, Item.Label, "削除対象の選択保存",
                 $"{entry.Value}: {ex.GetType().Name}: {ex.Message}");
-            ResultText = App.Text("CheckList.SaveFailed", "選択を保存できませんでした (ログを確認してください)");
-            ApplyResultStatus(MaintenanceActionStatus.Failed);
+            HasCheckListSaveError = true;
         }
 
         OnPropertyChanged(nameof(CheckListSummary));
@@ -407,6 +523,10 @@ public partial class CommandItemViewModel : ObservableObject
         finally
         {
             _suppressToggleWrite = false;
+            OnPropertyChanged(nameof(IsCustomState));
+            OnPropertyChanged(nameof(CanShowToggle));
+            OnPropertyChanged(nameof(ToggleState));
+            OnPropertyChanged(nameof(SelectedCustomToggleOption));
         }
     }
 
@@ -428,7 +548,6 @@ public partial class CommandItemViewModel : ObservableObject
 
     partial void OnIsStateKnownChanged(bool value)
     {
-        SetOffCommand.NotifyCanExecuteChanged();
         foreach (var child in Children)
         {
             child.NotifyParentStateChanged();
@@ -439,12 +558,9 @@ public partial class CommandItemViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(CanChoose));
         OnPropertyChanged(nameof(CanToggle));
-        SetOffCommand.NotifyCanExecuteChanged();
+        ApplyBatchOnCommand.NotifyCanExecuteChanged();
+        ApplyBatchOffCommand.NotifyCanExecuteChanged();
     }
-
-    // 混在構成は OFF と表示されるため、チェック値を変えずに OFF の設定処理を呼べるようにする。
-    private Task SetOffAsync() =>
-        HasExplicitOff && CanToggle ? _setToggle(this, false) : Task.CompletedTask;
 
     partial void OnSelectedChoiceChanged(ChoiceOptionViewModel? value)
     {
@@ -459,8 +575,15 @@ public partial class CommandItemViewModel : ObservableObject
     partial void OnIsRunningChanged(bool value)
     {
         RunCommand.NotifyCanExecuteChanged();
-        SetOffCommand.NotifyCanExecuteChanged();
+        ApplyBatchOnCommand.NotifyCanExecuteChanged();
+        ApplyBatchOffCommand.NotifyCanExecuteChanged();
     }
+
+    private bool CanApplyBatch() => IsBatchSetting && !IsRunning && _applyBatch is not null &&
+        (Parent is null || (Parent.IsStateKnown && Parent.IsChecked));
+
+    private Task ApplyBatchAsync(bool enabled) =>
+        CanApplyBatch() ? _applyBatch!(this, enabled) : Task.CompletedTask;
 
     partial void OnCanCancelChanged(bool value) => CancelCommand.NotifyCanExecuteChanged();
 }

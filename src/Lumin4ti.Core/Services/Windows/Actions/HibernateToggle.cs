@@ -39,6 +39,8 @@ public sealed class HibernateToggle : IMaintenanceToggle
 
     public bool RequiresReboot => false;
 
+    public bool? DefaultState => false;
+
     public Task<bool?> GetStateAsync(CancellationToken ct = default)
     {
         ct.ThrowIfCancellationRequested();

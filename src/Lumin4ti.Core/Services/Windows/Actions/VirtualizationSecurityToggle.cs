@@ -44,7 +44,10 @@ public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
 
     public bool RequiresReboot => true;
 
-    public bool SupportsExplicitOff => true;
+    // 無効化の明示上書きがない状態が標準。実効の保護状態は Windows・機器・ポリシーに従う。
+    public bool? DefaultState => false;
+
+    public bool IsCustomState { get; private set; }
 
     public MaintenanceStateDiagnostic? StateDiagnostic { get; private set; }
     public string? StateFailureReason { get; private set; }
@@ -53,9 +56,11 @@ public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
     {
         StateDiagnostic = null;
         StateFailureReason = null;
+        IsCustomState = false;
         try
         {
             var current = await CaptureAsync(ct);
+            IsCustomState = !current.IsFullyApplied && !current.EquivalentTo(VirtualizationSecuritySnapshot.Default());
             return current.IsFullyApplied;
         }
         catch (OperationCanceledException)

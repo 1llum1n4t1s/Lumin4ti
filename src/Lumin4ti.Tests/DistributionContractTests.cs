@@ -1,4 +1,5 @@
 using System.Xml.Linq;
+using Lumin4ti.Core.Models;
 
 namespace Lumin4ti.Tests;
 
@@ -23,12 +24,7 @@ public sealed class DistributionContractTests
             "scripts",
             "set-msi-program-files-location.ps1"));
         var readme = File.ReadAllText(Path.Combine(repositoryRoot, "README.md"));
-        var appSettings = File.ReadAllText(Path.Combine(
-            repositoryRoot,
-            "src",
-            "Lumin4ti.Core",
-            "Models",
-            "AppSettings.cs"));
+        var appSettings = new AppSettings();
 
         StringAssert.Contains(uiProject, "PackageReference Include=\"Velopack\"");
         StringAssert.Contains(releaseScript, "vpk pack");
@@ -42,13 +38,47 @@ public sealed class DistributionContractTests
         StringAssert.Contains(releaseScript, "旧PerUserインストーラ");
         StringAssert.Contains(readme, "Lumin4ti-win.msi");
         Assert.IsFalse(readme.Contains("Lumin4ti-win-Setup.exe", StringComparison.OrdinalIgnoreCase));
-        StringAssert.Contains(appSettings, "https://lumin4ti.kagayoi.com");
-        StringAssert.Contains(appSettings, "UpdateChannel => \"win\"");
+        Assert.AreEqual("https://lumin4ti.kagayoi.com", appSettings.UpdateBaseUrl);
+        Assert.AreEqual("win", appSettings.UpdateChannel);
 
         Assert.IsFalse(
             releaseScript.Contains("wix build", StringComparison.OrdinalIgnoreCase) ||
             releaseScript.Contains(".msix", StringComparison.OrdinalIgnoreCase),
             "Velopack以外のインストーラー方式へ変更するには個別の明示承認が必要です。");
+    }
+
+    [TestMethod]
+    public void 再起動helperはCoreのみ参照しGUIと同じ出力へ独立した起動ファイルを同梱する()
+    {
+        var root = FindRepositoryRoot();
+        var helper = XDocument.Load(Path.Combine(root, "src", "Lumin4ti.RebootCleanup", "Lumin4ti.RebootCleanup.csproj"));
+        var references = helper.Descendants("ProjectReference").ToArray();
+        Assert.HasCount(1, references);
+        Assert.AreEqual("..\\Lumin4ti.Core\\Lumin4ti.Core.csproj", (string?)references[0].Attribute("Include"));
+        Assert.IsFalse(helper.Descendants("PackageReference").Any());
+        Assert.AreEqual("Exe", helper.Descendants("OutputType").Single().Value);
+        Assert.AreEqual("true", helper.Descendants("UseAppHost").Single().Value);
+        Assert.AreEqual("true", helper.Descendants("GenerateRuntimeConfigurationFiles").Single().Value);
+        Assert.IsFalse(helper.Descendants("TargetFramework").Any() || helper.Descendants("RuntimeIdentifier").Any()
+            || helper.Descendants("SelfContained").Any(), "helper は GUI と同じ共通 TFM/RID/runtime を継承する必要があります。");
+
+        var solution = XDocument.Load(Path.Combine(root, "Lumin4ti.slnx"));
+        Assert.IsTrue(solution.Descendants("Project").Any(project =>
+            (string?)project.Attribute("Path") == "src/Lumin4ti.RebootCleanup/Lumin4ti.RebootCleanup.csproj"));
+        var ui = XDocument.Load(Path.Combine(root, "src", "Lumin4ti.UI", "Lumin4ti.UI.csproj"));
+        var helperReference = ui.Descendants("ProjectReference").Single(reference =>
+            ((string?)reference.Attribute("Include"))?.EndsWith("Lumin4ti.RebootCleanup.csproj", StringComparison.Ordinal) == true);
+        Assert.AreEqual("false", (string?)helperReference.Attribute("ReferenceOutputAssembly"));
+        Assert.AreEqual("false", (string?)helperReference.Attribute("Private"));
+        var collect = ui.Descendants("Target").Single(target => (string?)target.Attribute("Name") == "CollectRebootCleanupArtifacts");
+        Assert.AreEqual("GetTargetPath", (string?)collect.Element("MSBuild")?.Attribute("Targets"));
+        var files = collect.Descendants("_RebootCleanupArtifact").Select(item => (string)item.Attribute("Include")!).ToArray();
+        Assert.HasCount(4, files);
+        foreach (var extension in new[] { ".exe", ".dll", ".deps.json", ".runtimeconfig.json" })
+            Assert.IsTrue(files.Any(file => file.EndsWith("Lumin4ti.RebootCleanup" + extension + "')", StringComparison.Ordinal)));
+        var publish = ui.Descendants("ResolvedFileToPublish").Single();
+        Assert.AreEqual("@(_RebootCleanupArtifact)", (string?)publish.Attribute("Include"));
+        Assert.AreEqual("%(Filename)%(Extension)", (string?)publish.Attribute("RelativePath"));
     }
 
     [TestMethod]

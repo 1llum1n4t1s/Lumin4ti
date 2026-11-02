@@ -27,8 +27,11 @@ public sealed class RegistryToggleTests
         foreach (var spec in specs) registry.Set(spec, RegistryValueSnapshot.FromRegistry(RegistryValueKind.String, "custom"));
         var toggle = CreateToggle(specs, registry);
 
+        Assert.AreEqual(false, await toggle.GetStateAsync());
+        Assert.IsTrue(toggle.IsCustomState);
         Assert.IsTrue((await toggle.SetStateAsync(true)).Success);
         Assert.AreEqual(true, await toggle.GetStateAsync());
+        Assert.IsFalse(toggle.IsCustomState);
         Assert.IsTrue((await toggle.SetStateAsync(false)).Success);
         foreach (var spec in specs)
         {
@@ -36,6 +39,24 @@ public sealed class RegistryToggleTests
                 : RegistryValueSnapshot.FromRegistry(spec.Kind, spec.DefaultValue);
             AssertSnapshot(expected, registry.Read(spec), spec.Name);
         }
+        Assert.AreEqual(false, await toggle.GetStateAsync());
+        Assert.IsFalse(toggle.IsCustomState);
+    }
+
+    [TestMethod]
+    public async Task メニュー遅延の独自値からONを経由せずOFFの既定値へ変更する()
+    {
+        var spec = Spec("MenuShowDelay", RegistryValueKind.String, "0", "400");
+        var registry = new FakeRegistryValueAccessor();
+        registry.Set(spec, RegistryValueSnapshot.FromRegistry(RegistryValueKind.String, "100"));
+        var toggle = CreateToggle([spec], registry);
+
+        Assert.AreEqual(false, await toggle.GetStateAsync());
+        Assert.IsTrue(toggle.IsCustomState);
+        Assert.IsTrue((await toggle.SetStateAsync(false)).Success);
+        AssertSnapshot(RegistryValueSnapshot.FromRegistry(RegistryValueKind.String, "400"), registry.Read(spec), spec.Name);
+        Assert.AreEqual(false, await toggle.GetStateAsync());
+        Assert.IsFalse(toggle.IsCustomState);
     }
 
     [TestMethod]

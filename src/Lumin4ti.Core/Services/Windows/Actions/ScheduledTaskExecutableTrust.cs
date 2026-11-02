@@ -15,6 +15,7 @@ internal static class ScheduledTaskExecutableTrust
     private const string AppDirectoryName = "Lumin4ti";
     private const string CurrentDirectoryName = "current";
     private const string UiExecutableName = "Lumin4ti.UI.exe";
+    internal const string RebootCleanupExecutableName = "Lumin4ti.RebootCleanup.exe";
     private const string StableExecutableName = "Lumin4ti.exe";
 
     private static readonly SecurityIdentifier Administrators =
@@ -34,11 +35,17 @@ internal static class ScheduledTaskExecutableTrust
         (FileSystemRights)0x40000000;  // GENERIC_WRITE
 
     public static bool IsTrustedInstalledExecutable(string processPath)
+        => IsTrustedInstalledExecutable(processPath, UiExecutableName);
+
+    internal static bool IsTrustedRebootCleanupExecutable(string processPath)
+        => IsTrustedInstalledExecutable(processPath, RebootCleanupExecutableName);
+
+    private static bool IsTrustedInstalledExecutable(string processPath, string executableName)
     {
         try
         {
             var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-            if (!IsExpectedInstalledPath(processPath, programFiles))
+            if (!IsExpectedInstalledPath(processPath, programFiles, executableName))
             {
                 return false;
             }
@@ -68,7 +75,11 @@ internal static class ScheduledTaskExecutableTrust
     }
 
     internal static bool IsExpectedInstalledPath(string processPath, string programFiles)
+        => IsExpectedInstalledPath(processPath, programFiles, UiExecutableName);
+
+    internal static bool IsExpectedInstalledPath(string processPath, string programFiles, string executableName)
     {
+        if (executableName is not (UiExecutableName or RebootCleanupExecutableName)) return false;
         if (string.IsNullOrWhiteSpace(processPath) ||
             string.IsNullOrWhiteSpace(programFiles) ||
             !Path.IsPathFullyQualified(processPath) ||
@@ -81,13 +92,19 @@ internal static class ScheduledTaskExecutableTrust
             programFiles,
             AppDirectoryName,
             CurrentDirectoryName,
-            UiExecutableName));
+            executableName));
         return Path.GetFullPath(processPath).Equals(expected, StringComparison.OrdinalIgnoreCase);
     }
 
     internal static bool IsSafeAcl(FileSystemSecurity security, out string failureReason)
     {
         ArgumentNullException.ThrowIfNull(security);
+        var raw = new RawSecurityDescriptor(security.GetSecurityDescriptorBinaryForm(), 0);
+        if (raw.DiscretionaryAcl is null || raw.DiscretionaryAcl.Cast<GenericAce>().Any(ace => ace is not CommonAce { IsCallback: false }))
+        {
+            failureReason = "解釈できない DACL エントリがあります";
+            return false;
+        }
 
         var owner = security.GetOwner(typeof(SecurityIdentifier)) as SecurityIdentifier;
         if (owner is null || !IsTrustedPrincipal(owner))

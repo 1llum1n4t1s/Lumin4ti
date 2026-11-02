@@ -12,7 +12,7 @@ public sealed class DismExitCodeTests
     [TestMethod]
     public void 終了コード3010は成功扱い_要再起動()
     {
-        Assert.IsTrue(DismExitCode.IsSuccessOrRebootRequired(WithExit(DismExitCode.RebootRequired)));
+        Assert.IsTrue(DismExitCode.IsSuccessOrRebootRequired(WithExit(3010)));
     }
 
     [TestMethod]

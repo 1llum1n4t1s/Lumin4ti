@@ -109,6 +109,7 @@ internal static class Program
         // 既存登録だけを現行の権限・利用者限定定義へ移行する。
         if (OperatingSystem.IsWindows() && isElevated)
         {
+            RebootCacheCleanup.ReportCurrentUserResults();
             try
             {
                 new ScheduledTempCleanupToggle(new ProcessCommandExecutor())

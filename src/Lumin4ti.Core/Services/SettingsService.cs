@@ -48,10 +48,9 @@ public sealed class SettingsService : ISettingsService
             }
 
             var json = File.ReadAllText(settingsFilePath);
-            var settings = Lumin4tiJson.Deserialize<AppSettings>(json);
+            var settings = DeserializeAndNormalize(json);
             if (settings is not null)
             {
-                NormalizeSettings(settings);
                 LoggerBootstrap.Log.Info($"設定ファイルを読み込みました: {settingsFilePath}");
                 return new SettingsLoadResult(settings, SettingsLoadStatus.Loaded);
             }
@@ -88,6 +87,37 @@ public sealed class SettingsService : ISettingsService
         {
             settings.CleanupExclusions[key] = [];
         }
+    }
+
+    private static AppSettings? DeserializeAndNormalize(string json)
+    {
+        var settings = Lumin4tiJson.Deserialize<AppSettings>(json);
+        if (settings is not null) NormalizeSettings(settings);
+        return settings;
+    }
+
+    /// <summary>既存と同じJSON変換・正規化で、保存できない読取snapshotを作る。</summary>
+    internal static ISettingsService CreateReadOnlySnapshot(string json, string source)
+    {
+        try
+        {
+            var settings = DeserializeAndNormalize(json);
+            if (settings is not null) return new ReadOnlySnapshot(settings, SettingsLoadStatus.Loaded);
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            LoggerBootstrap.Log.Error($"設定snapshotを読み込めませんでした: {source} ({ex.GetType().Name})", ex);
+        }
+        return new ReadOnlySnapshot(new AppSettings(), SettingsLoadStatus.Failed);
+    }
+
+    private sealed class ReadOnlySnapshot(AppSettings current, SettingsLoadStatus status) : ISettingsService
+    {
+        public AppSettings Current { get; } = current;
+        public SettingsLoadStatus LoadStatus { get; } = status;
+        public object SyncRoot { get; } = new();
+        public Task SaveAsync(CancellationToken ct = default) => Task.FromException(new InvalidOperationException("読取snapshotは保存できません。"));
+        public Task FlushAsync(CancellationToken ct = default) => Task.CompletedTask;
     }
 
     public Task SaveAsync(CancellationToken ct = default)

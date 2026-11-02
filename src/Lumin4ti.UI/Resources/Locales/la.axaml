@@ -84,7 +84,10 @@
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Explorer restitui non potuit (quaeso manu eum restitue)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Status legi non potuit (iura administratoris desunt, aut facultas in hoc PC non praesto est. Initia Debug non exaltantur, ergo initium normale conare).</x:String>
   <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">DISM statum Recall obtinere non potuit. Fortasse haec facultas in hoc computatro non praesto est aut iura administratoris desunt. Plura in actis inspice.</x:String>
-  <x:String x:Key="Text.Toggle.SetOff" xml:space="preserve">Ad OFF ponere</x:String>
+  <x:String x:Key="Text.Setting.DefaultFormat" xml:space="preserve">Praedefinitum: {0}</x:String>
+  <x:String x:Key="Text.Setting.DefaultEnvironment" xml:space="preserve">Ex ambitu pendet / ignotum</x:String>
+  <x:String x:Key="Text.Toggle.CustomState" xml:space="preserve">Proprium (ON/OFF elige)</x:String>
+  <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">Proprium</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">Status Recall in exitu DISM non invenitur. Plura in actis inspice.</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">Status Recall a DISM redditus interpretari non potest. Plura in actis inspice.</x:String>
   <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">Hoc opus ab alio usore Windows inscriptum est ideoque mutari non potest.</x:String>
@@ -126,7 +129,7 @@
   <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">Cellas navigatrorum delere</x:String>
   <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Deletes Chromium web and shader caches, Service Worker cache storage, crash reports, and extension temporary data. Service Worker registrations, DRM components, bookmarks, passwords, and sign-in state are not deleted.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">Cellas iconum, imagunculae et litterarum formarum reficere</x:String>
-  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">Cellam iconum, cellam imagunculae et cellam formarum litterarum Exploratoris delet ut Windows eas denuo aedificet. Haec est emendatio usitata pro iconibus vacuis vel falsis, imagunculis quae numquam renovantur, et textu prave exhibito. Documenta quae cortex adhuc aperta tenet in proxima reboatione Windows tolluntur. Windows reboa ut refectio perficiatur. Dum cellae reficiuntur, exhibitio paulisper tardior est.</x:String>
+  <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">Cellam iconum, cellam imagunculae et cellam formarum litterarum Exploratoris delet ut Windows eas denuo aedificet. Haec est emendatio usitata pro iconibus vacuis vel falsis, imagunculis quae numquam renovantur, et textu prave exhibito. Explorator vi non clauditur. Cellae selectae adhuc in usu in proximo initio Windows ex institutione fideli denuo enumerantur, deinde deletio temptatur. Ad summum tres executiones intra septem dies fiunt; obiecta adhuc clausa servantur et eventus in diario scribuntur. Dum cellae reficiuntur, exhibitio paulisper tardior est.</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">Cellam descensionis Windows Update delere</x:String>
   <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">Deletes only re-downloadable files from SoftwareDistribution\Download. Update history and catroot2 are not deleted. Related services are restored after cleanup.</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">Data praelectionis et indicem quaerendi delere et reficere</x:String>
@@ -152,8 +155,8 @@
   <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">Virtualization-Based Security (VBS) et Hypervisor-Enforced Code Integrity (HVCI) inhabilitat ut ~1–2 GB memoriae semper reservatae liberet. Hoc cum securitate permutatio est; OFF (praedefinitum) relinque si Hyper-V, WSL2, Windows Sandbox, Docker Desktop, vel Credential Guard usurpas. OFF configurationes explicitas BCD et registri delet et valores Windows praedefinitos atque consilia valere sinit. Configurationes pristinae nec servantur nec restituuntur.</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">Processus SvcHost consolida (divisionem coerce)</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">Ex praedefinito Windows svchost.exe per facultatem divisum incohat (in PC cum plus quam 3.5 GB RAM). Hoc ad ON vertere limen divisionis maximum facit et servitia coniungibilia in pauciores processus consolidat, numerum processuum et usum memoriae (a decem ad plus quam centum MB) minuens. Servitia ut fines securitatis habita (DiagTrack, Dnscache, etc.) non consolidantur. OFF limen tollit et ad divisionem praedefinitam revertit.</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">Executionem UWP in recessu intermittere / valores Windows praedefinitos adhibere (200–500 MB servat)</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">ON executionem omnium applicationum Store (UWP) in recessu ad «Semper intermissam» ponit. OFF configurationes explicitas applicationum selectarum delet et valores Windows praedefinitos adhibet. Configurationes pristinae singularum applicationum nec servantur nec restituuntur.</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">Executio UWP in ambitu</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">Omnia OFF executionem in ambitu applicationum Store (UWP) institutarum prohibet; Omnia ON eam expresse permittit. ON valores praedefinitos Windows non restituit. Post novas applicationes institutas iterum exsequere. Priores optiones singularum applicationum nec servantur nec restituuntur. Tantum optiones singularum applicationum mutantur. Permissio vel prohibitio effectiva etiam ex optionibus generalibus Windows, regulis organizationis et limitibus applicationum pendet.</x:String>
   <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">Windows Recall inhabilita</x:String>
   <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">Facultatem Recall, quae imagines pellucidas pantalli periodice ad quaestionem AI recordat, inhabilitat (aliae facultates AI sicut Click-to-do et quaestio semantica servantur). Consumptionem memoriae/disci processus recordantis et sollicitudines privatae vitae minuit. Solum in Windows 11 24H2 + Copilot+ PC praesto; in PC non sustentis status legi nec verti potest.</x:String>
   <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">Power throttling inhabilita</x:String>
@@ -198,7 +201,7 @@
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Modum Edge in fundo et Startup Boost per regulam exstinguit. Si Edge raro uteris, circiter 100–300 MB memoriae liberari possunt. Edge paulo tardius incipere potest et notificationes extensionum cessare possunt. Hoc ad OFF verte ut regulas removeas et valores Edge praedefinitos restituas.</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">Elige quid deleatur</x:String>
   <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">Elige quid in ingressu exsequatur</x:String>
-  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">Electio servari non potuit (vide acta)</x:String>
+  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">Ultima servatio huius delectus defecit (diarium inspice).</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">Renovatio</x:String>
   <x:String x:Key="Text.UpdateDialog.AvailableHeader" xml:space="preserve">Nova versio praesto est</x:String>
@@ -214,4 +217,13 @@
   <x:String x:Key="Text.Status.Applied" xml:space="preserve">{0} mutatum est</x:String>
   <x:String x:Key="Text.Status.ApplyFailed" xml:space="preserve">{0} mutari non potuit (acta inspice)</x:String>
   <x:String x:Key="Text.Shutdown.BlockReason" xml:space="preserve">Lumin4ti exspectat dum opus conservationis perficitur…</x:String>
+  <x:String x:Key="Text.Button.BatchOn" xml:space="preserve">Omnia ON</x:String>
+  <x:String x:Key="Text.Button.BatchOff" xml:space="preserve">Omnia OFF</x:String>
+  <x:String x:Key="Text.Setting.DefaultSystemManaged" xml:space="preserve">Optiones praedefinitae Windows / applicationum</x:String>
+  <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">Versio evolutionis</x:String>
+  <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">Versio non praesto</x:String>
+  <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">Ultima servatio optionum linguae et renovationis defecit (diarium inspice).</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Optiones legi non potuerunt. Servatio ad fasciculum originale protegendum impeditur, nec purgatio in initio sessionis fiet. Mutationes tantum in hac sessione valent.</x:String>
+  <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">Nulla obiecta in ultima inspectione inventa sunt.</x:String>
+  <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">Indicem denuo aperi ut renovetur. In executione obiecta nova quae non exclusa sunt quoque includuntur.</x:String>
 </ResourceDictionary>

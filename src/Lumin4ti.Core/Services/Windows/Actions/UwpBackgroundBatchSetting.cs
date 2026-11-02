@@ -1,21 +1,23 @@
 using System.Runtime.Versioning;
+using System.Xml;
+using System.Xml.Linq;
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
 using Windows.Management.Deployment;
 
 namespace Lumin4ti.Core.Services.Windows.Actions;
 
-/// <summary>ON は全 UWP アプリを「常にオフ」、OFF は明示上書きを削除して Windows 既定へ戻す。</summary>
+/// <summary>現在の全 UWP アプリのバックグラウンド実行を一括で禁止または許可する。</summary>
 [SupportedOSPlatform("windows10.0.17763.0")]
-public sealed class UwpBackgroundToggle : IMaintenanceToggle
+public sealed class UwpBackgroundBatchSetting : IMaintenanceBatchSetting
 {
     private readonly Func<IReadOnlyList<string>> _getTargetFamilyNames;
     private readonly IUwpBackgroundSettingsStore _settings;
 
-    public UwpBackgroundToggle()
+    public UwpBackgroundBatchSetting()
         : this(GetInstalledPackageFamilyNames, new RegistryUwpBackgroundSettingsStore()) { }
 
-    internal UwpBackgroundToggle(
+    internal UwpBackgroundBatchSetting(
         Func<IReadOnlyList<string>> getTargetFamilyNames,
         IUwpBackgroundSettingsStore settings)
     {
@@ -24,45 +26,23 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
     }
 
     public string Id => "uwp-background-off";
-    public string Label => "UWP バックグラウンド実行を一括オフ / Windows 既定 (メモリ節約 200〜500MB)";
+    public string Label => "UWP バックグラウンド実行を一括設定";
     public string Description =>
-        "ON にすると、ストアアプリ (UWP) のバックグラウンド実行を全アプリまとめて「常にオフ」にします。" +
-        "OFF にすると、対象アプリの明示的な設定を削除して Windows 既定へ戻します。変更前の個別設定は保存しません。";
+        "「一括OFF」は現在のストアアプリ (UWP) のバックグラウンド実行をまとめて禁止し、「一括ON」はまとめて許可します。" +
+        "アプリ追加後も同じ操作を再実行できます。変更するのはアプリ別設定だけで、実効動作は Windows 全体設定・ポリシー・アプリの制約に依存します。変更前の個別設定は保存しません。";
     public CommandCategory Category => CommandCategory.Performance;
     public bool RequiresReboot => false;
-    public bool SupportsExplicitOff => true;
-    public MaintenanceStateDiagnostic? StateDiagnostic => null;
-    public string? StateFailureReason { get; private set; }
-
-    public Task<bool?> GetStateAsync(CancellationToken ct = default) => Task.Run<bool?>(() =>
-    {
-        StateFailureReason = null;
-        try
-        {
-            var families = GetTargets();
-            var values = _settings.ReadMany(families, ct);
-            return families.Length > 0 && families.All(family => values[family] == UwpBackgroundValues.Applied);
-        }
-        catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
-        catch (Exception error)
-        {
-            StateFailureReason = $"{error.GetType().Name}: {error.Message}";
-            MaintenanceItemLog.StateReadFailed(Id, Label, StateFailureReason);
-            return null;
-        }
-    }, ct);
-
-    public Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default) =>
-        Task.Run(() => SetState(on, ct), ct);
+    public Task<MaintenanceActionResult> ApplyAsync(bool enabled, CancellationToken ct = default) =>
+        Task.Run(() => Apply(enabled, ct), ct);
 
     private string[] GetTargets() => _getTargetFamilyNames()
         .Where(family => !string.IsNullOrWhiteSpace(family))
         .Distinct(StringComparer.OrdinalIgnoreCase).ToArray();
 
-    private MaintenanceActionResult SetState(bool on, CancellationToken ct)
+    private MaintenanceActionResult Apply(bool enabled, CancellationToken ct)
     {
-        var operation = on ? "常にオフの適用" : "Windows 既定への変更";
-        var target = on ? UwpBackgroundValues.Applied : default;
+        var operation = enabled ? "バックグラウンド実行の一括ON (許可)" : "バックグラウンド実行の一括OFF (禁止)";
+        var target = enabled ? UwpBackgroundValues.Enabled : UwpBackgroundValues.DisabledValues;
         var before = new Dictionary<string, UwpBackgroundValues>(StringComparer.OrdinalIgnoreCase);
         var attempted = new List<string>();
         MaintenanceActionResult result;
@@ -90,7 +70,8 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
                 if (actual[family] != target)
                     throw new InvalidOperationException($"{family} の最終設定を確認できませんでした。");
             ct.ThrowIfCancellationRequested();
-            result = MaintenanceActionResult.Ok($"  - {operation}: {families.Length} パッケージ");
+            result = MaintenanceActionResult.Ok($"  - アプリ別設定を{(enabled ? "一括ON (許可)" : "一括OFF (禁止)")}に変更: {families.Length} パッケージ\n" +
+                "  - 実効動作は Windows 全体設定・ポリシー・アプリの制約に依存します。");
         }
         catch (Exception error)
         {
@@ -99,7 +80,7 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
                 result = MaintenanceActionResult.Fail($"{operation}と補償に失敗しました。部分更新の可能性があります。\n  - {error.Message}\n  - " +
                     string.Join("\n  - ", compensationErrors));
             else if (error is OperationCanceledException && ct.IsCancellationRequested)
-                result = MaintenanceActionResult.Canceled("操作を取り消し、変更済みの設定を操作前の値へ補償しました。");
+                result = MaintenanceActionResult.Canceled($"{operation}を取り消し、変更済みの設定を操作前の値へ補償しました。");
             else
                 result = MaintenanceActionResult.Fail($"{operation}に失敗しました。変更済みの設定を操作前の値へ補償しました。\n  - {error.Message}");
         }
@@ -148,8 +129,66 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
         var packageManager = new PackageManager();
         return packageManager.FindPackagesForUser(string.Empty)
             .Where(package => !package.IsFramework && !package.IsResourcePackage && !package.IsBundle)
+            .Where(package =>
+            {
+                // 固定のインストール済み manifest の属性だけを読む。判定不能なら全件の書込前に中止する。
+                using var manifest = File.OpenText(Path.Combine(package.InstalledLocation.Path, "AppxManifest.xml"));
+                return ContainsUwpApplications(manifest);
+            })
             .Select(package => package.Id.FamilyName)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
+    }
+
+    internal static bool ContainsUwpApplications(TextReader manifest)
+    {
+        using var reader = XmlReader.Create(manifest, new XmlReaderSettings
+        {
+            DtdProcessing = DtdProcessing.Prohibit,
+            XmlResolver = null,
+            MaxCharactersInDocument = 1024 * 1024,
+        });
+        var document = XDocument.Load(reader);
+        XNamespace foundation = "http://schemas.microsoft.com/appx/manifest/foundation/windows10";
+        XNamespace uap10 = "http://schemas.microsoft.com/appx/manifest/uap/windows10/10";
+        XNamespace previewSecurity2 = "http://schemas.microsoft.com/appx/manifest/preview/windows10/security/2";
+        // Windows 8/8.1 の既知パッケージは Windows 10 UWP の一括設定対象に含めない。
+        if (document.Root?.Name == XName.Get("Package", "http://schemas.microsoft.com/appx/2010/manifest"))
+            return false;
+        if (document.Root?.Name != foundation + "Package")
+            throw new InvalidDataException("アプリパッケージの manifest 形式を確認できませんでした。");
+        var hasUwp = false;
+        foreach (var application in document.Root.Elements(foundation + "Applications").Elements(foundation + "Application"))
+        {
+            // Microsoft の Application スキーマ: windowsApp、または旧形式の通常 EntryPoint が UWP。
+            // https://learn.microsoft.com/uwp/schemas/appxpackage/uapmanifestschema/element-f-application
+            var behavior = (string?)application.Attribute(uap10 + "RuntimeBehavior");
+            var previewBehavior = (string?)application.Attribute(previewSecurity2 + "RuntimeBehavior");
+            if (behavior == "appSilo")
+                throw new InvalidDataException("uap10 の RuntimeBehavior を判定できませんでした。");
+            if (behavior is not null && previewBehavior is not null && behavior != previewBehavior)
+                throw new InvalidDataException("アプリの RuntimeBehavior に矛盾があります。");
+            behavior ??= previewBehavior;
+            if (behavior is not null && behavior is not ("windowsApp" or "win32App" or "packagedClassicApp" or "appSilo"))
+                throw new InvalidDataException("アプリの RuntimeBehavior を判定できませんでした。");
+            var entryPoint = (string?)application.Attribute("EntryPoint");
+            var startPage = (string?)application.Attribute("StartPage");
+            bool? legacyUwp = !string.IsNullOrWhiteSpace(entryPoint)
+                ? !entryPoint.Equals("windows.fullTrustApplication", StringComparison.OrdinalIgnoreCase)
+                    && !entryPoint.Equals("windows.partialTrustApplication", StringComparison.OrdinalIgnoreCase)
+                : !string.IsNullOrWhiteSpace(startPage) ? true : null;
+            if (behavior is not null)
+            {
+                var isUwp = behavior == "windowsApp";
+                if (legacyUwp is { } legacy && legacy != isUwp)
+                    throw new InvalidDataException("アプリの RuntimeBehavior と起動属性に矛盾があります。");
+                hasUwp |= isUwp;
+            }
+            else if (legacyUwp is { } legacy)
+                hasUwp |= legacy;
+            else
+                throw new InvalidDataException("アプリの EntryPoint を判定できませんでした。");
+        }
+        return hasUwp;
     }
 }

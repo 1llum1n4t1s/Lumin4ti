@@ -55,7 +55,7 @@
   <x:String x:Key="Text.Result.Partial" xml:space="preserve">⚠ 一部完了しました</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">削除する対象を選ぶ</x:String>
   <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">サインイン時に実行する項目を選ぶ</x:String>
-  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">選択を保存できませんでした (ログを確認してください)</x:String>
+  <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">この選択の前回の保存に失敗しました（ログを確認してください）。</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">アップデート</x:String>
   <x:String x:Key="Text.UpdateDialog.AvailableHeader" xml:space="preserve">新しいバージョンがあります</x:String>
@@ -72,9 +72,23 @@
   <x:String x:Key="Text.Status.ApplyFailed" xml:space="preserve">{0} の変更に失敗しました (ログを確認してください)</x:String>
   <x:String x:Key="Text.Shutdown.BlockReason" xml:space="preserve">Lumin4ti がメンテナンス操作の完了を待っています…</x:String>
   <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">DISM で Recall の状態を取得できません。非対応環境や管理者権限の不足などが考えられます。詳細はログを確認してください。</x:String>
-  <x:String x:Key="Text.Toggle.SetOff" xml:space="preserve">OFFにする</x:String>
+  <x:String x:Key="Text.Setting.DefaultFormat" xml:space="preserve">既定: {0}</x:String>
+  <x:String x:Key="Text.Setting.DefaultEnvironment" xml:space="preserve">環境による／不明</x:String>
+  <x:String x:Key="Text.Toggle.CustomState" xml:space="preserve">カスタム（ON/OFFを選択）</x:String>
+  <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">カスタム</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">DISM の出力に Recall の状態が見つかりません。詳細はログを確認してください。</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">DISM が返した Recall の状態を判定できません。詳細はログを確認してください。</x:String>
   <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">別の Windows ユーザーが登録したタスクのため操作できません。</x:String>
   <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">登録済みタスクの所有者を確認できないため操作できません。</x:String>
+  <x:String x:Key="Text.Button.BatchOn" xml:space="preserve">一括ON</x:String>
+  <x:String x:Key="Text.Button.BatchOff" xml:space="preserve">一括OFF</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">UWPバックグラウンド実行</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">現在インストールされているStore（UWP）アプリを、一括OFFでバックグラウンド実行禁止、一括ONで明示的に許可します。ONはWindowsの標準設定へ戻す操作ではありません。新しいアプリを追加した後は再実行してください。以前のアプリ別設定は保存・復元しません。 変更するのはアプリ別設定です。実効の許可・禁止は、Windows全体の設定、組織ポリシー、各アプリの制約にも従います。</x:String>
+  <x:String x:Key="Text.Setting.DefaultSystemManaged" xml:space="preserve">Windows / 各アプリの標準設定</x:String>
+  <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">開発ビルド</x:String>
+  <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">バージョンを取得できませんでした</x:String>
+  <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">言語・更新設定の前回の保存に失敗しました（ログを確認してください）。</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">設定を読み込めないため、原本を保護して保存を停止し、サインイン時クリーンアップも実行しません。変更はこの起動中だけ有効です。</x:String>
+  <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">前回の確認では、対象が見つかりませんでした。</x:String>
+  <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">一覧は開き直すと更新されます。実行時は除外されていない新しい対象も含みます。</x:String>
 </ResourceDictionary>
