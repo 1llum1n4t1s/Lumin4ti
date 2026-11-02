@@ -40,10 +40,12 @@ Lumin4ti は Windows 10 / 11（x64）向けのメンテナンス・最適化GUI�
 `MaintenanceActionCatalog`が画面へ公開する操作の正本であり、各項目は次のいずれかを実装する。
 
 - `IMaintenanceAction`: 一度だけ実行するボタン操作。進捗行と`MaintenanceActionResult`を返す。
-- `IMaintenanceToggle`: 現在状態を取得し、ONで適用、OFFで復元する。
+- `IMaintenanceToggle`: 現在状態を取得し、ONで適用、OFFで項目の解除値へ設定または明示設定を削除する。元値復元との違いと補償の境界は[状態と永続化](#状態と永続化)にまとめる。
 - `IMaintenanceChoice`: 複数の値から選び、適用後の実値を再取得する。
 
 `ParentId`を持つ項目は親カード内へ1段だけ配置され、親が無効または状態不明の間は操作できない。親の状態既知・ON/OFFの変化を子の操作可否へ通知する。カタログの並び順が画面の表示順になる。
+
+`SupportsExplicitOff`を持つトグルは「OFFにする」ボタンも表示する。全値が適用値に一致しない混在状態もOFFと表示するため、スイッチを一度ONにせず解除できるようにする。`SetOffCommand`はスイッチと同じ`CanToggle`条件と既存の切替経路を使い、状態不明・実行中・親が無効な間は実行しない。
 
 操作データは次の順に流れる。
 

@@ -146,7 +146,7 @@ if ($LASTEXITCODE -eq 0) { pwsh -NoProfile -File scripts/release-local.ps1 } els
 
 ## コードレビュー時の注意点 (このコードベース特有)
 
-- トグルの多重操作レース: `ToggleSwitch` の `IsEnabled` は `CanToggle` (= 状態既知 かつ 非実行中) にバインドすること。
+- トグルの多重操作レース: `ToggleSwitch` の `IsEnabled` は `CanToggle` (= 状態既知 かつ 非実行中 かつ 親がある場合は状態既知・ON) にバインドすること。`SupportsExplicitOff` / `SetOffCommand` の直接解除も同じ条件と既存の切替経路を通す。変更時は `CommandCategoryStateQueryTests` のOFF表示・状態不明・実行中・親子連動の検証を通す。表示の理由は [DESIGN.md のメンテナンス操作のモデル](DESIGN.md#メンテナンス操作のモデル) を参照する。
 - 状態表示の乖離を避ける: `GetStateAsync` はレジストリだけでなく実適用状態も見る (例: VBS トグルは bcdedit の `hypervisorlaunchtype` も照合)。部分適用を避けるため、失敗しやすいステップ (bcdedit 等) を先に実行してから残りを書く。
 - 状態取得の診断は `StateErrorText`、操作結果は `ResultText` へ分け、状態回復時に診断だけを消す。状態不明の技術的理由は `StateFailureReason`、翻訳可能なトグル固有診断は `StateDiagnostic` で渡し、正常取得時には解除する。失敗・部分成功・受付拒否の記録は `MaintenanceItemLog` を使い、項目名と原因を残す。診断の境界は [DESIGN.md の状態と永続化](DESIGN.md#状態と永続化) を参照し、変更時は操作フロー検証も通す。親子の操作部品はローカライズ済み項目名をアクセシビリティ名にする。デバイスの空表示は列挙成功時だけ出す。
 - 部分失敗を成功と偽らない: マルチステップ (powercfg 等) は重要ステップの失敗で `Fail` を返す。使用中ファイルのスキップのように「想定内の一部未処理」は `Partial` と結果行で伝える。
