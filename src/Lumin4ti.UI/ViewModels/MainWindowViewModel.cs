@@ -58,14 +58,14 @@ public class MainWindowViewModel
             operationCoordinator,
             CommandCategory.Performance,
             "パフォーマンス",
-            "メモリ・プロセス・描画まわりを最適化します。スイッチは基本 ON = 最適化を適用、OFF = Windows 既定に戻す、です" +
+            "メモリ・プロセス・描画まわりを最適化します。ON = 最適化を適用、OFF = 各項目の解除値へ設定または明示設定を削除します。変更前の値は保存・復元しません。" +
             "（MMAgent の各項目のみ ON = その機能を有効化 で、推奨値は各説明を参照してください）。");
         System = new CommandCategoryViewModel(
             catalog,
             operationCoordinator,
             CommandCategory.System,
             "システム設定",
-            "電源・入力・時刻などの Windows 設定を調整します。スイッチは ON = 調整を適用、OFF = Windows 既定に戻す、です。");
+            "電源・入力・時刻などの Windows 設定を調整します。ON = 調整を適用、OFF = 各項目の解除値へ設定または明示設定を削除します。変更前の値は保存・復元しません。");
         Organize = new CommandCategoryViewModel(
             catalog,
             operationCoordinator,

@@ -1,6 +1,5 @@
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
-using System.Security;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -685,31 +684,13 @@ public sealed class DefenderSignatureUpdateAction : IMaintenanceAction
 /// </summary>
 public sealed class DefenderResetAction : IMaintenanceAction
 {
-    private const string PendingBackupJson = "{\"Lumin4tiPending\":true}";
     private const int MaximumAvailabilityOutputLength = 64 * 1024;
-    private static readonly string[] BackupPropertyNames =
-    [
-        "ExclusionPath",
-        "ExclusionProcess",
-        "ExclusionExtension",
-        "ExclusionIpAddress",
-        "ControlledFolderAccessAllowedApplications",
-        "ControlledFolderAccessProtectedFolders",
-        "AttackSurfaceReductionOnlyExclusions",
-    ];
 
     private readonly ICommandExecutor _executor;
-    private readonly ProtectedBackupStorage _backupStorage;
 
     public DefenderResetAction(ICommandExecutor executor)
-        : this(executor, ProtectedBackupStorage.Default)
-    {
-    }
-
-    internal DefenderResetAction(ICommandExecutor executor, ProtectedBackupStorage backupStorage)
     {
         _executor = executor ?? throw new ArgumentNullException(nameof(executor));
-        _backupStorage = backupStorage ?? throw new ArgumentNullException(nameof(backupStorage));
     }
 
     public string Id => "defender-reset";
@@ -719,6 +700,7 @@ public sealed class DefenderResetAction : IMaintenanceAction
     public string Description =>
         "Windows Defender に登録された除外パス・除外プロセス・除外拡張子などを全て削除し、リアルタイム保護・クラウド保護などの主要オプションを既定値に戻します。" +
         "マルウェアや過去のソフトが勝手に追加した除外設定 (スキャンの抜け穴) を一掃できます。意図的に登録した除外も消えるため、必要なものは実行後に再登録してください。" +
+        "変更前の設定は保存しません。途中失敗では変更が一部残ることがあるため、結果とログを確認してください。" +
         "Defender サービスが完全に無効な環境では実行しません。他社製アンチウイルスによるパッシブモードでも、Defender サービスと管理 cmdlet が利用可能なら実行できます。";
 
     public CommandCategory Category => CommandCategory.Update;
@@ -750,39 +732,9 @@ public sealed class DefenderResetAction : IMaintenanceAction
                 "他社製アンチウイルス使用中でも Defender がパッシブモードでサービスを利用できる環境なら実行できます。");
         }
 
-        // 昇格 PowerShell にユーザー書き込み可能な AppData のパスを渡すと、再解析ポイント等で
-        // 任意ファイルを上書きされ得る。ACL を固定した ProgramData 配下へファイルを先に作り、
-        // PowerShell にはその既存ファイルの内容だけを更新させる。
-        var backupName = Path.Combine(
-            "defender",
-            $"defender-exclusions-{DateTime.Now:yyyyMMdd-HHmmss}-{Guid.NewGuid():N}.json");
-        string backupFile;
-        try
-        {
-            _backupStorage.WriteNewAtomically(backupName, stream =>
-            {
-                var pendingBytes = Encoding.UTF8.GetBytes(PendingBackupJson);
-                stream.Write(pendingBytes);
-            });
-            backupFile = _backupStorage.GetFullPath(backupName);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException)
-        {
-            LoggerBootstrap.Log.Error($"{Id}: 保護バックアップを準備できませんでした", ex);
-            return MaintenanceActionResult.Fail(
-                "Defender 設定の保護バックアップを準備できないため、リセットを開始しませんでした。" +
-                $"{Environment.NewLine}  - {ex.Message}");
-        }
-
-        var script = BuildResetScript(backupFile);
-        var encodedScript = Convert.ToBase64String(Encoding.Unicode.GetBytes(script));
-        // ここから先は複数設定を順次変更するクリティカル区間。開始前の最後の境界で
-        // キャンセルを反映し、開始後だけ CancellationToken.None で完了まで継続する。
-        if (ct.IsCancellationRequested)
-        {
-            TryDeleteIncompleteBackup(backupName);
-            ct.ThrowIfCancellationRequested();
-        }
+        var encodedScript = Convert.ToBase64String(Encoding.Unicode.GetBytes(BuildResetScript()));
+        // 複数設定を順次変更するため、開始前だけキャンセルを反映し、開始後は確認まで継続する。
+        ct.ThrowIfCancellationRequested();
 
         var result = await _executor.RunAsync(
             "powershell.exe",
@@ -791,125 +743,20 @@ public sealed class DefenderResetAction : IMaintenanceAction
             // 開始前のキャンセルだけを受け付け、開始後は検証まで一体で完了させる。
             CancellationToken.None);
 
-        string backupValidationFailure;
-        var backupIsValid = false;
-        var backupReadSucceeded = false;
-        try
-        {
-            var backupJson = _backupStorage.ReadAllText(backupName);
-            backupReadSucceeded = true;
-            backupIsValid = TryValidateBackupJson(backupJson, out backupValidationFailure);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException)
-        {
-            backupValidationFailure = ex.Message;
-        }
-
-        if (!backupIsValid)
-        {
-            // 内容を実際に読めて不正と確認できた placeholder だけを削除する。
-            // 一時的な読取エラー時は、唯一の復元データかもしれないため必ず保持する。
-            if (backupReadSucceeded)
-            {
-                TryDeleteIncompleteBackup(backupName);
-            }
-
-            if (!result.Success)
-            {
-                LoggerBootstrap.Log.Error($"{Id}: {CommandFailureDiagnostic.Format(result)}");
-            }
-            LoggerBootstrap.Log.Error($"{Id}: バックアップ検証失敗: {backupValidationFailure}");
-            return MaintenanceActionResult.Fail(DescribeBackupFailure(result, backupValidationFailure));
-        }
-
         if (result.Success)
         {
-            LoggerBootstrap.Log.Info($"{Id}: 完了 (バックアップ: {backupFile})");
+            LoggerBootstrap.Log.Info($"{Id}: 完了");
             var detail = string.IsNullOrWhiteSpace(result.StandardOutput)
                 ? "  - 除外設定を全削除し、主要オプションを既定値に戻しました"
                 : result.StandardOutput.Trim();
-            return MaintenanceActionResult.Ok(
-                $"{detail}{Environment.NewLine}  - 削除前の除外設定を保存しました: {backupFile}{Environment.NewLine}  - 除外設定を全削除し、主要オプションを既定値に戻しました");
+            return MaintenanceActionResult.Ok(detail);
         }
 
         LoggerBootstrap.Log.Error($"{Id}: {CommandFailureDiagnostic.Format(result)}");
         return MaintenanceActionResult.Fail(
             $"リセットに失敗しました (exit={result.ExitCode}){Environment.NewLine}" +
-            DefenderCommandSupport.DescribeFailure(result) +
-            $"{Environment.NewLine}  - 変更前の除外設定は保存済みです: {backupFile}");
-    }
-
-    internal static string DescribeBackupFailure(CommandExecutionResult result, string backupValidationFailure)
-    {
-        // バックアップ作成前の中止理由（改ざん防止等）を、不完全なバックアップの診断で隠さない。
-        var commandFailure = result.Success
-            ? string.Empty
-            : $"リセットに失敗しました (exit={result.ExitCode}){Environment.NewLine}" +
-              DefenderCommandSupport.DescribeFailure(result) + Environment.NewLine;
-        return commandFailure +
-               "Defender 設定のバックアップを確認できなかったため、処理を成功扱いにできません。" +
-               $"{Environment.NewLine}  - {backupValidationFailure}";
-    }
-
-    internal static bool TryValidateBackupJson(string json, out string failureReason)
-    {
-        if (string.IsNullOrWhiteSpace(json) || json.Length > 4 * 1024 * 1024)
-        {
-            failureReason = "バックアップが空か、許容サイズを超えています。";
-            return false;
-        }
-
-        try
-        {
-            using var document = JsonDocument.Parse(json);
-            if (document.RootElement.ValueKind != JsonValueKind.Object)
-            {
-                failureReason = "バックアップのルートが JSON オブジェクトではありません。";
-                return false;
-            }
-
-            foreach (var propertyName in BackupPropertyNames)
-            {
-                if (!document.RootElement.TryGetProperty(propertyName, out var value) ||
-                    !IsValidBackupValue(value))
-                {
-                    failureReason = $"バックアップの {propertyName} が欠落または不正です。";
-                    return false;
-                }
-            }
-
-            failureReason = string.Empty;
-            return true;
-        }
-        catch (JsonException ex)
-        {
-            failureReason = $"バックアップ JSON を解析できません: {ex.Message}";
-            return false;
-        }
-    }
-
-    private static bool IsValidBackupValue(JsonElement value)
-    {
-        if (value.ValueKind is JsonValueKind.Null or JsonValueKind.String)
-        {
-            return true;
-        }
-
-        return value.ValueKind == JsonValueKind.Array &&
-               value.EnumerateArray().All(item =>
-                   item.ValueKind is JsonValueKind.Null or JsonValueKind.String);
-    }
-
-    private void TryDeleteIncompleteBackup(string backupName)
-    {
-        try
-        {
-            _backupStorage.Delete(backupName);
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SecurityException)
-        {
-            LoggerBootstrap.Log.Error($"{Id}: 未完成バックアップを削除できませんでした", ex);
-        }
+            DefenderCommandSupport.DescribeFailure(result) + Environment.NewLine +
+            "一部の設定は変更済みの可能性があります。Windows セキュリティで保護状態と除外設定を確認してください。");
     }
 
     internal static string BuildAvailabilityCheckArguments()
@@ -982,10 +829,8 @@ public sealed class DefenderResetAction : IMaintenanceAction
         bool AMServiceEnabled,
         bool AntivirusEnabled);
 
-    internal static string BuildResetScript(string backupFile)
-    {
-        var backupLiteral = backupFile.Replace("'", "''", StringComparison.Ordinal);
-        const string template = """
+    internal static string BuildResetScript() =>
+        """
             $ErrorActionPreference = 'Stop'
             try {
                 Import-Module Defender -ErrorAction Stop
@@ -997,18 +842,6 @@ public sealed class DefenderResetAction : IMaintenanceAction
                     throw 'Tamper Protection が有効なため Defender 設定を変更できません。組織管理端末では管理者へ依頼し、個人端末では Windows セキュリティの「改ざん防止」を確認してください。'
                 }
                 $p = Get-MpPreference -ErrorAction Stop
-                $backup = [ordered]@{
-                    ExclusionPath = $p.ExclusionPath
-                    ExclusionProcess = $p.ExclusionProcess
-                    ExclusionExtension = $p.ExclusionExtension
-                    ExclusionIpAddress = $p.ExclusionIpAddress
-                    ControlledFolderAccessAllowedApplications = $p.ControlledFolderAccessAllowedApplications
-                    ControlledFolderAccessProtectedFolders = $p.ControlledFolderAccessProtectedFolders
-                    AttackSurfaceReductionOnlyExclusions = $p.AttackSurfaceReductionOnlyExclusions
-                }
-                $backupJson = $backup | ConvertTo-Json -Depth 4
-                [System.IO.File]::WriteAllText('__BACKUP_FILE__', $backupJson, [System.Text.UTF8Encoding]::new($false))
-
                 $removeCommand = Get-Command Remove-MpPreference -ErrorAction Stop
                 function Remove-ConfiguredValues([string] $name, [object[]] $values) {
                     $configuredValues = @($values | Where-Object { $_ } | Sort-Object -Unique)
@@ -1078,20 +911,13 @@ public sealed class DefenderResetAction : IMaintenanceAction
                     throw ('保護設定が既定の有効状態へ戻っていません: ' + ($notReset -join ', ') + '。Tamper Protection または組織ポリシーを確認してください。')
                 }
 
-                $pathCount = @($p.ExclusionPath | Where-Object { $_ }).Count
-                $processCount = @($p.ExclusionProcess | Where-Object { $_ }).Count
-                $extensionCount = @($p.ExclusionExtension | Where-Object { $_ }).Count
-                Write-Output ('  - 除外パス ' + $pathCount + ' 件 / 除外プロセス ' + $processCount + ' 件 / 除外拡張子 ' + $extensionCount + ' 件をバックアップしました')
                 Write-Output '  - 変更後に除外 0 件と主要な保護設定の有効状態を確認しました'
             }
             catch {
                 [Console]::Error.WriteLine($_.Exception.Message)
                 exit 1
             }
-            """;
-
-        return template.Replace("__BACKUP_FILE__", backupLiteral, StringComparison.Ordinal);
-    }
+        """;
 }
 
 internal static class DefenderCommandSupport

@@ -6,53 +6,41 @@ using Microsoft.Win32;
 
 namespace Lumin4ti.Verification;
 
-internal sealed class MemoryBackups : IRegistryBackupStorage
+internal sealed class MemoryVirtualizationPlatform(VirtualizationSecuritySnapshot initial) : IVirtualizationSecurityPlatform
 {
-    public Dictionary<string, string> Files { get; } = new(StringComparer.OrdinalIgnoreCase);
-    public bool ThrowAfterNextSharedWrite { get; set; }
-    public bool ThrowBeforeNextSharedWrite { get; set; }
-    public bool FailNextUserDelete { get; set; }
-    public bool ThrowAfterNextNewUserWrite { get; set; }
-    public Action? AfterNewWrite { get; set; }
-    public bool FileExists(string path) => Files.ContainsKey(path);
-    public string ReadAllText(string path) => Files[path];
-    public void Delete(string path)
+    public VirtualizationSecuritySnapshot State { get; set; } = initial;
+    public VirtualizationSecurityComponent? FailAfterComponent { get; set; }
+    public Task<BcdValueSnapshot> ReadHypervisorLaunchTypeAsync(CancellationToken ct) => Task.FromResult(State.HypervisorLaunchType);
+    public Task WriteHypervisorLaunchTypeAsync(BcdValueSnapshot value, CancellationToken ct)
     {
-        if (FailNextUserDelete && path.Split(Path.DirectorySeparatorChar).Length == 3)
-        { FailNextUserDelete = false; throw new IOException("RERE_CANARY user journal deletion denied"); }
-        Files.Remove(path);
+        State = State with { HypervisorLaunchType = value };
+        FailAfter(VirtualizationSecurityComponent.HypervisorLaunchType);
+        return Task.CompletedTask;
     }
-    public void WriteNewAtomically(string path, Action<Stream> write)
+    public RegistryValueSnapshot ReadRegistryValue(VirtualizationSecurityComponent component) => State.GetRegistryValue(component);
+    public void WriteRegistryValue(VirtualizationSecurityComponent component, RegistryValueSnapshot value)
     {
-        if (FileExists(path)) throw new IOException("既存原本を上書きできません");
-        WriteAtomically(path, write);
-        AfterNewWrite?.Invoke();
-        if (ThrowAfterNextNewUserWrite && path.Split(Path.DirectorySeparatorChar).Length == 3)
+        State = component switch
         {
-            ThrowAfterNextNewUserWrite = false;
-            throw new IOException("RERE_CANARY new user original saved but validation failed");
-        }
+            VirtualizationSecurityComponent.DeviceGuard => State with { DeviceGuard = value },
+            VirtualizationSecurityComponent.Hvci => State with { Hvci = value },
+            VirtualizationSecurityComponent.Lsa => State with { Lsa = value },
+            _ => throw new ArgumentOutOfRangeException(nameof(component)),
+        };
+        FailAfter(component);
     }
-    public void WriteAtomically(string path, Action<Stream> write)
+    private void FailAfter(VirtualizationSecurityComponent component)
     {
-        if (ThrowBeforeNextSharedWrite && path.Split(Path.DirectorySeparatorChar).Length == 2)
-        { ThrowBeforeNextSharedWrite = false; throw new IOException("RERE_CANARY shared write not reached"); }
-        using var stream = new MemoryStream();
-        write(stream);
-        Files[path] = Encoding.UTF8.GetString(stream.ToArray());
-        if (ThrowAfterNextSharedWrite && path.Split(Path.DirectorySeparatorChar).Length == 2)
-        {
-            ThrowAfterNextSharedWrite = false;
-            throw new IOException("RERE_CANARY atomic replace succeeded but validation failed");
-        }
+        if (FailAfterComponent != component) return;
+        FailAfterComponent = null;
+        throw new IOException("GOGO_CANARY VBS partial write failure");
     }
-    public IReadOnlyList<string> EnumerateUserBackupPaths(string id) => Files.Keys
-        .Where(path => path.Split(Path.DirectorySeparatorChar).Length == 3 && Path.GetFileName(path) == id + ".json").ToArray();
 }
 
 internal sealed class MemoryRegistry(Dictionary<string, RegistryValueSnapshot> values, string sid) : IRegistryValueAccessor
 {
     public bool FailNextWrite { get; set; }
+    public Action? AfterWrite { get; set; }
     public HashSet<int> FailAtWrite { get; } = [];
     public int WriteAttempts { get; private set; }
     private string Location(RegistryToggleSpec spec) => $"{(spec.Hive == RegistryHive.CurrentUser ? sid : "machine")}/{spec.KeyPath}/{spec.Name}";
@@ -63,6 +51,7 @@ internal sealed class MemoryRegistry(Dictionary<string, RegistryValueSnapshot> v
         if (FailAtWrite.Remove(WriteAttempts)) throw new IOException("GOGO_CANARY injected write failure");
         if (FailNextWrite) { FailNextWrite = false; throw new IOException("RERE_CANARY restore failure"); }
         values[Location(spec)] = value;
+        AfterWrite?.Invoke();
     }
 }
 

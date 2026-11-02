@@ -35,16 +35,12 @@ internal static class StateDiagnosticsPreview
             var catalog = new MaintenanceActionCatalog(new IMaintenanceItem[]
             {
                 new PreviewToggle("vbs-hvci-off", "VBS / HVCI を無効化", false),
-                new PreviewToggle("uwp-background-off", "UWP バックグラウンド実行を無効化", null,
-                    new MaintenanceStateDiagnostic("Toggle.UwpBackupInvalid",
-                        "復元データの形式または所有者を確認できません。旧バックアップは自動移行せず保持し、誤った復元を防ぐため操作を停止しました。")),
-                new PreviewToggle("preview-vbs-partial", "VBS / HVCI を無効化", null,
-                    new MaintenanceStateDiagnostic("Toggle.VbsPartialState",
-                        "VBS / HVCI の設定が一部だけ適用されています。復元データと現在の設定を確認してください。"),
-                    resourceId: "vbs-hvci-off"),
+                new PreviewToggle("uwp-background-off", "UWP バックグラウンド実行を一括オフ / Windows 既定", false),
                 new PreviewToggle("recall-off", "Recall を無効化", null,
-                    new MaintenanceStateDiagnostic("Toggle.RecallStateMissing",
-                        "DISM の出力に Recall の状態が見つかりません。詳細はログを確認してください。")),
+                    new MaintenanceStateDiagnostic("Toggle.RecallStateMissing", "Recall の状態が返されませんでした。")),
+                new PreviewToggle("scheduled-temp-cleanup", "サインイン時に一時ファイルを掃除", null,
+                    new MaintenanceStateDiagnostic("Toggle.ScheduledTaskOwnershipUnknown",
+                        "登録済みタスクの所有者を確認できないため操作できません。")),
             });
             var coordinator = new MaintenanceOperationCoordinator(() => new PreviewLease());
             var viewModel = new CommandCategoryViewModel(
@@ -107,6 +103,7 @@ internal static class StateDiagnosticsPreview
         public string DescriptionKey => $"Action.{resourceId ?? id}.Desc";
         public CommandCategory Category => CommandCategory.Performance;
         public bool RequiresReboot => false;
+        public bool SupportsExplicitOff => id is "vbs-hvci-off" or "uwp-background-off";
         public MaintenanceStateDiagnostic? StateDiagnostic => diagnostic;
         public Task<bool?> GetStateAsync(CancellationToken ct = default) => Task.FromResult(_state);
 

@@ -66,14 +66,9 @@ internal static class Program
             Require(vm.CanToggle, "minimal actual VM could not accept known state");
             return Task.FromResult("Actual VM constructed; no Avalonia lifetime, elevation or OS write invoked");
         });
-        await Run("two-user-registry-on-on-off-off-retry", RegistryWorkflow);
-        await Run("registry-reapply-failure-immediate-state-and-original", RegistryReapplyWorkflow);
-        await Run("registry-initial-failure-ownership-and-cancellation", RegistryPreparationWorkflow);
-        await Run("shared-atomic-replace-failure-original-preserved", SharedWriteFailureWorkflow);
-        await Run("shared-two-owner-release-failure-consistency", SharedReleaseWorkflow);
-        await Run("shared-completed-restoration-and-preparation-recovery", SharedRecoveryWorkflow);
-        await Run("shared-new-user-preparation-failure-after-external-change", () => SharedExternalPreparationWorkflow(false));
-        await Run("new-user-post-save-validation-failure-after-external-change", () => SharedExternalPreparationWorkflow(true));
+        await Run("two-user-registry-explicit-shared-release", RegistryWorkflow);
+        await Run("registry-reapply-failure-immediate-state-and-default", RegistryReapplyWorkflow);
+        await Run("registry-memory-compensation-cancellation-and-defaults", RegistryPreparationWorkflow);
         await Run("shutdown-cancellation-finally-gate", ShutdownWorkflow);
         await Run("ntp-stop-failure-compensation", NtpWorkflow);
         await Run("service-stop-scm-and-dependent-safety", ServiceWorkflow);
@@ -81,8 +76,10 @@ internal static class Program
         await Run("mmagent-external-change-and-parent-state", StateWorkflow);
         await Run("mmagent-inflight-reset-coalescing", MmAgentInflightWorkflow);
         await Run("device-enumeration-failure-retry", DeviceWorkflow);
-        await Run("uwp-sid-journal-isolation", UwpWorkflow);
-        await Run("uwp-partial-pair-compensation-restart-and-external-change", UwpPairWorkflow);
+        await Run("uwp-current-targets-windows-defaults", UwpWorkflow);
+        await Run("uwp-pair-memory-compensation-and-external-change", UwpPairWorkflow);
+        await Run("vbs-default-release-and-memory-compensation", VbsDefaultsWorkflow);
+        await Run("toggle-persistent-backup-boundary", TogglePersistenceBoundaryWorkflow);
         await Run("mmagent-failure-diagnostic-and-retry", MmAgentDiagnosticWorkflow);
         await Run("parser-and-diagnostic", ParserWorkflow);
         await Run("migration-download-body-timeout-and-cancel", DownloadWorkflow);
@@ -255,6 +252,15 @@ internal static class Program
             RequireItemCauseLog(before, item, "別のメンテナンス操作");
             Require(item.OperationCalls == 0, "busy operation reached OS fake for " + item.Id);
         }
+        var offItem = new LogProbeToggle("direct-off-known-false");
+        var offCategory = new CommandCategoryViewModel(new MaintenanceActionCatalog(new IMaintenanceItem[] { offItem }),
+            new MaintenanceOperationCoordinator(() => new NoopLease()), CommandCategory.System, "検証", "検証");
+        var offVm = offCategory.Items.Single();
+        offVm.ApplyState(false);
+        Require(offVm.SetOffCommand.CanExecute(null), "known OFF disabled explicit default-reset command");
+        TriggerLogProbe(offVm, "off");
+        Require(offItem.OperationCalls == 1 && offItem.RequestedState == false && !offVm.IsChecked,
+            "explicit OFF did not call actual category set-toggle path from known false");
         var scheduledFailed = new LogProbeAction("scheduled-failed") { Result = MaintenanceActionResult.Fail(LogCanaryDetail) };
         var scheduledPartial = new LogProbeAction("scheduled-partial") { Result = MaintenanceActionResult.Partial(LogCanaryDetail) };
         var scheduledException = new LogProbeAction("scheduled-exception") { Failure = new IOException(LogCanaryDetail) };
@@ -274,6 +280,7 @@ internal static class Program
         switch (kind)
         {
             case "toggle": vm.ApplyState(false); vm.IsChecked = true; break;
+            case "off": action = vm.SetOffCommand.ExecuteAsync(null); break;
             case "choice": vm.ApplySelectedValue("off"); vm.SelectedChoice = vm.ChoiceOptions.Single(option => option.Value == "on"); break;
             default: action = vm.RunCommand.ExecuteAsync(null); break;
         }
@@ -301,12 +308,14 @@ internal static class Program
 
     private sealed class LogProbeToggle(string id) : LogProbeItem(id), IMaintenanceToggle
     {
+        public bool SupportsExplicitOff => true;
         public MaintenanceStateDiagnostic? Diagnostic { get; init; }
         public MaintenanceStateDiagnostic? StateDiagnostic => Diagnostic;
+        public bool? RequestedState { get; private set; }
         public Func<CancellationToken, Task<bool?>> Query { get; init; } = _ => Task.FromResult<bool?>(false);
         public Task<bool?> GetStateAsync(CancellationToken ct = default) => Query(ct);
         public Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default)
-        { OperationCalls++; return Task.FromResult(Result); }
+        { OperationCalls++; RequestedState = on; return Task.FromResult(Result); }
     }
 
     private sealed class LogProbeChoice(string id) : LogProbeItem(id), IMaintenanceChoice
@@ -327,85 +336,69 @@ internal static class Program
             return Failure is null ? Task.FromResult(Result) : Task.FromException<MaintenanceActionResult>(Failure);
         }
     }
-    private static RegistryToggle Toggle(string id, MemoryRegistry registry, MemoryBackups storage, string sid, RegistryToggleSpec[] specs) =>
-        new(id, "検証", "検証", CommandCategory.System, specs, false, false, registry, new RegistryValueBackup(storage, registry, () => sid));
+    private static RegistryToggle Toggle(string id, MemoryRegistry registry, RegistryToggleSpec[] specs) =>
+        new(id, "検証", "検証", CommandCategory.System, specs, false, false, registry);
     private static async Task<string> RegistryReapplyWorkflow()
     {
-        const string sid = "S-1-5-21-111-222-333-1001";
         RegistryToggleSpec[] specs = [new(RegistryHive.CurrentUser, "GOGO_CANARY", "User", RegistryValueKind.DWord, 1)];
-        var registry = new MemoryRegistry(new(), sid); var storage = new MemoryBackups();
+        var registry = new MemoryRegistry(new(), "user-a");
         registry.Write(specs[0], RegistryValueSnapshot.Dword(9));
-        var toggle = Toggle("gogo-reapply", registry, storage, sid, specs);
+        var toggle = Toggle("gogo-reapply", registry, specs);
         Require((await toggle.SetStateAsync(true)).Success, "initial ON failed");
-        var original = storage.Files.Single().Value;
         registry.Write(specs[0], RegistryValueSnapshot.Dword(5));
         Require(await toggle.GetStateAsync() == false, "external change not visible");
         registry.FailNextWrite = true;
-        Require(!(await toggle.SetStateAsync(true)).Success, "injected reapply failure hidden");
-        Require(registry.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(5)), "failed reapply restored historical original instead of immediate value5");
-        Require(storage.Files.Single().Value == original, "failed reapply discarded/changed OFF original9");
-        Require((await toggle.SetStateAsync(false)).Success && registry.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(9)), "OFF retry did not restore historical original9");
-        return "Actual ON -> external5 -> failed reON kept immediate5 and original9; OFF restored9";
+        Require(!(await toggle.SetStateAsync(true)).Success && registry.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(5)),
+            "failed reapply lost immediate value5");
+        Require((await toggle.SetStateAsync(false)).Success && !registry.Read(specs[0]).Exists,
+            "OFF restored historical value instead of removing explicit setting");
+        return "Actual ON -> external5 -> failed reON compensated immediate5; OFF removed explicit value instead of restoring historical9";
     }
     private static async Task<string> RegistryPreparationWorkflow()
     {
-        const string a = "S-1-5-21-111-222-333-1001", b = "S-1-5-21-111-222-333-1002";
-        RegistryToggleSpec[] specs = [new(RegistryHive.LocalMachine, "GOGO_CANARY", "Machine", RegistryValueKind.DWord, 1), new(RegistryHive.CurrentUser, "GOGO_CANARY", "User", RegistryValueKind.DWord, 1)];
-        var values = new Dictionary<string, RegistryValueSnapshot>();
-        var ra = new MemoryRegistry(values, a); var rb = new MemoryRegistry(values, b); var storage = new MemoryBackups();
-        ra.Write(specs[0], RegistryValueSnapshot.Dword(7)); ra.Write(specs[1], RegistryValueSnapshot.Dword(8)); rb.Write(specs[1], RegistryValueSnapshot.Dword(9));
-        var ta = Toggle("gogo-owners", ra, storage, a, specs); var tb = Toggle("gogo-owners", rb, storage, b, specs);
-        Require((await ta.SetStateAsync(true)).Success, "A ON failed");
-        var original = storage.Files.ToDictionary(pair => pair.Key, pair => pair.Value);
-        rb.FailAtWrite.Add(rb.WriteAttempts + 2);
-        Require(!(await tb.SetStateAsync(true)).Success, "B partial apply failure hidden");
-        Require(rb.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(1)) && rb.Read(specs[1]).EquivalentTo(RegistryValueSnapshot.Dword(9)), "B failure changed immediate shared/user values");
-        Require(storage.Files.Count == original.Count && original.All(pair => storage.Files.GetValueOrDefault(pair.Key) == pair.Value), "B failure retained new ownership or altered A original");
-        Require((await ta.SetStateAsync(false)).Success && ra.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(7)), "phantom B owner prevented A OFF");
-
-        var fresh = new MemoryRegistry(new(), a); var freshStorage = new MemoryBackups();
-        fresh.Write(specs[0], RegistryValueSnapshot.Dword(7)); fresh.Write(specs[1], RegistryValueSnapshot.Dword(8));
-        var tf = Toggle("gogo-fresh", fresh, freshStorage, a, specs);
-        fresh.FailAtWrite.Add(fresh.WriteAttempts + 2);
-        Require(!(await tf.SetStateAsync(true)).Success && freshStorage.Files.Count == 0 && fresh.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(7)), "first ON failure did not compensate/cancel fresh preparation");
-        using var cancel = new CancellationTokenSource();
-        freshStorage.AfterNewWrite = cancel.Cancel;
-        var attempts = fresh.WriteAttempts;
-        try { await tf.SetStateAsync(true, cancel.Token); throw new InvalidOperationException("cancel not propagated"); }
-        catch (OperationCanceledException) when (cancel.IsCancellationRequested) { }
-        Require(fresh.WriteAttempts == attempts && freshStorage.Files.Count == 0, "cancellation after preparation wrote values or kept phantom ownership");
-        freshStorage.AfterNewWrite = null;
-        fresh.FailAtWrite.Add(fresh.WriteAttempts + 2); fresh.FailAtWrite.Add(fresh.WriteAttempts + 3);
-        var failedCompensation = await tf.SetStateAsync(true);
-        Require(!failedCompensation.Success && failedCompensation.Detail.Contains("補償にも失敗") && freshStorage.Files.Count == 2, "compensation failure lost originals or diagnostic");
-        Require((await tf.SetStateAsync(false)).Success && fresh.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(7)) && fresh.Read(specs[1]).EquivalentTo(RegistryValueSnapshot.Dword(8)), "OFF recovery after failed compensation lost original");
-        return "Actual mixed partial apply canceled only B ownership; A OFF restored7; first apply and post-save cancellation reverted preparation; compensation failure retained originals and OFF retry recovered";
+        RegistryToggleSpec[] specs =
+        [
+            new(RegistryHive.LocalMachine, "GOGO_CANARY", "Machine", RegistryValueKind.DWord, 1),
+            new(RegistryHive.CurrentUser, "GOGO_CANARY", "User", RegistryValueKind.DWord, 1, 0),
+        ];
+        var registry = new MemoryRegistry(new(), "user-a");
+        registry.Write(specs[0], RegistryValueSnapshot.Dword(7));
+        registry.Write(specs[1], RegistryValueSnapshot.Dword(8));
+        var toggle = Toggle("gogo-transaction", registry, specs);
+        registry.FailAtWrite.Add(registry.WriteAttempts + 2);
+        Require(!(await toggle.SetStateAsync(true)).Success &&
+            registry.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(7)) &&
+            registry.Read(specs[1]).EquivalentTo(RegistryValueSnapshot.Dword(8)), "partial ON did not compensate all immediate values");
+        using var cancellation = new CancellationTokenSource();
+        registry.AfterWrite = () => { registry.AfterWrite = null; cancellation.Cancel(); };
+        try { await toggle.SetStateAsync(true, cancellation.Token); throw new InvalidOperationException("cancellation ignored"); }
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested) { }
+        Require(registry.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(7)) &&
+            registry.Read(specs[1]).EquivalentTo(RegistryValueSnapshot.Dword(8)), "cancellation returned before memory compensation");
+        registry.FailAtWrite.Add(registry.WriteAttempts + 2);
+        registry.FailAtWrite.Add(registry.WriteAttempts + 3);
+        var failure = await toggle.SetStateAsync(true);
+        Require(failure.Status == MaintenanceActionStatus.Failed && failure.Detail.Contains("補償"), "compensation failure hidden");
+        Require((await toggle.SetStateAsync(false)).Success && !registry.Read(specs[0]).Exists &&
+            registry.Read(specs[1]).EquivalentTo(RegistryValueSnapshot.Dword(0)), "OFF deletion/explicit default contract failed");
+        return "Actual mixed HKLM/HKCU transaction: partial write and cancellation compensated in memory; compensation failure remained Failed; OFF removed absent-default value and wrote explicit default0";
     }
     private static async Task<string> RegistryWorkflow()
     {
-        const string a = "S-1-5-21-111-222-333-1001", b = "S-1-5-21-111-222-333-1002";
         RegistryToggleSpec[] specs = [new(RegistryHive.LocalMachine, "RERE_CANARY", "Machine", RegistryValueKind.DWord, 1), new(RegistryHive.CurrentUser, "RERE_CANARY", "User", RegistryValueKind.DWord, 1)];
         var values = new Dictionary<string, RegistryValueSnapshot>();
-        var ra = new MemoryRegistry(values, a); var rb = new MemoryRegistry(values, b); var backups = new MemoryBackups();
+        var ra = new MemoryRegistry(values, "user-a"); var rb = new MemoryRegistry(values, "user-b");
         ra.Write(specs[0], RegistryValueSnapshot.Dword(7)); ra.Write(specs[1], RegistryValueSnapshot.Dword(8)); rb.Write(specs[1], RegistryValueSnapshot.Dword(9));
-        var ta = Toggle("canary-mixed", ra, backups, a, specs); var tb = Toggle("canary-mixed", rb, backups, b, specs);
-        var va = Vm(ta); var vb = Vm(tb);
-        await ta.SetStateAsync(true); va.ApplyState(await ta.GetStateAsync());
-        await tb.SetStateAsync(true); vb.ApplyState(await tb.GetStateAsync());
-        Require(va.IsChecked && vb.IsChecked, "two ON states not observed");
+        var ta = Toggle("canary-mixed", ra, specs); var tb = Toggle("canary-mixed", rb, specs);
+        Require((await ta.SetStateAsync(true)).Success && (await tb.SetStateAsync(true)).Success, "two-user ON failed");
+        Require(await ta.GetStateAsync() == true && await tb.GetStateAsync() == true, "two ON states not observed");
         Require((await ta.SetStateAsync(false)).Success, "A OFF failed");
-        Require(ra.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(1)), "A OFF restored shared machine while B owns ON");
-        Require(ra.Read(specs[1]).EquivalentTo(RegistryValueSnapshot.Dword(8)), "A HKCU original lost");
-        rb.FailNextWrite = true;
-        Require(!(await tb.SetStateAsync(false)).Success, "injected restore failure hidden");
-        Require(backups.Files.Count > 0, "restore failure lost original");
-        Require((await tb.SetStateAsync(false)).Success, "B OFF retry failed");
-        Require(ra.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(7)) && rb.Read(specs[1]).EquivalentTo(RegistryValueSnapshot.Dword(9)), "last owner retry did not restore original values");
-        Require(backups.Files.Count == 1, "completed restore retained user journal or lost shared completion marker");
-        using var shared = JsonDocument.Parse(backups.Files.Values.Single());
-        Require(shared.RootElement.GetProperty("OwnerScopes").GetArrayLength() == 0, "completed restore retained active ownership");
-        Require((await tb.SetStateAsync(false)).Success && ra.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(7)), "repeated OFF changed restored shared original");
-        return "Two real RegistryToggle instances and VM observations; shared HKLM=7, SID A HKCU=8, SID B HKCU=9 restored after injected failure/retry";
+        Require(!ra.Read(specs[0]).Exists && !ra.Read(specs[1]).Exists &&
+            rb.Read(specs[1]).EquivalentTo(RegistryValueSnapshot.Dword(1)), "A OFF failed to release shared HKLM or changed B HKCU");
+        Require(await tb.GetStateAsync() == false, "B state hid shared machine setting removal");
+        Require((await tb.SetStateAsync(false)).Success && !rb.Read(specs[1]).Exists, "B OFF failed to remove B HKCU");
+        Require((await ta.SetStateAsync(false)).Success && !ra.Read(specs[0]).Exists, "repeated OFF was not idempotent");
+        return "Two actual RegistryToggle instances: A ON/B ON/A OFF removed shared HKLM and A HKCU immediately while preserving B HKCU; B observed OFF and explicitly cleared its HKCU; no ownership tracking";
     }
     private static async Task<string> ShutdownWorkflow()
     {
@@ -421,64 +414,8 @@ internal static class Program
         Require(finallyDone && !coordinator.TryBegin(out _), "shutdown reopened after old lease release");
         return "Cancellation observed; idle waited for finally; later lease refused even after old lease disposal";
     }
-    private static async Task<string> SharedWriteFailureWorkflow()
-    {
-        const string a = "S-1-5-21-111-222-333-1001", b = "S-1-5-21-111-222-333-1002";
-        RegistryToggleSpec[] specs = [new(RegistryHive.LocalMachine, "RERE_CANARY", "Machine", RegistryValueKind.DWord, 1), new(RegistryHive.CurrentUser, "RERE_CANARY", "User", RegistryValueKind.DWord, 1)];
-        var values = new Dictionary<string, RegistryValueSnapshot>();
-        var ra = new MemoryRegistry(values, a); var rb = new MemoryRegistry(values, b); var backups = new MemoryBackups();
-        ra.Write(specs[0], RegistryValueSnapshot.Dword(7)); ra.Write(specs[1], RegistryValueSnapshot.Dword(8)); rb.Write(specs[1], RegistryValueSnapshot.Dword(9));
-        var ta = Toggle("canary-atomic", ra, backups, a, specs); var tb = Toggle("canary-atomic", rb, backups, b, specs);
-        Require((await ta.SetStateAsync(true)).Success, "initial A ON failed");
-        backups.ThrowAfterNextSharedWrite = true;
-        Require((await ta.SetStateAsync(false)).Success, "safely verified committed release not completed");
-        Require(!backups.Files.ContainsKey(Path.Combine("registry", a, "canary-atomic.json")), "verified release retained user ownership");
-        Require(ra.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(7)), "committed OFF rolled registry back to ON");
-        Require((await ta.SetStateAsync(false)).Success && ra.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(7)), "repeat OFF changed true original");
-        Require((await tb.SetStateAsync(true)).Success && (await tb.SetStateAsync(false)).Success && rb.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(7)), "B could not safely capture/apply/restore after A retry");
-        return "Post-replace exception verified against committed raw journal; OFF completed consistently without rolling values back to ON; repeated OFF and later B cycle preserved original7";
-    }
-    private static async Task<string> SharedReleaseWorkflow()
-    {
-        const string a = "S-1-5-21-111-222-333-1001", b = "S-1-5-21-111-222-333-1002";
-        RegistryToggleSpec[] specs = [new(RegistryHive.LocalMachine, "GOGO_CANARY", "Machine", RegistryValueKind.DWord, 1), new(RegistryHive.CurrentUser, "GOGO_CANARY", "User", RegistryValueKind.DWord, 1)];
-        foreach (var committed in new[] { true, false })
-        {
-            var values = new Dictionary<string, RegistryValueSnapshot>(); var storage = new MemoryBackups();
-            var ra = new MemoryRegistry(values, a); var rb = new MemoryRegistry(values, b);
-            ra.Write(specs[0], RegistryValueSnapshot.Dword(7)); ra.Write(specs[1], RegistryValueSnapshot.Dword(8)); rb.Write(specs[1], RegistryValueSnapshot.Dword(9));
-            var ta = Toggle("gogo-release", ra, storage, a, specs); var tb = Toggle("gogo-release", rb, storage, b, specs);
-            Require((await ta.SetStateAsync(true)).Success && (await tb.SetStateAsync(true)).Success, "two-owner setup failed");
-            storage.ThrowAfterNextSharedWrite = committed; storage.ThrowBeforeNextSharedWrite = !committed;
-            var result = await ta.SetStateAsync(false);
-            Require(result.Success == committed && ra.Read(specs[1]).EquivalentTo(RegistryValueSnapshot.Dword(8)), "release failure rolled restored A user back to ON");
-            Require((await tb.SetStateAsync(false)).Success && rb.Read(specs[1]).EquivalentTo(RegistryValueSnapshot.Dword(9)), "B OFF failed");
-            Require(ra.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(committed ? 7 : 1)), "B shared restore disagreed with retained/committed ownership");
-            TaskCompletionSource<MaintenanceActionResult>? operation = null;
-            var recovery = new CommandItemViewModel(ta, _ => Task.CompletedTask, async (vm, on) =>
-            {
-                try
-                {
-                    var applied = await ta.SetStateAsync(on);
-                    vm.ResultText = applied.Detail; vm.ApplyResultStatus(applied.Status); vm.ApplyState(await ta.GetStateAsync());
-                    operation!.SetResult(applied);
-                }
-                catch (Exception error) { operation!.SetException(error); }
-            });
-            recovery.ApplyState(await ta.GetStateAsync());
-            Require(!recovery.IsChecked && recovery.CanToggle, "failed OFF did not expose expected screen state");
-            if (!committed)
-            {
-                Require(result.Detail.Contains("ON に戻してから OFF"), "recovery text not usable from OFF screen");
-                operation = new(TaskCreationOptions.RunContinuationsAsynchronously); recovery.IsChecked = true;
-                Require((await operation.Task).Success && recovery.IsChecked, "screen ON recovery failed");
-                operation = new(TaskCreationOptions.RunContinuationsAsynchronously); recovery.IsChecked = false;
-                Require((await operation.Task).Success && !recovery.IsChecked, "screen OFF recovery failed");
-            }
-            Require(ra.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(7)), "screen recovery did not complete retained ownership");
-        }
-        return "Two actual SID toggles: before/after replacement failures keep A user OFF; committed release restores shared7 on B OFF; uncommitted retains shared1 until actual VM OFF -> ON -> OFF recovery; final originals preserved";
-    }
+
+
     private static async Task<string> NtpWorkflow()
     {
         var writes = 0; var queries = 0; var restarted = false;
@@ -490,29 +427,7 @@ internal static class Program
         Require(!result.Success && writes == 0 && executor.Calls.Any(c => c.Arguments.StartsWith("start")), "NTP stop failure failed to compensate safely");
         return "Rejected stop did not write configuration; compensation mock start called";
     }
-    private static async Task<string> SharedRecoveryWorkflow()
-    {
-        const string a = "S-1-5-21-111-222-333-1001", b = "S-1-5-21-111-222-333-1002";
-        RegistryToggleSpec[] specs = [new(RegistryHive.LocalMachine, "RERE_CANARY", "Machine", RegistryValueKind.DWord, 1), new(RegistryHive.CurrentUser, "RERE_CANARY", "User", RegistryValueKind.DWord, 1)];
-        var values = new Dictionary<string, RegistryValueSnapshot>();
-        var ra = new MemoryRegistry(values, a); var rb = new MemoryRegistry(values, b); var backups = new MemoryBackups();
-        ra.Write(specs[0], RegistryValueSnapshot.Dword(7)); ra.Write(specs[1], RegistryValueSnapshot.Dword(8)); rb.Write(specs[1], RegistryValueSnapshot.Dword(9));
-        var ta = Toggle("canary-recovery", ra, backups, a, specs); var tb = Toggle("canary-recovery", rb, backups, b, specs);
-        Require((await ta.SetStateAsync(true)).Success, "A ON failed");
-        var aPath = Path.Combine("registry", a, "canary-recovery.json");
-        var aOriginal = backups.Files[aPath];
-        backups.FailNextUserDelete = true;
-        Require((await ta.SetStateAsync(false)).Success && await ta.GetStateAsync() == false, "restored values with failed original deletion did not show OFF");
-        Require((await tb.SetStateAsync(true)).Success && backups.Files[aPath] == aOriginal, "completed restore blocked B ON or replaced A original");
-        Require((await tb.SetStateAsync(false)).Success && ra.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(7)), "B restored incorrect machine original after A deletion failure");
-        Require((await ta.SetStateAsync(false)).Success, "A retained user original could not be retried");
-        var preparation = new MemoryBackups { ThrowBeforeNextSharedWrite = true };
-        var tp = Toggle("canary-preparation", ra, preparation, a, specs);
-        Require(!(await tp.SetStateAsync(true)).Success && ra.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(7)), "preparation failure wrote machine state");
-        Require(preparation.Files.Count == 0, "initial missing shared write failure retained newly created user original");
-        Require((await tp.SetStateAsync(true)).Success && (await tp.SetStateAsync(false)).Success && ra.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(7)), "preparation retry lost original or remained blocked");
-        return "Successful restore plus user-journal delete failure allowed B ON while preserving A original; initial shared-write failure recovered on ON retry";
-    }
+
     private static async Task<string> ServiceWorkflow()
     {
         var states = new Queue<WindowsServiceState?>([WindowsServiceState.Running, WindowsServiceState.Transitioning, WindowsServiceState.Running]);
@@ -534,32 +449,7 @@ internal static class Program
         Require(unqueryable.FailedToStop.Count == 1 && executor.Calls.Count == callsBefore, "unqueryable dependents allowed stop");
         return "Plain net stop recorded; post-stop SCM transition rejected; unknown/transition initial state and dependent/unknown dependent inspection issued no command";
     }
-    private static async Task<string> SharedExternalPreparationWorkflow(bool userPostSaveFault)
-    {
-        const string sid = "S-1-5-21-111-222-333-1001";
-        RegistryToggleSpec[] specs = [new(RegistryHive.LocalMachine, "RERE_CANARY", "Machine", RegistryValueKind.DWord, 1), new(RegistryHive.CurrentUser, "RERE_CANARY", "User", RegistryValueKind.DWord, 1)];
-        var registry = new MemoryRegistry(new Dictionary<string, RegistryValueSnapshot>(), sid);
-        var backups = new MemoryBackups();
-        registry.Write(specs[0], RegistryValueSnapshot.Dword(7)); registry.Write(specs[1], RegistryValueSnapshot.Dword(8));
-        var toggle = Toggle("canary-external-preparation", registry, backups, sid, specs);
-        Require((await toggle.SetStateAsync(true)).Success && (await toggle.SetStateAsync(false)).Success, "initial ON/OFF cycle failed");
-        var sharedPath = Path.Combine("registry", "canary-external-preparation.json");
-        var oldShared = backups.Files[sharedPath];
-        registry.Write(specs[0], RegistryValueSnapshot.Dword(9));
-        var attemptsBeforeFailure = registry.WriteAttempts;
-        backups.ThrowBeforeNextSharedWrite = !userPostSaveFault;
-        backups.ThrowAfterNextNewUserWrite = userPostSaveFault;
-        Require(!(await toggle.SetStateAsync(true)).Success, "pre-replace shared write failure hidden");
-        Require(registry.WriteAttempts == attemptsBeforeFailure, "failed preparation reached registry writes");
-        Require(await toggle.GetStateAsync() == false && registry.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(9)), "failed ON changed external machine value or UI state");
-        Require(backups.Files[sharedPath] == oldShared, "failed pre-replace write modified old shared completion marker");
-        Require(!backups.Files.ContainsKey(Path.Combine("registry", sid, "canary-external-preparation.json")), "failed preparation retained newly created user journal and blocked future ON");
-        Require((await toggle.SetStateAsync(true)).Success && (await toggle.SetStateAsync(false)).Success, "ON retry remained blocked after unchanged shared write failure");
-        Require(registry.Read(specs[0]).EquivalentTo(RegistryValueSnapshot.Dword(9)) && registry.Read(specs[1]).EquivalentTo(RegistryValueSnapshot.Dword(8)), "retry failed to capture latest external machine original");
-        return "Completed cycle left shared=7/owner0; external value=9; " +
-            (userPostSaveFault ? "post-save user validation failure" : "pre-replace shared write failure") +
-            " canceled only new user journal, kept UI OFF/value9, retry ON/OFF restored latest value9";
-    }
+
     private static async Task<string> CleanupWorkflow()
     {
         using var cancellation = new CancellationTokenSource();
@@ -617,47 +507,78 @@ internal static class Program
         Require(await provider.GetAsync("MemoryCompression") == false && executor.Calls == 2, "completed reset failed to reload updated snapshot");
         return "Three callers/reset bursts shared one incomplete mock query; completed reset loaded updated false with exactly second query";
     }
-    private static Task<string> UwpWorkflow()
+    private static async Task<string> UwpWorkflow()
     {
-        const string sid = "S-1-5-21-111-222-333-1001";
-        var journal = new UwpBackgroundJournal(2, [UwpBackgroundJournalEntry.Create("RERE_CANARY_family", new(7, null), UwpBackgroundValues.Applied)], sid);
-        var json = JsonSerializer.Serialize(journal);
-        var own = UwpBackgroundJournalStore.LoadScoped(() => true, () => json, () => false, sid);
-        var other = UwpBackgroundJournalStore.LoadScoped(() => true, () => json, () => false, "S-1-5-21-111-222-333-1002");
-        var legacy = UwpBackgroundJournalStore.LoadScoped(() => false, () => throw new InvalidOperationException(), () => true, sid);
-        Require(own.Status == UwpBackgroundJournalLoadStatus.Valid && other.Status == UwpBackgroundJournalLoadStatus.Invalid && legacy.Status == UwpBackgroundJournalLoadStatus.Invalid, "UWP ownership isolation failed");
-        return Task.FromResult("Real scoped journal loader accepted own SID and rejected other SID/legacy ownerless original; in-memory data only");
+        var targets = new List<string> { "GOGO_CANARY_A", "GOGO_CANARY_B" };
+        var settings = new MemoryUwpSettings();
+        settings.Values[targets[0]] = new(7, null); settings.Values[targets[1]] = new(0, 0);
+        Require((await new UwpBackgroundToggle(() => targets, settings).SetStateAsync(true)).Success &&
+            settings.Values.Values.All(value => value == UwpBackgroundValues.Applied), "UWP ON did not apply both values");
+        settings.Values[targets[0]] = new(5, 6);
+        targets.Add("GOGO_CANARY_NEW"); settings.Values[targets[2]] = new(9, 9);
+        var fresh = new UwpBackgroundToggle(() => targets, settings);
+        Require(await fresh.GetStateAsync() == false, "UWP mixed current state reported ON");
+        Require((await fresh.SetStateAsync(false)).Success && settings.Values.Values.All(value => value == default),
+            "fresh UWP OFF did not remove all current overrides including new/external settings");
+        return "Actual UWP fresh-instance OFF removed both explicit values for all currently installed targets, including externally changed/new packages; no saved originals required";
     }
     private static async Task<string> UwpPairWorkflow()
     {
-        const string sid = "S-1-5-21-111-222-333-1001", family = "GOGO_CANARY_A", other = "GOGO_CANARY_B";
-        UwpBackgroundJournal? journal = null;
+        const string family = "GOGO_CANARY_A", other = "GOGO_CANARY_B";
         var settings = new MemoryUwpSettings();
-        UwpBackgroundToggle NewToggle() => new(() => new[] { family, other }, settings,
-            () => journal is null ? new(UwpBackgroundJournalLoadStatus.Missing) : new(UwpBackgroundJournalLoadStatus.Valid, journal),
-            saved => journal = saved with { UserScope = sid }, () => { journal = null; return true; });
+        UwpBackgroundToggle NewToggle() => new(() => [family, other], settings);
         settings.Values[family] = new(null, 0); settings.Values[other] = new(0, 0);
         settings.FailPairs = 1;
-        Require(!(await NewToggle().SetStateAsync(true)).Success && settings.Values[family] == new UwpBackgroundValues(null, 0) && journal is not null, "ON partial pair not compensated/journal lost");
-        Require((await NewToggle().SetStateAsync(false)).Success && journal is null, "fresh OFF did not retire already compensated entries");
+        Require(!(await NewToggle().SetStateAsync(true)).Success && settings.Values[family] == new UwpBackgroundValues(null, 0),
+            "ON partial pair not compensated to immediate state");
         Require((await NewToggle().SetStateAsync(true)).Success, "normal UWP ON failed");
         settings.FailPairs = 1;
-        Require(!(await NewToggle().SetStateAsync(false)).Success && settings.Values[family] == UwpBackgroundValues.Applied && journal is not null, "OFF partial pair did not compensate to immediate ON");
-        Require((await NewToggle().SetStateAsync(false)).Success && settings.Values[family] == new UwpBackgroundValues(null, 0), "OFF retry lost null/value original");
+        Require(!(await NewToggle().SetStateAsync(false)).Success && settings.Values[family] == UwpBackgroundValues.Applied,
+            "OFF partial pair did not compensate to immediate ON");
+        Require((await NewToggle().SetStateAsync(false)).Success && settings.Values.Values.All(value => value == default),
+            "OFF retry did not remove overrides");
+        settings.Values[family] = new(null, 0);
         settings.FailPairs = 2;
-        Require(!(await NewToggle().SetStateAsync(true)).Success && settings.Values[family] == new UwpBackgroundValues(1, 0), "compensation failure did not retain partial pair");
-        var original = JsonSerializer.Serialize(journal);
-        Require(!(await NewToggle().SetStateAsync(true)).Success && JsonSerializer.Serialize(journal) == original, "fresh ON overwrote ambiguous original");
-        settings.Values[other] = UwpBackgroundValues.Applied;
-        Require(await NewToggle().GetStateAsync() == true, "other applied package could not select OFF");
+        var result = await NewToggle().SetStateAsync(true);
+        Require(result.Status == MaintenanceActionStatus.Failed && result.Detail.Contains("補償"), "pair compensation failure hidden");
         settings.FailPairs = 0; settings.FailBeforeFirstValue = false;
-        Require(!(await NewToggle().SetStateAsync(false)).Success && journal?.Entries?.Count == 1 && settings.Values[other] == new UwpBackgroundValues(0, 0), "OFF did not restore safe other entry while retaining ambiguous one");
-        Require(await NewToggle().GetStateAsync() is null && settings.Values[family] == new UwpBackgroundValues(1, 0), "ambiguous-only state overwritten or incorrectly known");
-        settings.Values[family] = new(7, 8);
-        Require((await NewToggle().SetStateAsync(false)).Success && settings.Values[family] == new UwpBackgroundValues(7, 8) && journal is null, "clear external change was overwritten");
+        Require((await NewToggle().SetStateAsync(false)).Success && settings.Values.Values.All(value => value == default),
+            "fresh OFF was blocked by old partial state");
+        settings.Values[family] = new(null, 0);
         settings.FailPairs = 1; settings.ExternalOnFailure = new(7, 8);
-        Require(!(await NewToggle().SetStateAsync(true)).Success && settings.Values[family] == new UwpBackgroundValues(7, 8) && journal is not null, "external change during write failure overwritten by compensation");
-        return "Actual UWP ON/OFF with per-DWORD failures: immediate compensation, null original restoration, fresh-instance ambiguous journal retained, safe other entry restored, unknown state and external changes protected; schema2 in memory";
+        Require(!(await NewToggle().SetStateAsync(true)).Success && settings.Values[family] == new UwpBackgroundValues(7, 8),
+            "failure compensation overwrote external change");
+        return "Actual UWP pair failures: ON/OFF compensated immediate values in memory, compensation failure remained Failed, fresh OFF cleared partial state, external change during failure preserved";
+    }
+
+    private static async Task<string> VbsDefaultsWorkflow()
+    {
+        var custom = VirtualizationSecuritySnapshot.Default() with
+        {
+            HypervisorLaunchType = BcdValueSnapshot.Present("Auto"),
+            Hvci = RegistryValueSnapshot.Dword(2),
+        };
+        var platform = new MemoryVirtualizationPlatform(custom);
+        var toggle = new VirtualizationSecurityToggle(platform);
+        Require(await toggle.GetStateAsync() == false && (await toggle.SetStateAsync(true)).Success && platform.State.IsFullyApplied,
+            "VBS custom state could not be applied");
+        Require((await new VirtualizationSecurityToggle(platform).SetStateAsync(false)).Success &&
+            platform.State.EquivalentTo(VirtualizationSecuritySnapshot.Default()), "VBS OFF restored custom values instead of deleting overrides");
+        platform.State = custom; platform.FailAfterComponent = VirtualizationSecurityComponent.Hvci;
+        Require(!(await new VirtualizationSecurityToggle(platform).SetStateAsync(true)).Success && platform.State.EquivalentTo(custom),
+            "VBS partial failure did not compensate immediate snapshot");
+        return "Actual VBS fake platform: ON applied all components; fresh OFF removed BCD/three registry overrides; injected partial failure compensated current custom values in memory";
+    }
+
+    private static Task<string> TogglePersistenceBoundaryWorkflow()
+    {
+        foreach (var file in new[] { "RegistryToggle.cs", "UwpBackgroundToggle.cs", "VirtualizationSecurityToggle.cs" })
+        {
+            var source = File.ReadAllText(Path.Combine(_repo, "src/Lumin4ti.Core/Services/Windows/Actions", file));
+            Require(!new[] { "RegistryValueBackup", "UwpBackgroundJournal", "VirtualizationSecurityBackupStore", "ProtectedBackupStorage", "File.Read", "File.Write" }
+                .Any(source.Contains), "toggle still references persistent backup: " + file);
+        }
+        return Task.FromResult("Static supplement: three toggle implementations have no persistent backup/file API references; legacy backup files are never opened, migrated or deleted by these paths; PATH/QuickAccess data backups excluded");
     }
     private static async Task<string> MmAgentDiagnosticWorkflow()
     {
@@ -776,7 +697,7 @@ internal static class Program
         var locales = Directory.GetFiles(Path.Combine(_repo, "src/Lumin4ti.UI/Resources/Locales"), "*.axaml");
         Require(locales.Length == 17, "locale count differs from 17");
         string[] added = ["UpdateDialog.Title", "UpdateDialog.AvailableHeader", "UpdateDialog.DownloadAndInstall", "UpdateDialog.IgnoreThisVersion", "UpdateDialog.UpToDateMessage", "UpdateDialog.ErrorHeader", "UpdateDialog.Close", "UpdateDialog.CheckingMessage", "UpdateDialog.DevelopmentBuild", "UpdateDialog.CheckFailed", "Status.Applying", "Status.Applied", "Status.ApplyFailed", "Shutdown.BlockReason"];
-        added = [.. added, "Toggle.VbsPartialState", "Toggle.UwpBackupInvalid", "Toggle.UwpPartialState",
+        added = [.. added, "Toggle.SetOff",
             "Toggle.RecallQueryFailed", "Toggle.RecallStateMissing", "Toggle.RecallStateUnsupported",
             "Toggle.ScheduledTaskOtherUser", "Toggle.ScheduledTaskOwnershipUnknown"];
         foreach (var path in locales)
@@ -787,9 +708,19 @@ internal static class Program
         var views = Directory.GetFiles(Path.Combine(_repo, "src/Lumin4ti.UI/Views"), "*.axaml").Select(File.ReadAllText).ToArray();
         Require(views.Any(text => text.Contains("AutomationProperties.Name")), "no accessibility names found");
         Require(File.ReadAllText(Path.Combine(_repo, "src/Lumin4ti.UI/Services/Lumin4tiUpdateStrings.cs")).Contains("Title => App.Text"), "cached update title remains");
+        var expectedNames = new Dictionary<string, string>
+        {
+            ["{Binding RunCommand}"] = "{Binding RunAutomationName}",
+            ["{Binding CancelCommand}"] = "{Binding CancelAutomationName}",
+            ["{Binding SetOffCommand}"] = "{Binding SetOffAutomationName}",
+        };
         var actionButtons = XDocument.Load(Path.Combine(_repo, "src/Lumin4ti.UI/Views/CommandCategoryView.axaml"))
-            .Descendants().Where(element => element.Name.LocalName == "Button" && element.Attributes().Any(attribute => attribute.Name.LocalName == "Command" && (attribute.Value == "{Binding RunCommand}" || attribute.Value == "{Binding CancelCommand}"))).ToArray();
-        Require(actionButtons.Length == 4 && actionButtons.All(button => button.Attributes().Any(attribute => attribute.Name.LocalName == "AutomationProperties.Name" && attribute.Value == (button.Attribute("Command")!.Value.Contains("RunCommand") ? "{Binding RunAutomationName}" : "{Binding CancelAutomationName}"))), "parent/child run/cancel names not correctly bound");
+            .Descendants().Where(element => element.Name.LocalName == "Button" &&
+                expectedNames.ContainsKey((string?)element.Attribute("Command") ?? "")).ToArray();
+        Require(actionButtons.Length == 6 && expectedNames.Keys.All(command => actionButtons.Count(button =>
+            (string?)button.Attribute("Command") == command) == 2) && actionButtons.All(button => button.Attributes().Any(attribute =>
+                attribute.Name.LocalName == "AutomationProperties.Name" && attribute.Value == expectedNames[button.Attribute("Command")!.Value])),
+            "parent/child run/cancel/default-reset names not correctly bound");
         return Task.FromResult($"Supplement only: 17 XML dictionaries parsed, {added.Length} required keys/no duplicates, getter and automation-name source present; this is not GUI accessibility validation");
     }
     private static Task<string> LocaleWorkflow()
@@ -829,13 +760,14 @@ internal static class Program
         var genericToggle = Vm(new MmAgentFeatureToggle(toggleExecutor, new MmAgentStateProvider(toggleExecutor), "MemoryCompression", "gogo-locale", "検証", "検証"));
         var genericChoice = new CommandItemViewModel(new MmAgentOperationApiChoice(toggleExecutor, new MmAgentStateProvider(toggleExecutor)), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
         var specific = Vm(genericToggle.Item);
-        var invalidUwp = new UwpBackgroundToggle(() => [], new MemoryUwpSettings(),
-            () => new(UwpBackgroundJournalLoadStatus.Invalid, Error: "旧 journal の所有者 SID を証明できません。"),
-            _ => throw new InvalidOperationException("状態照会で保存してはいけません"),
-            () => throw new InvalidOperationException("状態照会で削除してはいけません"));
-        var journalDiagnostic = Vm(invalidUwp);
-        journalDiagnostic.ApplyState(invalidUwp.GetStateAsync().GetAwaiter().GetResult());
-        journalDiagnostic.ResultText = "GOGO_CANARY previous UWP result";
+        var diagnosticItem = new LogProbeToggle("locale-recall-diagnostic")
+        {
+            Diagnostic = new("Toggle.RecallStateMissing", "Recall の状態が返されませんでした。"),
+            Query = _ => Task.FromResult<bool?>(null),
+        };
+        var stateDiagnostic = Vm(diagnosticItem);
+        stateDiagnostic.ApplyState(null);
+        stateDiagnostic.ResultText = "GOGO_CANARY previous diagnostic result";
         genericToggle.ApplyState(null); genericChoice.ApplySelectedValue(null); specific.ApplyState(null);
         specific.StateErrorText = "GOGO_CANARY specific IOException";
         genericToggle.ResultText = "GOGO_CANARY previous result";
@@ -857,15 +789,15 @@ internal static class Program
             const string unknownFallback = "状態を取得できませんでした (管理者権限がないか、この PC では利用できない機能です。デバッグ起動は昇格されないため、通常起動でお試しください)";
             Require(genericToggle.StateErrorText == expected[locale.Key].GetValueOrDefault("Text.Toggle.StateUnknown", unknownFallback) && genericChoice.StateErrorText == genericToggle.StateErrorText, "generic toggle/choice error remained in old language: " + locale.Key);
             Require(specific.StateErrorText == "GOGO_CANARY specific IOException", "locale switch replaced explicit diagnostic");
-            Require(journalDiagnostic.StateErrorText == expected[locale.Key]["Text.Toggle.UwpBackupInvalid"]
-                && !journalDiagnostic.CanToggle, "journal diagnostic remained generic, stale or enabled: " + locale.Key);
+            Require(stateDiagnostic.StateErrorText == expected[locale.Key]["Text.Toggle.RecallStateMissing"]
+                && !stateDiagnostic.CanToggle, "state diagnostic remained generic, stale or enabled: " + locale.Key);
             Require(genericToggle.RunAutomationName.Contains(App.Text("Button.Run", "実行")) && genericToggle.CancelAutomationName.Contains(App.Text("Button.Cancel", "中断")) && genericToggle.RunAutomationName != genericToggle.CancelAutomationName, "action automation identities ambiguous/stale");
-            Require(new[] { "StateErrorText", "RunAutomationName", "CancelAutomationName" }.All(notifications.Contains), "locale change missed property notification");
+            Require(new[] { "StateErrorText", "RunAutomationName", "CancelAutomationName", "SetOffAutomationName" }.All(notifications.Contains), "locale change missed property notification");
         }
         genericToggle.ApplyState(true); genericChoice.ApplySelectedValue("512");
-        journalDiagnostic.ApplyState(false);
-        Require(journalDiagnostic.StateErrorText.Length == 0 && journalDiagnostic.CanToggle
-            && journalDiagnostic.ResultText == "GOGO_CANARY previous UWP result", "journal recovery erased result or retained diagnostic");
+        stateDiagnostic.ApplyState(false);
+        Require(stateDiagnostic.StateErrorText.Length == 0 && stateDiagnostic.CanToggle
+            && stateDiagnostic.ResultText == "GOGO_CANARY previous diagnostic result", "state recovery erased result or retained diagnostic");
         Require(genericToggle.StateErrorText.Length == 0 && genericChoice.StateErrorText.Length == 0 && genericToggle.ResultText == "GOGO_CANARY previous result", "known state recovery did not clear only diagnosis");
         setStatus.Invoke(vm, [null, "", Array.Empty<object>()]);
         Require(vm.UpdateStatusText.Length == 0, "status reset retained translated text");

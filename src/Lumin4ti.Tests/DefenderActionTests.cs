@@ -128,7 +128,7 @@ public sealed class DefenderActionTests
     [TestMethod]
     public void 設定リセットは正しいモジュールと厳格なエラー処理を使う()
     {
-        var script = DefenderResetAction.BuildResetScript(@"C:\backup's\defender.json");
+        var script = DefenderResetAction.BuildResetScript();
 
         StringAssert.Contains(script, "Import-Module Defender -ErrorAction Stop");
         StringAssert.Contains(script, "$ErrorActionPreference = 'Stop'");
@@ -144,8 +144,10 @@ public sealed class DefenderActionTests
         StringAssert.Contains(script, "foreach ($name in $verifiableNames)");
         StringAssert.Contains(script, "除外設定が ");
         StringAssert.Contains(script, "主要な保護設定の有効状態を確認しました");
-        StringAssert.Contains(script, @"C:\backup''s\defender.json");
-        StringAssert.Contains(script, "[System.IO.File]::WriteAllText");
+        Assert.IsFalse(script.Contains("[System.IO.File]", StringComparison.Ordinal));
+        Assert.IsFalse(script.Contains("バックアップ", StringComparison.Ordinal));
+        Assert.IsTrue(script.IndexOf("if ($null -ne $status.IsTamperProtected", StringComparison.Ordinal) <
+                      script.IndexOf("$p = Get-MpPreference", StringComparison.Ordinal));
         Assert.IsFalse(script.Contains("Set-Content", StringComparison.Ordinal));
         Assert.IsFalse(script.Contains("ConfigDefender", StringComparison.Ordinal));
         Assert.IsFalse(script.Contains("SilentlyContinue", StringComparison.Ordinal));
@@ -167,7 +169,7 @@ public sealed class DefenderActionTests
     }
 
     [TestMethod]
-    public async Task Defenderサービス無効時はバックアップ作成前に中止する()
+    public async Task Defenderサービス無効時はリセット前に中止する()
     {
         var executor = new RecordingExecutor(new CommandExecutionResult(
             true,
@@ -175,69 +177,38 @@ public sealed class DefenderActionTests
             0,
             "{\"AMServiceEnabled\":false,\"AntivirusEnabled\":false}",
             string.Empty));
-        var trustedParent = Path.Combine(Path.GetTempPath(), "Lumin4ti.Tests", Guid.NewGuid().ToString("N"));
-        var storage = new ProtectedBackupStorage(
-            Path.Combine(trustedParent, "backups"),
-            trustedParent);
-        var action = new DefenderResetAction(executor, storage);
+        var action = new DefenderResetAction(executor);
 
         var result = await action.ExecuteAsync();
 
         Assert.IsFalse(result.Success);
         StringAssert.Contains(result.Detail, "サービスが無効");
         Assert.AreEqual(1, executor.Calls.Count);
-        Assert.IsFalse(Directory.Exists(trustedParent), "利用不可ならバックアップ用ディレクトリも作成しません");
     }
 
     [TestMethod]
-    public void バックアップ作成前のリセット失敗理由を先頭へ表示する()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task リセットは永続バックアップなしで結果と失敗原因を返す(bool success)
     {
         const string commandFailure = "Tamper Protection が有効なため Defender 設定を変更できません。";
-        Assert.IsFalse(DefenderResetAction.TryValidateBackupJson(
-            "{\"Lumin4tiPending\":true}", out var backupFailure));
+        var executor = new RecordingExecutor(
+            new(true, "powershell.exe", 0,
+                "{\"AMServiceEnabled\":true,\"AntivirusEnabled\":true}", string.Empty),
+            success ? Success() : Failure(1, commandFailure));
+        var action = new DefenderResetAction(executor);
 
-        var detail = DefenderResetAction.DescribeBackupFailure(Failure(1, commandFailure), backupFailure);
+        var result = await action.ExecuteAsync();
 
-        StringAssert.StartsWith(detail, "リセットに失敗しました (exit=1)");
-        StringAssert.Contains(detail, commandFailure);
-        StringAssert.Contains(detail, backupFailure);
-        Assert.IsTrue(detail.IndexOf(commandFailure, StringComparison.Ordinal) <
-                      detail.IndexOf(backupFailure, StringComparison.Ordinal));
-        var script = DefenderResetAction.BuildResetScript(@"C:\backup\defender.json");
-        Assert.IsTrue(script.IndexOf("if ($null -ne $status.IsTamperProtected", StringComparison.Ordinal) <
-                      script.IndexOf("[System.IO.File]::WriteAllText", StringComparison.Ordinal));
-    }
-
-    [TestMethod]
-    public void コマンド成功でも不正バックアップを成功やコマンド失敗として表示しない()
-    {
-        var detail = DefenderResetAction.DescribeBackupFailure(Success(), "バックアップが空です。");
-
-        StringAssert.StartsWith(detail, "Defender 設定のバックアップを確認できなかったため");
-        StringAssert.Contains(detail, "バックアップが空です。");
-        Assert.IsFalse(detail.Contains("exit=", StringComparison.Ordinal));
-    }
-
-    [TestMethod]
-    public void 設定バックアップは必須プロパティと文字列値を検証する()
-    {
-        const string valid = """
-            {
-              "ExclusionPath": ["C:\\\\work"],
-              "ExclusionProcess": null,
-              "ExclusionExtension": ".tmp",
-              "ExclusionIpAddress": [],
-              "ControlledFolderAccessAllowedApplications": [],
-              "ControlledFolderAccessProtectedFolders": [],
-              "AttackSurfaceReductionOnlyExclusions": []
-            }
-            """;
-
-        Assert.IsTrue(DefenderResetAction.TryValidateBackupJson(valid, out var failure), failure);
-        Assert.IsFalse(DefenderResetAction.TryValidateBackupJson(
-            "{\"Lumin4tiPending\":true}", out _));
-        Assert.IsFalse(DefenderResetAction.TryValidateBackupJson(
-            valid.Replace("[]", "[123]", StringComparison.Ordinal), out _));
+        Assert.AreEqual(success, result.Success);
+        Assert.AreEqual(2, executor.Calls.Count);
+        Assert.IsFalse(executor.Calls[1].Token.CanBeCanceled);
+        Assert.IsFalse(result.Detail.Contains("バックアップ", StringComparison.Ordinal));
+        if (!success)
+        {
+            StringAssert.StartsWith(result.Detail, "リセットに失敗しました (exit=1)");
+            StringAssert.Contains(result.Detail, commandFailure);
+        }
     }
 
     [TestMethod]

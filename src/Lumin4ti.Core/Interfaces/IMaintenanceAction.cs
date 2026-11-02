@@ -101,16 +101,19 @@ public interface IMaintenanceChoice : IMaintenanceItem
 
 /// <summary>
 /// ON/OFF を切り替えられる型のメンテナンス項目。ON = 最適化 (tweak) が適用された状態、
-/// OFF = Windows 既定の状態、で統一する。
+/// OFF = 項目で定義した解除値または明示設定の削除。変更前の値は保存・復元しない。
 /// </summary>
 public interface IMaintenanceToggle : IMaintenanceItem
 {
+    /// <summary>既知の OFF 表示や混在設定からも直接解除できる操作を提供する。</summary>
+    bool SupportsExplicitOff => false;
+
     /// <summary>直近の状態照会が不明だった具体的な理由。正常取得時は null。</summary>
     MaintenanceStateDiagnostic? StateDiagnostic => null;
 
     /// <summary>現在の適用状態を読み取る。null = 状態を判定できない (非対応環境等)。</summary>
     Task<bool?> GetStateAsync(CancellationToken ct = default);
 
-    /// <summary>ON (適用) / OFF (既定に戻す) を設定する。</summary>
+    /// <summary>ON (適用) / OFF (項目の解除値へ設定または明示上書きを削除) を設定する。</summary>
     Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default);
 }

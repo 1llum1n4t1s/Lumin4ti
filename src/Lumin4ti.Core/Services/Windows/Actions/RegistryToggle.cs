@@ -7,8 +7,8 @@ namespace Lumin4ti.Core.Services.Windows.Actions;
 
 /// <summary>
 /// レジストリ値 1 件の切替仕様。
-/// ON で <paramref name="AppliedValue"/> を書き込み、OFF は保存した元値と元の型へ戻す。
-/// 退避が Missing の場合だけ <paramref name="DefaultValue"/> を使い、null なら値を削除する。
+/// ON で <paramref name="AppliedValue"/> を書き込み、OFF は <paramref name="DefaultValue"/> を書き込む。
+/// 既定値が null なら値を削除して Windows 既定へ戻す。
 /// </summary>
 public sealed record RegistryToggleSpec(
     RegistryHive Hive,
@@ -33,7 +33,6 @@ public sealed class RegistryToggle : IMaintenanceToggle
     private readonly bool _requiresReboot;
     private readonly bool _affectsExplorer;
     private readonly IRegistryValueAccessor _registry;
-    private readonly RegistryValueBackup _backup;
 
     public RegistryToggle(
         string id,
@@ -51,8 +50,7 @@ public sealed class RegistryToggle : IMaintenanceToggle
             specs,
             requiresReboot,
             affectsExplorer,
-            WindowsRegistryValueAccessor.Instance,
-            RegistryValueBackup.Default)
+            WindowsRegistryValueAccessor.Instance)
     {
     }
 
@@ -64,8 +62,7 @@ public sealed class RegistryToggle : IMaintenanceToggle
         IReadOnlyList<RegistryToggleSpec> specs,
         bool requiresReboot,
         bool affectsExplorer,
-        IRegistryValueAccessor registry,
-        RegistryValueBackup backup)
+        IRegistryValueAccessor registry)
     {
         _id = id;
         _label = label;
@@ -75,7 +72,6 @@ public sealed class RegistryToggle : IMaintenanceToggle
         _requiresReboot = requiresReboot;
         _affectsExplorer = affectsExplorer;
         _registry = registry;
-        _backup = backup;
     }
 
     public string Id => _id;
@@ -89,6 +85,8 @@ public sealed class RegistryToggle : IMaintenanceToggle
     public bool RequiresReboot => _requiresReboot;
 
     public bool AffectsExplorer => _affectsExplorer;
+
+    public bool SupportsExplicitOff => true;
 
     internal IReadOnlyList<RegistryToggleSpec> Specs => _specs;
 
@@ -115,196 +113,64 @@ public sealed class RegistryToggle : IMaintenanceToggle
 
     private MaintenanceActionResult SetState(bool on, CancellationToken ct)
     {
-        ct.ThrowIfCancellationRequested();
-        return on ? Apply(ct) : Restore(ct);
-    }
-
-    private MaintenanceActionResult Apply(CancellationToken ct)
-    {
-        IReadOnlyList<RegistryWriteOperation> plan;
+        var operationName = on ? "設定の適用" : "解除値への変更";
         IReadOnlyList<RegistryWriteOperation> before;
-        Action? cancelPreparation = null;
+        var plan = new List<RegistryWriteOperation>(_specs.Count);
         try
         {
-            // 値変換もバックアップ保存も、一件も変更する前に完了させる。
-            var operations = new List<RegistryWriteOperation>(_specs.Count);
+            // 全値の型検証と操作直前の状態取得を、最初の書き込みより前に済ませる。
             foreach (var spec in _specs)
             {
                 ct.ThrowIfCancellationRequested();
-                operations.Add(new RegistryWriteOperation(spec, SnapshotFor(spec.AppliedValue, spec.Kind)));
+                var value = on ? spec.AppliedValue : spec.DefaultValue;
+                plan.Add(new RegistryWriteOperation(spec,
+                    value is null ? RegistryValueSnapshot.Missing() : SnapshotFor(value, spec.Kind)));
             }
-
-            plan = operations;
-            before = CaptureCurrentState(ct);
-            cancelPreparation = _backup.PrepareApply(Id, _specs);
-            // バックアップ作成中のキャンセルは、レジストリを書き始める前に反映する。
-            ct.ThrowIfCancellationRequested();
-        }
-        catch (OperationCanceledException)
-        {
-            if (cancelPreparation is not null)
-            {
-                try { cancelPreparation(); }
-                catch (Exception ex)
-                {
-                    LoggerBootstrap.Log.Error($"{Id}: ON 準備の取消に失敗し、復元原本を保持しました", ex);
-                    return MaintenanceActionResult.Fail($"設定は未変更ですが、ON 準備の取消に失敗しました。復元原本を保持しています。\n  - {ex.Message}");
-                }
-            }
-            throw;
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            LoggerBootstrap.Log.Error($"{Id}: ON 適用の準備に失敗したため変更しませんでした", ex);
-            return MaintenanceActionResult.Fail(
-                $"保護バックアップを安全に準備できないため、設定を変更しませんでした。\n  - {ex.Message}");
-        }
-
-        var lines = new List<string>();
-        try
-        {
-            foreach (var operation in plan)
-            {
-                _registry.Write(operation.Spec, operation.Value);
-                lines.Add($"  - {operation.Spec.Name} = {operation.Spec.AppliedValue}");
-            }
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            return CompensateFailedApply(ex, before, cancelPreparation!);
-        }
-
-        LoggerBootstrap.Log.Info($"{Id} → ON");
-        return MaintenanceActionResult.Ok(lines);
-    }
-
-    private MaintenanceActionResult CompensateFailedApply(
-        Exception applyError,
-        IReadOnlyList<RegistryWriteOperation> before,
-        Action cancelPreparation)
-    {
-        try
-        {
-            // 再 ON でも、OFF 用の初回原値ではなく今回の操作直前の状態へ補償する。
-            foreach (var operation in before)
-            {
-                _registry.Write(operation.Spec, operation.Value);
-            }
-            cancelPreparation();
-            LoggerBootstrap.Log.Error($"{Id}: ON 適用に失敗し、開始前の状態へ補償しました", applyError);
-            return MaintenanceActionResult.Fail(
-                $"設定の適用に失敗したため、今回の開始前の状態へ補償しました。既存の復元原本は保持しています。\n" +
-                $"  - 適用失敗: {applyError.Message}");
-        }
-        catch (Exception rollbackError) when (rollbackError is not OperationCanceledException)
-        {
-            LoggerBootstrap.Log.Error(
-                $"{Id}: ON 適用に失敗し、補償にも失敗しました: {rollbackError.Message}",
-                applyError);
-            return CompensationFailure(applyError, rollbackError.Message);
-        }
-    }
-
-    private MaintenanceActionResult Restore(CancellationToken ct)
-    {
-        var lines = new List<string>();
-        IReadOnlyList<RegistryWriteOperation> before;
-        try
-        {
             before = CaptureCurrentState(ct);
             ct.ThrowIfCancellationRequested();
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            LoggerBootstrap.Log.Error($"{Id}: OFF 前の状態を取得できないため変更しませんでした", ex);
-            return MaintenanceActionResult.Fail(
-                $"復元前の状態を安全に取得できないため、設定を変更しませんでした。\n  - {ex.Message}");
+            LoggerBootstrap.Log.Error($"{Id}: {operationName}の準備に失敗したため変更しませんでした", ex);
+            return MaintenanceActionResult.Fail($"{operationName}の準備に失敗したため、設定を変更しませんでした。\n  - {ex.Message}");
         }
 
-        RegistryBackupRestoreResult restore;
+        var attempted = new Stack<RegistryWriteAttempt>();
         try
         {
-            restore = _backup.TryRestore(Id, _specs, lines);
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            return CompensateFailedRestore(ex, before, "元の値への復元");
-        }
-
-        if (restore.Status == RegistryBackupRestoreStatus.Restored)
-        {
-            LoggerBootstrap.Log.Info($"{Id} → OFF (元値に復元)");
-            return MaintenanceActionResult.Ok(lines);
-        }
-        if (restore.Status == RegistryBackupRestoreStatus.Incomplete)
-        {
-            LoggerBootstrap.Log.Error($"{Id}: 値の復元後の所有更新を確認できないため、原本を保持しました: {restore.FailureReason}");
-            return MaintenanceActionResult.Fail(
-                "設定の値は復元しましたが、所有登録の更新を確認できませんでした。復元原本を保持しています。画面が OFF の場合は ON に戻してから OFF にし、所有登録の解除をやり直してください。\n" +
-                $"  - {restore.FailureReason}");
-        }
-
-        // Restored は既に複数値を書き換え済みなので中断しない。Invalid / Missing は
-        // まだ変更前のため、次の処理へ進む境界でキャンセルを反映できる。
-        ct.ThrowIfCancellationRequested();
-        if (restore.Status == RegistryBackupRestoreStatus.Invalid)
-        {
-            LoggerBootstrap.Log.Error($"{Id}: 復元バックアップの検証に失敗したため変更しませんでした: {restore.FailureReason}");
-            return MaintenanceActionResult.Fail(
-                $"復元バックアップが旧形式・未対応または破損しているため、設定を変更しませんでした。\n" +
-                $"  - {restore.FailureReason}");
-        }
-
-        return ApplyDefaults(before, ct);
-    }
-
-    private MaintenanceActionResult ApplyDefaults(
-        IReadOnlyList<RegistryWriteOperation> before,
-        CancellationToken ct)
-    {
-        IReadOnlyList<RegistryWriteOperation> plan;
-        try
-        {
-            // DefaultValue の型も、書き込み開始前に全件検証する。
-            var operations = new List<RegistryWriteOperation>(_specs.Count);
-            foreach (var spec in _specs)
+            for (var index = 0; index < plan.Count; index++)
             {
                 ct.ThrowIfCancellationRequested();
-                operations.Add(new RegistryWriteOperation(
-                    spec,
-                    spec.DefaultValue is null
-                        ? RegistryValueSnapshot.Missing()
-                        : SnapshotFor(spec.DefaultValue, spec.Kind)));
+                var operation = plan[index];
+                // 書き込み後に例外が出た値も補償対象へ含める。未着手値は含めない。
+                attempted.Push(new RegistryWriteAttempt(operation, before[index].Value));
+                _registry.Write(operation.Spec, operation.Value);
             }
-
-            plan = operations;
+            ct.ThrowIfCancellationRequested();
+            VerifyState(plan);
             ct.ThrowIfCancellationRequested();
         }
-        catch (Exception ex) when (ex is not OperationCanceledException)
+        catch (Exception ex)
         {
-            LoggerBootstrap.Log.Error($"{Id}: 既定値への復元計画を作成できないため変更しませんでした", ex);
-            return MaintenanceActionResult.Fail(
-                $"Windows 既定値への復元計画を作成できないため、設定を変更しませんでした。\n  - {ex.Message}");
-        }
-
-        var lines = new List<string>();
-        try
-        {
-            foreach (var operation in plan)
+            var compensationFailure = Compensate(attempted, before);
+            if (compensationFailure is not null)
             {
-                _registry.Write(operation.Spec, operation.Value);
-                lines.Add(operation.Value.Exists
-                    ? $"  - {operation.Spec.Name} = {operation.Spec.DefaultValue} (既定値)"
-                    : $"  - {operation.Spec.Name} を削除しました (Windows 既定に戻す)");
+                LoggerBootstrap.Log.Error($"{Id}: {operationName}と開始前状態への補償に失敗しました: {compensationFailure}", ex);
+                return MaintenanceActionResult.Fail(
+                    $"{operationName}に失敗し、開始前状態への補償にも失敗しました。部分適用の可能性があります。\n" +
+                    $"  - 変更失敗: {ex.Message}\n  - 補償失敗: {compensationFailure}");
             }
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            return CompensateFailedRestore(ex, before, "Windows 既定値への復元");
+
+            LoggerBootstrap.Log.Error($"{Id}: {operationName}に失敗し、開始前の状態へ補償しました", ex);
+            if (ex is OperationCanceledException) throw;
+            return MaintenanceActionResult.Fail($"{operationName}に失敗したため、開始前の状態へ補償しました。\n  - {ex.Message}");
         }
 
-        LoggerBootstrap.Log.Info($"{Id} → OFF");
-        return MaintenanceActionResult.Ok(lines);
+        LoggerBootstrap.Log.Info($"{Id} → {(on ? "ON" : "OFF")}");
+        return MaintenanceActionResult.Ok(plan.Select(operation =>
+            on ? $"  - {operation.Spec.Name} = {operation.Spec.AppliedValue}" :
+            operation.Value.Exists ? $"  - {operation.Spec.Name} = {operation.Spec.DefaultValue} (解除値)" :
+            $"  - {operation.Spec.Name} の明示設定を削除しました"));
     }
 
     private IReadOnlyList<RegistryWriteOperation> CaptureCurrentState(CancellationToken ct)
@@ -317,46 +183,59 @@ public sealed class RegistryToggle : IMaintenanceToggle
             value.Validate();
             current.Add(new RegistryWriteOperation(spec, value));
         }
-
         return current;
     }
 
-    private MaintenanceActionResult CompensateFailedRestore(
-        Exception restoreError,
-        IReadOnlyList<RegistryWriteOperation> before,
-        string operationName)
+    private void VerifyState(IReadOnlyList<RegistryWriteOperation> plan)
     {
-        try
+        foreach (var operation in plan)
         {
-            foreach (var operation in before)
-            {
-                _registry.Write(operation.Spec, operation.Value);
-            }
-
-            LoggerBootstrap.Log.Error(
-                $"{Id}: {operationName}に失敗し、開始前の状態へ補償しました",
-                restoreError);
-            return MaintenanceActionResult.Fail(
-                $"{operationName}に失敗したため、開始前の状態へ補償しました。復元バックアップは保持しています。\n" +
-                $"  - {restoreError.Message}");
-        }
-        catch (Exception rollbackError) when (rollbackError is not OperationCanceledException)
-        {
-            LoggerBootstrap.Log.Error(
-                $"{Id}: {operationName}に失敗し、開始前状態への補償にも失敗しました: {rollbackError.Message}",
-                restoreError);
-            return MaintenanceActionResult.Fail(
-                $"{operationName}に失敗し、開始前状態への補償にも失敗しました。部分復元の可能性があります。\n" +
-                $"  - 復元失敗: {restoreError.Message}\n" +
-                $"  - 補償失敗: {rollbackError.Message}");
+            if (!_registry.Read(operation.Spec).EquivalentTo(operation.Value))
+                throw new IOException($"{operation.Spec.Name} の実状態が要求値と一致しません。");
         }
     }
 
-    private static MaintenanceActionResult CompensationFailure(Exception applyError, string rollbackReason) =>
-        MaintenanceActionResult.Fail(
-            "設定の適用に失敗し、保存済みスナップショットからの補償にも失敗しました。部分適用の可能性があります。\n" +
-            $"  - 適用失敗: {applyError.Message}\n" +
-            $"  - 補償失敗: {rollbackReason}");
+    private string? Compensate(Stack<RegistryWriteAttempt> attempted, IReadOnlyList<RegistryWriteOperation> before)
+    {
+        string? externalChange = null;
+        // 試行済みの値だけを逆順に補償する。1 値の失敗で残りを打ち切らない。
+        foreach (var attempt in attempted)
+        {
+            var operation = attempt.Operation;
+            try
+            {
+                var current = _registry.Read(operation.Spec);
+                if (current.EquivalentTo(attempt.Before)) continue;
+                if (!current.EquivalentTo(operation.Value))
+                {
+                    externalChange ??= $"{operation.Spec.Name} に外部変更を検出したため、その値を保持しました。";
+                    LoggerBootstrap.Log.Error($"{Id}: {operation.Spec.Name} に外部変更を検出したため補償を中止しました");
+                    continue;
+                }
+                _registry.Write(operation.Spec, attempt.Before);
+            }
+            catch (Exception ex)
+            {
+                LoggerBootstrap.Log.Error($"{Id}: {operation.Spec.Name} の開始前状態への書き戻しに失敗しました", ex);
+            }
+        }
+        var errors = new List<string>();
+        if (externalChange is not null) errors.Add(externalChange);
+        // 未着手値は書き戻さないが、全体が開始前と同じかは全件照合する。
+        foreach (var operation in before)
+        {
+            try
+            {
+                if (!_registry.Read(operation.Spec).EquivalentTo(operation.Value))
+                    errors.Add($"{operation.Spec.Name} の実状態が開始前と一致しません (外部変更または補償不一致)。");
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"{operation.Spec.Name} の補償後の実状態を確認できません: {ex.Message}");
+            }
+        }
+        return errors.Count == 0 ? null : string.Join(" / ", errors);
+    }
 
     private static RegistryValueSnapshot SnapshotFor(object value, RegistryValueKind kind) =>
         RegistryValueSnapshot.FromRegistry(kind, NormalizeForWrite(value, kind));
@@ -386,4 +265,6 @@ public sealed class RegistryToggle : IMaintenanceToggle
     }
 
     private sealed record RegistryWriteOperation(RegistryToggleSpec Spec, RegistryValueSnapshot Value);
+
+    private sealed record RegistryWriteAttempt(RegistryWriteOperation Operation, RegistryValueSnapshot Before);
 }

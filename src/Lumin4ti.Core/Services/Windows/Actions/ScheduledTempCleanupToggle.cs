@@ -9,8 +9,8 @@ using Lumin4ti.Core.Models;
 namespace Lumin4ti.Core.Services.Windows.Actions;
 
 /// <summary>
-/// Windows タスクスケジューラーに、サインインのたびに %TEMP% を削除するタスクを登録・解除するトグル。
-/// タスクの実体は Lumin4ti.exe 自身を <see cref="ScheduledTempCleanup.CommandLineArgument"/> 付きで
+/// Windows タスクスケジューラーに、サインインのたびに利用者が選択したクリーンアップ項目を実行するタスクを登録・解除するトグル。
+/// タスクの実体は Lumin4ti.UI.exe 自身を <see cref="ScheduledTempCleanup.CommandLineArgument"/> 付きで
 /// 呼び出す (実処理は <see cref="ScheduledTempCleanup.Run"/> 側。既存の FileCleanupEngine の
 /// 安全ガードをそのまま使える)。ON = タスク登録、OFF = タスク削除。
 /// </summary>

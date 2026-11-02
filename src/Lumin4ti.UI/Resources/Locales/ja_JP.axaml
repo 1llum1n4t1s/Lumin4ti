@@ -71,10 +71,8 @@
   <x:String x:Key="Text.Status.Applied" xml:space="preserve">{0} を変更しました</x:String>
   <x:String x:Key="Text.Status.ApplyFailed" xml:space="preserve">{0} の変更に失敗しました (ログを確認してください)</x:String>
   <x:String x:Key="Text.Shutdown.BlockReason" xml:space="preserve">Lumin4ti がメンテナンス操作の完了を待っています…</x:String>
-  <x:String x:Key="Text.Toggle.VbsPartialState" xml:space="preserve">VBS / HVCI の設定が一部だけ適用されています。保存済みの元状態とも一致しないため、安全のため操作を停止しました。</x:String>
-  <x:String x:Key="Text.Toggle.UwpBackupInvalid" xml:space="preserve">復元データの形式または所有者を確認できません。旧バックアップは自動移行せず保持し、誤った復元を防ぐため操作を停止しました。</x:String>
-  <x:String x:Key="Text.Toggle.UwpPartialState" xml:space="preserve">バックグラウンド設定の一部が保存済みの状態と一致しません。途中更新と外部変更を区別できないため、復元データを保持して操作を停止しました。</x:String>
   <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">DISM で Recall の状態を取得できません。非対応環境や管理者権限の不足などが考えられます。詳細はログを確認してください。</x:String>
+  <x:String x:Key="Text.Toggle.SetOff" xml:space="preserve">OFFにする</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">DISM の出力に Recall の状態が見つかりません。詳細はログを確認してください。</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">DISM が返した Recall の状態を判定できません。詳細はログを確認してください。</x:String>
   <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">別の Windows ユーザーが登録したタスクのため操作できません。</x:String>

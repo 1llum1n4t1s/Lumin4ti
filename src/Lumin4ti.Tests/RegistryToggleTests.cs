@@ -1,7 +1,4 @@
-using System.Text;
-using System.Text.Json;
 using Lumin4ti.Core.Models;
-using Lumin4ti.Core.Services;
 using Lumin4ti.Core.Services.Windows.Actions;
 using Microsoft.Win32;
 
@@ -10,485 +7,282 @@ namespace Lumin4ti.Tests;
 [TestClass]
 public sealed class RegistryToggleTests
 {
-    private const string ToggleId = "registry-toggle-test";
     private const string KeyPath = @"Software\Lumin4ti.Tests\RegistryToggle";
 
     [TestMethod]
-    public void バックアップは存在有無と全レジストリ型を保持して復元する()
+    public async Task ONは適用値を書きOFFは元の独自設定でなく既定値または削除へ戻す()
     {
         var specs = new[]
         {
-            Spec("Dword", RegistryValueKind.DWord, 0),
-            Spec("Qword", RegistryValueKind.QWord, 0L),
-            Spec("String", RegistryValueKind.String, "applied"),
-            Spec("ExpandString", RegistryValueKind.ExpandString, "%TEMP%"),
-            Spec("MultiString", RegistryValueKind.MultiString, new[] { "applied" }),
-            Spec("Binary", RegistryValueKind.Binary, new byte[] { 1 }),
-            Spec("None", RegistryValueKind.None, new byte[] { 2 }),
+            Spec("Dword", RegistryValueKind.DWord, uint.MaxValue, 2),
+            Spec("Qword", RegistryValueKind.QWord, 100L, 9_876_543_210L),
+            Spec("String", RegistryValueKind.String, "applied", "default"),
+            Spec("ExpandString", RegistryValueKind.ExpandString, "%TEMP%", "%SystemRoot%"),
+            Spec("MultiString", RegistryValueKind.MultiString, new[] { "applied" }, new[] { "one", "two" }),
+            Spec("Binary", RegistryValueKind.Binary, new byte[] { 1 }, new byte[] { 0, 255 }),
+            Spec("None", RegistryValueKind.None, new byte[] { 2 }, new byte[] { 10, 20 }),
             Spec("Missing", RegistryValueKind.String, "applied"),
         };
-        var originals = new[]
-        {
-            RegistryValueSnapshot.Dword(unchecked((int)0xFFFFFFFF)),
-            RegistryValueSnapshot.FromRegistry(RegistryValueKind.QWord, 9_876_543_210L),
-            RegistryValueSnapshot.FromRegistry(RegistryValueKind.String, ""),
-            RegistryValueSnapshot.FromRegistry(RegistryValueKind.ExpandString, @"%SystemRoot%\System32"),
-            RegistryValueSnapshot.FromRegistry(RegistryValueKind.MultiString, new[] { "one", "two" }),
-            RegistryValueSnapshot.FromRegistry(RegistryValueKind.Binary, new byte[] { 0, 127, 255 }),
-            RegistryValueSnapshot.FromRegistry(RegistryValueKind.None, new byte[] { 10, 20 }),
-            RegistryValueSnapshot.Missing(),
-        };
         var registry = new FakeRegistryValueAccessor();
-        for (var index = 0; index < specs.Length; index++)
-        {
-            registry.Set(specs[index], originals[index]);
-        }
+        foreach (var spec in specs) registry.Set(spec, RegistryValueSnapshot.FromRegistry(RegistryValueKind.String, "custom"));
+        var toggle = CreateToggle(specs, registry);
 
-        var storage = new MemoryRegistryBackupStorage();
-        var backup = new RegistryValueBackup(storage, registry);
-        backup.Save(ToggleId, specs);
-
-        var json = storage.GetJson(BackupPath(ToggleId));
-        using (var document = JsonDocument.Parse(json))
-        {
-            Assert.AreEqual(
-                RegistryValueBackupDocument.CurrentSchemaVersion,
-                document.RootElement.GetProperty("SchemaVersion").GetInt32());
-            Assert.AreEqual(specs.Length, document.RootElement.GetProperty("Entries").GetArrayLength());
-            Assert.IsFalse(document.RootElement.GetProperty("Entries")[7].GetProperty("Value").GetProperty("Exists").GetBoolean());
-        }
-
+        Assert.IsTrue((await toggle.SetStateAsync(true)).Success);
+        Assert.AreEqual(true, await toggle.GetStateAsync());
+        Assert.IsTrue((await toggle.SetStateAsync(false)).Success);
         foreach (var spec in specs)
         {
-            registry.Set(spec, RegistryValueSnapshot.Missing());
-        }
-
-        var lines = new List<string>();
-        var restored = backup.TryRestore(ToggleId, specs, lines);
-
-        Assert.AreEqual(RegistryBackupRestoreStatus.Restored, restored.Status);
-        Assert.IsFalse(storage.FileExists(BackupPath(ToggleId)));
-        Assert.AreEqual(specs.Length, registry.WriteAttempts);
-        Assert.AreEqual(specs.Length, lines.Count);
-        for (var index = 0; index < specs.Length; index++)
-        {
-            AssertSnapshot(originals[index], registry.Read(specs[index]), specs[index].Name);
+            var expected = spec.DefaultValue is null ? RegistryValueSnapshot.Missing()
+                : RegistryValueSnapshot.FromRegistry(spec.Kind, spec.DefaultValue);
+            AssertSnapshot(expected, registry.Read(spec), spec.Name);
         }
     }
 
     [TestMethod]
-    public void 既存の現行バックアップは再保存で上書きしない()
-    {
-        var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
-        var original = RegistryValueSnapshot.FromRegistry(RegistryValueKind.String, "legacy");
-        var registry = new FakeRegistryValueAccessor();
-        registry.Set(specs[0], original);
-        var storage = new MemoryRegistryBackupStorage();
-        var backup = new RegistryValueBackup(storage, registry);
-
-        backup.Save(ToggleId, specs);
-        var firstJson = storage.GetJson(BackupPath(ToggleId));
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(123));
-        backup.Save(ToggleId, specs);
-
-        Assert.AreEqual(firstJson, storage.GetJson(BackupPath(ToggleId)));
-        var restored = backup.TryRestore(ToggleId, specs, []);
-        Assert.AreEqual(RegistryBackupRestoreStatus.Restored, restored.Status);
-        AssertSnapshot(original, registry.Read(specs[0]), specs[0].Name);
-    }
-
-    [TestMethod]
-    public void 混合退避は利用者の元値を分離し最後の所有者がOFFになるまでマシン原本を保持する()
-    {
-        var userSpecs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
-        var machineSpecs = new[]
-        {
-            new RegistryToggleSpec(RegistryHive.LocalMachine, KeyPath, "Value", RegistryValueKind.DWord, 1, 9),
-        };
-        var mixedSpecs = new[]
-        {
-            Spec("UserValue", RegistryValueKind.DWord, 1),
-            new RegistryToggleSpec(RegistryHive.LocalMachine, KeyPath, "MachineValue", RegistryValueKind.DWord, 1, 9),
-        };
-        var registry = new FakeRegistryValueAccessor();
-        registry.Set(userSpecs[0], RegistryValueSnapshot.Dword(9));
-        registry.Set(machineSpecs[0], RegistryValueSnapshot.Dword(9));
-        registry.Set(mixedSpecs[0], RegistryValueSnapshot.Dword(9));
-        registry.Set(mixedSpecs[1], RegistryValueSnapshot.Dword(9));
-        var storage = new MemoryRegistryBackupStorage();
-        var backup = new RegistryValueBackup(storage, registry);
-
-        backup.Save(ToggleId, userSpecs);
-        backup.Save("machine-toggle-test", machineSpecs);
-        backup.Save("mixed-toggle-test", mixedSpecs);
-
-        // 利用者値とマシン値を別々の正本へ退避する。
-        Assert.IsTrue(storage.FileExists(Path.Combine("registry", CurrentUserSid(), ToggleId + ".json")));
-        Assert.IsTrue(storage.FileExists(Path.Combine("registry", "machine-toggle-test.json")));
-        Assert.IsTrue(storage.FileExists(Path.Combine("registry", CurrentUserSid(), "mixed-toggle-test.json")));
-        var sharedPath = Path.Combine("registry", "mixed-toggle-test.json");
-        Assert.IsTrue(storage.FileExists(sharedPath));
-        using (var shared = JsonDocument.Parse(storage.GetJson(sharedPath)))
-        {
-            Assert.AreEqual(2, shared.RootElement.GetProperty("SchemaVersion").GetInt32());
-            Assert.AreEqual(1, shared.RootElement.GetProperty("Entries").GetArrayLength());
-            Assert.AreEqual(CurrentUserSid(), shared.RootElement.GetProperty("OwnerScopes")[0].GetString());
-        }
-        using (var user = JsonDocument.Parse(storage.GetJson(Path.Combine("registry", CurrentUserSid(), "mixed-toggle-test.json"))))
-        {
-            Assert.AreEqual(1, user.RootElement.GetProperty("Entries").GetArrayLength());
-        }
-
-        registry.Set(mixedSpecs[0], RegistryValueSnapshot.Dword(1));
-        registry.Set(mixedSpecs[1], RegistryValueSnapshot.Dword(1));
-        const string secondSid = "S-1-5-21-111-222-333-1002";
-        // 別利用者の HKCU は別 accessor で表し、HKLM の適用状態は共有する。
-        var secondRegistry = new FakeRegistryValueAccessor();
-        secondRegistry.Set(mixedSpecs[0], RegistryValueSnapshot.Dword(20));
-        secondRegistry.Set(mixedSpecs[1], RegistryValueSnapshot.Dword(1));
-        var secondBackup = new RegistryValueBackup(storage, secondRegistry, () => secondSid);
-        secondBackup.Save("mixed-toggle-test", mixedSpecs);
-        secondRegistry.Set(mixedSpecs[0], RegistryValueSnapshot.Dword(1));
-
-        Assert.AreEqual(RegistryBackupRestoreStatus.Restored, backup.TryRestore("mixed-toggle-test", mixedSpecs, []).Status);
-        AssertSnapshot(RegistryValueSnapshot.Dword(9), registry.Read(mixedSpecs[0]), "最初の利用者値");
-        AssertSnapshot(RegistryValueSnapshot.Dword(1), registry.Read(mixedSpecs[1]), "他利用者が使用中のマシン値");
-        using (var shared = JsonDocument.Parse(storage.GetJson(sharedPath)))
-        {
-            Assert.AreEqual(1, shared.RootElement.GetProperty("OwnerScopes").GetArrayLength());
-            Assert.AreEqual(secondSid, shared.RootElement.GetProperty("OwnerScopes")[0].GetString());
-        }
-
-        Assert.AreEqual(RegistryBackupRestoreStatus.Restored, secondBackup.TryRestore("mixed-toggle-test", mixedSpecs, []).Status);
-        AssertSnapshot(RegistryValueSnapshot.Dword(20), secondRegistry.Read(mixedSpecs[0]), "最後の利用者値");
-        AssertSnapshot(RegistryValueSnapshot.Dword(9), secondRegistry.Read(mixedSpecs[1]), "マシン原本");
-        using var completed = JsonDocument.Parse(storage.GetJson(sharedPath));
-        Assert.AreEqual(0, completed.RootElement.GetProperty("OwnerScopes").GetArrayLength());
-        secondRegistry.Set(mixedSpecs[1], RegistryValueSnapshot.Dword(42));
-        var writeAttempts = secondRegistry.WriteAttempts;
-        _ = secondBackup.TryRestore("mixed-toggle-test", mixedSpecs, []);
-        Assert.AreEqual(writeAttempts, secondRegistry.WriteAttempts, "完了済みの OFF は共有元値を再適用しない");
-        AssertSnapshot(RegistryValueSnapshot.Dword(42), secondRegistry.Read(mixedSpecs[1]), "OFF 後の外部変更");
-    }
-
-    [TestMethod]
-    public void 所有者不明の利用者スコープ導入前退避は復元せずInvalidで保持する()
-    {
-        var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
-        var registry = new FakeRegistryValueAccessor();
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(9));
-        var storage = new MemoryRegistryBackupStorage();
-        var seed = new RegistryValueBackup(storage, registry);
-        seed.Save(ToggleId, specs);
-        var legacyPath = Path.Combine("registry", ToggleId + ".json");
-        storage.SetJson(legacyPath, storage.GetJson(BackupPath(ToggleId)));
-        storage.Delete(BackupPath(ToggleId));
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(1));
-        var backup = new RegistryValueBackup(storage, registry);
-
-        var restored = backup.TryRestore(ToggleId, specs, []);
-
-        Assert.AreEqual(RegistryBackupRestoreStatus.Invalid, restored.Status);
-        StringAssert.Contains(restored.FailureReason, "所有者");
-        Assert.AreEqual(0, registry.WriteAttempts);
-        AssertSnapshot(RegistryValueSnapshot.Dword(1), registry.Read(specs[0]), specs[0].Name);
-        Assert.IsTrue(storage.FileExists(legacyPath), "所有者不明のレガシーは削除しない");
-        Assert.IsFalse(storage.FileExists(BackupPath(ToggleId)));
-    }
-
-    [TestMethod]
-    public void 所有者不明のレガシーがあってもSaveは現在値を利用者スコープへ退避してレガシーを保持する()
-    {
-        var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
-        var registry = new FakeRegistryValueAccessor();
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(999));
-        var storage = new MemoryRegistryBackupStorage();
-        var seed = new RegistryValueBackup(storage, registry);
-        seed.Save(ToggleId, specs);
-        var legacyPath = Path.Combine("registry", ToggleId + ".json");
-        storage.SetJson(legacyPath, storage.GetJson(BackupPath(ToggleId)));
-        storage.Delete(BackupPath(ToggleId));
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(1));
-
-        var backup = new RegistryValueBackup(storage, registry);
-        backup.Save(ToggleId, specs);
-
-        Assert.IsTrue(storage.FileExists(BackupPath(ToggleId)));
-        Assert.IsTrue(storage.FileExists(legacyPath), "所有者不明のレガシーは削除しない");
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(2));
-        backup.Save(ToggleId, specs); // 利用者スコープの有効なバックアップを優先して保持する
-
-        var restored = backup.TryRestore(ToggleId, specs, []);
-        Assert.AreEqual(RegistryBackupRestoreStatus.Restored, restored.Status);
-        AssertSnapshot(RegistryValueSnapshot.Dword(1), registry.Read(specs[0]), specs[0].Name);
-        Assert.IsTrue(storage.FileExists(legacyPath), "SID スコープ復元後も所有者不明のレガシーは保持する");
-    }
-
-    [TestMethod]
-    public void 利用者SIDを取得できない場合は共有スコープへ保存も復元もしない()
-    {
-        var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
-        var registry = new FakeRegistryValueAccessor();
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(9));
-        var storage = new MemoryRegistryBackupStorage();
-        var backup = new RegistryValueBackup(storage, registry, () => null);
-
-        var saveError = Assert.ThrowsExactly<InvalidOperationException>(() => backup.Save(ToggleId, specs));
-        StringAssert.Contains(saveError.Message, "SID");
-        var restored = backup.TryRestore(ToggleId, specs, []);
-
-        Assert.AreEqual(RegistryBackupRestoreStatus.Invalid, restored.Status);
-        StringAssert.Contains(restored.FailureReason, "SID");
-        Assert.AreEqual(0, registry.WriteAttempts);
-        Assert.IsFalse(storage.FileExists(Path.Combine("registry", "unknown-user", ToggleId + ".json")));
-    }
-
-    [TestMethod]
-    public void 旧Dictionary形式は復元も再保存も拒否して一件も書かない()
-    {
-        var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
-        var registry = new FakeRegistryValueAccessor();
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(9));
-        var storage = new MemoryRegistryBackupStorage();
-        storage.SetJson(BackupPath(ToggleId), "{\"CurrentUser|legacy\":\"9\"}");
-        var backup = new RegistryValueBackup(storage, registry);
-
-        var restored = backup.TryRestore(ToggleId, specs, []);
-
-        Assert.AreEqual(RegistryBackupRestoreStatus.Invalid, restored.Status);
-        Assert.AreEqual(0, registry.WriteAttempts);
-        Assert.IsTrue(storage.FileExists(BackupPath(ToggleId)));
-        Assert.ThrowsExactly<InvalidDataException>(() => backup.Save(ToggleId, specs));
-        Assert.AreEqual(0, registry.WriteAttempts);
-        AssertSnapshot(RegistryValueSnapshot.Dword(9), registry.Read(specs[0]), specs[0].Name);
-    }
-
-    [TestMethod]
-    public void 未対応schemaVersionはfailClosedで拒否する()
-    {
-        var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
-        var registry = new FakeRegistryValueAccessor();
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(9));
-        var storage = new MemoryRegistryBackupStorage();
-        storage.SetJson(
-            BackupPath(ToggleId),
-            Lumin4tiJson.Serialize(new RegistryValueBackupDocument
-            {
-                SchemaVersion = RegistryValueBackupDocument.CurrentSchemaVersion + 1,
-                Entries = [RegistryValueBackupEntry.Create(specs[0], RegistryValueSnapshot.Dword(5))],
-            }));
-        var backup = new RegistryValueBackup(storage, registry);
-
-        var restored = backup.TryRestore(ToggleId, specs, []);
-
-        Assert.AreEqual(RegistryBackupRestoreStatus.Invalid, restored.Status);
-        StringAssert.Contains(restored.FailureReason, "schema version");
-        Assert.AreEqual(0, registry.WriteAttempts);
-        AssertSnapshot(RegistryValueSnapshot.Dword(9), registry.Read(specs[0]), specs[0].Name);
-        Assert.IsTrue(storage.FileExists(BackupPath(ToggleId)));
-    }
-
-    [TestMethod]
-    public void 復元計画の後半が不正でも先頭を含め一件も書かない()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task 複数値の途中失敗は開始直前の全レジストリ型と存在有無へ補償する(bool on)
     {
         var specs = new[]
         {
-            Spec("First", RegistryValueKind.DWord, 1),
-            Spec("Second", RegistryValueKind.DWord, 1),
-        };
-        var registry = new FakeRegistryValueAccessor();
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(100));
-        registry.Set(specs[1], RegistryValueSnapshot.Dword(200));
-        var storage = new MemoryRegistryBackupStorage();
-        var invalid = new RegistryValueBackupDocument
-        {
-            SchemaVersion = RegistryValueBackupDocument.CurrentSchemaVersion,
-            Entries =
-            [
-                RegistryValueBackupEntry.Create(specs[0], RegistryValueSnapshot.Dword(10)),
-                RegistryValueBackupEntry.Create(specs[1], new RegistryValueSnapshot
-                {
-                    Exists = true,
-                    Kind = RegistryValueKind.DWord,
-                    StringValue = "wrong-field",
-                }),
-            ],
-        };
-        storage.SetJson(BackupPath(ToggleId), Lumin4tiJson.Serialize(invalid));
-        var backup = new RegistryValueBackup(storage, registry);
-
-        var restored = backup.TryRestore(ToggleId, specs, []);
-
-        Assert.AreEqual(RegistryBackupRestoreStatus.Invalid, restored.Status);
-        Assert.AreEqual(0, registry.WriteAttempts);
-        AssertSnapshot(RegistryValueSnapshot.Dword(100), registry.Read(specs[0]), specs[0].Name);
-        AssertSnapshot(RegistryValueSnapshot.Dword(200), registry.Read(specs[1]), specs[1].Name);
-        Assert.IsTrue(storage.FileExists(BackupPath(ToggleId)));
-    }
-
-    [TestMethod]
-    public async Task 複数specの適用途中で失敗すると保存済み全スナップショットへ即時補償する()
-    {
-        var specs = new[]
-        {
-            Spec("First", RegistryValueKind.DWord, 1),
-            Spec("Second", RegistryValueKind.DWord, 2),
+            Spec("Dword", RegistryValueKind.DWord, 1, 0),
+            Spec("String", RegistryValueKind.String, "applied"),
+            Spec("Missing", RegistryValueKind.Binary, new byte[] { 1 }),
+            Spec("Binary", RegistryValueKind.Binary, new byte[] { 2 }),
+            Spec("MultiString", RegistryValueKind.MultiString, new[] { "applied" }),
+            Spec("None", RegistryValueKind.None, new byte[] { 3 }),
+            Spec("Plain", RegistryValueKind.String, "applied"),
+            Spec("Last", RegistryValueKind.DWord, 1),
         };
         var originals = new[]
         {
-            RegistryValueSnapshot.FromRegistry(RegistryValueKind.QWord, 123L),
-            RegistryValueSnapshot.FromRegistry(RegistryValueKind.String, "legacy"),
+            RegistryValueSnapshot.FromRegistry(RegistryValueKind.QWord, 100L),
+            RegistryValueSnapshot.FromRegistry(RegistryValueKind.ExpandString, "%TEMP%"),
+            RegistryValueSnapshot.Missing(),
+            RegistryValueSnapshot.FromRegistry(RegistryValueKind.Binary, new byte[] { 0, 255 }),
+            RegistryValueSnapshot.FromRegistry(RegistryValueKind.MultiString, new[] { "one", "two" }),
+            RegistryValueSnapshot.FromRegistry(RegistryValueKind.None, new byte[] { 10, 20 }),
+            RegistryValueSnapshot.FromRegistry(RegistryValueKind.String, "custom"),
+            RegistryValueSnapshot.Dword(unchecked((int)uint.MaxValue)),
         };
         var registry = new FakeRegistryValueAccessor();
-        registry.Set(specs[0], originals[0]);
-        registry.Set(specs[1], originals[1]);
-        registry.FailAfterWrite(2);
-        var storage = new MemoryRegistryBackupStorage();
-        var toggle = CreateToggle(specs, registry, storage);
+        for (var i = 0; i < specs.Length; i++) registry.Set(specs[i], originals[i]);
+        registry.FailAfterWrite(specs.Length);
 
-        var result = await toggle.SetStateAsync(true);
+        var result = await CreateToggle(specs, registry).SetStateAsync(on);
 
-        Assert.IsFalse(result.Success);
+        Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
         StringAssert.Contains(result.Detail, "開始前の状態へ補償しました");
-        Assert.AreEqual(4, registry.WriteAttempts);
-        AssertSnapshot(originals[0], registry.Read(specs[0]), specs[0].Name);
-        AssertSnapshot(originals[1], registry.Read(specs[1]), specs[1].Name);
-        Assert.IsFalse(storage.FileExists(BackupPath(ToggleId)));
+        for (var i = 0; i < specs.Length; i++) AssertSnapshot(originals[i], registry.Read(specs[i]), specs[i].Name);
     }
 
     [TestMethod]
-    public async Task 適用失敗後の補償も失敗すると明示してバックアップを保持する()
+    public async Task 再ONの失敗は初回値でなく今回の開始前状態へ補償する()
     {
-        var specs = new[]
-        {
-            Spec("First", RegistryValueKind.DWord, 1),
-            Spec("Second", RegistryValueKind.DWord, 2),
-        };
+        var specs = new[] { Spec("One", RegistryValueKind.DWord, 1), Spec("Two", RegistryValueKind.DWord, 1) };
         var registry = new FakeRegistryValueAccessor();
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(10));
-        registry.Set(specs[1], RegistryValueSnapshot.Dword(20));
+        var toggle = CreateToggle(specs, registry);
+        Assert.IsTrue((await toggle.SetStateAsync(true)).Success);
+        registry.Set(specs[0], RegistryValueSnapshot.Dword(7));
+        registry.Set(specs[1], RegistryValueSnapshot.Dword(8));
+        registry.FailAfterWrite(registry.WriteAttempts + 2);
+
+        Assert.IsFalse((await toggle.SetStateAsync(true)).Success);
+        AssertSnapshot(RegistryValueSnapshot.Dword(7), registry.Read(specs[0]), "One");
+        AssertSnapshot(RegistryValueSnapshot.Dword(8), registry.Read(specs[1]), "Two");
+    }
+
+    [TestMethod]
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task 準備中のキャンセルは書き込み前に中断する(bool on)
+    {
+        var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
+        using var cancellation = new CancellationTokenSource();
+        var registry = new FakeRegistryValueAccessor { AfterRead = cancellation.Cancel };
+        registry.Set(specs[0], RegistryValueSnapshot.Dword(7));
+
+        await Assert.ThrowsAsync<OperationCanceledException>(() => CreateToggle(specs, registry).SetStateAsync(on, cancellation.Token));
+
+        Assert.AreEqual(0, registry.WriteAttempts);
+        AssertSnapshot(RegistryValueSnapshot.Dword(7), registry.Read(specs[0]), "Value");
+    }
+
+    [TestMethod]
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task 書き込み途中のキャンセルは全値を補償してから通知する(bool on)
+    {
+        var specs = new[] { Spec("One", RegistryValueKind.DWord, 1), Spec("Two", RegistryValueKind.DWord, 1) };
+        using var cancellation = new CancellationTokenSource();
+        var registry = new FakeRegistryValueAccessor { AfterWrite = cancellation.Cancel };
+        registry.Set(specs[0], RegistryValueSnapshot.Dword(7));
+        registry.Set(specs[1], RegistryValueSnapshot.Dword(8));
+
+        await Assert.ThrowsAsync<OperationCanceledException>(() => CreateToggle(specs, registry).SetStateAsync(on, cancellation.Token));
+
+        AssertSnapshot(RegistryValueSnapshot.Dword(7), registry.Read(specs[0]), "One");
+        AssertSnapshot(RegistryValueSnapshot.Dword(8), registry.Read(specs[1]), "Two");
+    }
+
+    [TestMethod]
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task 補償の一件が失敗しても残りを補償して部分適用を報告する(bool on)
+    {
+        var specs = new[] { Spec("One", RegistryValueKind.DWord, 1), Spec("Two", RegistryValueKind.DWord, 1) };
+        var registry = new FakeRegistryValueAccessor();
+        registry.Set(specs[0], RegistryValueSnapshot.Dword(7));
+        registry.Set(specs[1], RegistryValueSnapshot.Dword(8));
         registry.FailAfterWrite(2);
         registry.FailBeforeWrite(3);
-        var storage = new MemoryRegistryBackupStorage();
-        var toggle = CreateToggle(specs, registry, storage);
 
-        var result = await toggle.SetStateAsync(true);
+        var result = await CreateToggle(specs, registry).SetStateAsync(on);
 
-        Assert.IsFalse(result.Success);
-        StringAssert.Contains(result.Detail, "補償にも失敗しました");
-        StringAssert.Contains(result.Detail, "部分適用の可能性があります");
-        Assert.AreEqual(3, registry.WriteAttempts);
-        Assert.IsTrue(storage.FileExists(BackupPath(ToggleId)));
+        Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
+        StringAssert.Contains(result.Detail, "補償にも失敗");
+        StringAssert.Contains(result.Detail, "部分適用");
+        AssertSnapshot(RegistryValueSnapshot.Dword(7), registry.Read(specs[0]), "One");
+        Assert.AreEqual(4, registry.WriteAttempts);
     }
 
     [TestMethod]
-    public async Task ON時に旧バックアップがあれば適用前に停止する()
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task 未着手値の外部変更は途中キャンセルの補償で上書きしない(bool on)
+    {
+        var specs = new[] { Spec("One", RegistryValueKind.DWord, 1), Spec("Two", RegistryValueKind.DWord, 1) };
+        using var cancellation = new CancellationTokenSource();
+        var registry = new FakeRegistryValueAccessor();
+        registry.Set(specs[0], RegistryValueSnapshot.Dword(7));
+        registry.Set(specs[1], RegistryValueSnapshot.Dword(8));
+        registry.AfterWrite = () =>
+        {
+            if (registry.WriteAttempts != 1) return;
+            registry.Set(specs[1], RegistryValueSnapshot.Dword(99));
+            cancellation.Cancel();
+        };
+
+        var result = await CreateToggle(specs, registry).SetStateAsync(on, cancellation.Token);
+
+        Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
+        StringAssert.Contains(result.Detail, "Two の実状態が開始前と一致しません");
+        StringAssert.Contains(result.Detail, "外部変更または補償不一致");
+        AssertSnapshot(RegistryValueSnapshot.Dword(7), registry.Read(specs[0]), "One");
+        AssertSnapshot(RegistryValueSnapshot.Dword(99), registry.Read(specs[1]), "Two");
+        CollectionAssert.AreEqual(new[] { "One", "One" }, registry.WrittenNames.ToArray());
+    }
+
+    [TestMethod]
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task 試行済み値の外部変更は補償で上書きせず失敗として報告する(bool on)
+    {
+        var specs = new[] { Spec("One", RegistryValueKind.DWord, 1), Spec("Two", RegistryValueKind.DWord, 1) };
+        using var cancellation = new CancellationTokenSource();
+        var registry = new FakeRegistryValueAccessor();
+        registry.Set(specs[0], RegistryValueSnapshot.Dword(7));
+        registry.Set(specs[1], RegistryValueSnapshot.Dword(8));
+        registry.AfterWrite = () =>
+        {
+            registry.Set(specs[0], RegistryValueSnapshot.Dword(99));
+            cancellation.Cancel();
+        };
+
+        var result = await CreateToggle(specs, registry).SetStateAsync(on, cancellation.Token);
+
+        Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
+        StringAssert.Contains(result.Detail, "外部変更");
+        StringAssert.Contains(result.Detail, "その値を保持");
+        AssertSnapshot(RegistryValueSnapshot.Dword(99), registry.Read(specs[0]), "One");
+        AssertSnapshot(RegistryValueSnapshot.Dword(8), registry.Read(specs[1]), "Two");
+        CollectionAssert.AreEqual(new[] { "One" }, registry.WrittenNames.ToArray());
+    }
+
+    [TestMethod]
+    public async Task 未着手値の補償後照会が失敗しても全件の診断を残す()
+    {
+        var specs = new[]
+        {
+            Spec("One", RegistryValueKind.DWord, 1),
+            Spec("Two", RegistryValueKind.DWord, 1),
+            Spec("Three", RegistryValueKind.DWord, 1),
+        };
+        using var cancellation = new CancellationTokenSource();
+        var registry = new FakeRegistryValueAccessor();
+        foreach (var spec in specs) registry.Set(spec, RegistryValueSnapshot.Dword(7));
+        registry.AfterWrite = () =>
+        {
+            if (registry.WriteAttempts != 1) return;
+            registry.BeforeRead = spec =>
+            {
+                if (spec.Name != "One") throw new IOException($"{spec.Name} 読取拒否");
+            };
+            cancellation.Cancel();
+        };
+
+        var result = await CreateToggle(specs, registry).SetStateAsync(true, cancellation.Token);
+
+        Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
+        StringAssert.Contains(result.Detail, "Two の補償後の実状態を確認できません");
+        StringAssert.Contains(result.Detail, "Three の補償後の実状態を確認できません");
+        CollectionAssert.AreEqual(new[] { "One", "One" }, registry.WrittenNames.ToArray());
+        registry.BeforeRead = null;
+        foreach (var spec in specs) AssertSnapshot(RegistryValueSnapshot.Dword(7), registry.Read(spec), spec.Name);
+    }
+
+    [TestMethod]
+    public async Task キャンセル後の補償失敗をキャンセル扱いで隠さない()
     {
         var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
-        var registry = new FakeRegistryValueAccessor();
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(9));
-        var storage = new MemoryRegistryBackupStorage();
-        storage.SetJson(BackupPath(ToggleId), "{\"legacy\":\"9\"}");
-        var toggle = CreateToggle(specs, registry, storage);
+        using var cancellation = new CancellationTokenSource();
+        var registry = new FakeRegistryValueAccessor { AfterWrite = cancellation.Cancel };
+        registry.Set(specs[0], RegistryValueSnapshot.Dword(7));
+        registry.FailBeforeWrite(2);
 
-        var result = await toggle.SetStateAsync(true);
+        var result = await CreateToggle(specs, registry).SetStateAsync(true, cancellation.Token);
+
+        Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
+        StringAssert.Contains(result.Detail, "補償にも失敗");
+    }
+
+    [TestMethod]
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task 書き込みが反映されなければ成功とせず開始前へ補償する(bool on)
+    {
+        var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1, 0) };
+        var registry = new FakeRegistryValueAccessor { IgnoreFirstWrite = true };
+        registry.Set(specs[0], RegistryValueSnapshot.Dword(7));
+
+        var result = await CreateToggle(specs, registry).SetStateAsync(on);
 
         Assert.IsFalse(result.Success);
-        StringAssert.Contains(result.Detail, "設定を変更しませんでした");
+        StringAssert.Contains(result.Detail, "実状態が要求値と一致しません");
+        AssertSnapshot(RegistryValueSnapshot.Dword(7), registry.Read(specs[0]), "Value");
+    }
+
+    [TestMethod]
+    [DataRow(true)]
+    [DataRow(false)]
+    public async Task 後半の仕様型が不正なら一件も変更しない(bool on)
+    {
+        var specs = new[] { Spec("One", RegistryValueKind.DWord, 1, 0), Spec("Two", RegistryValueKind.DWord, "invalid", "invalid") };
+        var registry = new FakeRegistryValueAccessor();
+
+        Assert.IsFalse((await CreateToggle(specs, registry).SetStateAsync(on)).Success);
         Assert.AreEqual(0, registry.WriteAttempts);
-        AssertSnapshot(RegistryValueSnapshot.Dword(9), registry.Read(specs[0]), specs[0].Name);
     }
 
     [TestMethod]
-    public async Task OFF時に旧バックアップがあれば既定値へ逃げず停止する()
+    public async Task 状態判定は値だけでなくRegistryValueKindも照合する()
     {
-        var specs = new[] { new RegistryToggleSpec(
-            RegistryHive.CurrentUser,
-            KeyPath,
-            "Value",
-            RegistryValueKind.DWord,
-            1,
-            7) };
+        var spec = Spec("Value", RegistryValueKind.String, "1");
         var registry = new FakeRegistryValueAccessor();
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(1));
-        var storage = new MemoryRegistryBackupStorage();
-        storage.SetJson(BackupPath(ToggleId), "{\"legacy\":\"1\"}");
-        var toggle = CreateToggle(specs, registry, storage);
-
-        var result = await toggle.SetStateAsync(false);
-
-        Assert.IsFalse(result.Success);
-        StringAssert.Contains(result.Detail, "設定を変更しませんでした");
-        Assert.AreEqual(0, registry.WriteAttempts);
-        AssertSnapshot(RegistryValueSnapshot.Dword(1), registry.Read(specs[0]), specs[0].Name);
-    }
-
-    [TestMethod]
-    public async Task OFFの元値復元途中で失敗すると開始前の適用状態へ補償して再試行可能にする()
-    {
-        var specs = new[]
-        {
-            Spec("First", RegistryValueKind.DWord, 1),
-            Spec("Second", RegistryValueKind.DWord, 2),
-        };
-        var originals = new[]
-        {
-            RegistryValueSnapshot.Dword(10),
-            RegistryValueSnapshot.Dword(20),
-        };
-        var registry = new FakeRegistryValueAccessor();
-        registry.Set(specs[0], originals[0]);
-        registry.Set(specs[1], originals[1]);
-        var storage = new MemoryRegistryBackupStorage();
-        var backup = new RegistryValueBackup(storage, registry);
-        backup.Save(ToggleId, specs);
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(1));
-        registry.Set(specs[1], RegistryValueSnapshot.Dword(2));
-        registry.FailAfterWrite(2);
-        var toggle = CreateToggle(specs, registry, storage);
-
-        var result = await toggle.SetStateAsync(false);
-
-        Assert.IsFalse(result.Success);
-        StringAssert.Contains(result.Detail, "開始前の状態へ補償しました");
-        AssertSnapshot(RegistryValueSnapshot.Dword(1), registry.Read(specs[0]), specs[0].Name);
-        AssertSnapshot(RegistryValueSnapshot.Dword(2), registry.Read(specs[1]), specs[1].Name);
-        Assert.IsTrue(storage.FileExists(BackupPath(ToggleId)), "再試行用バックアップを保持する必要があります");
-    }
-
-    [TestMethod]
-    public async Task OFFの既定値適用途中で失敗すると開始前の状態へ補償する()
-    {
-        var specs = new[]
-        {
-            new RegistryToggleSpec(RegistryHive.CurrentUser, KeyPath, "First", RegistryValueKind.DWord, 1, 10),
-            new RegistryToggleSpec(RegistryHive.CurrentUser, KeyPath, "Second", RegistryValueKind.DWord, 2, 20),
-        };
-        var registry = new FakeRegistryValueAccessor();
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(1));
-        registry.Set(specs[1], RegistryValueSnapshot.Dword(2));
-        registry.FailAfterWrite(2);
-        var toggle = CreateToggle(specs, registry, new MemoryRegistryBackupStorage());
-
-        var result = await toggle.SetStateAsync(false);
-
-        Assert.IsFalse(result.Success);
-        StringAssert.Contains(result.Detail, "開始前の状態へ補償しました");
-        AssertSnapshot(RegistryValueSnapshot.Dword(1), registry.Read(specs[0]), specs[0].Name);
-        AssertSnapshot(RegistryValueSnapshot.Dword(2), registry.Read(specs[1]), specs[1].Name);
-    }
-
-    [TestMethod]
-    public async Task 状態判定は値だけでなく元のRegistryValueKindも照合する()
-    {
-        var specs = new[] { Spec("Value", RegistryValueKind.String, "1") };
-        var registry = new FakeRegistryValueAccessor();
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(1));
-        var toggle = CreateToggle(specs, registry, new MemoryRegistryBackupStorage());
-
+        registry.Set(spec, RegistryValueSnapshot.Dword(1));
+        var toggle = CreateToggle([spec], registry);
         Assert.AreEqual(false, await toggle.GetStateAsync());
-
-        registry.Set(specs[0], RegistryValueSnapshot.FromRegistry(RegistryValueKind.String, "1"));
+        registry.Set(spec, RegistryValueSnapshot.FromRegistry(RegistryValueKind.String, "1"));
         Assert.AreEqual(true, await toggle.GetStateAsync());
     }
 
@@ -498,7 +292,7 @@ public sealed class RegistryToggleTests
         var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
         var registry = new FakeRegistryValueAccessor();
         registry.Set(specs[0], RegistryValueSnapshot.Dword(0));
-        var toggle = CreateToggle(specs, registry, new MemoryRegistryBackupStorage());
+        var toggle = CreateToggle(specs, registry);
         var callingContext = new SynchronizationContext();
         var previousContext = SynchronizationContext.Current;
 
@@ -534,157 +328,54 @@ public sealed class RegistryToggleTests
         Assert.IsFalse(registry.AccessContexts.Any(context => ReferenceEquals(context, callingContext)));
     }
 
-    [TestMethod]
-    public async Task ON準備中のキャンセルはレジストリ書込み前の境界で中断する()
-    {
-        var specs = new[] { Spec("Value", RegistryValueKind.DWord, 1) };
-        var registry = new FakeRegistryValueAccessor();
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(0));
-        using var cancellation = new CancellationTokenSource();
-        var storage = new MemoryRegistryBackupStorage
-        {
-            AfterWriteNew = cancellation.Cancel,
-        };
-        var toggle = CreateToggle(specs, registry, storage);
+    private static RegistryToggle CreateToggle(IReadOnlyList<RegistryToggleSpec> specs, FakeRegistryValueAccessor registry) =>
+        new("registry-toggle-test", "テスト項目", "テスト説明", CommandCategory.Performance, specs, false, false, registry);
 
-        await Assert.ThrowsAsync<OperationCanceledException>(
-            () => toggle.SetStateAsync(true, cancellation.Token));
+    private static RegistryToggleSpec Spec(string name, RegistryValueKind kind, object applied, object? defaultValue = null) =>
+        new(RegistryHive.CurrentUser, KeyPath, name, kind, applied, defaultValue);
 
-        Assert.AreEqual(0, registry.WriteAttempts);
-        Assert.IsFalse(storage.FileExists(BackupPath(ToggleId)), "未適用の新規準備は取り消す");
-        AssertSnapshot(RegistryValueSnapshot.Dword(0), registry.Read(specs[0]), specs[0].Name);
-        registry.Set(specs[0], RegistryValueSnapshot.Dword(5));
-        Assert.IsTrue((await toggle.SetStateAsync(true)).Success);
-        Assert.IsTrue((await toggle.SetStateAsync(false)).Success);
-        AssertSnapshot(RegistryValueSnapshot.Dword(5), registry.Read(specs[0]), specs[0].Name);
-    }
-
-    private static RegistryToggle CreateToggle(
-        IReadOnlyList<RegistryToggleSpec> specs,
-        FakeRegistryValueAccessor registry,
-        MemoryRegistryBackupStorage storage) =>
-        new(
-            ToggleId,
-            "テスト",
-            "テスト",
-            CommandCategory.System,
-            specs,
-            requiresReboot: false,
-            affectsExplorer: false,
-            registry,
-            new RegistryValueBackup(storage, registry));
-
-    private static RegistryToggleSpec Spec(string name, RegistryValueKind kind, object appliedValue) =>
-        new(RegistryHive.CurrentUser, KeyPath, name, kind, appliedValue);
-
-    /// <summary>
-    /// このテストの spec はすべて HKCU なので、退避先は利用者ごとに分かれる
-    /// (マシン共通の保存場所で別利用者の元値を壊さないための実装と対になっている)。
-    /// </summary>
-    private static string BackupPath(string id) => Path.Combine("registry", CurrentUserSid(), id + ".json");
-
-    private static string CurrentUserSid()
-    {
-        using var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
-        return identity.User?.Value ?? "unknown-user";
-    }
-
-    private static void AssertSnapshot(
-        RegistryValueSnapshot expected,
-        RegistryValueSnapshot actual,
-        string name) =>
-        Assert.IsTrue(actual.EquivalentTo(expected), $"{name} の型付き値が一致しません。expected={expected}, actual={actual}");
-
-    private sealed class MemoryRegistryBackupStorage : IRegistryBackupStorage
-    {
-        private readonly Dictionary<string, string> _files = new(StringComparer.OrdinalIgnoreCase);
-
-        public Action? AfterWriteNew { get; init; }
-
-        public bool FileExists(string relativePath) => _files.ContainsKey(relativePath);
-
-        public string ReadAllText(string relativePath) => _files[relativePath];
-
-        public void WriteNewAtomically(string relativePath, Action<Stream> write)
-        {
-            if (_files.ContainsKey(relativePath))
-            {
-                throw new IOException("既存ファイルは上書きできません。");
-            }
-
-            using var stream = new MemoryStream();
-            write(stream);
-            _files.Add(relativePath, Encoding.UTF8.GetString(stream.ToArray()));
-            AfterWriteNew?.Invoke();
-        }
-
-        public void Delete(string relativePath) => _files.Remove(relativePath);
-
-        public void WriteAtomically(string relativePath, Action<Stream> write)
-        {
-            using var stream = new MemoryStream();
-            write(stream);
-            _files[relativePath] = Encoding.UTF8.GetString(stream.ToArray());
-        }
-
-        public IReadOnlyList<string> EnumerateUserBackupPaths(string id) =>
-            _files.Keys.Where(path =>
-            {
-                var parts = path.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-                return parts.Length == 3
-                    && parts[0] == "registry"
-                    && parts[2] == id + ".json";
-            }).ToArray();
-
-        public void SetJson(string relativePath, string json) => _files[relativePath] = json;
-
-        public string GetJson(string relativePath) => _files[relativePath];
-    }
+    private static void AssertSnapshot(RegistryValueSnapshot expected, RegistryValueSnapshot actual, string name) =>
+        Assert.IsTrue(expected.EquivalentTo(actual), name);
 
     private sealed class FakeRegistryValueAccessor : IRegistryValueAccessor
     {
         private readonly Dictionary<string, RegistryValueSnapshot> _values = new(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<int> _failBeforeWrites = [];
         private readonly HashSet<int> _failAfterWrites = [];
-
         public int WriteAttempts { get; private set; }
-
+        public Action? AfterRead { get; init; }
+        public Action<RegistryToggleSpec>? BeforeRead { get; set; }
+        public Action? AfterWrite { get; set; }
+        public bool IgnoreFirstWrite { get; init; }
         public List<SynchronizationContext?> AccessContexts { get; } = [];
+        public List<string> WrittenNames { get; } = [];
 
         public RegistryValueSnapshot Read(RegistryToggleSpec spec)
         {
             AccessContexts.Add(SynchronizationContext.Current);
-            return _values.TryGetValue(Location(spec), out var value) ? value : RegistryValueSnapshot.Missing();
+            BeforeRead?.Invoke(spec);
+            var value = _values.TryGetValue(spec.Name, out var current) ? current : RegistryValueSnapshot.Missing();
+            AfterRead?.Invoke();
+            return value;
         }
 
         public void Write(RegistryToggleSpec spec, RegistryValueSnapshot value)
         {
             AccessContexts.Add(SynchronizationContext.Current);
             WriteAttempts++;
-            if (_failBeforeWrites.Remove(WriteAttempts))
-            {
-                throw new IOException($"{WriteAttempts} 回目の書き込み前に失敗");
-            }
-
-            value.Validate();
-            _values[Location(spec)] = value;
-            if (_failAfterWrites.Remove(WriteAttempts))
-            {
-                throw new IOException($"{WriteAttempts} 回目の書き込み後に失敗");
-            }
+            WrittenNames.Add(spec.Name);
+            if (_failBeforeWrites.Remove(WriteAttempts)) throw new IOException($"{WriteAttempts} 回目の書き込み前に失敗");
+            if (!(IgnoreFirstWrite && WriteAttempts == 1)) Set(spec, value);
+            AfterWrite?.Invoke();
+            if (_failAfterWrites.Remove(WriteAttempts)) throw new IOException($"{WriteAttempts} 回目の書き込み後に失敗");
         }
 
         public void Set(RegistryToggleSpec spec, RegistryValueSnapshot value)
         {
             value.Validate();
-            _values[Location(spec)] = value;
+            _values[spec.Name] = value;
         }
-
         public void FailBeforeWrite(int attempt) => _failBeforeWrites.Add(attempt);
-
         public void FailAfterWrite(int attempt) => _failAfterWrites.Add(attempt);
-
-        private static string Location(RegistryToggleSpec spec) =>
-            $"{(int)spec.Hive}|{spec.KeyPath}|{spec.Name}";
     }
 }

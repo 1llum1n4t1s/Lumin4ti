@@ -13,7 +13,7 @@ dotnet build Lumin4ti.slnx           # ビルド (0 warnings を維持する方�
 dotnet test Lumin4ti.slnx            # 全テスト (MSTest)
 # 単一テストクラス/メソッド:
 dotnet test Lumin4ti.slnx --filter "FullyQualifiedName~RegistryToggleTests"
-dotnet test Lumin4ti.slnx --filter "Name=既存の現行バックアップは再保存で上書きしない"
+dotnet test Lumin4ti.slnx --filter "FullyQualifiedName~UwpBackgroundToggleTests"
 # 実行 (通常起動は UAC 昇格が入る):
 ./src/Lumin4ti.UI/bin/Debug/net10.0-windows10.0.20348.0/Lumin4ti.UI.exe
 ```
@@ -35,7 +35,7 @@ dotnet test Lumin4ti.slnx --filter "Name=既存の現行バックアップは再
 すべての「機能」は `IMaintenanceItem` を軸にした 3 型 ([IMaintenanceAction.cs](src/Lumin4ti.Core/Interfaces/IMaintenanceAction.cs)):
 
 - **`IMaintenanceAction`** — 「実行」ボタン型 (1 回実行)。`ExecuteAsync(IProgress<string>?, ct)` でライブ進捗を UI へ流せる。
-- **`IMaintenanceToggle`** — ON/OFF トグル型。**ON = 最適化を適用 / OFF = 適用前の状態へ復元** を基本とし、復元情報がない場合の既定値への復帰は各項目の契約に従う。MMAgent 系は ON = 機能有効。`GetStateAsync`/`SetStateAsync`。
+- **`IMaintenanceToggle`** — ON/OFF トグル型。**ON = 最適化を適用 / OFF = 項目の解除値へ設定または明示上書きを削除**。永続バックアップと適用前の元値復元は行わない。MMAgent 系は ON = 機能有効。`GetStateAsync`/`SetStateAsync`。
 - **`IMaintenanceChoice`** — ドロップダウン選択型。ON/OFF に収まらない数値・段階設定に使う (例: `MmAgentOperationApiChoice` は「無効」と記録ファイル数を 1 つの操作で選ばせる)。`Options`/`GetSelectedValueAsync`/`SetSelectedValueAsync`。選択肢の表示名は翻訳不要なら `Label` をそのまま出し、翻訳が要るものだけ `LabelKey` を持たせる。`IsDefault` を付けた選択肢に UI が「(既定)」を添える。
 
 `IMaintenanceItem.ParentId` に前提となる項目の Id を入れると、その項目は**親カードの中へ 1 段だけ入れ子表示**され、親トグルが OFF または状態不明の間は操作不可になる (OS 側で連動して無効になる子設定に使う)。親の状態既知・ON/OFF の変化を子へ通知する。親は同じカテゴリに置くこと。
@@ -53,7 +53,7 @@ dotnet test Lumin4ti.slnx --filter "Name=既存の現行バックアップは再
 
 ### 破壊的操作の復元性
 
-復元可能な項目は、適用前の実値を保護ストレージへ保存して戻す。[RegistryValueBackup](src/Lumin4ti.Core/Services/Windows/Actions/RegistryValueBackup.cs) の型付き値検証、SID 分離、共有設定の所有管理、失敗補償は [DESIGN.md の状態と永続化](DESIGN.md#状態と永続化) に従う。旧 AppData・所有者不明の退避を復元元にしない。変更時は `RegistryToggleTests` と `UwpBackgroundToggleTests` の該当検証、および操作フロー検証を通す。Defender も保護バックアップを使い、不可逆操作を足すときは同様の復元手段を検討する。
+ON/OFF設定切り替えとDefenderの既定設定へのリセットは永続バックアップを使わない。既存の旧バックアップは参照・移行・削除しない。型付きの操作直前値はメモリにだけ保持し、失敗・キャンセル時の補償と再検証は [DESIGN.md の状態と永続化](DESIGN.md#状態と永続化) に従う。HKLMの変更は他利用者にも影響し、利用者別の共有所有者管理は行わない。Path・クイックアクセスの並べ替えはデータ書き換えとして保護バックアップを維持する。変更時は `RegistryToggleTests` と `UwpBackgroundToggleTests` の該当検証、および操作フロー検証を通す。
 
 ### ログの保存と移行
 

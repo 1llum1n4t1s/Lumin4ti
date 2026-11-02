@@ -397,7 +397,7 @@ public partial class CommandCategoryViewModel : ObservableObject
             ShowBusyResult(item);
             // スイッチ操作で先に変わった表示だけを直前の既知値へ戻す。
             // 実行中の別操作と外部コマンドによる状態照会を競合させない。
-            item.ApplyState(!on);
+            item.RestorePreviousToggleState();
 
             item.EndRun();
             item.IsRunning = false;

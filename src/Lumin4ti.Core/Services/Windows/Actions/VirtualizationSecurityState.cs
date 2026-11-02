@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Lumin4ti.Core.Interfaces;
 using Microsoft.Win32;
 
@@ -104,7 +103,7 @@ internal sealed record RegistryValueSnapshot
             Kind = kind,
             BinaryValue = [.. bytes],
         },
-        _ => throw new InvalidDataException($"レジストリ値 {kind} をバックアップできません。"),
+        _ => throw new InvalidDataException($"レジストリ値 {kind} を操作前の値として扱えません。"),
     };
 
     public bool IsApplied =>
@@ -186,10 +185,6 @@ internal sealed record RegistryValueSnapshot
 
 internal sealed record VirtualizationSecuritySnapshot
 {
-    public const int CurrentSchemaVersion = 1;
-
-    public int SchemaVersion { get; init; } = CurrentSchemaVersion;
-
     public required BcdValueSnapshot HypervisorLaunchType { get; init; }
 
     public required RegistryValueSnapshot DeviceGuard { get; init; }
@@ -201,8 +196,13 @@ internal sealed record VirtualizationSecuritySnapshot
     public bool IsFullyApplied =>
         HypervisorLaunchType.IsApplied && DeviceGuard.IsApplied && Hvci.IsApplied && Lsa.IsApplied;
 
-    public bool HasAnyAppliedComponent =>
-        HypervisorLaunchType.IsApplied || DeviceGuard.IsApplied || Hvci.IsApplied || Lsa.IsApplied;
+    public static VirtualizationSecuritySnapshot Default() => new()
+    {
+        HypervisorLaunchType = BcdValueSnapshot.Missing(),
+        DeviceGuard = RegistryValueSnapshot.Missing(),
+        Hvci = RegistryValueSnapshot.Missing(),
+        Lsa = RegistryValueSnapshot.Missing(),
+    };
 
     public static VirtualizationSecuritySnapshot Applied() => new()
     {
@@ -226,18 +226,6 @@ internal sealed record VirtualizationSecuritySnapshot
         _ => throw new ArgumentOutOfRangeException(nameof(component), component, null),
     };
 
-    public void Validate()
-    {
-        if (SchemaVersion != CurrentSchemaVersion)
-        {
-            throw new InvalidDataException($"未対応の VBS バックアップ schema です: {SchemaVersion}");
-        }
-
-        HypervisorLaunchType.Validate();
-        DeviceGuard.Validate();
-        Hvci.Validate();
-        Lsa.Validate();
-    }
 }
 
 internal interface IVirtualizationSecurityPlatform
@@ -338,109 +326,4 @@ internal sealed class WindowsVirtualizationSecurityPlatform(ICommandExecutor exe
         VirtualizationSecurityComponent.Lsa => (LsaKey, "LsaCfgFlags"),
         _ => throw new ArgumentOutOfRangeException(nameof(component), component, null),
     };
-}
-
-internal sealed class VirtualizationSecurityBackupStore
-{
-    private readonly ProtectedBackupStorage? _protectedStorage;
-    private readonly string? _relativePath;
-
-    public VirtualizationSecurityBackupStore(string backupPath)
-    {
-        BackupPath = backupPath;
-    }
-
-    public VirtualizationSecurityBackupStore(ProtectedBackupStorage protectedStorage, string relativePath)
-    {
-        _protectedStorage = protectedStorage;
-        _relativePath = relativePath;
-        BackupPath = protectedStorage.GetFullPath(relativePath);
-    }
-
-    public string BackupPath { get; }
-
-    public VirtualizationSecuritySnapshot? Load()
-    {
-        if (!Exists())
-        {
-            return null;
-        }
-
-        try
-        {
-            var json = _protectedStorage is null
-                ? File.ReadAllText(BackupPath)
-                : _protectedStorage.ReadAllText(_relativePath!);
-            var backup = Lumin4tiJson.Deserialize<VirtualizationSecuritySnapshot>(json)
-                ?? throw new InvalidDataException("VBS バックアップが空です。");
-            backup.Validate();
-            return backup;
-        }
-        catch (JsonException ex)
-        {
-            throw new InvalidDataException("VBS バックアップを解析できません。", ex);
-        }
-    }
-
-    public void SaveNew(VirtualizationSecuritySnapshot snapshot)
-    {
-        snapshot.Validate();
-        if (Exists())
-        {
-            throw new IOException("VBS バックアップは既に存在します。");
-        }
-
-        if (_protectedStorage is not null)
-        {
-            _protectedStorage.WriteNewAtomically(
-                _relativePath!,
-                stream => Lumin4tiJson.Serialize(stream, snapshot));
-            return;
-        }
-
-        var directory = Path.GetDirectoryName(BackupPath)
-            ?? throw new InvalidOperationException("VBS バックアップ先ディレクトリを特定できません。");
-        Directory.CreateDirectory(directory);
-        var tempPath = Path.Combine(directory, $".{Path.GetFileName(BackupPath)}.{Guid.NewGuid():N}.tmp");
-        try
-        {
-            using (var stream = new FileStream(
-                       tempPath,
-                       FileMode.CreateNew,
-                       FileAccess.Write,
-                       FileShare.None,
-                       bufferSize: 4096,
-                       FileOptions.WriteThrough))
-            {
-                Lumin4tiJson.Serialize(stream, snapshot);
-                stream.Flush(flushToDisk: true);
-            }
-
-            // 同一ディレクトリ内の rename で、読者から途中までの JSON が見えないようにする。
-            File.Move(tempPath, BackupPath);
-        }
-        finally
-        {
-            if (File.Exists(tempPath))
-            {
-                File.Delete(tempPath);
-            }
-        }
-    }
-
-    public void Delete()
-    {
-        if (_protectedStorage is null)
-        {
-            File.Delete(BackupPath);
-        }
-        else
-        {
-            _protectedStorage.Delete(_relativePath!);
-        }
-    }
-
-    private bool Exists() => _protectedStorage is null
-        ? File.Exists(BackupPath)
-        : _protectedStorage.FileExists(_relativePath!);
 }

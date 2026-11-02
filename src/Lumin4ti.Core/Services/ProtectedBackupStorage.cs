@@ -6,8 +6,8 @@ using System.Security.Principal;
 namespace Lumin4ti.Core.Services;
 
 /// <summary>
-/// HKLM / BCD へ復元するバックアップを、Administrators と SYSTEM だけが変更できる
-/// ProgramData 配下へ保存する。危険な既存要素は隔離して作り直すが、その操作回は fail closed にする。
+/// Path の保護バックアップ、タスク登録用 XML、移行保留情報を、Administrators と SYSTEM だけが
+/// 変更できる ProgramData 配下へ保存する。危険な既存要素は隔離して作り直すが、その操作回は fail closed にする。
 /// </summary>
 [SupportedOSPlatform("windows")]
 internal sealed class ProtectedBackupStorage
@@ -96,21 +96,10 @@ internal sealed class ProtectedBackupStorage
             throw new IOException("保護バックアップは既に存在します。");
         }
 
-        WriteAtomicallyCore(relativePath, write, overwrite: false);
+        WriteAtomicallyCore(relativePath, write);
     }
 
-    /// <summary>
-    /// ACL と再解析ポイントを検証した保護領域で、既存ファイルを置き換えて原子的に保存する。
-    /// 状態 journal のように同じ正本を更新し続ける用途に使う。
-    /// </summary>
-    public void WriteAtomically(string relativePath, Action<Stream> write)
-    {
-        ArgumentNullException.ThrowIfNull(write);
-        _ = FileExists(relativePath); // 既存エントリがある場合は ACL と種別を検証する。
-        WriteAtomicallyCore(relativePath, write, overwrite: true);
-    }
-
-    private void WriteAtomicallyCore(string relativePath, Action<Stream> write, bool overwrite)
+    private void WriteAtomicallyCore(string relativePath, Action<Stream> write)
     {
         var fullPath = PrepareFilePath(relativePath);
 
@@ -132,7 +121,7 @@ internal sealed class ProtectedBackupStorage
                 stream.Flush(flushToDisk: true);
             }
 
-            File.Move(tempPath, fullPath, overwrite);
+            File.Move(tempPath, fullPath, overwrite: false);
             ValidateFileOrRepairAndThrow(fullPath);
         }
         finally

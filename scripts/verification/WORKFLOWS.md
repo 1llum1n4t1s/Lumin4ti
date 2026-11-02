@@ -1,53 +1,46 @@
 # レビュー修正の安全な操作フロー検証
 
-これは実 GUI E2E ではなく、実 ViewModel / Core 操作と OS 境界 mock を組み合わせた操作フロー検証です。実レジストリ、SCM、プロセス実行、通信、インストール、利用者データの削除は行いません。診断はメモリ内loggerだけで検査します。新しい unit test や package は追加しません。
+これは実 GUI E2E ではなく、実 ViewModel / Core 操作と OS 境界 fake を組み合わせた操作フロー検証です。実レジストリ、SCM、外部プロセス、通信、インストール、利用者データの削除は行いません。診断はメモリ内 logger で検査します。新しい package や temporary directory は追加しません。
 
-## 実装前に列挙した失敗ケースと期待結果
+## 現在の契約と確認する失敗条件
+
+ON/OFF 型の Registry / UWP / VBS は変更前の値を永続保存せず、OFF は明示設定の解除または項目指定の既定値へ変更します。失敗・取消時にその操作だけを補償するため、操作直前の実値をメモリ内へ保持します。PATH 整理と QuickAccess のデータバックアップは、この撤去対象に含めません。
 
 | フロー | 起こり得る失敗 | 確認する結果 |
 | --- | --- | --- |
-| 起動 | 古い assembly、異なる runtime、mock 境界の漏れ | 読み込んだ assembly の絶対パスと SHA256、runtime、OS を成果物へ記録。mock のみを明示的に構築 |
-| 共有レジストリ | 二人目が適用値を原本として保存、一人目の OFF が他者の ON を解除 | ON/ON/OFF/OFF で HKLM 原本を共有し最後の利用者で復元、HKCU は SID 別に復元 |
-| 復元失敗 | 一部復元失敗で原本消失、retry が誤った値へ戻す | 注入した書込み失敗を結果へ出し、retry で元値へ復元 |
-| 共有原本置換後失敗 | owners 更新後の例外でレジストリだけ ON へ戻り、別利用者 OFF がまだ適用中の共有値を復元 | 全値の復元後は ON へ補償しない。更新済み定義を照合できれば完了、未確定なら原本を保持して Failed、OFF retry で所有解除を完了。単独／二所有者で注入 |
-| 共有復元済みの回復 | user 原本削除失敗や初回準備失敗で ON が永久に拒否 | 共有値が原値と一致なら別 SID ON 可・既存 user 原本保持、準備時保存失敗の ON retry 可 |
-| 外部変更後の新準備失敗 | 前 cycle owner0 原本7、外部値9、新user原本保存成功後 shared 置換前に失敗し、残user原本が retry を永久拒否 | shared 不変を確認できた場合だけ今回新規 user 原本を取消。値9/UI OFFを保持し、retry ON/OFFで最新元値9を復元 |
-| user 原本保存後検証失敗 | 新user原本の rename は成功し validation が throw、共有更新へ到達せず retry が永久拒否 | shared 不変を確認できた場合は保存済み新user原本も取消し、retry ON/OFFで最新元値9を復元 |
-| UWP | 別 SID の原本を使用、旧無スコープ原本を誤復元 | SID の journal 分離と不一致拒否 |
-| 終了 | キャンセル後に旧 lease が終わると新操作を受付、finally を待たず終了 | 終了 gate を保持し、idle は finally/lease 解放まで未完了 |
-| cleanup | キャンセルがサービス復旧失敗を隠す、実ファイルに触れる | 非作動の相対 canary 対象を使い、engine 到達前のキャンセルと復旧失敗したサービス名を失敗結果へ残す |
-| NTP | 停止失敗後の再開漏れ、未停止で設定変更 | mock start を必ず補償し設定を書かない |
-| サービス | net /y が依存サービスを連鎖停止、SCM 状態不明で削除続行 | plain stop（連鎖承認なし）と要求後 SCM 照合、初期不明/遷移中/依存あり/依存照会不能は停止要求なし |
-| MMAgent | snapshot が外部変更を隠す | mock 外部状態変更後 ResetSnapshot と reload で VM 状態更新 |
-| MMAgent 並行照会 | 未完了照会中の reset 連打で OS query が多重起動 | 未完了の三 caller は一 query に集約し、完了後 reset は二回目の fresh query |
-| 親子 UI | 親不明でも子操作可、親回復後子が無効のまま | 親 null → 子 disabled → 親 true → enabled |
-| 状態と結果 | 状態不明が実行結果を上書き、回復しても error 残留 | StateErrorText と ResultText が共存し既知状態で error のみ消える |
-| デバイス列挙 | 例外を空一覧成功と表示、retry できない | 失敗時 IsEmpty=false、retry 空成功時 true、削除呼出し禁止 |
-| パーサ | canary 入力を shell に渡す、解決不能コマンドを欠損と断定 | RERE_CANARY を純粋パーサにだけ渡し安全に拒否 |
-| 診断 | 失敗 tool の stdout を捨てる | mock 失敗の終了コード/出力が診断に残り、秘密値を伏せる（OEM 復号は `ProcessCommandExecutorDecodeTests` で検証） |
-| 項目の状態読込ログ | null・例外・timeout が ID だけ／理由なしで記録される | 実 VM の状態照会へ fake toggle/choice を渡し、診断付き null・理由なし null・IOException・30ms timeout の項目名/ID/原因を確認。token は伏字、既知 OFF は失敗ログなし |
-| 項目の設定・実行ログ | Failed/Partial の Detail 消失、Busy の理由欠落、自動実行で失敗を Info のみに記録 | 実 category/card VM の toggle/choice/action 操作を fake で通し、各 Failed/Partial と Busy の項目名/ID/原因、秘密値の伏字、拒否時の未実行を確認。自動実行も fake の失敗・部分成功・例外を記録し、最後の成功項目まで続行 |
-| MSI 取得 | headers 到着で timeout が解除され body が無期限に待つ、利用者 cancel を timeout と誤判定 | mock HTTP body で timeout / OCE / 正常 copy を区別、外部通信なし |
-| 自動実行の選択解除 | 設定に大文字小文字違いの重複 ID があり、OFF 後もサインイン時に実行 | 実 checklist 操作→保存→選択を通し、全重複を解除。無関係な ID と順序、繰返し OFF/ON の冪等性を保持。削除対象の解決や task 実行は禁止 |
-| 更新スキップ解除 | 保存先の障害が生成 command へ未処理例外として伝播 | 正常保存と IOException 注入の両方で実 command を完了、画面・設定の tag を解除、空 tag の再実行は保存不要 |
-| 移行保留 JSON | 型情報の統一で旧原本を読めない、null・日本語パス・プロパティ順・UTF-8 書式が変化 | 旧 serializer と生成 metadata のテキスト／UTF-8 同一性と旧 JSON の読込を確認。保護ストレージ・レジストリ・移行は起動しない |
-| 静的補助 | locale キー欠落、更新 getter の通知漏れ、AutomationProperties.Name 欠落 | 17 locale XML と XAML/実装の対応を補助検査として記録 |
-| runner | case の一件失敗や cancellation 伝播の回帰で成果物を失う | 各 case に独立した15秒の待機上限を設定し、全件を JSON へ出力、失敗時 exit 1。上限は元 task を停止しないため、実 OS 操作を含む runner へ転用しない |
+| 起動 | 古い assembly、異なる runtime、fake 境界の漏れ | 読み込んだ assembly の絶対パスと SHA256、runtime、OS を成果物へ記録。fake のみを明示的に構築 |
+| 共有レジストリ | 旧所有者管理によって OFF が共有 HKLM の解除を拒む、別ユーザー HKCU まで変更する | 二ユーザー ON/ON/A-OFF で HKLM と A-HKCU を解除、B-HKCU は維持。B の状態読込は OFF、B-OFF で自身の HKCU を解除。繰返し OFF は冪等 |
+| レジストリ再適用 | 外部変更後の失敗を歴史的な原値へ戻す | ON→外部値5→再 ON 失敗で操作直前の5へ補償、OFF は保存値9へ戻さず値を削除 |
+| レジストリ失敗・取消 | 部分適用やキャンセル後に変更を残す、補償失敗を隠す | 混合 HKLM/HKCU の途中失敗と取消をメモリ補償。補償不能は Failed。OFF の値削除と明示既定0の両方を確認 |
+| UWP 既定化 | 前回適用情報がないと OFF できない、新規・外部変更された対象を残す | ON は全対象の両値1、別インスタンスの OFF は現在の全対象を null/null へ。追加アプリと操作前の外部変更も今回の明示 OFF で既定化 |
+| UWP 部分失敗 | ペア途中書込失敗で不整合、補償不能が成功扱い、外部変更を補償で上書き | ON/OFF の途中失敗は操作直前へ補償、補償失敗は Failed。新規 OFF は部分状態を解除でき、失敗途中の外部変更は保持 |
+| VBS | OFF で過去の独自構成を復元、途中の失敗で BCD/レジストリが混在 | fake platform で ON→別インスタンス OFF を通し BCD と3値の明示設定を解除。途中失敗は操作直前の独自構成へメモリ補償 |
+| 旧バックアップの境界 | 撤去した toggle が古い保存ファイルを読む・移行・削除する | Registry/UWP/VBS 実装の永続型・保護ストレージ・ファイル API 非参照を静的補助検査。旧データの実ファイルは作成・操作しない |
+| 終了 | キャンセル後に新操作を受付、finally より先に idle | 終了 gate を保持し、idle は finally/lease 解放まで未完了 |
+| NTP | 停止失敗後の再開漏れ、未停止で設定変更 | mock stop 失敗時に設定を書かず、補償 start を呼ぶ |
+| サービス・cleanup | 依存サービスの確認失敗を無視、取消が再開失敗を隠す | SCM の状態遷移と拒否を確認し、非作動の相対 canary で engine 到達前取消、再開失敗のサービス名を結果へ残す |
+| MMAgent | 外部変化を再読込しない、照会重複、不正出力の診断消失 | キャッシュ reset と進行中照会の集約、失敗/空/不正 JSON/数値、秘密値の伏字と retry を確認 |
+| 状態と結果 | 不明診断が操作結果を上書き、回復後も error 残留 | 親子 VM の操作可否、StateErrorText と ResultText の分離、既知状態で診断だけを消す |
+| デバイス列挙 | 例外を空一覧成功と表示、retry 不可 | 失敗時 IsEmpty=false、retry 空成功時 true。fake の削除呼出しは禁止 |
+| パーサ | canary を shell へ渡す、解決不能コマンドを欠損と断定 | 引用符なし空白パス・`.exe` ディレクトリ・環境変数を純粋 parser で検査し、曖昧な入力を欠損確定へ渡さない |
+| コマンド診断 | 失敗 tool の stdout を捨てる | mock 終了コード/出力を保持し秘密値を伏せる。OEM 復号は ProcessCommandExecutorDecodeTests の責務 |
+| 項目の状態読込ログ | null・例外・timeout が項目名や理由なし | 実 VM の状態照会へ fake toggle/choice を渡し診断付き/理由なし null、IOException、30ms timeout を確認。名前/ID/原因、token 伏字、既知 OFF の失敗ログなし |
+| 項目の操作ログ | Failed/Partial の Detail 消失、Busy 理由欠落、自動実行の失敗消失 | 実 category/card VM の toggle/choice/action で Failed/Partial/Busy を確認。名前/ID/原因と伏字、拒否時未実行、自動実行の後続続行 |
+| 直接 OFF | 既知 OFF の個別設定を解除するため ON が先に必要になる | fake 既知 false の SetOffCommand を直接実行し、既存 category の設定経路へ false を一度渡す |
+| MSI 取得 | headers 後 body が無期限に待つ、cancel と timeout を混同 | mock HTTP body の timeout / OCE / 正常 copy を区別。外部通信なし |
+| 自動実行の選択解除 | 大文字小文字違いの重複 ID が OFF 後も残る | 実 checklist 操作→メモリ保存→選択で全重複解除。無関係 ID/順序/冪等性を保持し、task 実行と削除対象解決はしない |
+| 更新スキップ解除 | 保存例外が生成 command へ伝播 | 正常と IOException の両方で実 command を完了、画面と tag を解除。空 tag の再実行は保存不要 |
+| 移行保留 JSON | 旧原本を読めない、null・日本語・順序・UTF-8 変化 | 移行用 JSON の旧 serializer と生成 metadata の等価性を確認。製品移行・ストレージ書込みは呼ばない |
+| ローカライズ | 状態診断や更新 getter、操作名の言語が古い | 実 App.SetLocale と VersionVM を17言語で切替。Recall の fake 診断、generic/explicit error、同じ singleton getter と設定保存数を確認 |
+| 静的補助 | locale key/Automation 名欠落 | 17 locale XML と親子 Run/Cancel/SetOff ボタンの名前を補助検査。実 GUI accessibility 検証とは区別 |
+| runner | 一件失敗や取消回帰で成果物を失う | case ごとに15秒上限、全件を JSON へ出力し失敗時 exit1。上限は元 task を停止しないので実 OS 操作へ転用しない |
 
-## gogo 追加指摘の実装前の失敗条件
-
-- 再 ON: 初回原値9→ON→外部値5→再 ON が途中失敗すると、9へ巻き戻して原本も失う。操作直前の5へ補償し、OFF用の9を保持する。初回失敗、補償失敗、混合HKLM/HKCUの新所有者取消、準備後キャンセルも確認する。
-- UWP: 2値の片方だけの適用・復元・補償失敗、再起動後の混合状態、明確な外部変更、未設定原値。判断不能な原本を消さず、即時例外は確認可能な操作直前状態へ補償する。
-- 起動コマンド: 引用符なしの空白入りパス、`.exe`で終わるディレクトリ、環境変数からの空白展開、正常な引用パス/空白なしパスと引数。曖昧な入力を欠損確定へ渡さない。
-- MMAgent: 失敗終了、空出力、不正JSON、非object JSON、不正数値、同時照会。原因を共有照会境界で一度記録し、秘密値を診断へ出さず、状態不明と再試行を保つ。
-- UI: toggle/choiceの汎用不明診断が言語変更で古いまま、具体的例外の誤置換、既知状態回復で結果まで消す、親子の実行/取消の同名、言語変更通知漏れ。
-- 項目固有診断: 所有者不明のUWP復元データの理由を実VMへ渡し、17言語の変更に追従する。既知状態へ回復したら診断だけを消し、前回の操作結果を保持する。
-- 項目ログ: 読込の null/例外/timeout、toggle/choice/action の Failed/Partial、Busy と自動実行で項目名と原因を失わない。検証専用 token を理由へ混ぜ、全ての関連ログで秘密値が伏字になることを確認する。VM の選択反映だけ Dispatcher を処理し、実 GUI・OS 操作は起動しない。
+旧契約専用だった共有原本の所有者追跡、journal の保存・削除・SID 隔離、再起動後の原値復元、保存原本 JSON の互換性ケースは廃止しました。保存機構を撤去したため、それらの成功を新しい完了条件にせず、共有解除・既定化・操作中のメモリ補償へ統合しています。ケース数を維持するための追加は行いません。
 
 ## 再現
 
 `pwsh -NoProfile -File scripts/verify-review-fixes.ps1`
 
-成果物は `local-release/review-fixes-verification.json`。これは保持する指定成果物です。新しい package、製品 version、配信設定は変更しません。temporary directory は作りません。logger はメモリ内providerだけを登録し、ファイル出力を停止します。
+成果物は `local-release/review-fixes-verification.json`。これは保持する指定成果物です。製品 version と配信設定は変更しません。logger はメモリ内 provider のみで、ファイル出力を停止します。
 
-watchdog の異常系は `dotnet run --project scripts/verification/Lumin4ti.Verification.csproj --no-build -- C:\Users\IMT\dev\Lumin4ti C:\Users\IMT\dev\Lumin4ti\local-release\verification-watchdog.json --simulate-missing-download-cancellation` で再現します。mock body だけが cancellation を無視し、15秒後に取得ケースの失敗、残りケースの継続、JSON 出力、exit 1 を確認します。製品 timeout は変更しません。
+watchdog の異常系は `dotnet run --project scripts/verification/Lumin4ti.Verification.csproj --no-build -- D:\Dev\Lumin4ti D:\Dev\Lumin4ti\local-release\verification-watchdog.json --simulate-missing-download-cancellation` で再現します。mock body だけが cancellation を無視し、15秒後に取得ケースの失敗、後続ケース継続、JSON 出力、exit1 を確認します。製品 timeout は変更しません。

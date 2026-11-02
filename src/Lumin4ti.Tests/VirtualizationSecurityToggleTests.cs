@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Lumin4ti.Core.Services.Windows.Actions;
 using Microsoft.Win32;
 
@@ -7,166 +6,206 @@ namespace Lumin4ti.Tests;
 [TestClass]
 public sealed class VirtualizationSecurityToggleTests
 {
-    private string _tempDirectory = null!;
-    private string _backupPath = null!;
-
-    [TestInitialize]
-    public void Initialize()
-    {
-        _tempDirectory = Path.Combine(Path.GetTempPath(), $"Lumin4ti.Tests.{Guid.NewGuid():N}");
-        Directory.CreateDirectory(_tempDirectory);
-        _backupPath = Path.Combine(_tempDirectory, "vbs-hvci.json");
-    }
-
-    [TestCleanup]
-    public void Cleanup()
-    {
-        if (Directory.Exists(_tempDirectory))
-        {
-            Directory.Delete(_tempDirectory, recursive: true);
-        }
-    }
-
     [TestMethod]
-    public async Task ON前の存在型値を保存してOFFで正確に復元する()
+    public async Task ONは全項目を無効化しOFFは明示設定を解除する()
     {
-        var original = new VirtualizationSecuritySnapshot
-        {
-            HypervisorLaunchType = BcdValueSnapshot.Present("Auto"),
-            DeviceGuard = RegistryValueSnapshot.Dword(1),
-            Hvci = RegistryValueSnapshot.FromRegistry(RegistryValueKind.String, "legacy"),
-            Lsa = RegistryValueSnapshot.FromRegistry(RegistryValueKind.QWord, 2L),
-        };
-        var platform = new FakePlatform(original);
-        var toggle = CreateToggle(platform);
+        var platform = new FakePlatform(CustomState());
+        var toggle = new VirtualizationSecurityToggle(platform);
 
         var applied = await toggle.SetStateAsync(true);
 
         Assert.IsTrue(applied.Success, applied.Detail);
         Assert.IsTrue(platform.State.IsFullyApplied);
-        Assert.IsTrue(File.Exists(_backupPath));
-        using (var document = JsonDocument.Parse(File.ReadAllText(_backupPath)))
+        Assert.AreEqual(true, await toggle.GetStateAsync());
+
+        var reset = await toggle.SetStateAsync(false);
+
+        Assert.IsTrue(reset.Success, reset.Detail);
+        Assert.IsTrue(platform.State.EquivalentTo(VirtualizationSecuritySnapshot.Default()));
+        Assert.AreEqual(false, await toggle.GetStateAsync());
+    }
+
+    [TestMethod]
+    public async Task OFFは初回でも独自構成の明示設定を解除する()
+    {
+        var platform = new FakePlatform(CustomState());
+        var toggle = new VirtualizationSecurityToggle(platform);
+
+        var reset = await toggle.SetStateAsync(false);
+
+        Assert.IsTrue(reset.Success, reset.Detail);
+        Assert.IsTrue(platform.State.EquivalentTo(VirtualizationSecuritySnapshot.Default()));
+        StringAssert.Contains(reset.Detail!, "Windows の既定値とポリシー");
+    }
+
+    [TestMethod]
+    public async Task 状態判定は全適用だけONで混在構成はOFFとする()
+    {
+        var platform = new FakePlatform(VirtualizationSecuritySnapshot.Applied());
+        var toggle = new VirtualizationSecurityToggle(platform);
+
+        Assert.AreEqual(true, await toggle.GetStateAsync());
+        foreach (var component in Enum.GetValues<VirtualizationSecurityComponent>())
         {
-            var root = document.RootElement;
-            Assert.AreEqual(VirtualizationSecuritySnapshot.CurrentSchemaVersion, root.GetProperty("SchemaVersion").GetInt32());
-            Assert.IsTrue(root.GetProperty("HypervisorLaunchType").GetProperty("Exists").GetBoolean());
-            Assert.AreEqual("Auto", root.GetProperty("HypervisorLaunchType").GetProperty("Value").GetString());
-            Assert.AreEqual(
-                (int)RegistryValueKind.String,
-                root.GetProperty("Hvci").GetProperty("Kind").GetInt32());
-            Assert.AreEqual("legacy", root.GetProperty("Hvci").GetProperty("StringValue").GetString());
+            platform.State = component switch
+            {
+                VirtualizationSecurityComponent.HypervisorLaunchType =>
+                    VirtualizationSecuritySnapshot.Applied() with { HypervisorLaunchType = BcdValueSnapshot.Missing() },
+                VirtualizationSecurityComponent.DeviceGuard =>
+                    VirtualizationSecuritySnapshot.Applied() with { DeviceGuard = RegistryValueSnapshot.Dword(1) },
+                VirtualizationSecurityComponent.Hvci =>
+                    VirtualizationSecuritySnapshot.Applied() with { Hvci = RegistryValueSnapshot.Dword(1) },
+                _ => VirtualizationSecuritySnapshot.Applied() with { Lsa = RegistryValueSnapshot.Dword(1) },
+            };
+            Assert.AreEqual(false, await toggle.GetStateAsync(), component.ToString());
+            Assert.IsNull(toggle.StateDiagnostic);
         }
-
-        var restored = await toggle.SetStateAsync(false);
-
-        Assert.IsTrue(restored.Success, restored.Detail);
-        Assert.IsTrue(platform.State.EquivalentTo(original));
-        Assert.IsFalse(File.Exists(_backupPath));
-        Assert.AreEqual(0, Directory.GetFiles(_tempDirectory, "*.tmp").Length);
     }
 
     [TestMethod]
-    public async Task 状態判定はBCDと3レジストリ値の全てを照合する()
+    public async Task 状態読込例外は原因を残して不明とし回復後に解除する()
     {
-        var platform = new FakePlatform(NotAppliedState());
-        var toggle = CreateToggle(platform);
+        var platform = new FakePlatform(VirtualizationSecuritySnapshot.Default()) { ReadFailure = true };
+        var toggle = new VirtualizationSecurityToggle(platform);
 
-        Assert.AreEqual(false, await toggle.GetStateAsync());
-
-        platform.State = VirtualizationSecuritySnapshot.Applied();
-        Assert.AreEqual(true, await toggle.GetStateAsync());
-
-        new VirtualizationSecurityBackupStore(_backupPath).SaveNew(NotAppliedState());
-
-        platform.State = VirtualizationSecuritySnapshot.Applied() with
-        {
-            Lsa = RegistryValueSnapshot.Dword(1),
-        };
         Assert.IsNull(await toggle.GetStateAsync());
-        Assert.AreEqual("Toggle.VbsPartialState", toggle.StateDiagnostic?.Key);
-        platform.State = NotAppliedState();
+        StringAssert.Contains(toggle.StateFailureReason!, "読込失敗注入");
+
+        platform.ReadFailure = false;
         Assert.AreEqual(false, await toggle.GetStateAsync());
-        Assert.IsNull(toggle.StateDiagnostic);
+        Assert.IsNull(toggle.StateFailureReason);
     }
 
     [TestMethod]
-    public async Task 初回の混在構成は適用できOFFでBCDの未設定も含めて元に戻す()
+    public async Task ON途中で書込後に失敗しても存在型値を開始前へ補償する()
     {
-        var original = VirtualizationSecuritySnapshot.Applied() with
-        {
-            HypervisorLaunchType = BcdValueSnapshot.Missing(),
-        };
+        var original = CustomState();
         var platform = new FakePlatform(original);
-        var toggle = CreateToggle(platform);
-
-        Assert.AreEqual(false, await toggle.GetStateAsync());
-        Assert.IsNull(toggle.StateDiagnostic);
-        Assert.IsFalse(File.Exists(_backupPath), "状態照会だけで退避を作成しない");
-
-        var applied = await toggle.SetStateAsync(true);
-        Assert.IsTrue(applied.Success, applied.Detail);
-        Assert.AreEqual(true, await toggle.GetStateAsync());
-        var restored = await toggle.SetStateAsync(false);
-        Assert.IsTrue(restored.Success, restored.Detail);
-        Assert.IsTrue(platform.State.EquivalentTo(original));
-        Assert.AreEqual(false, await toggle.GetStateAsync());
-        Assert.IsFalse(File.Exists(_backupPath));
-    }
-
-    [TestMethod]
-    public async Task ON途中で書込後に失敗しても全変更を元状態へ補償する()
-    {
-        var original = NotAppliedState();
-        var platform = new FakePlatform(original);
-        platform.InjectFailure(VirtualizationSecurityComponent.Hvci, afterWrite: true);
-        var toggle = CreateToggle(platform);
+        platform.InjectFailure(VirtualizationSecurityComponent.Lsa, afterWrite: true);
+        var toggle = new VirtualizationSecurityToggle(platform);
 
         var result = await toggle.SetStateAsync(true);
 
         Assert.IsFalse(result.Success);
         Assert.IsTrue(platform.State.EquivalentTo(original));
-        Assert.IsTrue(File.Exists(_backupPath));
-        StringAssert.Contains(result.Detail, "開始前の状態へ補償しました");
-        StringAssert.Contains(result.Detail, "最終状態: OFF");
+        StringAssert.Contains(result.Detail!, "開始前の状態へ補償");
         Assert.AreEqual(false, await toggle.GetStateAsync());
     }
 
     [TestMethod]
-    public async Task OFF途中で失敗した場合は適用済み状態へ補償してバックアップを保持する()
+    public async Task OFF途中で失敗した場合は開始前へ補償して再試行できる()
     {
-        var original = NotAppliedState() with
-        {
-            DeviceGuard = RegistryValueSnapshot.Dword(1),
-            Hvci = RegistryValueSnapshot.Dword(1),
-            Lsa = RegistryValueSnapshot.Dword(2),
-        };
+        var original = VirtualizationSecuritySnapshot.Applied();
         var platform = new FakePlatform(original);
-        var toggle = CreateToggle(platform);
-        Assert.IsTrue((await toggle.SetStateAsync(true)).Success);
         platform.InjectFailure(VirtualizationSecurityComponent.Hvci, afterWrite: true);
+        var toggle = new VirtualizationSecurityToggle(platform);
 
-        var failedRestore = await toggle.SetStateAsync(false);
+        var result = await toggle.SetStateAsync(false);
 
-        Assert.IsFalse(failedRestore.Success);
-        Assert.IsTrue(platform.State.EquivalentTo(VirtualizationSecuritySnapshot.Applied()));
-        Assert.IsTrue(File.Exists(_backupPath));
-        StringAssert.Contains(failedRestore.Detail, "最終状態: ON");
+        Assert.IsFalse(result.Success);
+        Assert.IsTrue(platform.State.EquivalentTo(original));
+        Assert.AreEqual(true, await toggle.GetStateAsync());
 
         var retry = await toggle.SetStateAsync(false);
         Assert.IsTrue(retry.Success, retry.Detail);
-        Assert.IsTrue(platform.State.EquivalentTo(original));
-        Assert.IsFalse(File.Exists(_backupPath));
+        Assert.IsTrue(platform.State.EquivalentTo(VirtualizationSecuritySnapshot.Default()));
     }
 
-    private VirtualizationSecurityToggle CreateToggle(FakePlatform platform) =>
-        new(platform, new VirtualizationSecurityBackupStore(_backupPath));
-
-    private static VirtualizationSecuritySnapshot NotAppliedState() => new()
+    [TestMethod]
+    public async Task OFF書込が反映されない場合は実読込照合で失敗にする()
     {
-        HypervisorLaunchType = BcdValueSnapshot.Missing(),
+        var original = VirtualizationSecuritySnapshot.Applied();
+        var platform = new FakePlatform(original) { IgnoreWrites = true };
+        var toggle = new VirtualizationSecurityToggle(platform);
+
+        var result = await toggle.SetStateAsync(false);
+
+        Assert.IsFalse(result.Success);
+        StringAssert.Contains(result.Detail!, "目標状態と一致しません");
+        Assert.IsTrue(platform.State.EquivalentTo(original));
+    }
+
+    [TestMethod]
+    public async Task 操作途中のキャンセルでも直前の型付き状態へ補償する()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var original = CustomState();
+        var platform = new FakePlatform(original) { AfterRegistryWrite = cancellation.Cancel };
+        var toggle = new VirtualizationSecurityToggle(platform);
+
+        var result = await toggle.SetStateAsync(true, cancellation.Token);
+
+        Assert.IsFalse(result.Success);
+        Assert.IsTrue(platform.State.EquivalentTo(original));
+        StringAssert.Contains(result.Detail!, "開始前の状態へ補償");
+    }
+
+    [TestMethod]
+    public async Task 補償書込が無視された場合は開始前との不一致を報告する()
+    {
+        var original = CustomState();
+        var platform = new FakePlatform(original);
+        platform.InjectFailure(VirtualizationSecurityComponent.Lsa, afterWrite: true);
+        platform.OnFailure = () => platform.IgnoreWrites = true;
+        var toggle = new VirtualizationSecurityToggle(platform);
+
+        var result = await toggle.SetStateAsync(true);
+
+        Assert.IsFalse(result.Success);
+        Assert.IsFalse(platform.State.EquivalentTo(original));
+        StringAssert.Contains(result.Detail!, "補償にも失敗しました");
+        StringAssert.Contains(result.Detail!, "開始前の状態と一致しません");
+        Assert.IsFalse(result.Detail!.Contains("開始前の状態へ補償しました", StringComparison.Ordinal));
+        StringAssert.Contains(result.Detail!, "最終状態: ON");
+    }
+
+    [TestMethod]
+    public async Task 補償後の読込失敗では補償成功を断定せず最終状態も不明とする()
+    {
+        var original = CustomState();
+        var platform = new FakePlatform(original);
+        platform.InjectFailure(VirtualizationSecurityComponent.Lsa, afterWrite: true);
+        platform.OnFailure = () => platform.AfterBcdWrite = () => platform.ReadFailure = true;
+        var toggle = new VirtualizationSecurityToggle(platform);
+
+        var result = await toggle.SetStateAsync(true);
+
+        Assert.IsFalse(result.Success);
+        Assert.IsTrue(platform.State.EquivalentTo(original));
+        StringAssert.Contains(result.Detail!, "補償後の実状態を確認できません");
+        StringAssert.Contains(result.Detail!, "読込失敗注入");
+        Assert.IsFalse(result.Detail!.Contains("開始前の状態へ補償しました", StringComparison.Ordinal));
+        StringAssert.Contains(result.Detail!, "最終状態: 判定不能");
+    }
+
+    [TestMethod]
+    public async Task 後続処理の失敗前に外部変更された値は補償で上書きしない()
+    {
+        var original = CustomState();
+        var platform = new FakePlatform(original);
+        platform.InjectFailure(VirtualizationSecurityComponent.Hvci, afterWrite: true);
+        platform.OnFailure = () => platform.State = platform.State with
+        {
+            DeviceGuard = RegistryValueSnapshot.Dword(7),
+        };
+        var toggle = new VirtualizationSecurityToggle(platform);
+
+        var result = await toggle.SetStateAsync(true);
+
+        Assert.IsFalse(result.Success);
+        Assert.IsTrue(platform.State.DeviceGuard.EquivalentTo(RegistryValueSnapshot.Dword(7)));
+        Assert.IsTrue(platform.State.Hvci.EquivalentTo(original.Hvci));
+        Assert.IsTrue(platform.State.HypervisorLaunchType.EquivalentTo(original.HypervisorLaunchType));
+        StringAssert.Contains(result.Detail!, "外部で変更された値を保持しました");
+        StringAssert.Contains(result.Detail!, "開始前の状態と一致しません");
+    }
+
+    private static VirtualizationSecuritySnapshot CustomState() => new()
+    {
+        HypervisorLaunchType = BcdValueSnapshot.Present("Auto"),
         DeviceGuard = RegistryValueSnapshot.Missing(),
-        Hvci = RegistryValueSnapshot.Missing(),
-        Lsa = RegistryValueSnapshot.Missing(),
+        Hvci = RegistryValueSnapshot.FromRegistry(RegistryValueKind.String, "legacy"),
+        Lsa = RegistryValueSnapshot.FromRegistry(RegistryValueKind.QWord, 2L),
     };
 
     private sealed class FakePlatform(VirtualizationSecuritySnapshot initialState) : IVirtualizationSecurityPlatform
@@ -176,6 +215,11 @@ public sealed class VirtualizationSecurityToggleTests
         private bool _failurePending;
 
         public VirtualizationSecuritySnapshot State { get; set; } = initialState;
+        public bool ReadFailure { get; set; }
+        public bool IgnoreWrites { get; set; }
+        public Action? AfterRegistryWrite { get; set; }
+        public Action? OnFailure { get; set; }
+        public Action? AfterBcdWrite { get; set; }
 
         public void InjectFailure(VirtualizationSecurityComponent component, bool afterWrite)
         {
@@ -187,6 +231,10 @@ public sealed class VirtualizationSecurityToggleTests
         public Task<BcdValueSnapshot> ReadHypervisorLaunchTypeAsync(CancellationToken ct)
         {
             ct.ThrowIfCancellationRequested();
+            if (ReadFailure)
+            {
+                throw new InvalidOperationException("読込失敗注入");
+            }
             return Task.FromResult(State.HypervisorLaunchType);
         }
 
@@ -212,9 +260,22 @@ public sealed class VirtualizationSecurityToggleTests
 
         private void MaybeFail(VirtualizationSecurityComponent component, Action write)
         {
+            if (IgnoreWrites)
+            {
+                return;
+            }
+
             if (!_failurePending || component != _failureComponent)
             {
                 write();
+                if (component != VirtualizationSecurityComponent.HypervisorLaunchType)
+                {
+                    AfterRegistryWrite?.Invoke();
+                }
+                else
+                {
+                    AfterBcdWrite?.Invoke();
+                }
                 return;
             }
 
@@ -224,6 +285,7 @@ public sealed class VirtualizationSecurityToggleTests
                 write();
             }
 
+            OnFailure?.Invoke();
             throw new InvalidOperationException($"{component} の失敗注入");
         }
     }

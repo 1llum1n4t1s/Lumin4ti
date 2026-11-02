@@ -33,6 +33,8 @@ public partial class CommandItemViewModel : ObservableObject
 
     public string CancelAutomationName => $"{Label}: {App.Text("Button.Cancel", "中断")}";
 
+    public string SetOffAutomationName => $"{Label}: {App.Text("Toggle.SetOff", "OFFにする")}";
+
     /// <summary>表示用説明 (ローカライズ済み)。</summary>
     public string Description => App.Text(Item.DescriptionKey, Item.Description);
 
@@ -44,6 +46,7 @@ public partial class CommandItemViewModel : ObservableObject
 
     /// <summary>ON/OFF トグル型か (false なら実行ボタン型)。</summary>
     public bool IsToggle => Item is IMaintenanceToggle;
+    public bool HasExplicitOff => Item is IMaintenanceToggle { SupportsExplicitOff: true };
 
     public bool IsAction => Item is IMaintenanceAction;
 
@@ -117,6 +120,11 @@ public partial class CommandItemViewModel : ObservableObject
 
     /// <summary>直近に「実状態として確認できた」選択値 (適用できなかったときの戻し先)。</summary>
     private ChoiceOptionViewModel? _lastKnownChoice;
+
+    private bool? _lastKnownToggleState;
+
+    /// <summary>受付拒否時は、スイッチ操作と直接 OFF 操作のどちらでも最後の確認済み状態へ戻す。</summary>
+    public void RestorePreviousToggleState() => ApplyState(_lastKnownToggleState);
 
     /// <summary>
     /// 適用せずに表示だけ直前の既知値へ戻す。別操作の実行中で適用を断ったときに使い、
@@ -212,6 +220,8 @@ public partial class CommandItemViewModel : ObservableObject
 
     public IAsyncRelayCommand RunCommand { get; }
 
+    public IAsyncRelayCommand SetOffCommand { get; }
+
     public IRelayCommand CancelCommand { get; }
 
     public CommandItemViewModel(
@@ -230,6 +240,7 @@ public partial class CommandItemViewModel : ObservableObject
         CheckListEntries = [];
         RefreshCheckListEntries();
         RunCommand = new AsyncRelayCommand(() => _run(this), () => !IsRunning);
+        SetOffCommand = new AsyncRelayCommand(SetOffAsync, () => HasExplicitOff && CanToggle);
         CancelCommand = new RelayCommand(Cancel, () => CanCancel);
 
         // 言語切替時にローカライズ済みプロパティを再評価する
@@ -267,6 +278,7 @@ public partial class CommandItemViewModel : ObservableObject
         OnPropertyChanged(nameof(Label));
         OnPropertyChanged(nameof(RunAutomationName));
         OnPropertyChanged(nameof(CancelAutomationName));
+        OnPropertyChanged(nameof(SetOffAutomationName));
         OnPropertyChanged(nameof(Description));
         OnPropertyChanged(nameof(CheckListCaption));
         if (_isGenericStateError)
@@ -386,6 +398,7 @@ public partial class CommandItemViewModel : ObservableObject
             }
             else
             {
+                _lastKnownToggleState = state.Value;
                 IsChecked = state.Value;
                 IsStateKnown = true;
                 StateErrorText = string.Empty;
@@ -415,6 +428,7 @@ public partial class CommandItemViewModel : ObservableObject
 
     partial void OnIsStateKnownChanged(bool value)
     {
+        SetOffCommand.NotifyCanExecuteChanged();
         foreach (var child in Children)
         {
             child.NotifyParentStateChanged();
@@ -425,7 +439,12 @@ public partial class CommandItemViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(CanChoose));
         OnPropertyChanged(nameof(CanToggle));
+        SetOffCommand.NotifyCanExecuteChanged();
     }
+
+    // 混在構成は OFF と表示されるため、チェック値を変えずに OFF の設定処理を呼べるようにする。
+    private Task SetOffAsync() =>
+        HasExplicitOff && CanToggle ? _setToggle(this, false) : Task.CompletedTask;
 
     partial void OnSelectedChoiceChanged(ChoiceOptionViewModel? value)
     {
@@ -437,7 +456,11 @@ public partial class CommandItemViewModel : ObservableObject
         _ = _setChoice(this, value.Value);
     }
 
-    partial void OnIsRunningChanged(bool value) => RunCommand.NotifyCanExecuteChanged();
+    partial void OnIsRunningChanged(bool value)
+    {
+        RunCommand.NotifyCanExecuteChanged();
+        SetOffCommand.NotifyCanExecuteChanged();
+    }
 
     partial void OnCanCancelChanged(bool value) => CancelCommand.NotifyCanExecuteChanged();
 }

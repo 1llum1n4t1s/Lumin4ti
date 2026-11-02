@@ -10,11 +10,6 @@ namespace Lumin4ti.Core.Services;
 [JsonSourceGenerationOptions(WriteIndented = true)]
 [JsonSerializable(typeof(AppSettings))]
 [JsonSerializable(typeof(EnvPathBackupDocument))]
-[JsonSerializable(typeof(RegistryValueBackupDocument))]
-// 高速生成経路は byte[] の null を空 Base64 として書くため、型付き復元値はメタデータ経路に固定する。
-[JsonSerializable(typeof(RegistryValueSnapshot), GenerationMode = JsonSourceGenerationMode.Metadata)]
-[JsonSerializable(typeof(UwpBackgroundJournal))]
-[JsonSerializable(typeof(VirtualizationSecuritySnapshot))]
 [JsonSerializable(typeof(QuickAccessScriptResult))]
 [JsonSerializable(typeof(WindowsPerMachineMigration.PendingMigration))]
 internal sealed partial class Lumin4tiJsonContext : JsonSerializerContext;

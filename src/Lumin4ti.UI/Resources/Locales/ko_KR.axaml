@@ -59,9 +59,9 @@
   <x:String x:Key="Text.Category.Repair" xml:space="preserve">복구</x:String>
   <x:String x:Key="Text.Category.Repair.Caption" xml:space="preserve">손상된 등록 상태와 표시 오류를 다시 등록하거나 재구성해 복구합니다.</x:String>
   <x:String x:Key="Text.Category.Performance" xml:space="preserve">성능</x:String>
-  <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">메모리, 프로세스, 렌더링을 최적화합니다. 스위치는 일반적으로 ON = 최적화 적용, OFF = Windows 기본값으로 되돌림입니다(MMAgent 항목만 ON = 해당 기능 사용이며, 권장값은 각 설명을 참조하세요).</x:String>
+  <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">메모리, 프로세스 및 렌더링을 최적화합니다. ON은 최적화를 적용하고 OFF는 항목별로 정의된 해제 값을 사용합니다. 이전 값은 저장하거나 복원하지 않습니다. MMAgent에서 ON은 기능을 활성화합니다.</x:String>
   <x:String x:Key="Text.Category.System" xml:space="preserve">시스템</x:String>
-  <x:String x:Key="Text.Category.System.Caption" xml:space="preserve">전원, 입력, 시간 등 Windows 설정을 조정합니다. 스위치는 ON = 적용, OFF = Windows 기본값으로 되돌림입니다.</x:String>
+  <x:String x:Key="Text.Category.System.Caption" xml:space="preserve">전원, 입력, 시간 등 Windows 설정을 조정합니다. ON은 최적화를 적용하고 OFF는 항목별로 정의된 해제 값을 사용합니다. 이전 값은 저장하거나 복원하지 않습니다.</x:String>
   <x:String x:Key="Text.Category.Organize" xml:space="preserve">정돈</x:String>
   <x:String x:Key="Text.Category.Organize.Caption" xml:space="preserve">고정 항목, 환경 변수 등을 깔끔한 순서로 정렬합니다.</x:String>
 
@@ -83,10 +83,8 @@
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer 다시 시작됨</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Explorer 다시 시작 실패(수동으로 다시 시작하세요)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">상태를 읽을 수 없습니다(관리자 권한이 없거나 이 PC에서 해당 기능을 사용할 수 없습니다. 디버그 실행은 권한 상승되지 않으므로 일반 실행으로 시도하세요).</x:String>
-  <x:String x:Key="Text.Toggle.VbsPartialState" xml:space="preserve">VBS / HVCI 설정이 일부만 적용되어 있으며 저장된 원래 상태와도 일치하지 않습니다. 안전을 위해 작업을 중지했습니다.</x:String>
-  <x:String x:Key="Text.Toggle.UwpBackupInvalid" xml:space="preserve">복원 데이터의 형식 또는 소유자를 확인할 수 없습니다. 이전 백업은 자동으로 마이그레이션하지 않고 보존하며, 잘못된 복원을 방지하기 위해 작업을 중지했습니다.</x:String>
-  <x:String x:Key="Text.Toggle.UwpPartialState" xml:space="preserve">일부 백그라운드 설정이 저장된 상태와 일치하지 않습니다. 중단된 업데이트와 외부 변경을 구분할 수 없어 복원 데이터를 보존하고 작업을 중지했습니다.</x:String>
   <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">DISM으로 Recall 상태를 가져올 수 없습니다. 이 PC에서 기능을 지원하지 않거나 관리자 권한이 부족할 수 있습니다. 자세한 내용은 로그를 확인하세요.</x:String>
+  <x:String x:Key="Text.Toggle.SetOff" xml:space="preserve">OFF로 전환</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">DISM 출력에 Recall 상태가 없습니다. 자세한 내용은 로그를 확인하세요.</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">DISM이 반환한 Recall 상태를 해석할 수 없습니다. 자세한 내용은 로그를 확인하세요.</x:String>
   <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">다른 Windows 사용자가 등록한 작업이므로 변경할 수 없습니다.</x:String>
@@ -98,7 +96,7 @@
   <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Defender 정의 파일 다시 가져오기</x:String>
   <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Windows Defender의 바이러스 정의와 동적 서명을 한 번 삭제한 후 최신 버전을 다시 다운로드합니다. 오탐이나 업데이트 오류를 일으키는 정의 손상을 위한 표준 새로 고침이며, 실행 중에도 실시간 보호는 계속 작동합니다.</x:String>
   <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">Defender 설정 초기화(제외 항목 및 주요 옵션)</x:String>
-  <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Windows Defender에 등록된 모든 제외 경로, 프로세스, 확장명을 제거하고 실시간 보호, 클라우드 보호 등 주요 옵션을 기본값으로 복원합니다. 악성 코드나 오래된 소프트웨어가 추가했을 수 있는 제외 항목(검사 사각지대)을 지웁니다. 의도적으로 추가한 제외 항목도 제거되므로 필요한 항목은 이후 다시 추가하세요.</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Windows Defender에 등록된 모든 제외 경로, 프로세스, 확장명을 제거하고 실시간 보호, 클라우드 보호 등 주요 옵션을 기본값으로 복원합니다. 악성 코드나 오래된 소프트웨어가 추가했을 수 있는 제외 항목(검사 사각지대)을 지웁니다. 의도적으로 추가한 제외 항목도 제거되므로 필요한 항목은 이후 다시 추가하세요. Defender 서비스가 완전히 비활성화된 환경에서는 실행하지 않습니다. 다른 백신을 사용하는 수동 모드에서도 Defender 서비스와 관리 cmdlet을 사용할 수 있으면 실행할 수 있습니다. 이전 설정은 저장하지 않습니다.</x:String>
   <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">Windows 보안 앱 초기화</x:String>
   <x:String x:Key="Text.Action.security-app-reset.Desc" xml:space="preserve">Windows 보안 앱이 열리지 않거나 손상되어 보이거나 항목이 누락되었을 때 초기 상태로 재설정하고 다시 등록합니다. Defender의 보호 상태나 정의 파일에는 영향을 주지 않습니다.</x:String>
 
@@ -151,11 +149,11 @@
   <x:String x:Key="Text.Action.paging-executive-reset.Label" xml:space="preserve">커널 페이징 설정을 기본값으로 초기화</x:String>
   <x:String x:Key="Text.Action.paging-executive-reset.Desc" xml:space="preserve">최적화 도구가 자주 기록하는 DisablePagingExecutive(커널 코드를 항상 RAM에 유지하는 설정)를 삭제하고 Windows 기본 페이징 동작으로 되돌립니다. 이 설정은 최신 Windows에서 이점이 거의 없고 메모리를 낭비할 수 있습니다. 설정되지 않은 PC에서는 아무 작업도 하지 않습니다.</x:String>
   <x:String x:Key="Text.Action.vbs-hvci-off.Label" xml:space="preserve">VBS / HVCI 비활성화(1~2 GB 메모리 절약)</x:String>
-  <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">가상화 기반 보안(VBS)과 하이퍼바이저 적용 코드 무결성(HVCI)을 비활성화해 항상 예약된 약 1~2 GB의 메모리를 확보합니다. 보안과의 절충이므로 Hyper-V, WSL2, Windows Sandbox, Docker Desktop, Credential Guard를 사용한다면 OFF(기본값)로 두세요.</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">가상화 기반 보안(VBS)과 하이퍼바이저 적용 코드 무결성(HVCI)을 비활성화해 항상 예약된 약 1~2 GB의 메모리를 확보합니다. 보안과의 절충이므로 Hyper-V, WSL2, Windows Sandbox, Docker Desktop, Credential Guard를 사용한다면 OFF(기본값)로 두세요. OFF는 BCD와 레지스트리의 명시적 설정을 삭제하고 Windows 기본값과 정책에 따릅니다. 이전 설정은 저장하거나 복원하지 않습니다.</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">SvcHost 프로세스 통합(분할 억제)</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">기본적으로 Windows는 기능별로 분할된 svchost.exe를 시작합니다(RAM이 3.5 GB를 초과하는 PC). 이 항목을 ON으로 하면 분할 임계값을 최대로 높여 그룹화 가능한 서비스를 더 적은 프로세스로 통합하여 프로세스 수와 메모리 사용량(수십에서 100 MB 이상)을 줄입니다. 보안 경계로 취급되는 서비스(DiagTrack, Dnscache 등)는 통합되지 않습니다. OFF는 임계값을 제거하고 기본 분할로 되돌립니다.</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">UWP 백그라운드 실행 일괄 끄기(200~500 MB 절약)</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">모든 Store(UWP) 앱의 백그라운드 실행을 한 번에 “항상 끄기”로 설정해, 닫은 후 백그라운드에서 계속 실행되지 않도록 합니다. 상주를 줄여 약 200~500 MB의 메모리를 절약할 수 있습니다. 알림이나 라이브 타일이 필요한 앱은 이 항목을 OFF로 하거나 설정에서 개별적으로 “항상 켜기”로 변경하세요.</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">UWP 백그라운드 실행 일괄 끄기 / Windows 기본값 (200~500MB 절약)</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">ON은 모든 스토어(UWP) 앱의 백그라운드 실행을 '항상 끔'으로 설정합니다. OFF는 대상 앱의 명시적 설정을 삭제하고 Windows 기본값을 사용합니다. 이전 앱별 설정은 저장하거나 복원하지 않습니다.</x:String>
   <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">Windows Recall 비활성화</x:String>
   <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">AI 검색을 위해 주기적으로 화면 스냅샷을 기록하는 Recall 기능을 비활성화합니다(Click-to-do, 의미 검색 등 다른 AI 기능은 유지). 기록 프로세스의 메모리/디스크 소비와 개인정보 우려를 줄입니다. Windows 11 24H2 + Copilot+ PC에서만 사용할 수 있으며, 지원되지 않는 PC에서는 상태를 읽을 수 없고 전환할 수 없습니다.</x:String>
   <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">전원 제한 비활성화</x:String>
@@ -163,7 +161,7 @@
   <x:String x:Key="Text.Action.mpo-off.Label" xml:space="preserve">MPO(Multi-Plane Overlay) 비활성화</x:String>
   <x:String x:Key="Text.Action.mpo-off.Desc" xml:space="preserve">GPU가 여러 평면을 합성하는 Multi-Plane Overlay(MPO)를 비활성화합니다(OverlayTestMode=5). 드라이버에 따라 MPO는 화면 깜박임, 순간 검은 화면, 영상 끊김을 일으킬 수 있으며, 그런 증상이 있을 때의 표준 해결 방법입니다. 증상이 없다면 OFF(기본값)로 두어도 괜찮습니다.</x:String>
   <x:String x:Key="Text.Action.audio-priority.Label" xml:space="preserve">오디오 처리 우선순위 높이기</x:String>
-  <x:String x:Key="Text.Action.audio-priority.Desc" xml:space="preserve">부하가 높을 때 오디오 끊김과 잡음을 줄이기 위해 Multimedia Class Scheduler의 재생/캡처 작업 우선순위를 최고값(6)으로 높입니다. OFF는 우선순위 설정을 제거하고 Windows 기본값으로 되돌립니다.</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Desc" xml:space="preserve">부하가 높을 때 오디오 끊김과 잡음을 줄이기 위해 Multimedia Class Scheduler의 재생/캡처 작업 우선순위를 최고값(6)으로 높입니다. OFF는 명시적으로 지정된 Priority 값을 삭제합니다. 이전 값은 저장하거나 복원하지 않습니다.</x:String>
   <x:String x:Key="Text.Action.rdp-framerate.Label" xml:space="preserve">원격 데스크톱을 60 FPS로 설정</x:String>
   <x:String x:Key="Text.Action.rdp-framerate.Desc" xml:space="preserve">원격 데스크톱 연결의 그리기 프레임 간격을 단축해(DWMFRAMEINTERVAL=15) 기본 약 30 FPS에서 약 60 FPS로 높입니다. 이 설정은 연결되는 쪽인 이 PC에 적용됩니다. 대역폭 사용량이 늘어납니다. OFF는 기본 프레임 속도로 되돌립니다.</x:String>
   <x:String x:Key="Text.Action.startup-speedup.Label" xml:space="preserve">시작 프로그램 실행 지연 제거</x:String>
@@ -183,7 +181,7 @@
   <x:String x:Key="Text.Action.folder-template-general.Label" xml:space="preserve">폴더 보기 템플릿을 일반으로 고정</x:String>
   <x:String x:Key="Text.Action.folder-template-general.Desc" xml:space="preserve">Explorer가 폴더 내용으로부터 표시 스타일(사진 / 음악 / 문서 등)을 자동 감지하는 것을 중지하고 모든 폴더를 일반 항목으로 통일합니다. 파일이 많은 폴더에서 자동 감지로 인한 느린 표시(녹색 진행 막대)를 해결합니다. OFF는 자동 감지로 되돌립니다.</x:String>
   <x:String x:Key="Text.Action.ceip-off.Label" xml:space="preserve">CEIP / 피드백 알림 비활성화</x:String>
-  <x:String x:Key="Text.Action.ceip-off.Desc" xml:space="preserve">고객 체험 개선 프로그램(CEIP, 사용 데이터를 Microsoft에 전송)과 “Windows에 대한 의견을 보내 주세요” 알림을 비활성화합니다. 전송의 백그라운드 부하와 개인정보 모두를 위한 표준 설정입니다. OFF는 정책을 제거하고 기본값으로 되돌립니다.</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Desc" xml:space="preserve">고객 체험 개선 프로그램(CEIP, 사용 데이터를 Microsoft에 전송)과 “Windows에 대한 의견을 보내 주세요” 알림을 비활성화합니다. 전송의 백그라운드 부하와 개인정보 모두를 위한 표준 설정입니다. OFF는 정책을 제거하고 기본값으로 되돌립니다. 이 HKLM 정책 변경은 이 PC의 모든 Windows 사용자에게 영향을 줍니다.</x:String>
   <x:String x:Key="Text.Action.gamedvr-reset.Label" xml:space="preserve">Game Bar / Game DVR 설정을 기본값으로 초기화</x:String>
   <x:String x:Key="Text.Action.gamedvr-reset.Desc" xml:space="preserve">과거 최적화 도구나 레지스트리 조정으로 기록된 Game Bar / Game DVR(게임 녹화) 비활성화 설정을 삭제해 Windows 기본 동작으로 되돌립니다. “Win+G가 응답하지 않음”이나 “게임을 캡처할 수 없음” 같은 증상에 효과적입니다.</x:String>
   <x:String x:Key="Text.Action.nvme-driver-revert.Label" xml:space="preserve">NVMe 네이티브 드라이버 강제 사용 해제</x:String>

@@ -483,24 +483,4 @@ public sealed class ScheduledTempCleanupTests
         Assert.AreEqual(0, exitCode);
         Assert.IsNull(executor.LastFileName);
     }
-
-    [TestMethod]
-    public void ストア型キャッシュの対象は安全ガードを通過する()
-    {
-        foreach (var target in FileCleanupGroups.StoreCacheTargets)
-        {
-            Assert.IsTrue(
-                FileCleanupEngine.TryResolve(target.RawPath, out _, out var reason),
-                $"{target.RawPath}: {reason}");
-        }
-    }
-
-    [TestMethod]
-    public void TEMP環境変数は安全ガードを通過する()
-    {
-        // ScheduledTempCleanup.Run は CleanupTarget.Contents(@"%TEMP%") を使う。
-        // 保護フォルダ (基点ディレクトリ) 判定に引っかからず、実行時に解決できることを確認する。
-        Assert.IsTrue(FileCleanupEngine.TryResolve(@"%TEMP%", out var resolved, out var reason), reason);
-        Assert.IsTrue(Path.IsPathFullyQualified(resolved), resolved);
-    }
 }

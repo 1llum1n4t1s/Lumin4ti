@@ -59,9 +59,9 @@
   <x:String x:Key="Text.Category.Repair" xml:space="preserve">修復</x:String>
   <x:String x:Key="Text.Category.Repair.Caption" xml:space="preserve">透過重新登錄或重建來修復損毀的登錄項目和顯示故障。</x:String>
   <x:String x:Key="Text.Category.Performance" xml:space="preserve">效能</x:String>
-  <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">最佳化記憶體、處理程序與繪製。開關一般為 ON = 套用最佳化，OFF = 還原為 Windows 預設（僅 MMAgent 項目為 ON = 啟用該功能；建議值請參閱各項說明）。</x:String>
+  <x:String x:Key="Text.Category.Performance.Caption" xml:space="preserve">最佳化記憶體、處理程序與繪製。ON 套用最佳化；OFF 使用各項目定義的解除值。不儲存或還原先前的值。MMAgent 的 ON 表示啟用該功能。</x:String>
   <x:String x:Key="Text.Category.System" xml:space="preserve">系統</x:String>
-  <x:String x:Key="Text.Category.System.Caption" xml:space="preserve">調整電源、輸入、時間等 Windows 設定。開關為 ON = 套用，OFF = 還原為 Windows 預設。</x:String>
+  <x:String x:Key="Text.Category.System.Caption" xml:space="preserve">調整電源、輸入、時間等 Windows 設定。 ON 套用最佳化；OFF 使用各項目定義的解除值。 不儲存或還原先前的值。</x:String>
   <x:String x:Key="Text.Category.Organize" xml:space="preserve">整理</x:String>
   <x:String x:Key="Text.Category.Organize.Caption" xml:space="preserve">將釘選項目、環境變數等整理成整齊的順序。</x:String>
 
@@ -83,10 +83,8 @@
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - 已重新啟動 Explorer</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - 重新啟動 Explorer 失敗（請手動重新啟動）</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">無法讀取狀態（沒有系統管理員權限，或此電腦不支援該功能。偵錯啟動不會提升權限，請嘗試正常啟動）。</x:String>
-  <x:String x:Key="Text.Toggle.VbsPartialState" xml:space="preserve">VBS / HVCI 設定僅部分套用，也與已儲存的原始狀態不一致。為確保安全，已停止操作。</x:String>
-  <x:String x:Key="Text.Toggle.UwpBackupInvalid" xml:space="preserve">無法驗證還原資料的格式或擁有者。舊備份已保留且不會自動移轉；為防止錯誤還原，已停止操作。</x:String>
-  <x:String x:Key="Text.Toggle.UwpPartialState" xml:space="preserve">部分背景設定與已儲存的狀態不一致。無法區分中途更新與外部變更，因此已保留還原資料並停止操作。</x:String>
   <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">無法透過 DISM 取得 Recall 狀態。此電腦可能不支援該功能，或缺少系統管理員權限。請查看記錄以了解詳情。</x:String>
+  <x:String x:Key="Text.Toggle.SetOff" xml:space="preserve">設為 OFF</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">DISM 輸出中未找到 Recall 狀態。請查看記錄以了解詳情。</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">無法解析 DISM 傳回的 Recall 狀態。請查看記錄以了解詳情。</x:String>
   <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">此工作由另一位 Windows 使用者註冊，無法修改。</x:String>
@@ -98,7 +96,7 @@
   <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">重新取得 Defender 定義檔</x:String>
   <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">先刪除一次 Windows Defender 的病毒定義與動態簽章，然後重新下載最新版本。用於修復因定義損毀導致誤判或更新錯誤的標準重新整理作業；執行期間即時保護仍持續運作。</x:String>
   <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">重設 Defender 設定（排除項目與主要選項）</x:String>
-  <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">移除 Windows Defender 中登錄的所有排除路徑、處理程序與副檔名，並將即時保護、雲端保護等主要選項還原為預設值。清除惡意程式或舊軟體可能加入的排除項目（掃描盲點）。刻意加入的排除項目也會被移除，因此之後請重新加入所需項目。</x:String>
+  <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">移除 Windows Defender 中登錄的所有排除路徑、處理程序與副檔名，並將即時保護、雲端保護等主要選項還原為預設值。清除惡意程式或舊軟體可能加入的排除項目（掃描盲點）。刻意加入的排除項目也會被移除，因此之後請重新加入所需項目。 Defender 服務完全停用時不會執行。使用其他防毒軟體的被動模式下，只要 Defender 服務和管理 cmdlet 可用，也可以執行。不儲存先前的設定。</x:String>
   <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">重設 Windows 安全性應用程式</x:String>
   <x:String x:Key="Text.Action.security-app-reset.Desc" xml:space="preserve">當 Windows 安全性應用程式無法開啟、顯示異常或缺少項目時，將其重設為初始狀態並重新註冊。不會影響 Defender 的保護狀態或定義檔。</x:String>
 
@@ -151,11 +149,11 @@
   <x:String x:Key="Text.Action.paging-executive-reset.Label" xml:space="preserve">將核心分頁設定重設為預設</x:String>
   <x:String x:Key="Text.Action.paging-executive-reset.Desc" xml:space="preserve">刪除最佳化工具常寫入的 DisablePagingExecutive（使核心程式碼始終常駐於 RAM 的設定），還原為 Windows 預設的分頁行為。此設定在現代 Windows 上益處甚微，還可能浪費記憶體。在未設定此項的電腦上不執行任何操作。</x:String>
   <x:String x:Key="Text.Action.vbs-hvci-off.Label" xml:space="preserve">停用 VBS / HVCI（節省 1–2 GB 記憶體）</x:String>
-  <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">停用以虛擬化為基礎的安全性（VBS）與 Hypervisor 強制的程式碼完整性（HVCI），釋放始終保留的約 1–2 GB 記憶體。這是與安全性的取捨；若你使用 Hyper-V、WSL2、Windows Sandbox、Docker Desktop 或 Credential Guard，請保持 OFF（預設）。</x:String>
+  <x:String x:Key="Text.Action.vbs-hvci-off.Desc" xml:space="preserve">停用以虛擬化為基礎的安全性（VBS）與 Hypervisor 強制的程式碼完整性（HVCI），釋放始終保留的約 1–2 GB 記憶體。這是與安全性的取捨；若你使用 Hyper-V、WSL2、Windows Sandbox、Docker Desktop 或 Credential Guard，請保持 OFF（預設）。 OFF 會刪除 BCD 和登錄中的明確設定，交由 Windows 預設設定和原則決定。不儲存或還原先前的設定。</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Label" xml:space="preserve">合併 SvcHost 處理程序（抑制分割）</x:String>
   <x:String x:Key="Text.Action.svchost-split-threshold.Desc" xml:space="preserve">預設情況下，Windows 會依功能分割啟動 svchost.exe（在 RAM 超過 3.5 GB 的電腦上）。將此項設為 ON 會把分割門檻提到最大，將可分組的服務合併到較少的處理程序中，藉此減少處理程序數量與記憶體使用量（數十到一百多 MB）。被視為安全性界限的服務（DiagTrack、Dnscache 等）不會被合併。OFF 會移除門檻並還原為預設分割。</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">大量關閉 UWP 背景執行（節省 200–500 MB）</x:String>
-  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">一次將所有 Store（UWP）應用程式的背景執行設為「永遠關閉」，使其在關閉後不再於背景執行。減少常駐可節省約 200–500 MB 記憶體。對於需要通知或動態磚的應用程式，請將此項設為 OFF，或在設定中逐一改為「永遠開啟」。</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">批次關閉 UWP 背景執行 / 使用 Windows 預設設定（節省 200–500 MB）</x:String>
+  <x:String x:Key="Text.Action.uwp-background-off.Desc" xml:space="preserve">ON 會將所有 Store（UWP）應用程式的背景執行設為「永遠關閉」。OFF 會刪除目標應用程式的明確設定，改用 Windows 預設設定。不儲存或還原各應用程式先前的設定。</x:String>
   <x:String x:Key="Text.Action.recall-off.Label" xml:space="preserve">停用 Windows Recall</x:String>
   <x:String x:Key="Text.Action.recall-off.Desc" xml:space="preserve">停用定期記錄螢幕快照以供 AI 搜尋的 Recall 功能（Click-to-do、語意搜尋等其他 AI 功能予以保留）。減少記錄處理程序的記憶體/磁碟消耗及隱私顧慮。僅在 Windows 11 24H2 + Copilot+ 電腦上可用；在不支援的電腦上無法讀取狀態，也無法切換。</x:String>
   <x:String x:Key="Text.Action.power-throttling-off.Label" xml:space="preserve">停用電源節流</x:String>
@@ -163,7 +161,7 @@
   <x:String x:Key="Text.Action.mpo-off.Label" xml:space="preserve">停用 MPO（Multi-Plane Overlay）</x:String>
   <x:String x:Key="Text.Action.mpo-off.Desc" xml:space="preserve">停用由 GPU 合成多個平面的 Multi-Plane Overlay（MPO）（OverlayTestMode=5）。視驅動程式而定，MPO 可能造成螢幕閃爍、瞬間黑畫面與影片頓挫；出現這些症狀時的標準修復方法。若沒有這些症狀，保持 OFF（預設）即可。</x:String>
   <x:String x:Key="Text.Action.audio-priority.Label" xml:space="preserve">提高音訊處理優先順序</x:String>
-  <x:String x:Key="Text.Action.audio-priority.Desc" xml:space="preserve">將 Multimedia Class Scheduler 的播放/擷取工作優先順序提升到最高值（6），以減少高負載下的音訊掉格與爆音。OFF 會移除優先順序設定並還原為 Windows 預設。</x:String>
+  <x:String x:Key="Text.Action.audio-priority.Desc" xml:space="preserve">將 Multimedia Class Scheduler 的播放/擷取工作優先順序提升到最高值（6），以減少高負載下的音訊掉格與爆音。 OFF 會刪除明確設定的 Priority 值。不儲存或還原先前的值。</x:String>
   <x:String x:Key="Text.Action.rdp-framerate.Label" xml:space="preserve">將遠端桌面設為 60 FPS</x:String>
   <x:String x:Key="Text.Action.rdp-framerate.Desc" xml:space="preserve">縮短遠端桌面連線的繪製畫面間隔（DWMFRAMEINTERVAL=15），將預設的約 30 FPS 提升到約 60 FPS。此設定適用於作為被連線一方的本機。頻寬使用量會增加。OFF 會還原為預設畫面更新率。</x:String>
   <x:String x:Key="Text.Action.startup-speedup.Label" xml:space="preserve">移除啟動應用程式的啟動延遲</x:String>
@@ -183,7 +181,7 @@
   <x:String x:Key="Text.Action.folder-template-general.Label" xml:space="preserve">將資料夾檢視範本固定為「一般」</x:String>
   <x:String x:Key="Text.Action.folder-template-general.Desc" xml:space="preserve">阻止 Explorer 依資料夾內容自動偵測顯示樣式（圖片 / 音樂 / 文件等），並將所有資料夾統一為「一般項目」。解決檔案較多的資料夾因自動偵測造成的顯示緩慢（綠色進度列）問題。OFF 會還原為自動偵測。</x:String>
   <x:String x:Key="Text.Action.ceip-off.Label" xml:space="preserve">停用 CEIP / 意見反應通知</x:String>
-  <x:String x:Key="Text.Action.ceip-off.Desc" xml:space="preserve">停用客戶經驗改進計劃（CEIP，會向 Microsoft 傳送使用資料）與「請對 Windows 提供意見反應」通知。同時兼顧傳送帶來的背景負載與隱私的標準設定。OFF 會移除原則並還原為預設。</x:String>
+  <x:String x:Key="Text.Action.ceip-off.Desc" xml:space="preserve">停用客戶經驗改進計劃（CEIP，會向 Microsoft 傳送使用資料）與「請對 Windows 提供意見反應」通知。同時兼顧傳送帶來的背景負載與隱私的標準設定。OFF 會移除原則並還原為預設。 這些 HKLM 原則變更會影響此電腦上的所有 Windows 使用者。</x:String>
   <x:String x:Key="Text.Action.gamedvr-reset.Label" xml:space="preserve">將 Game Bar / Game DVR 設定重設為預設</x:String>
   <x:String x:Key="Text.Action.gamedvr-reset.Desc" xml:space="preserve">刪除過去的最佳化工具或登錄調整寫入的 Game Bar / Game DVR（遊戲錄製）停用設定，還原為 Windows 預設行為。對於「Win+G 無回應」或「無法擷取遊戲」等症狀有效。</x:String>
   <x:String x:Key="Text.Action.nvme-driver-revert.Label" xml:space="preserve">復原強制啟用 NVMe 原生驅動程式</x:String>

@@ -6,7 +6,7 @@ namespace Lumin4ti.Core.Services.Windows.Actions;
 
 /// <summary>
 /// 仮想化ベースセキュリティ (VBS/HVCI) の無効化トグル。
-/// ON 前に BCD とレジストリ 3 値を退避し、OFF ではユーザーの元状態へ正確に復元する。
+/// OFF では BCD とレジストリ 3 値の明示設定を解除し、Windows の既定値とポリシーへ委ねる。
 /// </summary>
 [SupportedOSPlatform("windows")]
 public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
@@ -20,23 +20,15 @@ public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
     ];
 
     private readonly IVirtualizationSecurityPlatform _platform;
-    private readonly VirtualizationSecurityBackupStore _backupStore;
 
     public VirtualizationSecurityToggle(ICommandExecutor executor)
-        : this(
-            new WindowsVirtualizationSecurityPlatform(executor),
-            new VirtualizationSecurityBackupStore(
-                ProtectedBackupStorage.Default,
-                "vbs-hvci.json"))
+        : this(new WindowsVirtualizationSecurityPlatform(executor))
     {
     }
 
-    internal VirtualizationSecurityToggle(
-        IVirtualizationSecurityPlatform platform,
-        VirtualizationSecurityBackupStore backupStore)
+    internal VirtualizationSecurityToggle(IVirtualizationSecurityPlatform platform)
     {
         _platform = platform;
-        _backupStore = backupStore;
     }
 
     public string Id => "vbs-hvci-off";
@@ -45,11 +37,14 @@ public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
 
     public string Description =>
         "仮想化ベースセキュリティ (VBS) とハイパーバイザー保護コード整合性 (HVCI) を無効化して、常時確保されている 1〜2GB 程度のメモリを解放します。" +
-        "セキュリティ機能とのトレードオフであり、Hyper-V / WSL2 / Windows サンドボックス / Docker Desktop / Credential Guard を使う場合は OFF (既定) のままにしてください。";
+        "セキュリティ機能とのトレードオフであり、Hyper-V / WSL2 / Windows サンドボックス / Docker Desktop / Credential Guard を使う場合は OFF (既定) のままにしてください。" +
+        "OFF は BCD とレジストリ3値の明示設定を削除します。元の値は保存・復元せず、実効状態は Windows と組織ポリシーに依存します。";
 
     public CommandCategory Category => CommandCategory.Performance;
 
     public bool RequiresReboot => true;
+
+    public bool SupportsExplicitOff => true;
 
     public MaintenanceStateDiagnostic? StateDiagnostic { get; private set; }
     public string? StateFailureReason { get; private set; }
@@ -61,29 +56,7 @@ public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
         try
         {
             var current = await CaptureAsync(ct);
-            if (current.IsFullyApplied)
-            {
-                return true;
-            }
-
-            // 適用失敗を元状態へ補償した場合は、元状態が独自構成でも OFF と判定できる。
-            var backup = _backupStore.Load();
-            if (backup is not null && current.EquivalentTo(backup))
-            {
-                return false;
-            }
-
-            // 初回の独自構成は未適用として扱う。ON でその実値を退避してから変更できる。
-            // 退避後の混在状態は適用・復元途中の可能性があるため、操作を許可しない。
-            if (backup is not null && current.HasAnyAppliedComponent)
-            {
-                StateDiagnostic = new("Toggle.VbsPartialState",
-                    "VBS / HVCI の設定が一部だけ適用されています。保存済みの元状態とも一致しないため、安全のため操作を停止しました。");
-                LoggerBootstrap.Log.Error($"{Id}: 保存済みの元状態と異なる部分適用状態です");
-                return null;
-            }
-
-            return false;
+            return current.IsFullyApplied;
         }
         catch (OperationCanceledException)
         {
@@ -101,7 +74,7 @@ public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
     {
         try
         {
-            return on ? await ApplyAsync(ct) : await RestoreAsync(ct);
+            return on ? await ApplyAsync(ct) : await ResetAsync(ct);
         }
         catch (OperationCanceledException)
         {
@@ -109,7 +82,7 @@ public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
         }
         catch (Exception ex)
         {
-            LoggerBootstrap.Log.Error($"{Id}: {(on ? "適用" : "復元")}の準備に失敗しました", ex);
+            LoggerBootstrap.Log.Error($"{Id}: {(on ? "適用" : "設定解除")}の準備に失敗しました", ex);
             return MaintenanceActionResult.Fail(ex.Message);
         }
     }
@@ -117,12 +90,6 @@ public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
     private async Task<MaintenanceActionResult> ApplyAsync(CancellationToken ct)
     {
         var before = await CaptureAsync(ct);
-        if (_backupStore.Load() is null)
-        {
-            // 途中までの JSON を正本として読まないよう、一時ファイルを flush 後に rename する。
-            _backupStore.SaveNew(before);
-        }
-
         var failure = await TransitionAsync(before, VirtualizationSecuritySnapshot.Applied(), ct);
         if (failure is not null)
         {
@@ -134,32 +101,23 @@ public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
         [
             "  - hypervisorlaunchtype を off に設定しました",
             "  - VBS / HVCI / Credential Guard のレジストリ値を無効 (0) に設定しました",
-            "  - ON 前の BCD・レジストリ状態をバックアップしました",
         ]);
     }
 
-    private async Task<MaintenanceActionResult> RestoreAsync(CancellationToken ct)
+    private async Task<MaintenanceActionResult> ResetAsync(CancellationToken ct)
     {
-        var original = _backupStore.Load();
-        if (original is null)
-        {
-            return MaintenanceActionResult.Fail(
-                "元状態のバックアップがないため、安全に復元できません。ON を適用した環境と同じ設定フォルダーを使用してください。");
-        }
-
         var before = await CaptureAsync(ct);
-        var failure = await TransitionAsync(before, original, ct);
+        var failure = await TransitionAsync(before, VirtualizationSecuritySnapshot.Default(), ct);
         if (failure is not null)
         {
-            return await CreateFailureResultAsync("VBS / HVCI の元状態への復元", failure);
+            return await CreateFailureResultAsync("VBS / HVCI の明示設定の解除", failure);
         }
 
-        _backupStore.Delete();
-        LoggerBootstrap.Log.Info($"{Id} → OFF (元状態に復元)");
+        LoggerBootstrap.Log.Info($"{Id} → OFF (明示設定を解除)");
         return MaintenanceActionResult.Ok(
         [
-            "  - hypervisorlaunchtype の存在と値を元状態へ復元しました",
-            "  - VBS / HVCI / Credential Guard の型と値を元状態へ復元しました",
+            "  - hypervisorlaunchtype と VBS / HVCI / Credential Guard の明示設定を解除しました",
+            "  - セキュリティ機能の有効・無効は Windows の既定値とポリシーに従います",
         ]);
     }
 
@@ -198,6 +156,18 @@ public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
             {
                 try
                 {
+                    var (isBefore, isDesired) = await ReadRollbackStateAsync(component, before, desired);
+                    if (isBefore)
+                    {
+                        continue;
+                    }
+
+                    if (!isDesired)
+                    {
+                        rollbackErrors.Add($"{component}: 外部で変更された値を保持しました。");
+                        continue;
+                    }
+
                     // 安全上の補償は、利用者キャンセル後も最後まで実行する。
                     await WriteComponentAsync(component, before, CancellationToken.None);
                 }
@@ -205,6 +175,19 @@ public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
                 {
                     rollbackErrors.Add($"{component}: {rollbackEx.Message}");
                 }
+            }
+
+            try
+            {
+                var restored = await CaptureAsync(CancellationToken.None);
+                if (!restored.EquivalentTo(before))
+                {
+                    rollbackErrors.Add("補償後の実状態が開始前の状態と一致しません。");
+                }
+            }
+            catch (Exception verificationEx)
+            {
+                rollbackErrors.Add($"補償後の実状態を確認できません: {verificationEx.Message}");
             }
 
             LoggerBootstrap.Log.Error($"{Id}: 変更失敗。補償エラー={rollbackErrors.Count}", ex);
@@ -248,6 +231,22 @@ public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
         _platform.WriteRegistryValue(component, snapshot.GetRegistryValue(component));
     }
 
+    private async Task<(bool IsBefore, bool IsDesired)> ReadRollbackStateAsync(
+        VirtualizationSecurityComponent component,
+        VirtualizationSecuritySnapshot before,
+        VirtualizationSecuritySnapshot desired)
+    {
+        if (component == VirtualizationSecurityComponent.HypervisorLaunchType)
+        {
+            var current = await _platform.ReadHypervisorLaunchTypeAsync(CancellationToken.None);
+            return (current.EquivalentTo(before.HypervisorLaunchType), current.EquivalentTo(desired.HypervisorLaunchType));
+        }
+
+        var registryValue = _platform.ReadRegistryValue(component);
+        return (registryValue.EquivalentTo(before.GetRegistryValue(component)),
+            registryValue.EquivalentTo(desired.GetRegistryValue(component)));
+    }
+
     private static bool ComponentEquals(
         VirtualizationSecuritySnapshot left,
         VirtualizationSecuritySnapshot right,
@@ -259,8 +258,8 @@ public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
     private static string DescribeState(bool? state) => state switch
     {
         true => "ON (全項目適用済み)",
-        false => "OFF (元状態)",
-        null => "部分適用または判定不能",
+        false => "OFF (全項目適用には該当しません)",
+        null => "判定不能",
     };
 
     private sealed record TransitionFailure(Exception Error, IReadOnlyList<string> RollbackErrors);

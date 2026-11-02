@@ -8,7 +8,7 @@ namespace Lumin4ti.Core.Services.Windows;
 /// <summary>
 /// タスクスケジューラーから起動されたときに、画面と同じクリーンアップ項目を実行して即終了する
 /// 専用エントリポイント。<see cref="Actions.ScheduledTempCleanupToggle"/> が登録するタスクは、
-/// この引数を付けて自分自身 (Lumin4ti.exe) を呼び出す。通常の起動フロー (自己昇格・多重起動ガード・UI) を
+/// この引数を付けて自分自身 (Lumin4ti.UI.exe) を呼び出す。通常の起動フロー (自己昇格・多重起動ガード・UI) を
 /// 経由せず、タスクスケジューラーから最高権限で起動されるため、サインインのたびに UAC を出さず無人で完走できる。
 /// 実行する項目と、項目ごとに消す対象は settings.json の利用者設定 (<see cref="ICleanupPreferences"/>) が唯一の正本で、
 /// 画面のボタンで走る処理とまったく同じコードを通る。

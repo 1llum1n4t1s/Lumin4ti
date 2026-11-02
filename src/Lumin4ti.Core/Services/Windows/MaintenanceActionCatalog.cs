@@ -8,7 +8,7 @@ namespace Lumin4ti.Core.Services.Windows;
 
 /// <summary>
 /// 全メンテナンス項目のカタログ。並び順が画面の表示順になる。
-/// ON/OFF が定義できる設定は IMaintenanceToggle (ON = 最適化適用 / OFF = Windows 既定)、
+/// ON/OFF が定義できる設定は IMaintenanceToggle (ON = 最適化適用 / OFF = 項目の解除値へ設定または明示上書きを削除)、
 /// 1 回実行型は IMaintenanceAction。
 /// </summary>
 [SupportedOSPlatform("windows10.0.17763.0")]
@@ -109,7 +109,7 @@ public sealed class MaintenanceActionCatalog
                 label: "オーディオ処理の優先度を引き上げ",
                 description:
                     "マルチメディアクラススケジューラの再生 (Playback) / 録音 (Capture) タスクの優先度を最高値 (6) に引き上げ、高負荷時の音声の途切れ・プチノイズを抑えます。" +
-                    "OFF で優先度設定を削除して Windows 既定に戻ります。",
+                    "OFF では Playback / Capture の Priority 明示値を削除します。変更前の値は保存・復元しません。",
                 category: CommandCategory.Performance,
                 specs:
                 [
@@ -190,7 +190,7 @@ public sealed class MaintenanceActionCatalog
                 label: "CEIP / フィードバック通知を無効化",
                 description:
                     "カスタマー エクスペリエンス向上プログラム (CEIP: 利用状況を Microsoft へ送信する仕組み) と、「Windows についてのフィードバックをお寄せください」通知を無効化します。" +
-                    "送信処理のバックグラウンド負荷とプライバシーへの配慮の両面で定番の設定です。OFF でポリシーを削除して既定に戻ります。",
+                    "送信処理のバックグラウンド負荷とプライバシーへの配慮の両面で定番の設定です。OFF でポリシーを削除します。マシン側のポリシー変更は他の利用者にも影響し、変更前の値は保存・復元しません。",
                 category: CommandCategory.System,
                 specs:
                 [
