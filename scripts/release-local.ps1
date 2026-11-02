@@ -321,7 +321,7 @@ foreach ($runtime in $Runtimes) {
     # runtime packs が assets.json に入らず NETSDK1112 が出る)。
     Write-Host "== restore: $runtime ==" -ForegroundColor Cyan
     Invoke-Native "dotnet restore ($runtime)" {
-        dotnet restore src/Lumin4ti.UI/Lumin4ti.UI.csproj -r $runtime --force-evaluate -p:SelfContained=true
+        dotnet restore src/Lumin4ti.UI/Lumin4ti.UI.csproj -r $runtime --force-evaluate -p:Configuration=Release -p:SelfContained=true
     }
 
     Write-Host "== publish: $runtime ==" -ForegroundColor Cyan
