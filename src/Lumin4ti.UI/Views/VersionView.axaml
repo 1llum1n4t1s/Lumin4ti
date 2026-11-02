@@ -56,6 +56,10 @@
           <Button Content="{DynamicResource Text.Version.OpenSettings}" Command="{Binding OpenSettingsFolderCommand}" />
         </StackPanel>
       </primitives:HeaderedContentControl>
+      <Button Content="{DynamicResource Text.Version.OpenDebugger}" Command="{Binding OpenDebuggerCommand}"
+              HorizontalAlignment="Left" Margin="0,12,0,0" />
+      <TextBlock Text="{Binding DebuggerStatusText}" Classes="caption" TextWrapping="Wrap"
+                 IsVisible="{Binding DebuggerStatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
     </StackPanel>
   </ScrollViewer>
 </UserControl>

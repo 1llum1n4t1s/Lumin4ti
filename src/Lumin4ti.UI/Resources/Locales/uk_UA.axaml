@@ -96,8 +96,8 @@
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Масове оновлення встановлених застосунків (winget)</x:String>
   <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">Використовує менеджер пакетів winget для оновлення всіх встановлених застосунків до останніх версій. Якщо оновлень багато, завантаження та встановлення можуть зайняти час. Виконувані файли запущених застосунків можуть бути заблоковані, і їхнє оновлення завершиться помилкою, але решта продовжить оновлюватися, а після завершення відображається зведення успіхів і невдач.</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Повторно завантажити файли визначень Defender</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Одноразово видаляє вірусні визначення та динамічні сигнатури Windows Defender, а потім повторно завантажує їхні останні версії. Стандартний спосіб оновлення в разі пошкодження визначень, що спричиняє хибні спрацювання або помилки оновлення; захист у реальному часі продовжує працювати під час виконання.</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Очистити кеш визначень Defender і перевірити оновлення</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Видаляє динамічні сигнатури Windows Defender і перевіряє оновлення визначень. Не видаляє і не відкочує весь набір базових визначень. Якщо вони вже актуальні, додаткове завантаження не виконується.</x:String>
   <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">Скинути налаштування Defender (винятки та основні параметри)</x:String>
   <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Видаляє всі шляхи, процеси та розширення, додані до винятків Windows Defender, і відновлює основні параметри, такі як захист у реальному часі та хмарний захист, до значень за замовчуванням. Очищає винятки (сліпі зони сканування), які могли додати шкідливі програми або застаріле ПЗ. Навмисно додані винятки також видаляються, тож за потреби додайте їх знову. Не виконується, якщо службу Defender повністю вимкнено. Пасивний режим з іншим антивірусом підтримується, якщо доступні служба Defender і командлети керування. Попередні налаштування не зберігаються.</x:String>
   <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">Скинути застосунок «Безпека Windows»</x:String>
@@ -226,4 +226,9 @@
   <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Не вдалося прочитати налаштування. Збереження вимкнено для захисту оригінального файлу, очищення під час входу не виконуватиметься. Зміни діють лише в цьому сеансі.</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">Під час останньої перевірки об’єктів не знайдено.</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">Відкрийте список знову, щоб оновити його. Під час виконання також враховуються нові об’єкти, не виключені з обробки.</x:String>
+  <x:String x:Key="Text.Processing.Title" xml:space="preserve">Обробка</x:String>
+  <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Дочекайтеся завершення операції.</x:String>
+  <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Дочекайтеся завершення скасування та очищення.</x:String>
+  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">Відкрити налагоджувач</x:String>
+  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">Не вдалося відкрити налагоджувач. Перевірте журнали.</x:String>
 </ResourceDictionary>

@@ -24,6 +24,9 @@ public partial class CommandItemViewModel : ObservableObject
     private readonly Func<CommandItemViewModel, string, Task>? _setChoice;
     private readonly Func<CommandItemViewModel, bool, Task>? _applyBatch;
     private bool _suppressToggleWrite;
+    private int _pendingSelectionSaves;
+
+    public bool IsSavingSelection => Volatile.Read(ref _pendingSelectionSaves) > 0;
 
     public IMaintenanceItem Item { get; }
 
@@ -418,8 +421,10 @@ public partial class CommandItemViewModel : ObservableObject
     /// </summary>
     private async Task ApplyCheckListEntryAsync(CheckListEntryViewModel entry, bool selected)
     {
+        Interlocked.Increment(ref _pendingSelectionSaves);
         try
         {
+            OnPropertyChanged(nameof(IsSavingSelection));
             await ((IMaintenanceCheckList)Item).SetCheckListEntrySelectedAsync(entry.Value, selected);
             HasCheckListSaveError = false;
         }
@@ -428,6 +433,11 @@ public partial class CommandItemViewModel : ObservableObject
             MaintenanceItemLog.Failure(Item.Id, Item.Label, "削除対象の選択保存",
                 $"{entry.Value}: {ex.GetType().Name}: {ex.Message}");
             HasCheckListSaveError = true;
+        }
+        finally
+        {
+            Interlocked.Decrement(ref _pendingSelectionSaves);
+            OnPropertyChanged(nameof(IsSavingSelection));
         }
 
         OnPropertyChanged(nameof(CheckListSummary));

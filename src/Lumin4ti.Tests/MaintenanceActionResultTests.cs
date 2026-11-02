@@ -62,6 +62,44 @@ public sealed class MaintenanceActionResultTests
     }
 
     [TestMethod]
+    public async Task 選択保存が重なり一件失敗しても最後の保存が終わるまで処理中を保つ()
+    {
+        var first = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var second = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var saves = new Queue<Task>([first.Task, second.Task]);
+        var action = new MutableCheckListAction { SaveAsync = () => saves.Dequeue() };
+        var item = new CommandItemViewModel(action, _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
+        var failed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var finished = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        item.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(item.HasCheckListSaveError) && item.HasCheckListSaveError)
+            {
+                failed.TrySetResult();
+            }
+            if (args.PropertyName == nameof(item.IsSavingSelection) && !item.IsSavingSelection)
+            {
+                finished.TrySetResult();
+            }
+        };
+
+        Assert.IsFalse(item.IsSavingSelection);
+        item.CheckListEntries.Single().IsSelected = false;
+        item.CheckListEntries.Single().IsSelected = true;
+        Assert.IsTrue(item.IsSavingSelection);
+
+        first.SetException(new InvalidOperationException("保存失敗"));
+        await failed.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        Assert.IsTrue(item.IsSavingSelection);
+        Assert.IsTrue(item.HasCheckListSaveError);
+
+        second.SetResult();
+        await finished.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        Assert.IsFalse(item.IsSavingSelection);
+        Assert.IsFalse(item.HasCheckListSaveError);
+    }
+
+    [TestMethod]
     public void 空の対象一覧を開き直すと新候補を除外でき実行中は一覧を再構築しない()
     {
         var action = new MutableCheckListAction();
@@ -97,6 +135,7 @@ public sealed class MaintenanceActionResultTests
     private sealed class MutableCheckListAction : IMaintenanceAction, IMaintenanceCheckList
     {
         public bool FailSave { get; set; }
+        public Func<Task>? SaveAsync { get; init; }
         public List<MaintenanceCheckListEntry> Entries { get; } =
         [
             new("cache", "Cache", true),
@@ -127,7 +166,7 @@ public sealed class MaintenanceActionResultTests
             {
                 throw new InvalidOperationException("一時変更のみ・原本は保護されています");
             }
-            return Task.CompletedTask;
+            return SaveAsync?.Invoke() ?? Task.CompletedTask;
         }
 
         public Task<MaintenanceActionResult> ExecuteAsync(CancellationToken ct = default) =>

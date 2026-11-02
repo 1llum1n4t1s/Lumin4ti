@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Lumin4ti.Core.Interfaces;
@@ -62,6 +63,9 @@ public partial class App : Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            // デバッグ画面を開いたままでも、メイン画面の終了・補償完了後に終了する。
+            desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
+            Services.GetRequiredService<DebuggerService>().Initialize();
             desktop.MainWindow = new MainWindow(
                 Services.GetRequiredService<MaintenanceOperationCoordinator>())
             {
@@ -97,6 +101,8 @@ public partial class App : Application
         services.AddSingleton<IDisconnectedDeviceService, WindowsDisconnectedDeviceService>();
         services.AddSingleton<MaintenanceActionCatalog>();
         services.AddSingleton<MaintenanceOperationCoordinator>();
+        services.AddSingleton<DebuggerService>();
+        services.AddSingleton<IDebuggerService>(sp => sp.GetRequiredService<DebuggerService>());
 
         services.AddSingleton(sp => new Services.UpdateService(sp.GetRequiredService<ISettingsService>().Current));
 

@@ -96,8 +96,8 @@
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Массовое обновление установленных приложений (winget)</x:String>
   <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">Использует менеджер пакетов winget для обновления всех установленных приложений до последних версий. Если обновлений много, загрузка и установка могут занять время. Исполняемые файлы запущенных приложений могут быть заблокированы, и их обновление завершится с ошибкой, но остальные продолжат обновляться, а по завершении отображается сводка успехов и неудач.</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Повторно загрузить файлы определений Defender</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Однократно удаляет вирусные определения и динамические сигнатуры Windows Defender, затем повторно загружает их последние версии. Стандартный способ обновления при повреждении определений, вызывающем ложные срабатывания или ошибки обновления; защита в реальном времени продолжает работать во время выполнения.</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Очистить кэш определений Defender и проверить обновления</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Удаляет динамические сигнатуры Windows Defender и проверяет обновления определений. Не удаляет и не откатывает весь набор базовых определений. Если они уже актуальны, дополнительная загрузка не выполняется.</x:String>
   <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">Сбросить настройки Defender (исключения и основные параметры)</x:String>
   <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Удаляет все пути, процессы и расширения, добавленные в исключения Windows Defender, и восстанавливает основные параметры, такие как защита в реальном времени и облачная защита, до значений по умолчанию. Очищает исключения (слепые зоны сканирования), которые могли добавить вредоносные программы или устаревшее ПО. Намеренно добавленные исключения также удаляются, поэтому при необходимости добавьте их заново. Не выполняется, если служба Defender полностью отключена. Пассивный режим с другим антивирусом поддерживается, если доступны служба Defender и командлеты управления. Прежние настройки не сохраняются.</x:String>
   <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">Сбросить приложение «Безопасность Windows»</x:String>
@@ -226,4 +226,9 @@
   <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Не удалось прочитать настройки. Сохранение отключено для защиты исходного файла, очистка при входе не выполняется. Изменения действуют только в этом сеансе.</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">При последней проверке объекты не найдены.</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">Откройте список заново, чтобы обновить его. При выполнении также учитываются новые объекты, не исключённые из обработки.</x:String>
+  <x:String x:Key="Text.Processing.Title" xml:space="preserve">Обработка</x:String>
+  <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Дождитесь завершения операции.</x:String>
+  <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Дождитесь завершения отмены и очистки.</x:String>
+  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">Открыть отладчик</x:String>
+  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">Не удалось открыть отладчик. Проверьте журналы.</x:String>
 </ResourceDictionary>

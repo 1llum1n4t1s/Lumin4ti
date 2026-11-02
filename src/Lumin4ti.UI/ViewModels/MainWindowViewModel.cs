@@ -1,15 +1,41 @@
 using System;
 using System.Diagnostics;
+using System.ComponentModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services.Windows;
 using Lumin4ti.UI.Services;
+using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Lumin4ti.UI.ViewModels;
 
-public class MainWindowViewModel
+public class MainWindowViewModel : ObservableObject, IDisposable
 {
+    private readonly CommandItemViewModel[] _items;
+    private bool _cancelRequested;
+    private bool _disposed;
+
+    public bool IsProcessing => _operationCoordinator.ProcessingState.IsProcessing || Version.IsSavingSettings ||
+        _items.Any(item => item.IsSavingSelection);
+
+    private CommandItemViewModel? RunningItem => _items.FirstOrDefault(item => item.IsRunning);
+
+    public bool CanCancelProcessing => !_cancelRequested &&
+        _operationCoordinator.ProcessingState.CanCancel &&
+        RunningItem is { CanCancel: true };
+
+    public string ProcessingText => _cancelRequested
+        ? App.Text("Processing.Cancelling", "キャンセル後の後処理が完了するまでお待ちください。")
+        : RunningItem?.Label ?? App.Text("Processing.Wait", "処理が完了するまでお待ちください。");
+
+    public string ProcessingDetail => RunningItem?.ProgressText ?? string.Empty;
+
+    public IRelayCommand CancelProcessingCommand { get; }
+
     public CommandCategoryViewModel Update { get; }
 
     public CommandCategoryViewModel Cleanup { get; }
@@ -75,6 +101,17 @@ public class MainWindowViewModel
 
         DeviceCleanup = deviceCleanup;
         Version = version;
+        _items = new[] { Update, Cleanup, Repair, Performance, System, Organize }
+            .SelectMany(category => category.Items)
+            .SelectMany(item => new[] { item }.Concat(item.Children)).ToArray();
+        CancelProcessingCommand = new RelayCommand(CancelProcessing, () => CanCancelProcessing);
+        _operationCoordinator.StateChanged += OnOperationStateChanged;
+        Version.PropertyChanged += OnProcessingPropertyChanged;
+        foreach (var item in _items)
+        {
+            item.PropertyChanged += OnProcessingPropertyChanged;
+        }
+        App.LocaleChanged += OnLocaleChanged;
 
         // トグルの現在状態はバックグラウンドで読み込む (DISM/Get-MMAgent 等で外部プロセスを起動しうる)。
         // 初回読込と起動時更新確認は同じ排他制御を使うため、読込完了後に更新確認を投入する。
@@ -121,7 +158,8 @@ public class MainWindowViewModel
         ArgumentNullException.ThrowIfNull(coordinator);
         ArgumentNullException.ThrowIfNull(reload);
 
-        if (!coordinator.TryBegin(out var operation))
+        // 読み取り専用の初回・再アクティブ時照会は、変更操作のオーバーレイを出さない。
+        if (!coordinator.TryBegin(out var operation, showProcessing: false))
         {
             return false;
         }
@@ -164,5 +202,74 @@ public class MainWindowViewModel
         }
 
         _ = Task.Run(ReloadAllStatesAsync);
+    }
+
+    private void CancelProcessing()
+    {
+        if (!CanCancelProcessing || RunningItem is not { CanCancel: true } item)
+        {
+            return;
+        }
+
+        _cancelRequested = true;
+        item.CancelCommand.Execute(null);
+        RefreshProcessing();
+    }
+
+    private void OnOperationStateChanged(object? sender, EventArgs e) => QueueProcessingRefresh();
+
+    private void OnLocaleChanged() => QueueProcessingRefresh();
+
+    private void OnProcessingPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(CommandItemViewModel.IsRunning) or nameof(CommandItemViewModel.CanCancel)
+            or nameof(CommandItemViewModel.Label) or nameof(CommandItemViewModel.ProgressText)
+            or nameof(CommandItemViewModel.IsSavingSelection)
+            or nameof(VersionViewModel.IsSavingSettings))
+        {
+            QueueProcessingRefresh();
+        }
+    }
+
+    private void QueueProcessingRefresh()
+    {
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            RefreshProcessing();
+        }
+        else
+        {
+            Dispatcher.UIThread.Post(RefreshProcessing);
+        }
+    }
+
+    private void RefreshProcessing()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+        if (!_operationCoordinator.ProcessingState.IsProcessing)
+        {
+            _cancelRequested = false;
+        }
+        OnPropertyChanged(nameof(IsProcessing));
+        OnPropertyChanged(nameof(ProcessingText));
+        OnPropertyChanged(nameof(ProcessingDetail));
+        OnPropertyChanged(nameof(CanCancelProcessing));
+        CancelProcessingCommand.NotifyCanExecuteChanged();
+    }
+
+    public void Dispose()
+    {
+        _disposed = true;
+        _operationCoordinator.StateChanged -= OnOperationStateChanged;
+        Version.PropertyChanged -= OnProcessingPropertyChanged;
+        foreach (var item in _items)
+        {
+            item.PropertyChanged -= OnProcessingPropertyChanged;
+        }
+        App.LocaleChanged -= OnLocaleChanged;
+        GC.SuppressFinalize(this);
     }
 }

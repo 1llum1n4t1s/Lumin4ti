@@ -29,10 +29,25 @@ internal static class StateDiagnosticsPreview
 
     public sealed class PreviewApp : App
     {
+        private DebuggerService? _debugger;
+
         public override void OnFrameworkInitializationCompleted()
         {
             // 本番 App の初期化は呼ばない。DI・設定保存・OS 操作を持ち込まない。
             SetLocale("ja_JP");
+            _debugger = new DebuggerService(provider =>
+            {
+                var output = Environment.GetEnvironmentVariable("LUMIN4TI_PREVIEW_LOG");
+                var factory = LoggerFactory.Create(builder =>
+                {
+                    if (!string.IsNullOrEmpty(output)) builder.AddSuperLightFile(output);
+                });
+                LogManager.Configure(factory);
+                var subscription = Lumin4ti.Core.Services.LoggerBootstrap.AttachProvider(factory, provider);
+                factory.CreateLogger("Lumin4ti.Preview").LogInformation("CRDebugger の模擬画面接続を確認しました。");
+                return subscription;
+            });
+            _debugger.Initialize();
             var catalog = new MaintenanceActionCatalog(new IMaintenanceItem[]
             {
                 new PreviewToggle("vbs-hvci-off", "VBS / HVCI を無効化", false, defaultState: false),
@@ -42,9 +57,12 @@ internal static class StateDiagnosticsPreview
                 new PreviewCheckListAction(failSave: true),
                 new FileCleanupAction("preview-real-cleanup", "削除一覧の案内（メモリ内）", "対象は空配列です。OS操作は行いません。", () => []),
                 new PreviewShellCacheDescription(),
+                new DefenderSignatureUpdateAction(
+                    new MockExecutor((_, _, _) => new CommandExecutionResult(true, "preview", 0, "No updates needed", "")),
+                    () => @"C:\preview\MpCmdRun.exe"),
                 new PreviewToggle("preview-custom-vbs", "VBS カスタム / 一部適用（メモリ内）", false,
                     defaultState: false, customState: true),
-                new PreviewToggle("mmagent-memory-compression", "メモリ圧縮", true, defaultState: true),
+                new PreviewToggle("mmagent-memory-compression", "メモリ圧縮", true, defaultState: true, applyDelayMs: 6000),
                 new PreviewToggle("preview-parent", "親設定（メモリ内）", true, defaultState: false),
                 new PreviewToggle("preview-child", "子設定（メモリ内）", false, defaultState: true, parentId: "preview-parent"),
                 new PreviewChoice(),
@@ -104,14 +122,20 @@ internal static class StateDiagnosticsPreview
             window.Opened += async (_, _) => await viewModel.LoadToggleStatesAsync();
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
+                desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
                 desktop.MainWindow = window;
+                desktop.Exit += (_, _) =>
+                {
+                    _debugger.Dispose();
+                    LogManager.Shutdown();
+                };
             }
         }
 
-        private static void ShowSettingsPreview(MaintenanceActionCatalog catalog, MemorySettings settings)
+        private void ShowSettingsPreview(MaintenanceActionCatalog catalog, MemorySettings settings)
         {
             var coordinator = new MaintenanceOperationCoordinator(() => new PreviewLease());
-            var version = new VersionViewModel(new UpdateService(() => null), settings, coordinator);
+            var version = new VersionViewModel(new UpdateService(() => null), settings, coordinator, _debugger);
             var devices = new DeviceCleanupViewModel(new MockDevices { FailEnumeration = false }, coordinator);
             new MainWindow(coordinator)
             {
@@ -154,14 +178,24 @@ internal static class StateDiagnosticsPreview
         public bool RequiresReboot => false;
         public IReadOnlyList<MaintenanceCheckListEntry> GetCheckListEntries() =>
             startEmpty && ++_queries <= 2 ? [] : [new("preview-target", "模擬キャッシュ", _selected)];
-        public Task SetCheckListEntrySelectedAsync(string value, bool selected, CancellationToken ct = default)
+        public async Task SetCheckListEntrySelectedAsync(string value, bool selected, CancellationToken ct = default)
         {
+            await Task.Delay(3000, ct);
             _selected = selected;
-            return failSave ? Task.FromException(new IOException("preview selection save failure")) : Task.CompletedTask;
+            if (failSave) throw new IOException("preview selection save failure");
         }
-        public async Task<MaintenanceActionResult> ExecuteAsync(CancellationToken ct = default)
+        public Task<MaintenanceActionResult> ExecuteAsync(CancellationToken ct = default) => ExecuteAsync(null, ct);
+
+        public async Task<MaintenanceActionResult> ExecuteAsync(IProgress<string>? progress, CancellationToken ct = default)
         {
-            await Task.Delay(TimeSpan.FromSeconds(15), ct);
+            progress?.Report("OPOP_CANARY: メモリ内の模擬処理を実行しています。OS操作は行いません。");
+            try { await Task.Delay(TimeSpan.FromSeconds(15), ct); }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                progress?.Report("OPOP_CANARY: 中断後の後処理を確認しています。");
+                await Task.Delay(3000, CancellationToken.None);
+                throw;
+            }
             return MaintenanceActionResult.Ok("OPOP_CANARY simulated cleanup completed");
         }
     }
@@ -186,7 +220,8 @@ internal static class StateDiagnosticsPreview
     private sealed class PreviewToggle(
         string id, string label, bool? state,
         MaintenanceStateDiagnostic? diagnostic = null, string? resourceId = null,
-        bool? defaultState = null, string? parentId = null, bool customState = false) : IMaintenanceToggle
+        bool? defaultState = null, string? parentId = null, bool customState = false,
+        int applyDelayMs = 0) : IMaintenanceToggle
     {
         private bool? _state = state;
         private bool _customState = customState;
@@ -203,12 +238,13 @@ internal static class StateDiagnosticsPreview
         public MaintenanceStateDiagnostic? StateDiagnostic => diagnostic;
         public Task<bool?> GetStateAsync(CancellationToken ct = default) => Task.FromResult(_state);
 
-        public Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default)
+        public async Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
+            if (applyDelayMs > 0) await Task.Delay(applyDelayMs, ct);
             _state = on;
             _customState = false;
-            return Task.FromResult(MaintenanceActionResult.Ok());
+            return MaintenanceActionResult.Ok();
         }
     }
 

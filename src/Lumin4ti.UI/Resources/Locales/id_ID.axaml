@@ -96,8 +96,8 @@
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Perbarui aplikasi terpasang sekaligus (winget)</x:String>
   <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">Menggunakan pengelola paket winget untuk memperbarui semua aplikasi terpasang ke versi terbaru. Jika banyak aplikasi yang perlu diperbarui, pengunduhan dan pemasangan bisa memakan waktu. Aplikasi yang sedang berjalan mungkin file eksekusinya terkunci dan gagal diperbarui, tetapi yang lain tetap berlanjut dan rincian berhasil/gagal ditampilkan.</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Unduh ulang file definisi Defender</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Menghapus sekali definisi virus dan tanda tangan dinamis Windows Defender, lalu mengunduh ulang yang terbaru. Penyegaran standar untuk kerusakan definisi yang menyebabkan deteksi palsu atau kesalahan pembaruan; perlindungan waktu nyata tetap berjalan selama proses berlangsung.</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Hapus cache definisi Defender dan periksa pembaruan</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Menghapus tanda tangan dinamis Windows Defender, lalu memeriksa pembaruan definisi. Tidak menghapus atau mengembalikan seluruh definisi dasar ke versi sebelumnya. Jika sudah terbaru, tidak ada unduhan tambahan.</x:String>
   <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">Setel ulang pengaturan Defender (pengecualian &amp; opsi utama)</x:String>
   <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Menghapus semua jalur, proses, dan ekstensi pengecualian yang terdaftar di Windows Defender dan memulihkan opsi utama seperti perlindungan waktu nyata dan cloud ke bawaannya. Membersihkan pengecualian (titik buta pemindaian) yang mungkin ditambahkan oleh malware atau perangkat lunak lama. Pengecualian yang disengaja juga dihapus, jadi tambahkan kembali yang Anda perlukan setelahnya. Tidak dijalankan jika layanan Defender sepenuhnya dinonaktifkan. Mode pasif dengan antivirus lain didukung jika layanan Defender dan cmdlet pengelolaan tersedia. Pengaturan sebelumnya tidak disimpan.</x:String>
   <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">Setel ulang aplikasi Keamanan Windows</x:String>
@@ -226,4 +226,9 @@
   <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Pengaturan tidak dapat dibaca. Penyimpanan dinonaktifkan untuk melindungi file asli, dan pembersihan saat masuk tidak akan dijalankan. Perubahan hanya berlaku selama sesi ini.</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">Tidak ada target yang ditemukan pada pemeriksaan terakhir.</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">Buka kembali daftar untuk memperbaruinya. Target baru yang tidak dikecualikan juga disertakan saat tindakan dijalankan.</x:String>
+  <x:String x:Key="Text.Processing.Title" xml:space="preserve">Sedang memproses</x:String>
+  <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Tunggu hingga operasi selesai.</x:String>
+  <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Tunggu hingga pembatalan dan pembersihan selesai.</x:String>
+  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">Buka debugger</x:String>
+  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">Tidak dapat membuka debugger. Periksa log.</x:String>
 </ResourceDictionary>

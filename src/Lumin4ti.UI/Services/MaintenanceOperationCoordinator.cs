@@ -18,6 +18,23 @@ public sealed class MaintenanceOperationCoordinator
     private readonly Func<IDisposable?> _tryAcquireProcessLock;
     private TaskCompletionSource? _idleSignal;
     private bool _isStopping;
+    private bool _showProcessing;
+
+    /// <summary>購読側は通知時に最新の状態を読み直す。通知は同期ロックの外で行う。</summary>
+    public event EventHandler? StateChanged;
+
+    public (bool IsProcessing, bool CanCancel) ProcessingState
+    {
+        get
+        {
+            lock (_sync)
+            {
+                return (_active.Count != 0 && _showProcessing,
+                    _active.Count != 0 && _showProcessing && !_isStopping &&
+                    !_active.Any(source => source.IsCancellationRequested));
+            }
+        }
+    }
 
     public bool IsStopping
     {
@@ -54,7 +71,8 @@ public sealed class MaintenanceOperationCoordinator
 
     public bool TryBegin(
         out OperationLease? lease,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        bool showProcessing = true)
     {
         lock (_sync)
         {
@@ -85,9 +103,12 @@ public sealed class MaintenanceOperationCoordinator
             _idleSignal = new TaskCompletionSource(
                 TaskCreationOptions.RunContinuationsAsynchronously);
             _active.Add(source);
+            _showProcessing = showProcessing;
             lease = new OperationLease(this, source, processLock);
-            return true;
         }
+
+        NotifyStateChanged();
+        return true;
     }
 
     public void RequestCancellation()
@@ -110,7 +131,13 @@ public sealed class MaintenanceOperationCoordinator
             {
                 // 完了と終了要求が競合しただけなので無視する。
             }
+            catch (AggregateException ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
         }
+
+        NotifyStateChanged();
     }
 
     public Task WaitForIdleAsync()
@@ -130,11 +157,34 @@ public sealed class MaintenanceOperationCoordinator
             {
                 completedSignal = _idleSignal;
                 _idleSignal = null;
+                _showProcessing = false;
             }
         }
 
         source.Dispose();
         completedSignal?.TrySetResult();
+        NotifyStateChanged();
+    }
+
+    private void NotifyStateChanged()
+    {
+        if (StateChanged is not { } handlers)
+        {
+            return;
+        }
+
+        foreach (EventHandler handler in handlers.GetInvocationList())
+        {
+            try
+            {
+                handler(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                // 表示の購読先の失敗で操作リースや終了待ちを失わせない。
+                System.Diagnostics.Debug.WriteLine(ex);
+            }
+        }
     }
 
     public sealed class OperationLease : IDisposable

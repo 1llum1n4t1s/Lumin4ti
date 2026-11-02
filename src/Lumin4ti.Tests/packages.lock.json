@@ -154,6 +154,16 @@
         "resolved": "8.4.2",
         "contentHash": "WadCzGEc2U+3e20avRLng4qNtt4zoOGWrdUISqJWrHe3/FSnrYjuM5Sb4yQb09LhkBXrrI4Zt3dLKgRMbItsrg=="
       },
+      "CRDebugger.Avalonia": {
+        "type": "Transitive",
+        "resolved": "1.0.34",
+        "contentHash": "6yVMxw4yAZUKoqH9omLBc/bfkIQRB+tpQFnAtt/ijhTe3RrGBamY1NrAso+hBYznGw1qZff0H0ZCnI/fWqs0lA==",
+        "dependencies": {
+          "Avalonia": "12.1.2",
+          "Avalonia.Themes.Fluent": "12.1.2",
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.12"
+        }
+      },
       "HarfBuzzSharp": {
         "type": "Transitive",
         "resolved": "8.3.1.3",
@@ -406,8 +416,9 @@
           "Avalonia.Desktop": "[12.1.4, )",
           "Avalonia.Fonts.Inter": "[12.1.4, )",
           "Avalonia.Themes.Fluent": "[12.1.4, )",
+          "CRDebugger.Avalonia": "[1.0.34, )",
           "CommunityToolkit.Mvvm": "[8.4.2, )",
-          "Lumin4ti.Core": "[1.0.46, )",
+          "Lumin4ti.Core": "[1.0.47, )",
           "Microsoft.Extensions.DependencyInjection": "[10.0.14, )",
           "Velopack": "[1.2.161, )",
           "VelopackUpdateDialog.Avalonia": "[1.0.21, )"

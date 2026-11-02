@@ -52,4 +52,6 @@ ON/OFF 型の Registry / VBS と UWP の一括設定は変更前の値を永続�
 
 既定値と状態診断の実画面確認は既存の --preview-state-diagnostics モードで行います。製品テンプレートで既定ON/OFF/環境依存・選択型・親子カードを表示し、親OFF時の子の操作禁止、日本語/English切替と再読込、現在値と既定値の違いを確認します。カスタム値は同じ位置のON/OFF選択欄からどちらにも直接変更できることを確認します。UWPは一括OFF/一括ONを同じ方向に続けて実行でき、実行中は両ボタンとも操作不可になることを確認します。状態変更はメモリ内のfakeのみで、製品の初期化・設定保存・OS操作は行いません。
 
+同じプレビューの設定画面では、メモリ圧縮の切替（6秒）・チェック選択保存（3秒）・模擬実行（15秒）を使い、Shisui型オーバーレイ、背面操作禁止、ライブ進捗、中断後の後処理待ちと再操作を確認します。バージョン画面の「デバッグ画面を開く」は実際のCRDebuggerに接続します。LUMIN4TI_PREVIEW_LOGへ今回の作業領域内の絶対パスを渡すと、同じ模擬ログのファイル出力とデバッグ画面への転送も確認できます。既存利用者のログ・設定・OSは変更しません。
+
 watchdog の異常系は `dotnet run --project scripts/verification/Lumin4ti.Verification.csproj --no-build -- D:\Dev\Lumin4ti D:\Dev\Lumin4ti\local-release\verification-watchdog.json --simulate-missing-download-cancellation` で再現します。mock body だけが cancellation を無視し、15秒後に取得ケースの失敗、後続ケース継続、JSON 出力、exit1 を確認します。製品 timeout は変更しません。

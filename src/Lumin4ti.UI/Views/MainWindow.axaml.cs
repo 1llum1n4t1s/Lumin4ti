@@ -23,6 +23,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         Closing += OnClosing;
         Activated += OnActivated;
+        Closed += (_, _) => (DataContext as ViewModels.MainWindowViewModel)?.Dispose();
     }
 
     /// <summary>

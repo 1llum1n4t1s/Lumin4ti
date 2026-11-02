@@ -23,7 +23,7 @@
       </ExperimentalAcrylicBorder.Material>
     </ExperimentalAcrylicBorder>
 
-    <Grid Margin="16,36,16,16" RowDefinitions="Auto,*">
+    <Grid Margin="16,36,16,16" RowDefinitions="Auto,*" IsEnabled="{Binding !IsProcessing}">
       <TextBlock Text="{Binding Version.SettingsSaveStatusText}" Classes="caption" TextWrapping="Wrap" Margin="0,0,0,8"
                  Foreground="#FF9500" IsVisible="{Binding Version.SettingsSaveStatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
       <TabControl Classes="sidebar" Grid.Row="1">
@@ -117,5 +117,27 @@
         </TabItem>
       </TabControl>
     </Grid>
+    <Border IsVisible="{Binding IsProcessing}" Background="{DynamicResource Brush.ContainerAlt}">
+      <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+              MaxWidth="440" Margin="28" Padding="28,24"
+              Background="{DynamicResource Brush.Window}"
+              BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1" CornerRadius="18">
+        <StackPanel Spacing="16">
+          <TextBlock Text="{DynamicResource Text.Processing.Title}" FontSize="20" FontWeight="SemiBold"
+                     HorizontalAlignment="Center" Foreground="{DynamicResource Brush.FG1}" />
+          <ProgressBar IsIndeterminate="True" Height="4" Width="240"
+                       Foreground="{DynamicResource Brush.Accent}" />
+          <TextBlock Text="{Binding ProcessingText}" TextWrapping="Wrap"
+                     TextAlignment="Center" Foreground="{DynamicResource Brush.FG2}" />
+          <ScrollViewer MaxHeight="160" HorizontalScrollBarVisibility="Disabled"
+                        IsVisible="{Binding ProcessingDetail, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <TextBlock Text="{Binding ProcessingDetail}" TextWrapping="Wrap"
+                       Foreground="{DynamicResource Brush.FG2}" />
+          </ScrollViewer>
+          <Button Content="{DynamicResource Text.Button.Cancel}" HorizontalAlignment="Center"
+                  IsVisible="{Binding CanCancelProcessing}" Command="{Binding CancelProcessingCommand}" />
+        </StackPanel>
+      </Border>
+    </Border>
   </Panel>
 </Window>

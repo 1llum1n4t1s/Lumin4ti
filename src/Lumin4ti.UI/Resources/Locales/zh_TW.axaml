@@ -96,8 +96,8 @@
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">大量更新已安裝的應用程式（winget）</x:String>
   <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">使用 winget 套件管理員將所有已安裝的應用程式升級到最新版本。若需要更新的應用程式較多，下載與安裝可能需要一段時間。正在執行的應用程式可能因執行檔遭鎖定而更新失敗，但其餘會繼續更新，並顯示成功/失敗的明細。</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">重新取得 Defender 定義檔</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">先刪除一次 Windows Defender 的病毒定義與動態簽章，然後重新下載最新版本。用於修復因定義損毀導致誤判或更新錯誤的標準重新整理作業；執行期間即時保護仍持續運作。</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">清除 Defender 定義快取並檢查更新</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">刪除 Windows Defender 的動態簽章，然後檢查定義更新。不會刪除全部基礎定義或將其回復為舊版本。如果已經是最新版本，就不會額外下載。</x:String>
   <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">重設 Defender 設定（排除項目與主要選項）</x:String>
   <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">移除 Windows Defender 中登錄的所有排除路徑、處理程序與副檔名，並將即時保護、雲端保護等主要選項還原為預設值。清除惡意程式或舊軟體可能加入的排除項目（掃描盲點）。刻意加入的排除項目也會被移除，因此之後請重新加入所需項目。 Defender 服務完全停用時不會執行。使用其他防毒軟體的被動模式下，只要 Defender 服務和管理 cmdlet 可用，也可以執行。不儲存先前的設定。</x:String>
   <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">重設 Windows 安全性應用程式</x:String>
@@ -226,4 +226,9 @@
   <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">無法讀取設定。為保護原始檔案，已停止儲存，也不會執行登入時清理。變更僅在本次執行期間有效。</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">上次檢查時未找到目標。</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">重新開啟清單即可更新。執行時也會包含未被排除的新目標。</x:String>
+  <x:String x:Key="Text.Processing.Title" xml:space="preserve">處理中</x:String>
+  <x:String x:Key="Text.Processing.Wait" xml:space="preserve">請等待操作完成。</x:String>
+  <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">請等待取消及清理完成。</x:String>
+  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">開啟偵錯工具</x:String>
+  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">無法開啟偵錯工具。請檢查記錄。</x:String>
 </ResourceDictionary>

@@ -91,4 +91,9 @@
   <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">設定を読み込めないため、原本を保護して保存を停止し、サインイン時クリーンアップも実行しません。変更はこの起動中だけ有効です。</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">前回の確認では、対象が見つかりませんでした。</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">一覧は開き直すと更新されます。実行時は除外されていない新しい対象も含みます。</x:String>
+  <x:String x:Key="Text.Processing.Title" xml:space="preserve">処理中</x:String>
+  <x:String x:Key="Text.Processing.Wait" xml:space="preserve">処理が完了するまでお待ちください。</x:String>
+  <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">キャンセル後の後処理が完了するまでお待ちください。</x:String>
+  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">デバッグ画面を開く</x:String>
+  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">デバッグ画面を開けませんでした。ログを確認してください。</x:String>
 </ResourceDictionary>

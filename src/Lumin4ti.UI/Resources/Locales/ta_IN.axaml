@@ -96,8 +96,8 @@
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">நிறுவப்பட்ட பயன்பாடுகளை மொத்தமாகப் புதுப்பி (winget)</x:String>
   <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">winget தொகுப்பு மேலாளரைப் பயன்படுத்தி நிறுவப்பட்ட அனைத்து பயன்பாடுகளையும் அவற்றின் சமீபத்திய பதிப்புகளுக்கு மேம்படுத்துகிறது. பல பயன்பாடுகளுக்குப் புதுப்பிப்பு தேவைப்பட்டால், பதிவிறக்கமும் நிறுவலும் சிறிது நேரம் எடுக்கலாம். இயங்கிக்கொண்டிருக்கும் பயன்பாடுகளின் இயங்குகோப்புகள் பூட்டப்பட்டு புதுப்பிக்கத் தவறலாம், ஆனால் மற்றவை தொடரும், வெற்றி/தோல்வி விவரப் பட்டியல் காட்டப்படும்.</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Defender வரையறைக் கோப்புகளை மீண்டும் பெறு</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Windows Defender-இன் வைரஸ் வரையறைகளையும் இயங்குநிலைக் கையொப்பங்களையும் ஒருமுறை நீக்கி, சமீபத்தியவற்றை மீண்டும் பதிவிறக்குகிறது. தவறான கண்டறிதல்களை அல்லது புதுப்பிப்புப் பிழைகளை ஏற்படுத்தும் வரையறை சிதைவுக்கான வழக்கமான புதுப்பித்தல்; இயங்கும்போது நிகழ்நேரப் பாதுகாப்பு தொடர்ந்து செயல்படும்.</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Defender வரையறைத் தற்காலிகச் சேமிப்பை அழித்து புதுப்பிப்புகளைச் சரிபார்</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Windows Defender இன் மாறும் கையொப்பங்களை நீக்கி, வரையறைப் புதுப்பிப்புகளைச் சரிபார்க்கும். அடிப்படை வரையறைகள் அனைத்தையும் நீக்கவோ முந்தைய பதிப்பிற்கு மாற்றவோ செய்யாது. ஏற்கனவே சமீபத்திய நிலையில் இருந்தால் கூடுதல் பதிவிறக்கம் நடைபெறாது.</x:String>
   <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">Defender அமைப்புகளை மீட்டமை (விலக்குகள் &amp; முக்கிய விருப்பங்கள்)</x:String>
   <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Windows Defender-இல் பதிவுசெய்யப்பட்ட அனைத்து விலக்குப் பாதைகள், செயல்முறைகள், நீட்டிப்புகளை நீக்கி, நிகழ்நேர மற்றும் கிளவுட் பாதுகாப்பு போன்ற முக்கிய விருப்பங்களை அவற்றின் இயல்புநிலைக்கு மீட்டமைக்கிறது. தீம்பொருள் அல்லது பழைய மென்பொருள் சேர்த்திருக்கக்கூடிய விலக்குகளை (ஸ்கேன் குருட்டுப்புள்ளிகள்) அழிக்கிறது. வேண்டுமென்றே சேர்த்த விலக்குகளும் நீக்கப்படும், எனவே தேவைப்படுவற்றை பின்னர் மீண்டும் சேர்க்கவும். Defender சேவை முற்றிலும் முடக்கப்பட்டிருந்தால் இயங்காது. வேறு வைரஸ் தடுப்பானுடன் செயலற்ற பயன்முறையில் இருந்தாலும் Defender சேவையும் நிர்வாக cmdlet-களும் கிடைத்தால் இயங்கும். முந்தைய அமைப்புகள் சேமிக்கப்படாது.</x:String>
   <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">Windows Security பயன்பாட்டை மீட்டமை</x:String>
@@ -226,4 +226,9 @@
   <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">அமைப்புகளைப் படிக்க முடியவில்லை. அசல் கோப்பைப் பாதுகாக்க சேமிப்பு நிறுத்தப்பட்டுள்ளது; உள்நுழைவு நேரத் துப்புரவும் இயங்காது. மாற்றங்கள் இந்த அமர்வில் மட்டுமே பொருந்தும்.</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">கடைசிச் சரிபார்ப்பில் இலக்குகள் எதுவும் கிடைக்கவில்லை.</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">பட்டியலைப் புதுப்பிக்க மீண்டும் திறக்கவும். செயலை இயக்கும்போது விலக்கப்படாத புதிய இலக்குகளும் சேர்க்கப்படும்.</x:String>
+  <x:String x:Key="Text.Processing.Title" xml:space="preserve">செயலாக்கத்தில் உள்ளது</x:String>
+  <x:String x:Key="Text.Processing.Wait" xml:space="preserve">செயல்பாடு முடியும் வரை காத்திருக்கவும்.</x:String>
+  <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">ரத்துசெய்தலும் சுத்தம் செய்தலும் முடியும் வரை காத்திருக்கவும்.</x:String>
+  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">பிழைத்திருத்தியைத் திற</x:String>
+  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">பிழைத்திருத்தியைத் திறக்க முடியவில்லை. பதிவுகளைச் சரிபார்க்கவும்.</x:String>
 </ResourceDictionary>

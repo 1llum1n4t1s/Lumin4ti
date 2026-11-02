@@ -96,8 +96,8 @@
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Applicationes installatas simul renova (winget)</x:String>
   <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">Administro sarcinarum winget omnes applicationes installatas ad versiones novissimas provehit. Si multae applicationes renovatione egent, descensio et installatio tempus poscere possunt. Applicationes currentes exsecutabilia sua clausa habere et renovari deficere possunt, sed ceterae pergunt et divisio successus/defectus monstratur.</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Fasciculos definitionum Defender denuo pete</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Definitiones virorum et signaturas dynamicas Windows Defender semel delet, deinde novissimas denuo descendit. Renovatio usitata pro corruptione definitionum quae falsas detectiones vel errores renovationis efficit; dum currit, tutela realis temporis pergit operari.</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Memoriam temporariam definitionum Defender purgare et renovationes quaerere</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Signaturas dynamicas Windows Defender removet, deinde renovationes definitionum quaerit. Definitiones fundamentales integras nec delet nec ad versionem priorem restituit. Si iam recentes sunt, nihil amplius de interrete recipitur.</x:String>
   <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">Rationes Defender restitue (exclusiones &amp; optiones praecipuae)</x:String>
   <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Omnes vias exclusionis, processus et extensiones in Windows Defender registratas removet et optiones praecipuas sicut tutelam realis temporis et nubis ad praedefinita restituit. Exclusiones (loca caeca scrutationis) quas malware vel software vetus addere potuit purgat. Exclusiones consultae quoque removentur, ergo quas indiges postea denuo adde. Non exsequitur si ministerium Defender omnino intermissum est. Modus passivus cum alio antiviro admittitur, si ministerium Defender et cmdlet administrationis praesto sunt. Configurationes pristinae non servantur.</x:String>
   <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">Applicationem Windows Security restitue</x:String>
@@ -226,4 +226,9 @@
   <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Optiones legi non potuerunt. Servatio ad fasciculum originale protegendum impeditur, nec purgatio in initio sessionis fiet. Mutationes tantum in hac sessione valent.</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">Nulla obiecta in ultima inspectione inventa sunt.</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">Indicem denuo aperi ut renovetur. In executione obiecta nova quae non exclusa sunt quoque includuntur.</x:String>
+  <x:String x:Key="Text.Processing.Title" xml:space="preserve">Operatio agitur</x:String>
+  <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Exspecta dum operatio absolvatur.</x:String>
+  <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Exspecta dum revocatio et purgatio absolvantur.</x:String>
+  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">Depuratorem aperire</x:String>
+  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">Depurator aperiri non potuit. Acta inspice.</x:String>
 </ResourceDictionary>

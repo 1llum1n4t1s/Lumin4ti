@@ -96,8 +96,8 @@
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">I-update nang sabay-sabay ang mga naka-install na app (winget)</x:String>
   <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">Ginagamit ang package manager na winget para i-upgrade ang lahat ng naka-install na app sa pinakabagong bersyon. Kung maraming app ang kailangang i-update, maaaring tumagal ang pag-download at pag-install. Ang mga app na tumatakbo ay maaaring naka-lock ang executable at mabigo sa pag-update, ngunit magpapatuloy ang iba at ipapakita ang buod ng tagumpay/pagkabigo.</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Muling kunin ang mga definition file ng Defender</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Minsang binubura ang mga virus definition at dynamic signature ng Windows Defender, pagkatapos ay muling dina-download ang pinakabago. Isang karaniwang refresh para sa sirang definition na nagdudulot ng maling pagtukoy o error sa update; patuloy na gumagana ang real-time protection habang tumatakbo ito.</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Burahin ang definition cache ng Defender at tingnan ang mga update</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Binubura ang mga dynamic signature ng Windows Defender at sinusuri ang mga update ng definition. Hindi binubura o ibinabalik sa dating bersyon ang buong base definition. Kung napapanahon na, walang karagdagang pag-download.</x:String>
   <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">I-reset ang mga setting ng Defender (exclusions at pangunahing opsyon)</x:String>
   <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Inaalis ang lahat ng exclusion path, proseso, at extension na nakarehistro sa Windows Defender at ibinabalik ang pangunahing opsyon tulad ng real-time at cloud protection sa mga default. Nililinis ang mga exclusion (mga blind spot sa scan) na maaaring naidagdag ng malware o lumang software. Naaalis din ang mga sinadyang exclusion, kaya idagdag muli ang mga kailangan mo pagkatapos. Hindi tatakbo kung ganap na naka-disable ang serbisyo ng Defender. Suportado ang passive mode habang may ibang antivirus kung available ang serbisyo ng Defender at mga cmdlet sa pamamahala. Hindi sine-save ang mga dating setting.</x:String>
   <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">I-reset ang Windows Security app</x:String>
@@ -226,4 +226,9 @@
   <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Hindi mabasa ang settings. Naka-disable ang pag-save para protektahan ang orihinal na file, at hindi tatakbo ang sign-in cleanup. Sa session na ito lang may bisa ang mga pagbabago.</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">Walang nakitang target noong huling pagsusuri.</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">Buksan muli ang listahan upang i-refresh ito. Kasama rin ang mga bagong nahanap na target na hindi ibinukod kapag pinatakbo ang aksyon.</x:String>
+  <x:String x:Key="Text.Processing.Title" xml:space="preserve">Pinoproseso</x:String>
+  <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Hintaying matapos ang operasyon.</x:String>
+  <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Hintaying matapos ang pagkansela at paglilinis.</x:String>
+  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">Buksan ang debugger</x:String>
+  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">Hindi mabuksan ang debugger. Tingnan ang mga log.</x:String>
 </ResourceDictionary>

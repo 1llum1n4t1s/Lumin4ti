@@ -96,8 +96,8 @@
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Atualizar os aplicativos instalados em lote (winget)</x:String>
   <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">Usa o gerenciador de pacotes winget para atualizar todos os aplicativos instalados para as versões mais recentes. Se muitos aplicativos precisarem de atualização, o download e a instalação podem demorar. Aplicativos em execução podem ter seus executáveis bloqueados e falhar na atualização, mas os demais continuam e um resumo de sucessos/falhas é exibido.</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Baixar novamente os arquivos de definições do Defender</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Exclui uma vez as definições de vírus e as assinaturas dinâmicas do Windows Defender e baixa novamente as mais recentes. Uma atualização padrão para corrupção de definições que causa detecções falsas ou erros de atualização; a proteção em tempo real continua funcionando enquanto é executada.</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Limpar o cache de definições do Defender e verificar atualizações</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Remove as assinaturas dinâmicas do Windows Defender e verifica atualizações de definições. Não exclui nem reverte todas as definições básicas. Se já estiverem atualizadas, nenhum download adicional será feito.</x:String>
   <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">Redefinir as configurações do Defender (exclusões e opções principais)</x:String>
   <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Remove todos os caminhos, processos e extensões de exclusão registrados no Windows Defender e restaura as opções principais, como proteção em tempo real e na nuvem, para os padrões. Limpa as exclusões (pontos cegos da verificação) que malware ou softwares antigos possam ter adicionado. As exclusões intencionais também são removidas, então adicione novamente as que você precisar depois. Não é executado se o serviço do Defender estiver totalmente desabilitado. O modo passivo com outro antivírus é compatível se o serviço do Defender e os cmdlets de gerenciamento estiverem disponíveis. As configurações anteriores não são salvas.</x:String>
   <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">Redefinir o aplicativo Segurança do Windows</x:String>
@@ -226,4 +226,9 @@
   <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Não foi possível ler as configurações. O salvamento está desativado para proteger o arquivo original e a limpeza ao entrar não será executada. As alterações valem apenas nesta sessão.</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">Nenhum item foi encontrado na última verificação.</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">Reabra a lista para atualizá-la. Os novos itens que não foram excluídos da seleção também são incluídos ao executar a ação.</x:String>
+  <x:String x:Key="Text.Processing.Title" xml:space="preserve">Processando</x:String>
+  <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Aguarde a conclusão da operação.</x:String>
+  <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Aguarde a conclusão do cancelamento e da limpeza.</x:String>
+  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">Abrir depurador</x:String>
+  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">Não foi possível abrir o depurador. Verifique os logs.</x:String>
 </ResourceDictionary>

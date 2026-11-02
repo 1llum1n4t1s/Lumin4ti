@@ -96,8 +96,8 @@
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">批量更新已安装的应用（winget）</x:String>
   <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">使用 winget 包管理器将所有已安装的应用升级到最新版本。如果需要更新的应用较多，下载和安装可能需要一段时间。正在运行的应用可能因可执行文件被锁定而更新失败，但其余应用会继续更新，并显示成功/失败的明细。</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">重新获取 Defender 定义文件</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">先删除一次 Windows Defender 的病毒定义和动态签名，然后重新下载最新版本。用于修复因定义损坏导致的误报或更新错误的标准刷新操作；运行期间实时保护仍持续工作。</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">清理 Defender 定义缓存并检查更新</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">删除 Windows Defender 的动态签名，然后检查定义更新。不会删除全部基础定义或将其回退到旧版本。如果已经是最新版本，则不会额外下载。</x:String>
   <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">重置 Defender 设置（排除项与主要选项）</x:String>
   <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">删除 Windows Defender 中注册的所有排除路径、进程和扩展名，并将实时保护、云保护等主要选项恢复为默认值。清除恶意软件或旧软件可能添加的排除项（扫描盲区）。有意添加的排除项也会被删除，因此之后请重新添加所需项。 Defender 服务完全禁用时不会执行。使用其他杀毒软件的被动模式下，只要 Defender 服务和管理 cmdlet 可用，也可以执行。不保存之前的设置。</x:String>
   <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">重置 Windows 安全应用</x:String>
@@ -226,4 +226,9 @@
   <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">无法读取设置。为保护原文件，已停止保存，也不会执行登录时清理。更改仅在本次运行期间有效。</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">上次检查时未找到目标。</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">重新打开列表即可更新。执行时也会包含未被排除的新目标。</x:String>
+  <x:String x:Key="Text.Processing.Title" xml:space="preserve">正在处理</x:String>
+  <x:String x:Key="Text.Processing.Wait" xml:space="preserve">请等待操作完成。</x:String>
+  <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">请等待取消和清理完成。</x:String>
+  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">打开调试器</x:String>
+  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">无法打开调试器。请检查日志。</x:String>
 </ResourceDictionary>

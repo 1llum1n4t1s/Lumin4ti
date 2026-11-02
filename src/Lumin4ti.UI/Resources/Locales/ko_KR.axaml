@@ -96,8 +96,8 @@
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">설치된 앱 일괄 업데이트(winget)</x:String>
   <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">winget 패키지 관리자를 사용해 설치된 모든 앱을 최신 버전으로 업그레이드합니다. 업데이트할 앱이 많으면 다운로드와 설치에 시간이 걸릴 수 있습니다. 실행 중인 앱은 실행 파일이 잠겨 업데이트에 실패할 수 있지만, 나머지는 계속 진행되며 성공/실패 내역이 표시됩니다.</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Defender 정의 파일 다시 가져오기</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Windows Defender의 바이러스 정의와 동적 서명을 한 번 삭제한 후 최신 버전을 다시 다운로드합니다. 오탐이나 업데이트 오류를 일으키는 정의 손상을 위한 표준 새로 고침이며, 실행 중에도 실시간 보호는 계속 작동합니다.</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Defender 정의 캐시 지우기 및 업데이트 확인</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Windows Defender의 동적 서명을 삭제한 다음 정의 업데이트를 확인합니다. 기본 정의 전체를 삭제하거나 이전 버전으로 되돌리지 않습니다. 이미 최신 상태이면 추가 다운로드를 하지 않습니다.</x:String>
   <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">Defender 설정 초기화(제외 항목 및 주요 옵션)</x:String>
   <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Windows Defender에 등록된 모든 제외 경로, 프로세스, 확장명을 제거하고 실시간 보호, 클라우드 보호 등 주요 옵션을 기본값으로 복원합니다. 악성 코드나 오래된 소프트웨어가 추가했을 수 있는 제외 항목(검사 사각지대)을 지웁니다. 의도적으로 추가한 제외 항목도 제거되므로 필요한 항목은 이후 다시 추가하세요. Defender 서비스가 완전히 비활성화된 환경에서는 실행하지 않습니다. 다른 백신을 사용하는 수동 모드에서도 Defender 서비스와 관리 cmdlet을 사용할 수 있으면 실행할 수 있습니다. 이전 설정은 저장하지 않습니다.</x:String>
   <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">Windows 보안 앱 초기화</x:String>
@@ -226,4 +226,9 @@
   <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">설정을 읽을 수 없습니다. 원본 파일을 보호하기 위해 저장을 중지하고 로그인 시 정리도 실행하지 않습니다. 변경 사항은 이번 실행 중에만 적용됩니다.</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">마지막 확인에서 대상을 찾지 못했습니다.</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">목록을 다시 열면 업데이트됩니다. 실행 시 제외되지 않은 새 대상도 포함됩니다.</x:String>
+  <x:String x:Key="Text.Processing.Title" xml:space="preserve">처리 중</x:String>
+  <x:String x:Key="Text.Processing.Wait" xml:space="preserve">작업이 완료될 때까지 기다려 주세요.</x:String>
+  <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">취소 및 정리 작업이 완료될 때까지 기다려 주세요.</x:String>
+  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">디버거 열기</x:String>
+  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">디버거를 열 수 없습니다. 로그를 확인하세요.</x:String>
 </ResourceDictionary>

@@ -96,8 +96,8 @@
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Mettre à jour les applications installées en masse (winget)</x:String>
   <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">Utilise le gestionnaire de paquets winget pour mettre à jour toutes les applications installées vers leurs dernières versions. Si de nombreuses applications doivent être mises à jour, le téléchargement et l'installation peuvent prendre du temps. Les applications en cours d'exécution peuvent avoir leurs exécutables verrouillés et échouer à la mise à jour, mais les autres se poursuivent et un récapitulatif des succès/échecs s'affiche.</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Récupérer à nouveau les fichiers de définition de Defender</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Supprime une fois les définitions de virus et les signatures dynamiques de Windows Defender, puis retélécharge les plus récentes. Une actualisation standard en cas de corruption des définitions provoquant de fausses détections ou des erreurs de mise à jour ; la protection en temps réel reste active pendant l'opération.</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Vider le cache des définitions Defender et rechercher les mises à jour</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Supprime les signatures dynamiques de Windows Defender, puis recherche les mises à jour des définitions. Ne supprime ni ne restaure les définitions de base complètes. Si elles sont déjà à jour, aucun téléchargement supplémentaire ne se produit.</x:String>
   <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">Réinitialiser les paramètres de Defender (exclusions &amp; options principales)</x:String>
   <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Supprime tous les chemins, processus et extensions d'exclusion enregistrés dans Windows Defender et restaure les options principales telles que la protection en temps réel et cloud à leurs valeurs par défaut. Efface les exclusions (angles morts d'analyse) que des logiciels malveillants ou d'anciens logiciels ont pu ajouter. Les exclusions intentionnelles sont également supprimées, alors rajoutez ensuite celles dont vous avez besoin. Ne s’exécute pas si le service Defender est entièrement désactivé. Le mode passif avec un autre antivirus est pris en charge si le service Defender et les cmdlets de gestion sont disponibles. Les anciens paramètres ne sont pas enregistrés.</x:String>
   <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">Réinitialiser l'application Sécurité Windows</x:String>
@@ -226,4 +226,9 @@
   <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Les paramètres sont illisibles. L’enregistrement est désactivé pour protéger le fichier d’origine et le nettoyage à la connexion ne sera pas exécuté. Les modifications ne valent que pour cette session.</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">Aucune cible trouvée lors de la dernière vérification.</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">Rouvrez la liste pour l’actualiser. Les nouvelles cibles qui ne sont pas exclues sont également incluses lors de l’exécution.</x:String>
+  <x:String x:Key="Text.Processing.Title" xml:space="preserve">Traitement en cours</x:String>
+  <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Veuillez patienter pendant le traitement.</x:String>
+  <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Veuillez attendre la fin de la procédure et du nettoyage.</x:String>
+  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">Ouvrir le débogueur</x:String>
+  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">Ouverture du débogueur impossible. Consultez les journaux.</x:String>
 </ResourceDictionary>

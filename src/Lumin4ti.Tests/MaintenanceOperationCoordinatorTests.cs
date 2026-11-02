@@ -124,6 +124,69 @@ public sealed class MaintenanceOperationCoordinatorTests
         Assert.IsTrue(updateStarted);
         Assert.AreEqual(0, coordinator.ActiveCount);
     }
+    [TestMethod]
+    public async Task 項目からの中断は補償完了まで表示を保ち次の操作を受け付ける()
+    {
+        var coordinator = new MaintenanceOperationCoordinator(() => new TestOperationLock());
+        using var itemCancellation = new CancellationTokenSource();
+        Assert.IsTrue(coordinator.TryBegin(out var operation, itemCancellation.Token));
+        var idle = coordinator.WaitForIdleAsync();
+        Assert.AreEqual((true, true), coordinator.ProcessingState);
+
+        itemCancellation.Cancel();
+
+        Assert.IsTrue(operation!.Token.IsCancellationRequested);
+        Assert.AreEqual((true, false), coordinator.ProcessingState);
+        Assert.IsFalse(coordinator.IsStopping);
+        Assert.IsFalse(idle.IsCompleted);
+        Assert.IsFalse(coordinator.TryBegin(out _));
+
+        operation.Dispose();
+        await idle;
+        Assert.AreEqual((false, false), coordinator.ProcessingState);
+        Assert.IsTrue(coordinator.TryBegin(out var next));
+        next!.Dispose();
+    }
+
+    [TestMethod]
+    public async Task 状態照会は表示せず失敗してもリースを解放する()
+    {
+        var coordinator = new MaintenanceOperationCoordinator(() => new TestOperationLock());
+        var notified = 0;
+        coordinator.StateChanged += (_, _) => notified++;
+
+        await Assert.ThrowsExactlyAsync<InvalidOperationException>(() =>
+            MainWindowViewModel.RunStateReloadAsync(coordinator, _ =>
+            {
+                Assert.AreEqual(1, coordinator.ActiveCount);
+                Assert.AreEqual((false, false), coordinator.ProcessingState);
+                throw new InvalidOperationException("照会失敗");
+            }));
+
+        Assert.AreEqual(0, coordinator.ActiveCount);
+        Assert.AreEqual(2, notified);
+        Assert.IsTrue(coordinator.TryBegin(out var next));
+        next!.Dispose();
+    }
+
+    [TestMethod]
+    public void 表示通知の例外で開始中断完了と後続通知を妨げない()
+    {
+        var coordinator = new MaintenanceOperationCoordinator(() => new TestOperationLock());
+        var states = new List<(bool IsProcessing, bool CanCancel)>();
+        coordinator.StateChanged += (_, _) => throw new InvalidOperationException("表示側の失敗");
+        coordinator.StateChanged += (_, _) => states.Add(coordinator.ProcessingState);
+
+        Assert.IsTrue(coordinator.TryBegin(out var operation));
+        coordinator.RequestCancellation();
+        operation!.Dispose();
+        operation.Dispose();
+
+        CollectionAssert.AreEqual(
+            new[] { (true, true), (true, false), (false, false) }, states);
+        Assert.AreEqual(0, coordinator.ActiveCount);
+    }
+
     private sealed class TestOperationLock : IDisposable
     {
         public void Dispose() { }

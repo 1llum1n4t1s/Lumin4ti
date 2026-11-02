@@ -94,8 +94,8 @@
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Update installed apps in bulk (winget)</x:String>
   <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">Uses the winget package manager to upgrade all installed apps to their latest versions. If many apps need updating, download and installation can take a while. Apps that are running may have their executables locked and fail to update, but the others continue and a success/failure breakdown is shown.</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Re-fetch Defender definition files</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Deletes Windows Defender's virus definitions and dynamic signatures once, then re-downloads the latest ones. A standard refresh for definition corruption causing false detections or update errors; real-time protection keeps working while it runs.</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Clear Defender definition cache and check for updates</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Removes Windows Defender dynamic signatures, then checks for definition updates. Does not delete or roll back the full base definitions. If already up to date, no additional download occurs.</x:String>
   <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">Reset Defender settings (exclusions &amp; main options)</x:String>
   <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Removes all exclusion paths, processes, and extensions registered in Windows Defender and restores main options such as real-time and cloud protection to their defaults. Clears exclusions (scan blind spots) that malware or old software may have added. Intentional exclusions are removed too, so re-add any you need afterward. Does not run when the Defender service is fully disabled. Passive mode with another antivirus is supported when the Defender service and management cmdlets are available. Previous settings are not saved.</x:String>
   <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">Reset the Windows Security app</x:String>
@@ -224,4 +224,9 @@
   <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Settings could not be read. Saving is disabled to protect the original file, and sign-in cleanup will not run. Changes apply only during this session.</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">No targets were found at the last check.</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">Reopen the list to refresh it. Newly found targets that are not excluded are also included when you run the action.</x:String>
+  <x:String x:Key="Text.Processing.Title" xml:space="preserve">Processing</x:String>
+  <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Please wait for the operation to finish.</x:String>
+  <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Please wait for cancellation and cleanup to finish.</x:String>
+  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">Open debugger</x:String>
+  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">Could not open the debugger. Check the logs.</x:String>
 </ResourceDictionary>

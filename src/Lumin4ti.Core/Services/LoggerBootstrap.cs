@@ -14,6 +14,7 @@ public static class LoggerBootstrap
     public static ILog Log => _log ??= LogManager.GetLogger(typeof(LoggerBootstrap));
 
     private static bool _initialized;
+    private static ILoggerFactory? _factory;
 
     /// <summary>
     /// ログ構成自体に失敗した理由 (成功時は null)。ファイルへ残せない状況を
@@ -45,18 +46,21 @@ public static class LoggerBootstrap
             }
             Directory.CreateDirectory(AppPaths.LogsDirectory);
 
-            LogManager.Configure(builder =>
+            _factory = LoggerFactory.Create(builder =>
             {
                 builder.AddSuperLightFile(Path.Combine(AppPaths.LogsDirectory, "Lumin4ti_${shortdate}.log"));
                 builder.SetMinimumLevel(LogLevel.Information);
             });
+            LogManager.Configure(_factory);
         }
         catch (Exception ex)
         {
-            // ここで失敗するとログ自体が残せないため、標準エラーだけが唯一の手がかりになる。
             InitializationFailure = $"{ex.GetType().Name}: {ex.Message}";
             Console.Error.WriteLine(
                 $"[Lumin4ti] ログ出力を構成できませんでした ({AppPaths.LogsDirectory}): {InitializationFailure}");
+            // ファイルを作れなくても、UI 起動後にメモリ内のデバッグ画面へ接続できるようにする。
+            _factory ??= LoggerFactory.Create(builder => builder.SetMinimumLevel(LogLevel.Information));
+            LogManager.Configure(_factory);
         }
     }
 
@@ -112,5 +116,80 @@ public static class LoggerBootstrap
         }
     }
 
-    public static void Shutdown() => LogManager.Shutdown();
+    /// <summary>既存のファイル出力を維持して、切離し可能な追加出力先を登録する。</summary>
+    public static IDisposable AttachProvider(ILoggerProvider provider) => AttachProvider(_factory, provider);
+
+    internal static IDisposable AttachProvider(ILoggerFactory? factory, ILoggerProvider provider)
+    {
+        ArgumentNullException.ThrowIfNull(provider);
+        var forwarding = new DetachableProvider(provider);
+        try
+        {
+            (factory ?? throw new InvalidOperationException("ログ出力が初期化されていません。")).AddProvider(forwarding);
+            return forwarding;
+        }
+        catch
+        {
+            forwarding.Dispose();
+            throw;
+        }
+    }
+
+    private sealed class DetachableProvider(ILoggerProvider provider) : ILoggerProvider
+    {
+        private readonly object _gate = new();
+        private ILoggerProvider? _provider = provider;
+
+        public ILogger CreateLogger(string categoryName)
+        {
+            lock (_gate)
+            {
+                return new ForwardingLogger(this, _provider?.CreateLogger(categoryName));
+            }
+        }
+
+        public void Dispose()
+        {
+            lock (_gate)
+            {
+                var current = _provider;
+                _provider = null;
+                current?.Dispose();
+            }
+        }
+
+        private sealed class ForwardingLogger(DetachableProvider owner, ILogger? logger) : ILogger
+        {
+            public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+            public bool IsEnabled(LogLevel logLevel)
+            {
+                lock (owner._gate)
+                    return owner._provider is not null && logger?.IsEnabled(logLevel) == true;
+            }
+
+            public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
+                Func<TState, Exception?, string> formatter)
+            {
+                lock (owner._gate)
+                {
+                    if (owner._provider is null) return;
+                    try
+                    {
+                        logger?.Log(logLevel, eventId, state, exception, formatter);
+                    }
+                    catch (Exception ex)
+                    {
+                        // 追加出力先の障害で、本来の操作やファイルへのログ記録を失敗させない。
+                        Console.Error.WriteLine($"[Lumin4ti] 追加ログ出力に失敗しました: {ex.GetType().Name}");
+                    }
+                }
+            }
+        }
+    }
+
+    public static void Shutdown()
+    {
+        _factory = null;
+        LogManager.Shutdown();
+    }
 }

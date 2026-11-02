@@ -51,6 +51,17 @@
         "resolved": "8.4.2",
         "contentHash": "WadCzGEc2U+3e20avRLng4qNtt4zoOGWrdUISqJWrHe3/FSnrYjuM5Sb4yQb09LhkBXrrI4Zt3dLKgRMbItsrg=="
       },
+      "CRDebugger.Avalonia": {
+        "type": "Direct",
+        "requested": "[1.0.34, )",
+        "resolved": "1.0.34",
+        "contentHash": "6yVMxw4yAZUKoqH9omLBc/bfkIQRB+tpQFnAtt/ijhTe3RrGBamY1NrAso+hBYznGw1qZff0H0ZCnI/fWqs0lA==",
+        "dependencies": {
+          "Avalonia": "12.1.2",
+          "Avalonia.Themes.Fluent": "12.1.2",
+          "Microsoft.Extensions.Logging.Abstractions": "10.0.12"
+        }
+      },
       "Microsoft.Extensions.DependencyInjection": {
         "type": "Direct",
         "requested": "[10.0.14, )",

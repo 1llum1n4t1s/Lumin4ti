@@ -96,8 +96,8 @@
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">स्थापितान् अनुप्रयोगान् समूहशः नवीकुरु (winget)</x:String>
   <x:String x:Key="Text.Action.winget-upgrade-all.Desc" xml:space="preserve">winget-संकुलप्रबन्धकेन सर्वान् स्थापितान् अनुप्रयोगान् नवीनतमसंस्करणेभ्यः उन्नयति। यदि बहवः अनुप्रयोगाः नवीकरणम् अपेक्षन्ते, तर्हि अवचयनं स्थापनं च कालं गृह्णीयात्। चालमानानाम् अनुप्रयोगानां निष्पादनसञ्चिकाः अवरुद्धाः स्युः नवीकरणे च विफलेयुः, परं अन्ये निरन्तरं चलन्ति, सफलता/विफलता-विवरणं च दर्श्यते।</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Defender-परिभाषासञ्चिकाः पुनः आनय</x:String>
-  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Windows Defender-स्य विषाणुपरिभाषाः गतिशीलहस्ताक्षराणि च एकवारं लोपयति, ततः नवीनतमानि पुनः अवचिनोति। मिथ्याशोधनं नवीकरणदोषान् वा जनयतः परिभाषाभ्रष्टतायाः प्रामाणिकं पुनर्नवीकरणम्; चालने वास्तविककालसुरक्षा निरन्तरं कार्यं करोति।</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Label" xml:space="preserve">Defender परिभाषासञ्चयं शोधयित्वा अद्यतनानि परीक्ष्यन्ताम्</x:String>
+  <x:String x:Key="Text.Action.defender-signature-update.Desc" xml:space="preserve">Windows Defender इत्यस्य गतिशीलहस्ताक्षराणि अपास्य परिभाषाणाम् अद्यतनानि परीक्ष्यन्ते। सम्पूर्णाः मूलपरिभाषाः न अपसार्यन्ते, न च पूर्वसंस्करणं प्रति प्रत्यावर्त्यन्ते। यदि ताः अद्यतनाः एव सन्ति, अतिरिक्तम् अवतरणं न भवति।</x:String>
   <x:String x:Key="Text.Action.defender-reset.Label" xml:space="preserve">Defender-विन्यासान् प्रत्यानय (अपवर्जनानि &amp; मुख्यविकल्पाः)</x:String>
   <x:String x:Key="Text.Action.defender-reset.Desc" xml:space="preserve">Windows Defender-मध्ये पञ्जीकृतान् सर्वान् अपवर्जनपथान्, प्रक्रियाः, विस्तारान् च अपनयति, वास्तविककाल-मेघसुरक्षादीन् मुख्यविकल्पान् च तेषां प्रामाणिकस्थितिं प्रत्यानयति। दुष्टक्रमः पुरातनसाफ्ट्वेयरं वा योजितवत् अपवर्जनानि (स्कैन-अन्धस्थलानि) परिमार्ष्टि। साभिप्रायाणि अपवर्जनानि अपि अपनीयन्ते, अतः आवश्यकानि पश्चात् पुनः योजय। Defender सेवा पूर्णतया निष्क्रिया चेत् न प्रवर्तते। अन्यस्मिन् विषाणुरोधके प्रयुज्यमाने निष्क्रियमात्रविधावपि Defender सेवा प्रबन्धनcmdlet च उपलब्धौ चेत् प्रवर्तते। पूर्वविन्यासाः न संरक्ष्यन्ते।</x:String>
   <x:String x:Key="Text.Action.security-app-reset.Label" xml:space="preserve">Windows Security-अनुप्रयोगं प्रत्यानय</x:String>
@@ -226,4 +226,9 @@
   <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">विन्यासाः पठितुं न शक्यन्ते। मूलसञ्चिकारक्षणार्थं संरक्षणं स्थगितम्, प्रवेशसमये स्वच्छतापि न निष्पाद्यते। परिवर्तनानि अस्मिन्नेव सत्रे प्रभावीणि।</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">पूर्वपरीक्षणे लक्ष्याणि न प्राप्तानि।</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">सूचीं पुनरुद्घाट्य नवीकरोतु। निष्पादनसमये अवर्जितानि नूतनलक्ष्याण्यपि समाविश्यन्ते।</x:String>
+  <x:String x:Key="Text.Processing.Title" xml:space="preserve">कार्यं प्रचलति</x:String>
+  <x:String x:Key="Text.Processing.Wait" xml:space="preserve">कार्यसमाप्तिपर्यन्तं प्रतीक्षताम्।</x:String>
+  <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">निरसनस्य शोधनस्य च समाप्तिपर्यन्तं प्रतीक्षताम्।</x:String>
+  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">दोषान्वेषकं उद्घाटयतु</x:String>
+  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">दोषान्वेषकः उद्घाटयितुं न शक्यते। वृत्तान्तान् पश्यतु।</x:String>
 </ResourceDictionary>
