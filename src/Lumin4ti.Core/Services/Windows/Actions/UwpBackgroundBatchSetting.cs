@@ -82,7 +82,9 @@ public sealed class UwpBackgroundBatchSetting : IMaintenanceBatchSetting
             else if (error is OperationCanceledException && ct.IsCancellationRequested)
                 result = MaintenanceActionResult.Canceled($"{operation}を取り消し、変更済みの設定を操作前の値へ補償しました。");
             else
-                result = MaintenanceActionResult.Fail($"{operation}に失敗しました。変更済みの設定を操作前の値へ補償しました。\n  - {error.Message}");
+                result = MaintenanceActionResult.Fail($"{operation}に失敗しました。" +
+                    (attempted.Count == 0 ? "設定は変更していません。" : "変更済みの設定を操作前の値へ補償しました。") +
+                    $"\n  - {error.Message}");
         }
         MaintenanceItemLog.LogResult(this, operation, result);
         return result;
@@ -132,8 +134,15 @@ public sealed class UwpBackgroundBatchSetting : IMaintenanceBatchSetting
             .Where(package =>
             {
                 // 固定のインストール済み manifest の属性だけを読む。判定不能なら全件の書込前に中止する。
-                using var manifest = File.OpenText(Path.Combine(package.InstalledLocation.Path, "AppxManifest.xml"));
-                return ContainsUwpApplications(manifest);
+                try
+                {
+                    using var manifest = File.OpenText(Path.Combine(package.InstalledLocation.Path, "AppxManifest.xml"));
+                    return ContainsUwpApplications(manifest);
+                }
+                catch (Exception error)
+                {
+                    throw new InvalidDataException($"{package.Id.FamilyName} の manifest を確認できませんでした: {error.Message}", error);
+                }
             })
             .Select(package => package.Id.FamilyName)
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -150,8 +159,6 @@ public sealed class UwpBackgroundBatchSetting : IMaintenanceBatchSetting
         });
         var document = XDocument.Load(reader);
         XNamespace foundation = "http://schemas.microsoft.com/appx/manifest/foundation/windows10";
-        XNamespace uap10 = "http://schemas.microsoft.com/appx/manifest/uap/windows10/10";
-        XNamespace previewSecurity2 = "http://schemas.microsoft.com/appx/manifest/preview/windows10/security/2";
         // Windows 8/8.1 の既知パッケージは Windows 10 UWP の一括設定対象に含めない。
         if (document.Root?.Name == XName.Get("Package", "http://schemas.microsoft.com/appx/2010/manifest"))
             return false;
@@ -160,35 +167,51 @@ public sealed class UwpBackgroundBatchSetting : IMaintenanceBatchSetting
         var hasUwp = false;
         foreach (var application in document.Root.Elements(foundation + "Applications").Elements(foundation + "Application"))
         {
-            // Microsoft の Application スキーマ: windowsApp、または旧形式の通常 EntryPoint が UWP。
-            // https://learn.microsoft.com/uwp/schemas/appxpackage/uapmanifestschema/element-f-application
-            var behavior = (string?)application.Attribute(uap10 + "RuntimeBehavior");
-            var previewBehavior = (string?)application.Attribute(previewSecurity2 + "RuntimeBehavior");
-            if (behavior == "appSilo")
-                throw new InvalidDataException("uap10 の RuntimeBehavior を判定できませんでした。");
-            if (behavior is not null && previewBehavior is not null && behavior != previewBehavior)
-                throw new InvalidDataException("アプリの RuntimeBehavior に矛盾があります。");
-            behavior ??= previewBehavior;
-            if (behavior is not null && behavior is not ("windowsApp" or "win32App" or "packagedClassicApp" or "appSilo"))
-                throw new InvalidDataException("アプリの RuntimeBehavior を判定できませんでした。");
-            var entryPoint = (string?)application.Attribute("EntryPoint");
-            var startPage = (string?)application.Attribute("StartPage");
-            bool? legacyUwp = !string.IsNullOrWhiteSpace(entryPoint)
-                ? !entryPoint.Equals("windows.fullTrustApplication", StringComparison.OrdinalIgnoreCase)
-                    && !entryPoint.Equals("windows.partialTrustApplication", StringComparison.OrdinalIgnoreCase)
-                : !string.IsNullOrWhiteSpace(startPage) ? true : null;
-            if (behavior is not null)
-            {
-                var isUwp = behavior == "windowsApp";
-                if (legacyUwp is { } legacy && legacy != isUwp)
-                    throw new InvalidDataException("アプリの RuntimeBehavior と起動属性に矛盾があります。");
-                hasUwp |= isUwp;
-            }
-            else if (legacyUwp is { } legacy)
-                hasUwp |= legacy;
-            else
-                throw new InvalidDataException("アプリの EntryPoint を判定できませんでした。");
+            var applicationRuntime = GetUwpRuntime(application);
+            hasUwp |= applicationRuntime == true;
+            // EntryPoint は任意。データ・コーデックだけの宣言は対象外とし、
+            // 背景タスク専用アプリは Extension 自身の起動属性から判定する。
+            // https://learn.microsoft.com/uwp/schemas/appxpackage/uapmanifestschema/element-f-application-extension
+            foreach (var extension in application.Elements(foundation + "Extensions").Elements()
+                .Where(element => element.Name.LocalName == "Extension"))
+                hasUwp |= GetUwpRuntime(extension, applicationRuntime) == true;
         }
         return hasUwp;
+    }
+
+    private static bool? GetUwpRuntime(XElement element, bool? inheritedRuntime = null)
+    {
+        XNamespace uap10 = "http://schemas.microsoft.com/appx/manifest/uap/windows10/10";
+        XNamespace previewSecurity2 = "http://schemas.microsoft.com/appx/manifest/preview/windows10/security/2";
+        var behavior = (string?)element.Attribute(uap10 + "RuntimeBehavior");
+        var previewBehavior = (string?)element.Attribute(previewSecurity2 + "RuntimeBehavior");
+        if (behavior == "appSilo")
+            throw new InvalidDataException("uap10 の RuntimeBehavior を判定できませんでした。");
+        if (behavior is not null && previewBehavior is not null && behavior != previewBehavior)
+            throw new InvalidDataException("アプリの RuntimeBehavior に矛盾があります。");
+        behavior ??= previewBehavior;
+        if (behavior is not null && behavior is not ("windowsApp" or "win32App" or "packagedClassicApp" or "appSilo"))
+            throw new InvalidDataException("アプリの RuntimeBehavior を判定できませんでした。");
+        var entryPoint = (string?)element.Attribute("EntryPoint");
+        var startPage = (string?)element.Attribute("StartPage");
+        bool? legacyUwp = !string.IsNullOrWhiteSpace(entryPoint)
+            ? !entryPoint.Equals("windows.fullTrustApplication", StringComparison.OrdinalIgnoreCase)
+                && !entryPoint.Equals("windows.partialTrustApplication", StringComparison.OrdinalIgnoreCase)
+            : !string.IsNullOrWhiteSpace(startPage) ? true : null;
+        if (behavior is not null)
+        {
+            var isUwp = behavior == "windowsApp";
+            if (legacyUwp is { } legacy && legacy != isUwp)
+                throw new InvalidDataException("アプリの RuntimeBehavior と起動属性に矛盾があります。");
+            return isUwp;
+        }
+        else if (legacyUwp is { } legacy)
+            return legacy;
+        if (inheritedRuntime is not null)
+            return inheritedRuntime;
+        if (!string.IsNullOrWhiteSpace((string?)element.Attribute("Executable")) ||
+            !string.IsNullOrWhiteSpace((string?)element.Attribute(uap10 + "HostId")))
+            throw new InvalidDataException("アプリの EntryPoint を判定できませんでした。");
+        return null;
     }
 }

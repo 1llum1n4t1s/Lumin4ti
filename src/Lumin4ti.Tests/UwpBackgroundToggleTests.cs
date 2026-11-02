@@ -42,6 +42,10 @@ public sealed class UwpBackgroundToggleTests
     [DataRow("<Application EntryPoint=\"Windows.FullTrustApplication\" />", false)]
     [DataRow("<Application EntryPoint=\"windows.partialTrustApplication\" />", false)]
     [DataRow("<Application EntryPoint=\"Windows.FullTrustApplication\" /><Application EntryPoint=\"Example.App\" />", true)]
+    [DataRow("<Application Id=\"SourceData\"><Extensions><Extension Category=\"windows.appExtension\" /></Extensions></Application>", false)]
+    [DataRow("<Application Id=\"Codec\"><Extensions><Extension Category=\"windows.mediaCodec\" /></Extensions></Application>", false)]
+    [DataRow("<Application Id=\"Background\"><Extensions><Extension Category=\"windows.backgroundTasks\" EntryPoint=\"Example.BackgroundTask\" /></Extensions></Application>", true)]
+    [DataRow("<Application Id=\"Background\"><Extensions><Extension Category=\"windows.backgroundTasks\" uap10:RuntimeBehavior=\"win32App\" /></Extensions></Application>", false)]
     [DataRow("", false)]
     public async Task UWPを含むパッケージだけへ一括ONを書き込む(string applications, bool expectedTarget)
     {
@@ -75,7 +79,7 @@ public sealed class UwpBackgroundToggleTests
             using TextReader invalid = failure switch
             {
                 0 => new StringReader("<!DOCTYPE Package [<!ENTITY x 'value'>]>" + Manifest("")),
-                1 => new StringReader(Manifest("<Application />")),
+                1 => new StringReader(Manifest("<Application Executable=\"Unknown.exe\" />")),
                 2 => new FailingManifestReader(),
                 3 => new StringReader(Manifest("<Application uap10:RuntimeBehavior=\"unknown\" />")),
                 4 => new StringReader(Manifest("<Application uap10:RuntimeBehavior=\"windowsApp\" previewsecurity2:RuntimeBehavior=\"win32App\" />")),
@@ -85,8 +89,35 @@ public sealed class UwpBackgroundToggleTests
             UwpBackgroundBatchSetting.ContainsUwpApplications(invalid);
             return ["A", "B"];
         }, store);
-        Assert.AreEqual(MaintenanceActionStatus.Failed, (await setting.ApplyAsync(true)).Status);
+        var result = await setting.ApplyAsync(true);
+        Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
+        StringAssert.Contains(result.Detail, "設定は変更していません");
         Assert.AreEqual(0, store.WriteCalls);
+    }
+
+    [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public async Task 起動属性のないデータ宣言を除外して背景タスク専用UWPと通常UWPを一括設定する(bool enabled)
+    {
+        var store = new FakeSettingsStore();
+        var manifests = new Dictionary<string, string>
+        {
+            ["SourceData"] = Manifest("<Application Id=\"SourceData\"><Extensions><Extension Category=\"windows.appExtension\" /></Extensions></Application>"),
+            ["Codec"] = Manifest("<Application Id=\"Codec\"><Extensions><Extension Category=\"windows.mediaCodec\" /></Extensions></Application>"),
+            ["Background"] = Manifest("<Application Id=\"App\"><Extensions><Extension Category=\"windows.backgroundTasks\" EntryPoint=\"ContentDeliveryManager.Background.RegistrationTask\" /></Extensions></Application>"),
+            ["Uwp"] = Manifest("<Application EntryPoint=\"Example.App\" />"),
+        };
+        var setting = new UwpBackgroundBatchSetting(() => manifests.Where(pair =>
+        {
+            using var reader = new StringReader(pair.Value);
+            return UwpBackgroundBatchSetting.ContainsUwpApplications(reader);
+        }).Select(pair => pair.Key).ToArray(), store);
+
+        Assert.IsTrue((await setting.ApplyAsync(enabled)).Success);
+        CollectionAssert.AreEquivalent(new[] { "Background", "Uwp" }, store.Values.Keys.ToArray());
+        foreach (var value in store.Values.Values)
+            Assert.AreEqual(enabled ? UwpBackgroundValues.Enabled : UwpBackgroundValues.DisabledValues, value);
     }
 
     private sealed class FailingManifestReader : TextReader

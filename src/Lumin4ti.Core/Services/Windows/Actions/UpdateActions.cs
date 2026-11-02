@@ -567,12 +567,12 @@ public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanc
 }
 
 /// <summary>
-/// Windows Defender の定義ファイルを削除して再取得する (定義破損時の定番リフレッシュ手順)。
+/// Windows Defender の動的シグネチャを削除し、定義の更新を確認する。
 /// MpCmdRun.exe が正規の手段のため外部プロセスで実行する。
 /// </summary>
 public sealed class DefenderSignatureUpdateAction : IMaintenanceAction
 {
-    internal const string RemoveDefinitionsArguments = "-RemoveDefinitions -All";
+    internal const string RemoveDefinitionsArguments = "-RemoveDefinitions -DynamicSignatures";
     internal const string SignatureUpdateArguments = "-SignatureUpdate";
 
     private readonly ICommandExecutor _executor;
@@ -591,11 +591,11 @@ public sealed class DefenderSignatureUpdateAction : IMaintenanceAction
 
     public string Id => "defender-signature-update";
 
-    public string Label => "Defender 定義ファイルの再取得";
+    public string Label => "Defender 定義キャッシュのクリアと更新確認";
 
     public string Description =>
-        "Windows Defender のウイルス定義ファイルと動的シグネチャを一度削除してから最新版を再取得します。" +
-        "定義の破損による誤検知・更新エラーを解消する定番のリフレッシュ手順で、実行してもリアルタイム保護は動作し続けます。";
+        "Windows Defender の動的シグネチャを削除して、定義の更新を確認します。" +
+        "基本定義全体の削除・巻き戻しは行いません。既に最新の場合、追加のダウンロードは行われません。";
 
     public CommandCategory Category => CommandCategory.Update;
 
@@ -612,8 +612,9 @@ public sealed class DefenderSignatureUpdateAction : IMaintenanceAction
             return MaintenanceActionResult.Fail("MpCmdRun.exe が見つかりませんでした (Defender 無効環境の可能性があります)");
         }
 
-        // 公式手順どおり定義全体を以前のセットまたは inbox 版へ戻し、最新版を再取得する。
-        // 最新化はロールバックに失敗しても試し、定義が古いまま残るリスクを減らす。
+        // Microsoft のキャッシュ消去・更新手順。基本定義全体を巻き戻す -All は使わない。
+        // https://www.microsoft.com/en-us/wdsi/defenderupdates
+        // 動的シグネチャを削除できなくても更新確認は試す。
         CommandExecutionResult remove;
         try
         {
@@ -622,18 +623,18 @@ public sealed class DefenderSignatureUpdateAction : IMaintenanceAction
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
             // 削除処理が途中まで適用された可能性がある。キャンセルを返す前に、独立した
-            // トークンで定義更新を必ず試して inbox 版・部分状態のまま残さない。
+            // トークンで定義更新を必ず試して部分状態のまま残さない。
             var recovery = await _executor.RunAsync(
                 mpCmdRun,
                 SignatureUpdateArguments,
                 CancellationToken.None);
-            LoggerBootstrap.Log.Info($"{Id}: キャンセル後の定義再取得 exit={recovery.ExitCode}");
+            LoggerBootstrap.Log.Info($"{Id}: キャンセル後の定義更新確認 exit={recovery.ExitCode}");
             if (!recovery.Success)
             {
                 LoggerBootstrap.Log.Error(
-                    $"{Id}: キャンセル後の定義再取得にも失敗: {CommandFailureDiagnostic.Format(recovery)}");
+                    $"{Id}: キャンセル後の定義更新確認にも失敗: {CommandFailureDiagnostic.Format(recovery)}");
                 return MaintenanceActionResult.Fail(
-                    "定義ファイル削除中にキャンセルされ、保護のために試した定義再取得にも失敗しました。" +
+                    "動的シグネチャ削除中にキャンセルされ、保護のために試した定義更新確認にも失敗しました。" +
                     Environment.NewLine + DefenderCommandSupport.DescribeFailure(recovery));
             }
 
@@ -642,23 +643,23 @@ public sealed class DefenderSignatureUpdateAction : IMaintenanceAction
 
         if (!remove.Success)
         {
-            LoggerBootstrap.Log.Error($"{Id}: 定義の巻き戻しに失敗: {CommandFailureDiagnostic.Format(remove)}");
+            LoggerBootstrap.Log.Error($"{Id}: 動的シグネチャの削除に失敗: {CommandFailureDiagnostic.Format(remove)}");
         }
 
-        // 定義を戻した後はクリティカル区間。UI のキャンセルで更新を中断しない。
+        // 削除後の更新確認はクリティカル区間。UI のキャンセルで更新を中断しない。
         var update = await _executor.RunAsync(
             mpCmdRun,
             SignatureUpdateArguments,
             CancellationToken.None);
         if (!update.Success)
         {
-            LoggerBootstrap.Log.Error($"{Id}: 定義の再取得に失敗: {CommandFailureDiagnostic.Format(update)}");
+            LoggerBootstrap.Log.Error($"{Id}: 定義の更新確認に失敗: {CommandFailureDiagnostic.Format(update)}");
         }
 
         var lines = new List<string>
         {
-            $"  - 定義ファイルを既定状態へ戻す: {(remove.Success ? "OK" : $"失敗 (exit={remove.ExitCode})")}",
-            $"  - 定義ファイル更新: {(update.Success ? "OK" : $"失敗 (exit={update.ExitCode})")}",
+            $"  - 動的シグネチャの削除: {(remove.Success ? "OK" : $"失敗 (exit={remove.ExitCode})")}",
+            $"  - 定義の更新確認: {(update.Success ? "OK" : $"失敗 (exit={update.ExitCode})")}",
         };
 
         LoggerBootstrap.Log.Info($"{Id}: remove={remove.ExitCode} update={update.ExitCode}");

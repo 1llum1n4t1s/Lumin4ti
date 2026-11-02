@@ -61,21 +61,25 @@ public sealed class DefenderActionTests
     }
 
     [TestMethod]
-    public async Task 定義ファイルは全体を戻してから更新する()
+    public async Task 動的シグネチャを削除してから定義の更新を確認する()
     {
-        var executor = new RecordingExecutor(Success(), Success());
+        var executor = new RecordingExecutor(Success(), Success() with { StandardOutput = "Signature update finished. No updates needed" });
         var action = new DefenderSignatureUpdateAction(executor, () => @"C:\Defender\MpCmdRun.exe");
 
         var result = await action.ExecuteAsync();
 
         Assert.IsTrue(result.Success);
         Assert.AreEqual(2, executor.Calls.Count);
-        Assert.AreEqual("-RemoveDefinitions -All", executor.Calls[0].Arguments);
+        Assert.AreEqual("-RemoveDefinitions -DynamicSignatures", executor.Calls[0].Arguments);
         Assert.AreEqual("-SignatureUpdate", executor.Calls[1].Arguments);
+        StringAssert.Contains(result.Detail, "動的シグネチャの削除: OK");
+        StringAssert.Contains(result.Detail, "定義の更新確認: OK");
+        Assert.IsFalse(result.Detail.Contains("再取得", StringComparison.Ordinal));
+        Assert.IsFalse(executor.Calls[1].Token.CanBeCanceled);
     }
 
     [TestMethod]
-    public async Task 定義の巻き戻しに失敗した場合は更新成功でも全体を失敗にする()
+    public async Task 動的シグネチャの削除に失敗した場合は更新成功でも全体を失敗にする()
     {
         var executor = new RecordingExecutor(Failure(5, "Access denied"), Success());
         var action = new DefenderSignatureUpdateAction(executor, () => @"C:\Defender\MpCmdRun.exe");
@@ -96,7 +100,7 @@ public sealed class DefenderActionTests
     }
 
     [TestMethod]
-    public async Task 定義削除中のキャンセル後も再取得を補償実行する()
+    public async Task 動的シグネチャ削除中のキャンセル後も更新確認を補償実行する()
     {
         using var cts = new CancellationTokenSource();
         var executor = new CancelThenRecoverExecutor(cts);
