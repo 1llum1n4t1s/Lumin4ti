@@ -525,7 +525,7 @@ $verificationClient.Timeout = [TimeSpan]::FromMinutes(3)
 try {
     foreach ($fixedArtifact in @($publishArtifacts | Where-Object { $_.Name -notlike '*.nupkg' })) {
         $fixedUrl = "$BaseUrl/$([uri]::EscapeDataString($fixedArtifact.Name))"
-        $remoteBytes = $verificationClient.GetByteArrayAsync("${fixedUrl}?_=$([Guid]::NewGuid().ToString('N'))").GetAwaiter().GetResult()
+        $remoteBytes = $verificationClient.GetByteArrayAsync($fixedUrl).GetAwaiter().GetResult()
         $remoteHash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($remoteBytes))
         $localHash = (Get-FileHash -LiteralPath $fixedArtifact.FullName -Algorithm SHA256).Hash
         if ($remoteHash -ne $localHash) { $purgeUrls += $fixedUrl }
