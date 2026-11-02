@@ -229,6 +229,4 @@
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">செயலாக்கத்தில் உள்ளது</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">செயல்பாடு முடியும் வரை காத்திருக்கவும்.</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">ரத்துசெய்தலும் சுத்தம் செய்தலும் முடியும் வரை காத்திருக்கவும்.</x:String>
-  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">பிழைத்திருத்தியைத் திற</x:String>
-  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">பிழைத்திருத்தியைத் திறக்க முடியவில்லை. பதிவுகளைச் சரிபார்க்கவும்.</x:String>
 </ResourceDictionary>

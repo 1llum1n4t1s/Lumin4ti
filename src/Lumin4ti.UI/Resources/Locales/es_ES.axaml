@@ -229,6 +229,4 @@
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">Procesando</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Espere a que finalice la operación.</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Espere a que finalicen la cancelación y la limpieza.</x:String>
-  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">Abrir depurador</x:String>
-  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">No se pudo abrir el depurador. Consulte los registros.</x:String>
 </ResourceDictionary>

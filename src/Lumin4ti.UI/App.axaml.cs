@@ -65,12 +65,17 @@ public partial class App : Application
         {
             // デバッグ画面を開いたままでも、メイン画面の終了・補償完了後に終了する。
             desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
+#if DEBUG
             Services.GetRequiredService<DebuggerService>().Initialize();
+#endif
             desktop.MainWindow = new MainWindow(
                 Services.GetRequiredService<MaintenanceOperationCoordinator>())
             {
                 DataContext = Services.GetRequiredService<MainWindowViewModel>(),
             };
+#if DEBUG
+            desktop.MainWindow.Opened += (_, _) => Services.GetRequiredService<DebuggerService>().Show();
+#endif
             desktop.Exit += (_, _) =>
             {
                 try
@@ -101,8 +106,9 @@ public partial class App : Application
         services.AddSingleton<IDisconnectedDeviceService, WindowsDisconnectedDeviceService>();
         services.AddSingleton<MaintenanceActionCatalog>();
         services.AddSingleton<MaintenanceOperationCoordinator>();
+#if DEBUG
         services.AddSingleton<DebuggerService>();
-        services.AddSingleton<IDebuggerService>(sp => sp.GetRequiredService<DebuggerService>());
+#endif
 
         services.AddSingleton(sp => new Services.UpdateService(sp.GetRequiredService<ISettingsService>().Current));
 

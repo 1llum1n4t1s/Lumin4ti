@@ -229,6 +229,4 @@
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">Обробка</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Дочекайтеся завершення операції.</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Дочекайтеся завершення скасування та очищення.</x:String>
-  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">Відкрити налагоджувач</x:String>
-  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">Не вдалося відкрити налагоджувач. Перевірте журнали.</x:String>
 </ResourceDictionary>

@@ -25,12 +25,8 @@ public partial class VersionViewModel : ObservableObject
     private readonly UpdateService _updateService;
     private readonly ISettingsService _settingsService;
     private readonly MaintenanceOperationCoordinator _operationCoordinator;
-    private readonly IDebuggerService? _debuggerService;
     private int _pendingSettingsSaves;
     public bool IsSavingSettings => _pendingSettingsSaves > 0;
-    private bool _debuggerOpenFailed;
-    public string DebuggerStatusText => _debuggerOpenFailed
-        ? App.Text("Version.DebuggerOpenFailed", "デバッグ画面を開けませんでした。ログを確認してください。") : string.Empty;
     private bool _updateDialogOpen;
     private string? _updateStatusKey;
     private string _updateStatusFallback = string.Empty;
@@ -85,13 +81,11 @@ public partial class VersionViewModel : ObservableObject
     public VersionViewModel(
         UpdateService updateService,
         ISettingsService settingsService,
-        MaintenanceOperationCoordinator operationCoordinator,
-        IDebuggerService? debuggerService = null)
+        MaintenanceOperationCoordinator operationCoordinator)
     {
         _updateService = updateService;
         _settingsService = settingsService;
         _operationCoordinator = operationCoordinator;
-        _debuggerService = debuggerService;
         CheckForUpdatesOnStartup = settingsService.Current.CheckForUpdatesOnStartup;
         IgnoredUpdateTag = settingsService.Current.IgnoreUpdateTag ?? string.Empty;
         if (settingsService.LoadStatus == SettingsLoadStatus.Failed)
@@ -106,18 +100,10 @@ public partial class VersionViewModel : ObservableObject
             RefreshUpdateStatus();
             OnPropertyChanged(nameof(VersionText));
             OnPropertyChanged(nameof(SettingsSaveStatusText));
-            OnPropertyChanged(nameof(DebuggerStatusText));
         };
     }
 
-    [RelayCommand]
-    private void OpenDebugger()
-    {
-        _debuggerOpenFailed = _debuggerService?.Show() != true;
-        OnPropertyChanged(nameof(DebuggerStatusText));
-    }
-
-    private void SetUpdateStatus(string? key = null, string fallback = "", params object[] args)
+private void SetUpdateStatus(string? key = null, string fallback = "", params object[] args)
     {
         _updateStatusKey = key;
         _updateStatusFallback = fallback;

@@ -229,6 +229,4 @@
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">कार्यं प्रचलति</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">कार्यसमाप्तिपर्यन्तं प्रतीक्षताम्।</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">निरसनस्य शोधनस्य च समाप्तिपर्यन्तं प्रतीक्षताम्।</x:String>
-  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">दोषान्वेषकं उद्घाटयतु</x:String>
-  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">दोषान्वेषकः उद्घाटयितुं न शक्यते। वृत्तान्तान् पश्यतु।</x:String>
 </ResourceDictionary>

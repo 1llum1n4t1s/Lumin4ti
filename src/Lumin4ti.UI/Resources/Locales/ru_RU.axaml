@@ -229,6 +229,4 @@
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">Обработка</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Дождитесь завершения операции.</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Дождитесь завершения отмены и очистки.</x:String>
-  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">Открыть отладчик</x:String>
-  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">Не удалось открыть отладчик. Проверьте журналы.</x:String>
 </ResourceDictionary>

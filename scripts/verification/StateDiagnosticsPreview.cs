@@ -29,12 +29,15 @@ internal static class StateDiagnosticsPreview
 
     public sealed class PreviewApp : App
     {
+#if DEBUG
         private DebuggerService? _debugger;
+#endif
 
         public override void OnFrameworkInitializationCompleted()
         {
             // 本番 App の初期化は呼ばない。DI・設定保存・OS 操作を持ち込まない。
             SetLocale("ja_JP");
+#if DEBUG
             _debugger = new DebuggerService(provider =>
             {
                 var output = Environment.GetEnvironmentVariable("LUMIN4TI_PREVIEW_LOG");
@@ -48,6 +51,7 @@ internal static class StateDiagnosticsPreview
                 return subscription;
             });
             _debugger.Initialize();
+#endif
             var catalog = new MaintenanceActionCatalog(new IMaintenanceItem[]
             {
                 new PreviewToggle("vbs-hvci-off", "VBS / HVCI を無効化", false, defaultState: false),
@@ -120,13 +124,18 @@ internal static class StateDiagnosticsPreview
                 Content = content,
             };
             window.Opened += async (_, _) => await viewModel.LoadToggleStatesAsync();
+#if DEBUG
+            window.Opened += (_, _) => _debugger.Show();
+#endif
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
                 desktop.MainWindow = window;
                 desktop.Exit += (_, _) =>
                 {
+#if DEBUG
                     _debugger.Dispose();
+#endif
                     LogManager.Shutdown();
                 };
             }
@@ -135,7 +144,7 @@ internal static class StateDiagnosticsPreview
         private void ShowSettingsPreview(MaintenanceActionCatalog catalog, MemorySettings settings)
         {
             var coordinator = new MaintenanceOperationCoordinator(() => new PreviewLease());
-            var version = new VersionViewModel(new UpdateService(() => null), settings, coordinator, _debugger);
+            var version = new VersionViewModel(new UpdateService(() => null), settings, coordinator);
             var devices = new DeviceCleanupViewModel(new MockDevices { FailEnumeration = false }, coordinator);
             new MainWindow(coordinator)
             {

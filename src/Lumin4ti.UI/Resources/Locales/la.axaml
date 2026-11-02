@@ -229,6 +229,4 @@
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">Operatio agitur</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Exspecta dum operatio absolvatur.</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Exspecta dum revocatio et purgatio absolvantur.</x:String>
-  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">Depuratorem aperire</x:String>
-  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">Depurator aperiri non potuit. Acta inspice.</x:String>
 </ResourceDictionary>

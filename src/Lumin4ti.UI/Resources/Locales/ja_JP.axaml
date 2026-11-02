@@ -94,6 +94,4 @@
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">処理中</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">処理が完了するまでお待ちください。</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">キャンセル後の後処理が完了するまでお待ちください。</x:String>
-  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">デバッグ画面を開く</x:String>
-  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">デバッグ画面を開けませんでした。ログを確認してください。</x:String>
 </ResourceDictionary>

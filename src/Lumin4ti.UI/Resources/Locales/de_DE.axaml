@@ -229,6 +229,4 @@
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">Verarbeitung läuft</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Bitte warten Sie, bis der Vorgang abgeschlossen ist.</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Bitte warten Sie, bis Abbruch und Bereinigung abgeschlossen sind.</x:String>
-  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">Debugger öffnen</x:String>
-  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">Der Debugger konnte nicht geöffnet werden. Prüfen Sie die Protokolle.</x:String>
 </ResourceDictionary>

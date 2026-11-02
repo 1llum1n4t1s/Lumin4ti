@@ -227,6 +227,4 @@
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">Processing</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Please wait for the operation to finish.</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Please wait for cancellation and cleanup to finish.</x:String>
-  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">Open debugger</x:String>
-  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">Could not open the debugger. Check the logs.</x:String>
 </ResourceDictionary>

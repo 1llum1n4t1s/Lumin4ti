@@ -229,6 +229,4 @@
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">Traitement en cours</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Veuillez patienter pendant le traitement.</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Veuillez attendre la fin de la procédure et du nettoyage.</x:String>
-  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">Ouvrir le débogueur</x:String>
-  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">Ouverture du débogueur impossible. Consultez les journaux.</x:String>
 </ResourceDictionary>

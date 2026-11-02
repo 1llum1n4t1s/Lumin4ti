@@ -10,39 +10,12 @@ namespace Lumin4ti.Tests;
 public sealed class DebuggerIntegrationTests
 {
     [TestMethod]
-    public void デバッグ画面の失敗を表示し次の成功で解除する()
-    {
-        var debugger = new FakeDebuggerService();
-        var vm = CreateViewModel(new PendingSettings(), debugger);
-        var statusNotifications = 0;
-        vm.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(vm.DebuggerStatusText)) statusNotifications++;
-        };
-
-        debugger.Succeeds = true;
-        vm.OpenDebuggerCommand.Execute(null);
-        Assert.AreEqual(string.Empty, vm.DebuggerStatusText);
-
-        debugger.Succeeds = false;
-        vm.OpenDebuggerCommand.Execute(null);
-        Assert.AreEqual(App.Text("Version.DebuggerOpenFailed",
-            "デバッグ画面を開けませんでした。ログを確認してください。"), vm.DebuggerStatusText);
-
-        debugger.Succeeds = true;
-        vm.OpenDebuggerCommand.Execute(null);
-        Assert.AreEqual(string.Empty, vm.DebuggerStatusText);
-        Assert.AreEqual(3, debugger.ShowCount);
-        Assert.AreEqual(3, statusNotifications);
-    }
-
-    [TestMethod]
     [DataRow(false)]
     [DataRow(true)]
     public async Task 重複した設定保存は最後の保存が成功または失敗するまで実行中を維持する(bool lastSaveFails)
     {
         var settings = new PendingSettings();
-        var vm = CreateViewModel(settings, new FakeDebuggerService());
+        var vm = CreateViewModel(settings);
         var states = new List<bool>();
         TaskCompletionSource? nextState = null;
         vm.PropertyChanged += (_, e) =>
@@ -77,21 +50,9 @@ public sealed class DebuggerIntegrationTests
         Assert.AreEqual(lastSaveFails, !string.IsNullOrEmpty(vm.SettingsSaveStatusText));
     }
 
-    private static VersionViewModel CreateViewModel(PendingSettings settings, IDebuggerService debugger) =>
+    private static VersionViewModel CreateViewModel(PendingSettings settings) =>
         new(new UpdateService(() => null), settings,
-            new MaintenanceOperationCoordinator(() => throw new AssertFailedException("この操作はOS変更leaseを取得しません。")),
-            debugger);
-
-    private sealed class FakeDebuggerService : IDebuggerService
-    {
-        public bool Succeeds { get; set; }
-        public int ShowCount { get; private set; }
-        public bool Show()
-        {
-            ShowCount++;
-            return Succeeds;
-        }
-    }
+            new MaintenanceOperationCoordinator(() => throw new AssertFailedException("この操作はOS変更leaseを取得しません。")));
 
     private sealed class PendingSettings : ISettingsService
     {

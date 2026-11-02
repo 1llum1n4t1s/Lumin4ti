@@ -229,6 +229,4 @@
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">Pinoproseso</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Hintaying matapos ang operasyon.</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Hintaying matapos ang pagkansela at paglilinis.</x:String>
-  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">Buksan ang debugger</x:String>
-  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">Hindi mabuksan ang debugger. Tingnan ang mga log.</x:String>
 </ResourceDictionary>

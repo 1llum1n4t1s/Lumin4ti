@@ -229,6 +229,4 @@
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">처리 중</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">작업이 완료될 때까지 기다려 주세요.</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">취소 및 정리 작업이 완료될 때까지 기다려 주세요.</x:String>
-  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">디버거 열기</x:String>
-  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">디버거를 열 수 없습니다. 로그를 확인하세요.</x:String>
 </ResourceDictionary>

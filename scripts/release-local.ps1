@@ -57,6 +57,9 @@ function Assert-ReleasePackage {
     param([string]$PackagePath, [string]$ExpectedVersion)
     $archive = [IO.Compression.ZipFile]::OpenRead($PackagePath)
     try {
+        if (@($archive.Entries | Where-Object { $_.FullName -match 'CRDebugger' }).Count -gt 0) {
+            throw "製品パッケージに開発用 CRDebugger が含まれています: $PackagePath"
+        }
         $readText = {
             param([string]$Name)
             $entry = $archive.GetEntry($Name)
@@ -89,6 +92,9 @@ function Assert-ReleasePackage {
             }
         }
         $deps = (& $readText 'lib/app/Lumin4ti.UI.deps.json') | ConvertFrom-Json
+        if (@($deps.libraries.PSObject.Properties.Name | Where-Object { $_ -match 'CRDebugger' }).Count -gt 0) {
+            throw "製品パッケージに開発用 CRDebugger の依存が含まれています: $PackagePath"
+        }
         if (-not ([string]$deps.runtimeTarget.name).EndsWith('/win-x64', [StringComparison]::Ordinal)) {
             throw "パッケージの runtimeTarget が win-x64 ではありません: $PackagePath"
         }

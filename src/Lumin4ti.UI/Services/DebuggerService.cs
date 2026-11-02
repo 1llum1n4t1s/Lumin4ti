@@ -1,3 +1,4 @@
+#if DEBUG
 using System;
 using Avalonia.Threading;
 using CRDebugger.Avalonia;
@@ -8,13 +9,8 @@ using DebugPanel = CRDebugger.Core.CRDebugger;
 
 namespace Lumin4ti.UI.Services;
 
-public interface IDebuggerService
-{
-    bool Show();
-}
-
 /// <summary>デスクトップ UI の寿命内だけデバッグ画面とログ転送を所有する。</summary>
-public sealed class DebuggerService : IDebuggerService, IDisposable
+public sealed class DebuggerService : IDisposable
 {
     private readonly Func<ILoggerProvider, IDisposable> _attachProvider;
     private IDisposable? _logging;
@@ -104,3 +100,5 @@ public sealed class DebuggerService : IDebuggerService, IDisposable
         }
     }
 }
+
+#endif

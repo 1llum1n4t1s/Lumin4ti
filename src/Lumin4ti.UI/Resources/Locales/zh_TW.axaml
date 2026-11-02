@@ -229,6 +229,4 @@
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">處理中</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">請等待操作完成。</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">請等待取消及清理完成。</x:String>
-  <x:String x:Key="Text.Version.OpenDebugger" xml:space="preserve">開啟偵錯工具</x:String>
-  <x:String x:Key="Text.Version.DebuggerOpenFailed" xml:space="preserve">無法開啟偵錯工具。請檢查記錄。</x:String>
 </ResourceDictionary>
