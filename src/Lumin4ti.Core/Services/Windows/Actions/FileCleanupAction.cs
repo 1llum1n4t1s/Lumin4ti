@@ -17,6 +17,7 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
     private readonly ICommandExecutor? _executor;
     private readonly IReadOnlyList<string> _servicesToStop;
     private readonly bool _scheduleBlockedForReboot;
+    private readonly IRebootCacheCleanupScheduler? _rebootScheduler;
     private readonly ICleanupPreferences? _preferences;
     private readonly Func<CleanupTarget, string> _checkListKeySelector;
     private readonly Func<CleanupTarget, string> _checkListLabelSelector;
@@ -53,7 +54,8 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
         ICleanupPreferences? preferences = null,
         Func<CleanupTarget, string>? checkListKeySelector = null,
         Func<CleanupTarget, string>? checkListLabelSelector = null,
-        Func<ICommandExecutor, IReadOnlyList<string>, IProgress<string>?, CancellationToken, Task<ServiceSuspension>>? suspendServices = null)
+        Func<ICommandExecutor, IReadOnlyList<string>, IProgress<string>?, CancellationToken, Task<ServiceSuspension>>? suspendServices = null,
+        IRebootCacheCleanupScheduler? rebootScheduler = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         ArgumentException.ThrowIfNullOrWhiteSpace(label);
@@ -74,6 +76,7 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
         RequiresReboot = requiresReboot;
         AffectsExplorer = affectsExplorer;
         _scheduleBlockedForReboot = scheduleBlockedForReboot;
+        _rebootScheduler = rebootScheduler;
         _preferences = preferences;
         _checkListKeySelector = checkListKeySelector ?? DescribeTarget;
         _checkListLabelSelector = checkListLabelSelector ?? _checkListKeySelector;
@@ -100,9 +103,26 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
     public IReadOnlyList<CleanupTarget> EnumerateAllTargets() => [.. _targetProvider()];
 
     /// <summary>実際に削除する対象 (利用者が外したものを除く)。</summary>
-    public IReadOnlyList<CleanupTarget> EnumerateSelectedTargets()
+    public IReadOnlyList<CleanupTarget> EnumerateSelectedTargets() => EnumerateSelectedTargets(CancellationToken.None);
+
+    private IReadOnlyList<CleanupTarget> EnumerateSelectedTargets(CancellationToken ct)
     {
-        var targets = _targetProvider().ToList();
+        ct.ThrowIfCancellationRequested();
+        var targets = new List<CleanupTarget>();
+        using var enumerator = _targetProvider().GetEnumerator();
+        while (true)
+        {
+            ct.ThrowIfCancellationRequested();
+            if (!enumerator.MoveNext())
+            {
+                break;
+            }
+
+            ct.ThrowIfCancellationRequested();
+            targets.Add(enumerator.Current);
+        }
+
+        ct.ThrowIfCancellationRequested();
         var selectedGroups = targets
             .GroupBy(_checkListKeySelector, StringComparer.OrdinalIgnoreCase)
             .Where(group => group.All(IsTargetSelected))
@@ -186,24 +206,20 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
         IReadOnlyList<string> resumeFailures = [];
         CleanupOutcome? outcome = null;
         ExceptionDispatchInfo? operationFailure = null;
-
-        var targets = EnumerateSelectedTargets();
-        if (targets.Count == 0)
-        {
-            // 全対象のチェックが外れている状態。サービスを止める意味も無いのでここで返す。
-            LoggerBootstrap.Log.Info($"{Id}: 対象が 1 件も選ばれていないため何もしませんでした");
-            return MaintenanceActionResult.Ok("  - 対象が選ばれていないため、何も削除しませんでした");
-        }
+        IReadOnlyList<CleanupTarget> targets = [];
 
         try
         {
-            if (_servicesToStop.Count > 0)
+            // 探索中の取消も旧予約を解除する補償経路へ通す。未取得の snapshot は空とする。
+            targets = await Task.Run(() => EnumerateSelectedTargets(ct), ct);
+            ct.ThrowIfCancellationRequested();
+            if (targets.Count > 0 && _servicesToStop.Count > 0)
             {
                 suspension = await _suspendServices(_executor!, _servicesToStop, progress, ct);
             }
 
             ct.ThrowIfCancellationRequested();
-            if (CanRunCleanup(suspension))
+            if (targets.Count > 0 && CanRunCleanup(suspension))
             {
                 outcome = await Task.Run(
                     () => FileCleanupEngine.Run(targets, _scheduleBlockedForReboot, progress, ct),
@@ -223,21 +239,43 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
             }
         }
 
+        // 補償を完了してから予約を更新する。失敗・取消でも古い未選択対象を残さない。
+        var canceled = ct.IsCancellationRequested || operationFailure?.SourceException is OperationCanceledException;
+        if (canceled && operationFailure is null) operationFailure = ExceptionDispatchInfo.Capture(new OperationCanceledException(ct));
+        var queue = await ReconcileRebootQueueAsync(targets, canceled ? [] : outcome?.BlockedTargets ?? [], CancellationToken.None);
+        // この1回のsnapshotで取消か完了かを確定する。判定後のtokenを読んでCanceledへ変えない。
+        var canceledAfterQueue = ct.IsCancellationRequested;
+        if (!canceled && canceledAfterQueue && outcome is { BlockedTargets.Count: > 0 })
+            queue = await ReconcileRebootQueueAsync(targets, [], CancellationToken.None);
+        if (canceledAfterQueue && operationFailure is null) operationFailure = ExceptionDispatchInfo.Capture(new OperationCanceledException(ct));
+        if (outcome is not null && queue is { Success: true }) outcome.ScheduledForReboot = queue.PendingTargets;
+
         // 補償結果を確認してからキャンセル・例外を確定する。復帰失敗を OCE で隠さない。
         if (operationFailure is not null)
         {
             var detail = operationFailure.SourceException is OperationCanceledException
                 ? "  - 操作はキャンセルされました"
                 : $"  - 削除処理に失敗しました: {CommandFailureDiagnostic.Sanitize(operationFailure.SourceException.Message)}";
+            if (!string.IsNullOrEmpty(queue?.Detail)) detail += Environment.NewLine + "  - " + queue.Detail;
             if (resumeFailures.Count > 0)
             {
                 return MaintenanceActionResult.Fail(detail + Environment.NewLine + DescribeResumeFailure(suspension!));
             }
             if (operationFailure.SourceException is OperationCanceledException)
             {
+                if (queue is { Success: false }) return MaintenanceActionResult.Fail(detail + Environment.NewLine + "  - 削除作業は中断しましたが、旧起動時予約の解除に失敗しました");
                 return MaintenanceActionResult.Canceled(detail);
             }
+            if (queue is { Success: false }) return MaintenanceActionResult.Fail(detail);
             operationFailure.Throw();
+        }
+
+        if (targets.Count == 0)
+        {
+            LoggerBootstrap.Log.Info($"{Id}: 対象が 1 件も選ばれていないため何もしませんでした");
+            var detail = "  - 対象が選ばれていないため、何も削除しませんでした" +
+                (string.IsNullOrEmpty(queue?.Detail) ? string.Empty : Environment.NewLine + "  - " + queue.Detail);
+            return queue is { Success: false } ? MaintenanceActionResult.Fail(detail) : MaintenanceActionResult.Ok(detail);
         }
 
         if (outcome is null)
@@ -247,6 +285,7 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
             {
                 $"  - 必要なサービスを停止できなかったため、削除を中止しました: {failedServices}",
             };
+            if (!string.IsNullOrEmpty(queue?.Detail)) failureLines.Add("  - " + queue.Detail);
             if (resumeFailures.Count > 0)
             {
                 failureLines.Add(DescribeResumeFailure(suspension!));
@@ -257,7 +296,8 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
         }
 
         var lines = FileCleanupEngine.DescribeOutcome(outcome).ToList();
-        var degraded = outcome.Blocked > 0 || outcome.RejectedTargets.Count > 0;
+        if (!string.IsNullOrEmpty(queue?.Detail)) lines.Add("  - " + queue.Detail);
+        var degraded = outcome.Blocked > 0 || outcome.RejectedTargets.Count > 0 || queue is { Success: false };
 
         LoggerBootstrap.Log.Info(
             $"{Id}: files={outcome.DeletedFiles} dirs={outcome.DeletedDirectories} " +
@@ -285,6 +325,19 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
 
     internal static bool CanRunCleanup(ServiceSuspension? suspension) =>
         suspension is not { FailedToStop.Count: > 0 };
+
+    private async Task<RebootCleanupQueueResult?> ReconcileRebootQueueAsync(IReadOnlyList<CleanupTarget> selected,
+        IReadOnlyList<CleanupTarget> blocked, CancellationToken ct)
+    {
+        if (!_scheduleBlockedForReboot || _rebootScheduler is null) return null;
+        try { return await _rebootScheduler.QueueAsync(selected, blocked, ct); }
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex)
+        {
+            LoggerBootstrap.Log.Error($"{Id}: 起動時の予約更新に失敗しました", ex);
+            return new(false, 0, "起動時の予約を更新できませんでした: " + CommandFailureDiagnostic.Sanitize(ex.Message));
+        }
+    }
 
     private static string DescribeResumeFailure(ServiceSuspension suspension) =>
         $"  - 停止したサービスを再開できませんでした: {string.Join("; ", suspension.ResumeFailureDetails)}" +

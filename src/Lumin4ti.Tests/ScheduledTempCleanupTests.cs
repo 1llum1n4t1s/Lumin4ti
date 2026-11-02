@@ -254,21 +254,127 @@ public sealed class ScheduledTempCleanupTests
     }
 
     [TestMethod]
-    public async Task 照会が失敗すればOFFと判定する()
+    public async Task 照会失敗時も不存在を確認できた場合だけOFFと判定する()
     {
         var executor = new RecordingExecutor { NextSuccess = false };
-        var toggle = new ScheduledTempCleanupToggle(executor);
+        var toggle = new ScheduledTempCleanupToggle(
+            executor, new FakeTaskDefinitionStore(), taskExists: () => false);
 
         var state = await toggle.GetStateAsync();
 
         Assert.AreEqual(false, state);
-        Assert.IsNull(toggle.StateDiagnostic, "未登録と照会エラーを区別できない場合も既存の OFF 判定を保ちます");
+        Assert.IsNull(toggle.StateDiagnostic);
+        Assert.IsNull(toggle.StateFailureReason);
 
         var blocked = await toggle.SetStateAsync(false);
 
         Assert.AreEqual(MaintenanceActionStatus.Failed, blocked.Status);
         Assert.IsFalse(executor.Arguments.Any(
             arguments => arguments.Contains("/delete", StringComparison.OrdinalIgnoreCase)));
+    }
+
+    [TestMethod]
+    public async Task 存在照会は呼出元の同期コンテキスト外で実行する()
+    {
+        var callerContext = new SynchronizationContext();
+        SynchronizationContext? queryContext = callerContext;
+        var executor = new RecordingExecutor { QuerySuccess = false };
+        var toggle = new ScheduledTempCleanupToggle(
+            executor, new FakeTaskDefinitionStore(), taskExists: () =>
+            {
+                queryContext = SynchronizationContext.Current;
+                return false;
+            });
+
+        var previousContext = SynchronizationContext.Current;
+        Task<bool?> stateTask;
+        try
+        {
+            SynchronizationContext.SetSynchronizationContext(callerContext);
+            stateTask = toggle.GetStateAsync();
+        }
+        finally
+        {
+            SynchronizationContext.SetSynchronizationContext(previousContext);
+        }
+
+        Assert.AreEqual(false, await stateTask);
+        Assert.AreNotSame(callerContext, queryContext);
+    }
+
+    [TestMethod]
+    public async Task 開始済みの存在照会はキャンセル後も応答を待ち状態を反映しない()
+    {
+        using var cancellation = new CancellationTokenSource();
+        using var releaseQuery = new ManualResetEventSlim();
+        var queryStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var executor = new RecordingExecutor { QuerySuccess = false };
+        var toggle = new ScheduledTempCleanupToggle(
+            executor, new FakeTaskDefinitionStore(), taskExists: () =>
+            {
+                queryStarted.SetResult();
+                if (!releaseQuery.Wait(TimeSpan.FromSeconds(10)))
+                    throw new TimeoutException("テスト用照会の解放待ちがタイムアウトしました");
+                return false;
+            });
+
+        var stateTask = toggle.GetStateAsync(cancellation.Token);
+        try
+        {
+            await queryStarted.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            cancellation.Cancel();
+            Assert.IsFalse(stateTask.IsCompleted, "開始済み COM 照会を置き去りにしてはいけません");
+        }
+        finally
+        {
+            releaseQuery.Set();
+        }
+
+        await Assert.ThrowsAsync<OperationCanceledException>(() => stateTask);
+        Assert.IsNull(toggle.StateFailureReason);
+    }
+
+    [TestMethod]
+    public async Task 存在するタスクの定義照会失敗は状態不明にして再照会成功で診断を消す()
+    {
+        var executor = new RecordingExecutor { QuerySuccess = false };
+        var presenceQueries = 0;
+        var toggle = new ScheduledTempCleanupToggle(
+            executor, new FakeTaskDefinitionStore(), taskExists: () => { presenceQueries++; return true; });
+
+        Assert.IsNull(await toggle.GetStateAsync());
+        StringAssert.Contains(toggle.StateFailureReason, "タスク定義の照会に失敗");
+        Assert.AreEqual(1, presenceQueries);
+
+        executor.QuerySuccess = true;
+        executor.QueryXml = ScheduledTempCleanupToggle.BuildTaskXml(
+            @"C:\Program Files\Lumin4ti\current\Lumin4ti.UI.exe", WindowsIdentity.GetCurrent().Name);
+
+        Assert.AreEqual(true, await toggle.GetStateAsync());
+        Assert.IsNull(toggle.StateFailureReason);
+        Assert.AreEqual(1, presenceQueries, "定義照会成功時は追加の存在照会を行いません");
+    }
+
+    [TestMethod]
+    public async Task 存在照会のアクセス拒否や接続失敗は状態不明にする()
+    {
+        // GetTask 内で確認された不存在以外は、同じ HRESULT でも接続段階などの失敗として扱う。
+        foreach (var errorCode in new[]
+                 {
+                     unchecked((int)0x80070005), unchecked((int)0x800706BA), unchecked((int)0x80070002),
+                 })
+        {
+            var executor = new RecordingExecutor { QuerySuccess = false };
+            var toggle = new ScheduledTempCleanupToggle(
+                executor, new FakeTaskDefinitionStore(), taskExists: () =>
+                    throw new System.Runtime.InteropServices.COMException("読み取り失敗", errorCode));
+
+            Assert.IsNull(await toggle.GetStateAsync());
+            StringAssert.Contains(toggle.StateFailureReason, $"HRESULT=0x{errorCode:X8}");
+            Assert.IsFalse(executor.Arguments.Any(arguments =>
+                arguments.Contains("/create", StringComparison.OrdinalIgnoreCase)
+                || arguments.Contains("/delete", StringComparison.OrdinalIgnoreCase)));
+        }
     }
 
     [TestMethod]

@@ -1,4 +1,5 @@
 using Lumin4ti.Core.Interfaces;
+using Lumin4ti.Core.Models;
 
 namespace Lumin4ti.Core.Services;
 
@@ -113,5 +114,13 @@ public sealed class CleanupPreferences(ISettingsService settings) : ICleanupPref
         }
     }
 
-    public Task SaveAsync(CancellationToken ct = default) => settings.SaveAsync(ct);
+    public Task SaveAsync(CancellationToken ct = default)
+    {
+        ct.ThrowIfCancellationRequested();
+        if (settings.LoadStatus == SettingsLoadStatus.Failed)
+        {
+            throw new InvalidOperationException("設定ファイルを読み込めないため、原本を保護して選択を保存していません。変更はこの起動中だけ有効です。");
+        }
+        return settings.SaveAsync(ct);
+    }
 }

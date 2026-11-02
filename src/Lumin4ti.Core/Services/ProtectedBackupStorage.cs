@@ -88,6 +88,23 @@ internal sealed class ProtectedBackupStorage
         return File.ReadAllText(GetFullPath(relativePath));
     }
 
+    internal IReadOnlyList<string> EnumerateFileNames(string relativeDirectory, int limit)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(limit);
+        var directory = GetFullPath(relativeDirectory);
+        EnsureDirectoryChain(directory);
+        using var entry = Windows.Actions.NativeCleanupEntry.Open(directory, true);
+        var names = new List<string>();
+        foreach (var child in entry.Enumerate())
+        {
+            if ((child.Attributes & (FileAttributes.Directory | FileAttributes.ReparsePoint)) != 0)
+                throw new SecurityException("保護キューに通常ファイル以外の要素があります。");
+            if (names.Count >= limit) throw new IOException("保護キューのファイル数上限を超えています。");
+            names.Add(child.Name);
+        }
+        return names;
+    }
+
     public void WriteNewAtomically(string relativePath, Action<Stream> write)
     {
         ArgumentNullException.ThrowIfNull(write);
@@ -178,6 +195,12 @@ internal sealed class ProtectedBackupStorage
     internal static bool IsProtectedAcl(FileSystemSecurity security, out string failureReason)
     {
         ArgumentNullException.ThrowIfNull(security);
+        var raw = new RawSecurityDescriptor(security.GetSecurityDescriptorBinaryForm(), 0);
+        if (raw.DiscretionaryAcl is null || raw.DiscretionaryAcl.Cast<GenericAce>().Any(ace => ace is not CommonAce { IsCallback: false }))
+        {
+            failureReason = "解釈できない DACL エントリがあります";
+            return false;
+        }
         if (!security.AreAccessRulesProtected)
         {
             failureReason = "DACL が継承から保護されていません";

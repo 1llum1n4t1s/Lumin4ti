@@ -2,6 +2,8 @@ using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services.Windows;
 using Lumin4ti.Core.Services.Windows.Actions;
+using System.Security.AccessControl;
+using System.Security.Principal;
 
 namespace Lumin4ti.Tests;
 
@@ -9,6 +11,369 @@ namespace Lumin4ti.Tests;
 public sealed class FileCleanupTests
 {
     private string _root = string.Empty;
+
+    private sealed class SynchronousProgress(Action<string> callback) : IProgress<string>
+    {
+        public void Report(string value) => callback(value);
+    }
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
+    private static extern Microsoft.Win32.SafeHandles.SafeFileHandle CreateFileW(string path, uint access, uint share, nint security, uint creation, uint flags, nint template);
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+    private static extern bool DeviceIoControl(Microsoft.Win32.SafeHandles.SafeFileHandle handle, uint code, byte[] input, uint length, nint output, uint outputLength, out uint returned, nint overlapped);
+
+    private static void CreateJunctionInPlace(string directory, string target, uint access = 0x100)
+    {
+        using var handle = CreateFileW(directory, access, 7, 0, 3, 0x02200000, 0);
+        Assert.IsFalse(handle.IsInvalid);
+        var substitute = System.Text.Encoding.Unicode.GetBytes(@"\??\" + target);
+        var printable = System.Text.Encoding.Unicode.GetBytes(target);
+        var data = new byte[20 + substitute.Length + printable.Length];
+        void Write(int offset, ushort value) => BitConverter.GetBytes(value).CopyTo(data, offset);
+        BitConverter.GetBytes(0xA0000003u).CopyTo(data, 0);
+        Write(4, (ushort)(data.Length - 8));
+        Write(10, (ushort)substitute.Length);
+        Write(12, (ushort)(substitute.Length + 2));
+        Write(14, (ushort)printable.Length);
+        substitute.CopyTo(data, 16);
+        printable.CopyTo(data, 18 + substitute.Length);
+        Assert.IsTrue(DeviceIoControl(handle, 0x900A4, data, (uint)data.Length, 0, 0, out _, 0),
+            $"既存ディレクトリの junction 化に失敗: {System.Runtime.InteropServices.Marshal.GetLastWin32Error()}");
+    }
+
+    [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void 実行中に対象自体をjunction化しても外部ファイルとリンクを保持する(bool files)
+    {
+        var target = Path.Combine(_root, "inplace-target");
+        Directory.CreateDirectory(target);
+        var outside = CreateFile(@"outside\canary.etl", "external data");
+        File.SetAttributes(outside, FileAttributes.ReadOnly | FileAttributes.Hidden);
+        var attributes = File.GetAttributes(outside);
+        var progress = new SynchronousProgress(_ => CreateJunctionInPlace(target, Path.GetDirectoryName(outside)!));
+
+        var outcome = FileCleanupEngine.Run(
+            [files ? CleanupTarget.Files(target, "*.etl") : CleanupTarget.Contents(target)], false, progress, CancellationToken.None);
+
+        Assert.AreEqual(0, outcome.DeletedFiles);
+        Assert.IsTrue(outcome.Blocked > 0 || outcome.RejectedTargets.Count > 0);
+        Assert.AreEqual("external data", File.ReadAllText(outside));
+        Assert.AreEqual(attributes, File.GetAttributes(outside));
+        Assert.IsTrue((File.GetAttributes(target) & FileAttributes.ReparsePoint) != 0, "リンク自身も保持する");
+    }
+
+    [TestMethod]
+    public void handle取得後のjunction化では外部名を列挙せず削除もしない()
+    {
+        var target = Path.Combine(_root, "native-inplace");
+        Directory.CreateDirectory(target);
+        var outside = CreateFile(@"native-outside\canary.txt", "keep");
+        using (var entry = NativeCleanupEntry.Open(target, true, delete: true))
+        {
+            CreateJunctionInPlace(target, Path.GetDirectoryName(outside)!);
+            Assert.ThrowsExactly<IOException>(() => entry.Enumerate().ToArray());
+            Assert.ThrowsExactly<IOException>(() => entry.Delete());
+        }
+        Assert.AreEqual("keep", File.ReadAllText(outside));
+        Assert.IsTrue((File.GetAttributes(target) & FileAttributes.ReparsePoint) != 0);
+    }
+
+    [TestMethod]
+    public void 列挙後に祖先をjunction化しても絶対パスの子を開かない()
+    {
+        var parent = Path.Combine(_root, "ancestor-inplace");
+        var child = Path.Combine(parent, "child");
+        Directory.CreateDirectory(child);
+        var outside = CreateFile(@"ancestor-outside\child\canary.txt", "keep");
+        using (var root = NativeCleanupEntry.Open(parent, true))
+        {
+            Assert.HasCount(1, root.Enumerate().ToArray());
+            // 列挙済みの空の子を別主体が取り除くと、祖先自体を in-place 変更できる。
+            Directory.Delete(child);
+            CreateJunctionInPlace(parent, Path.Combine(_root, "ancestor-outside"));
+            Assert.Throws<System.ComponentModel.Win32Exception>(() => NativeCleanupEntry.Open(child, true, delete: true, pinAncestors: false));
+        }
+        Assert.AreEqual("keep", File.ReadAllText(outside));
+        Assert.IsTrue((File.GetAttributes(parent) & FileAttributes.ReparsePoint) != 0);
+    }
+
+    [TestMethod]
+    public void deleteHandle取得中の名前差替えを拒否し属性操作は同じ実体だけに作用する()
+    {
+        var file = CreateFile(@"native-delete\file.tmp");
+        File.SetAttributes(file, FileAttributes.ReadOnly);
+        using (var entry = NativeCleanupEntry.Open(file, false, delete: true))
+        {
+            Assert.ThrowsExactly<IOException>(() => File.Move(file, file + ".moved"));
+            entry.SetAttributes(FileAttributes.Normal);
+            entry.Delete();
+        }
+        Assert.IsFalse(File.Exists(file));
+    }
+
+    [TestMethod]
+    public void directoryのWriteDataだけのhandleでもjunction化できるため予約ACLで拒否する()
+    {
+        var target = Path.Combine(_root, "write-data-junction");
+        Directory.CreateDirectory(target);
+        var outside = CreateFile(@"write-data-outside\keep.txt", "keep");
+        CreateJunctionInPlace(target, Path.GetDirectoryName(outside)!, access: 2);
+        Assert.IsTrue((File.GetAttributes(target) & FileAttributes.ReparsePoint) != 0);
+        Assert.AreEqual("keep", File.ReadAllText(outside));
+    }
+
+    [TestMethod]
+    public void 子のabsoluteNativePathは保持したrootのdeviceprefixを継承する()
+    {
+        var path = Path.Combine(_root, "native-context");
+        var child = Path.Combine(path, "child");
+        Directory.CreateDirectory(child);
+        using var root = NativeCleanupEntry.Open(path, true);
+        using var entry = root.OpenDescendant(child, true);
+        Assert.AreEqual(root.NativePath + @"\child", entry.NativePath);
+        Assert.ThrowsExactly<IOException>(() => root.OpenDescendant(_root, true));
+    }
+
+    [TestMethod]
+    public void nativeパスはDOSaliasではなく検証済みローカルvolumeを使う()
+    {
+        Assert.AreEqual(@"\Device\HarddiskVolume12\cache\data.bin",
+            NativeCleanupEntry.ToNativePath(@"D:\cache\data.bin", @"\Device\HarddiskVolume12"));
+        Assert.ThrowsExactly<IOException>(() => NativeCleanupEntry.ToNativePath(@"D:\cache", @"\??\C:\subst"));
+        Assert.ThrowsExactly<IOException>(() => NativeCleanupEntry.ToNativePath(@"D:\cache", @"\Device\Mup\server\share"));
+        Assert.ThrowsExactly<IOException>(() => NativeCleanupEntry.ToNativePath(@"\\server\share\cache", @"\Device\HarddiskVolume12"));
+        Assert.IsTrue(NativeCleanupEntry.ResolveNativePath(_root).StartsWith(@"\Device\HarddiskVolume", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    public void 列挙は先頭で短絡したら次の走査を行わずbufferを解放する()
+    {
+        var path = Path.Combine(_root, "lazy");
+        Directory.CreateDirectory(path);
+        using (var entry = NativeCleanupEntry.Open(path, true))
+        {
+            var enumeration = entry.Enumerate();
+            var first = CreateFile(@"lazy\first.bin");
+            using (var cursor = enumeration.GetEnumerator())
+            {
+                Assert.IsTrue(cursor.MoveNext());
+                Assert.AreEqual("first.bin", cursor.Current.Name);
+                File.Delete(first);
+                var outside = Path.Combine(_root, "lazy-outside");
+                Directory.CreateDirectory(outside);
+                CreateJunctionInPlace(path, outside);
+                // 全件走査なら次のnative取得時にreparse検出で失敗する。短絡Disposeはここで止まる。
+            }
+            Assert.ThrowsExactly<IOException>(() => entry.Enumerate().ToArray());
+        }
+        Assert.IsTrue((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0);
+    }
+
+    [TestMethod]
+    public void WRITE_ATTRIBUTESを拒否された普通ファイルでもDELETE権限で削除できる()
+    {
+        var file = CreateFile(@"acl-file\normal.bin");
+        var info = new FileInfo(file);
+        var original = info.GetAccessControl().GetSecurityDescriptorBinaryForm();
+        try
+        {
+            var restricted = info.GetAccessControl();
+            restricted.AddAccessRule(new FileSystemAccessRule(WindowsIdentity.GetCurrent().User!,
+                FileSystemRights.WriteAttributes, AccessControlType.Deny));
+            info.SetAccessControl(restricted);
+            var result = FileCleanupEngine.Run([CleanupTarget.Contents(info.DirectoryName!)], false, null, CancellationToken.None);
+            Assert.AreEqual(1, result.DeletedFiles, string.Join("; ", result.BlockedExamples));
+            Assert.IsFalse(File.Exists(file));
+        }
+        finally { if (File.Exists(file)) RestoreDacl(info, original); }
+    }
+
+    [TestMethod]
+    public void directory自身のDELETE不可でも内部ファイルを掃除する()
+    {
+        var file = CreateFile(@"acl-directory\child\normal.bin");
+        var parent = new DirectoryInfo(Path.Combine(_root, "acl-directory"));
+        var child = new DirectoryInfo(Path.GetDirectoryName(file)!);
+        var parentAcl = parent.GetAccessControl().GetSecurityDescriptorBinaryForm();
+        var childAcl = child.GetAccessControl().GetSecurityDescriptorBinaryForm();
+        var user = WindowsIdentity.GetCurrent().User!;
+        try
+        {
+            var denyParent = parent.GetAccessControl();
+            denyParent.AddAccessRule(new FileSystemAccessRule(user, FileSystemRights.DeleteSubdirectoriesAndFiles, AccessControlType.Deny));
+            parent.SetAccessControl(denyParent);
+            var denyChild = child.GetAccessControl();
+            denyChild.AddAccessRule(new FileSystemAccessRule(user, FileSystemRights.Delete, AccessControlType.Deny));
+            child.SetAccessControl(denyChild);
+            var result = FileCleanupEngine.Run([CleanupTarget.Contents(parent.FullName)], false, null, CancellationToken.None);
+            Assert.AreEqual(1, result.DeletedFiles, string.Join("; ", result.BlockedExamples));
+            Assert.IsFalse(File.Exists(file));
+            Assert.IsTrue(Directory.Exists(child.FullName));
+            Assert.AreEqual(1, result.Blocked);
+        }
+        finally
+        {
+            try { RestoreDacl(parent, parentAcl); }
+            finally { if (Directory.Exists(child.FullName)) RestoreDacl(child, childAcl); }
+        }
+    }
+
+    [TestMethod]
+    public void 読取共有で開かれた普通ファイルもDELETE共有があれば削除できる()
+    {
+        var file = CreateFile(@"share-delete\normal.bin");
+        using var reader = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
+        var result = FileCleanupEngine.Run([CleanupTarget.Contents(Path.GetDirectoryName(file)!)], false, null, CancellationToken.None);
+        Assert.AreEqual(1, result.DeletedFiles, string.Join("; ", result.BlockedExamples));
+    }
+    [TestMethod]
+    public void HiddenSystemだけのdirectoryはWRITE_ATTRIBUTES不可でも属性を変えず削除する()
+    {
+        var parent = Path.Combine(_root, "acl-hidden-directory");
+        var child = new DirectoryInfo(Path.Combine(parent, "child"));
+        child.Create();
+        child.Attributes = FileAttributes.Directory | FileAttributes.Hidden | FileAttributes.System;
+        var original = child.GetAccessControl().GetSecurityDescriptorBinaryForm();
+        try
+        {
+            var restricted = child.GetAccessControl();
+            restricted.AddAccessRule(new FileSystemAccessRule(WindowsIdentity.GetCurrent().User!, FileSystemRights.WriteAttributes, AccessControlType.Deny));
+            child.SetAccessControl(restricted);
+            var result = FileCleanupEngine.Run([CleanupTarget.Contents(parent)], false, null, CancellationToken.None);
+            Assert.AreEqual(1, result.DeletedDirectories, string.Join("; ", result.BlockedExamples));
+            Assert.IsFalse(Directory.Exists(child.FullName));
+        }
+        finally { if (Directory.Exists(child.FullName)) { RestoreDacl(child, original); child.Attributes = FileAttributes.Directory; } }
+    }
+
+    [TestMethod]
+    public void directory自身がDELETE非共有でも内部ファイルを掃除する()
+    {
+        var file = CreateFile(@"share-directory\child\normal.bin");
+        var child = Path.GetDirectoryName(file)!;
+        using var other = CreateFileW(child, 0x81, 3, 0, 3, 0x02200000, 0);
+        Assert.IsFalse(other.IsInvalid);
+        var result = FileCleanupEngine.Run([CleanupTarget.Contents(Path.GetDirectoryName(child)!)], false, null, CancellationToken.None);
+        Assert.AreEqual(1, result.DeletedFiles, string.Join("; ", result.BlockedExamples));
+        Assert.IsFalse(File.Exists(file));
+        Assert.IsTrue(Directory.Exists(child));
+        Assert.AreEqual(1, result.Blocked);
+    }
+    private static void RestoreDacl(FileSystemInfo entry, byte[] original)
+    {
+        // GetAccessControl の読取オブジェクトをそのまま Persist しても変更済とは扱われない。
+        // 新規 descriptor の Access セクションを設定し、DACL の書込対象を明示する。
+        FileSystemSecurity restored;
+        if (entry is DirectoryInfo directory)
+        {
+            var security = new DirectorySecurity();
+            security.SetSecurityDescriptorBinaryForm(original, AccessControlSections.Access);
+            directory.SetAccessControl(security);
+            restored = directory.GetAccessControl(AccessControlSections.Access);
+        }
+        else
+        {
+            var file = (FileInfo)entry;
+            var security = new FileSecurity();
+            security.SetSecurityDescriptorBinaryForm(original, AccessControlSections.Access);
+            file.SetAccessControl(security);
+            restored = file.GetAccessControl(AccessControlSections.Access);
+        }
+
+        Assert.AreEqual(new RawSecurityDescriptor(original, 0).GetSddlForm(AccessControlSections.Access),
+            restored.GetSecurityDescriptorSddlForm(AccessControlSections.Access), $"テスト用 DACL の復元失敗: {entry.FullName}");
+    }
+
+    [TestMethod]
+    public void lockとアクセス拒否が混在するtargetはSYSTEM再列挙へ予約しない()
+    {
+        var locked = CreateFile(@"mixed-access\locked.bin");
+        var denied = new FileInfo(CreateFile(@"mixed-access\denied.bin"));
+        var parent = denied.Directory!;
+        var parentAcl = parent.GetAccessControl().GetSecurityDescriptorBinaryForm();
+        var fileAcl = denied.GetAccessControl().GetSecurityDescriptorBinaryForm();
+        var user = WindowsIdentity.GetCurrent().User!;
+        try
+        {
+            var parentDenied = parent.GetAccessControl();
+            parentDenied.AddAccessRule(new FileSystemAccessRule(user, FileSystemRights.DeleteSubdirectoriesAndFiles, AccessControlType.Deny));
+            parent.SetAccessControl(parentDenied);
+            var fileDenied = denied.GetAccessControl();
+            fileDenied.AddAccessRule(new FileSystemAccessRule(user, FileSystemRights.Delete, AccessControlType.Deny));
+            denied.SetAccessControl(fileDenied);
+            using var held = new FileStream(locked, FileMode.Open, FileAccess.Read, FileShare.None);
+            var outcome = FileCleanupEngine.Run([CleanupTarget.Contents(parent.FullName)], true, null, CancellationToken.None);
+            Assert.AreEqual(2, outcome.Blocked);
+            Assert.AreEqual(1, outcome.LockBlocked);
+            Assert.HasCount(0, outcome.BlockedTargets, "ACL 拒否を含む target 全体を特権で再実行しない");
+            Assert.IsTrue(File.Exists(locked));
+            Assert.IsTrue(File.Exists(denied.FullName));
+        }
+        finally
+        {
+            try { RestoreDacl(parent, parentAcl); }
+            finally { if (File.Exists(denied.FullName)) RestoreDacl(denied, fileAcl); }
+        }
+    }
+
+    [TestMethod]
+    public void lockとリンク拒否が混在するtargetも予約しない()
+    {
+        var locked = CreateFile(@"mixed-link\locked.bin");
+        var outside = CreateFile(@"link-outside\keep.txt", "keep");
+        var parent = Path.GetDirectoryName(locked)!;
+        CreateJunction(Path.Combine(parent, "linked"), Path.GetDirectoryName(outside)!);
+        using var held = new FileStream(locked, FileMode.Open, FileAccess.Read, FileShare.None);
+        var outcome = FileCleanupEngine.Run([CleanupTarget.Contents(parent)], true, null, CancellationToken.None);
+        Assert.AreEqual(1, outcome.LockBlocked);
+        Assert.AreEqual(1, outcome.RejectedTargets.Count);
+        Assert.HasCount(0, outcome.BlockedTargets);
+        Assert.AreEqual("keep", File.ReadAllText(outside));
+        Assert.IsTrue((File.GetAttributes(Path.Combine(parent, "linked")) & FileAttributes.ReparsePoint) != 0);
+    }
+
+    [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void bounded設定読取は保持したreadDatahandleだけを使い更新と差替えを共有拒否する(bool utf16)
+    {
+        var file = CreateFile(@"read-settings\settings.json");
+        const string json = "{\"Locale\":\"en_US\"}";
+        File.WriteAllText(file, json, utf16 ? System.Text.Encoding.Unicode : System.Text.Encoding.UTF8);
+        using (var entry = NativeCleanupEntry.Open(file, false, readData: true))
+        {
+            Assert.AreEqual(json, entry.ReadText(1024));
+            Assert.ThrowsExactly<IOException>(() => entry.ReadText(4));
+            Assert.Throws<IOException>(() => File.WriteAllText(file, "replacement"));
+            Assert.Throws<IOException>(() => File.Move(file, file + ".moved"));
+            Assert.AreEqual(json, entry.ReadText(1024));
+        }
+        File.WriteAllText(file, "released");
+        Assert.AreEqual("released", File.ReadAllText(file));
+    }
+
+    [TestMethod]
+    public void fileのDACL復元は新規descriptorを保存して実ACLの一致を確認する()
+    {
+        var file = new FileInfo(CreateFile(@"acl-restore\keep.bin"));
+        var original = file.GetAccessControl().GetSecurityDescriptorBinaryForm();
+        try
+        {
+            var restricted = file.GetAccessControl();
+            restricted.AddAccessRule(new FileSystemAccessRule(WindowsIdentity.GetCurrent().User!,
+                FileSystemRights.WriteAttributes, AccessControlType.Deny));
+            file.SetAccessControl(restricted);
+            Assert.AreNotEqual(new RawSecurityDescriptor(original, 0).GetSddlForm(AccessControlSections.Access),
+                file.GetAccessControl().GetSecurityDescriptorSddlForm(AccessControlSections.Access));
+        }
+        finally { RestoreDacl(file, original); }
+        file.Attributes = FileAttributes.ReadOnly;
+        Assert.IsTrue((file.Attributes & FileAttributes.ReadOnly) != 0);
+        file.Attributes = FileAttributes.Normal;
+    }
 
     private sealed class NoopExecutor : ICommandExecutor
     {
@@ -64,6 +429,7 @@ public sealed class FileCleanupTests
             subdirectory.Delete(recursive: false);
         }
 
+        directory.Attributes = FileAttributes.Directory;
         directory.Delete(recursive: false);
     }
 
@@ -133,7 +499,7 @@ public sealed class FileCleanupTests
             progress: null,
             ct: CancellationToken.None);
 
-        Assert.AreEqual(1, outcome.DeletedFiles);
+        Assert.AreEqual(1, outcome.DeletedFiles, string.Join("; ", outcome.BlockedExamples));
         Assert.IsFalse(File.Exists(Path.Combine(target, "mail.ost")));
         Assert.IsTrue(File.Exists(Path.Combine(target, "keep.pst")), "パターン外は残す");
         Assert.IsTrue(File.Exists(Path.Combine(target, "sub", "nested.ost")), "サブフォルダは辿らない");
@@ -193,7 +559,7 @@ public sealed class FileCleanupTests
             progress: null,
             ct: CancellationToken.None);
 
-        Assert.AreEqual(1, outcome.DeletedFiles);
+        Assert.AreEqual(1, outcome.DeletedFiles, string.Join("; ", outcome.BlockedExamples));
         Assert.IsFalse(File.Exists(file));
     }
 
@@ -327,6 +693,91 @@ public sealed class FileCleanupTests
         Assert.AreEqual(1, outcome.RejectedTargets.Count);
         Assert.AreEqual(0, outcome.DeletedFiles);
         Assert.IsTrue(File.Exists(keep), "祖先リンクの先にあるキャッシュは残す");
+    }
+
+    [TestMethod]
+    public void 列挙用ガードの保持中は祖先をジャンクションへ差し替えられない()
+    {
+        var browserRoot = Path.Combine(_root, "browser-swap");
+        var userData = Path.Combine(browserRoot, "User Data");
+        var movedRoot = Path.Combine(_root, "browser-moved");
+        var external = Path.Combine(_root, "external-browser", "User Data", "External Profile");
+        var profile = Path.Combine(userData, "Default");
+        Directory.CreateDirectory(profile);
+        Directory.CreateDirectory(external);
+
+        using (var targets = FileCleanupGroups.EnumerateBrowserTargets([browserRoot]).GetEnumerator())
+        {
+            Assert.IsTrue(targets.MoveNext());
+            Assert.ThrowsExactly<IOException>(() => Directory.Move(browserRoot, movedRoot));
+            while (!targets.Current.RawPath.StartsWith(profile + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+            {
+                Assert.IsTrue(targets.MoveNext(), "通常のプロファイルを列挙する必要があります");
+            }
+
+            Assert.ThrowsExactly<IOException>(() => Directory.Move(userData, Path.Combine(browserRoot, "User Data moved")));
+            Assert.ThrowsExactly<IOException>(() => Directory.Move(profile, Path.Combine(userData, "Default moved")));
+        }
+
+        Directory.Move(browserRoot, movedRoot);
+        CreateJunction(browserRoot, Path.GetDirectoryName(Path.GetDirectoryName(external)!)!);
+        Assert.HasCount(0, FileCleanupGroups.EnumerateBrowserTargets([browserRoot]).ToArray(),
+            "保持解除後に差し替えられた祖先リンクも次の列挙で拒否する");
+    }
+
+    [TestMethod]
+    public async Task 実行時の対象列挙は呼出しスレッドで行わない()
+    {
+        var callerThread = 0;
+        var providerThread = 0;
+        var action = new FileCleanupAction("test-enumeration", "test", "test", () =>
+        {
+            providerThread = Environment.CurrentManagedThreadId;
+            return [];
+        });
+
+        // 専用の呼出しスレッドを使い、await 後に同じ pool thread が再利用される揺らぎを避ける。
+        var invocation = new TaskCompletionSource<Task<MaintenanceActionResult>>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var caller = new Thread(() =>
+        {
+            callerThread = Environment.CurrentManagedThreadId;
+            invocation.SetResult(action.ExecuteAsync());
+        });
+        caller.Start();
+        await await invocation.Task;
+        caller.Join();
+
+        Assert.AreNotEqual(callerThread, providerThread);
+    }
+
+    [TestMethod]
+    public async Task 実行前取消では対象が空でも列挙せず取消を返す()
+    {
+        var calls = 0;
+        var action = new FileCleanupAction("test-cancel", "test", "test", () =>
+        {
+            calls++;
+            return [];
+        });
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+
+        Assert.AreEqual(MaintenanceActionStatus.Canceled, (await action.ExecuteAsync(cancellation.Token)).Status);
+
+        Assert.AreEqual(0, calls);
+    }
+
+    [TestMethod]
+    public async Task 対象列挙中の取消は空の結果を成功にしない()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var action = new FileCleanupAction("test-cancel-enumeration", "test", "test", () =>
+        {
+            cancellation.Cancel();
+            return [];
+        });
+
+        Assert.AreEqual(MaintenanceActionStatus.Canceled, (await action.ExecuteAsync(cancellation.Token)).Status);
     }
 
     [TestMethod]
@@ -576,7 +1027,7 @@ public sealed class FileCleanupTests
         var linkedEtl = CreateFile(@"external\linked.etl");
         CreateJunction(Path.Combine(root, "linked"), external);
 
-        var targets = FileCleanupGroups.EnumerateKnownTreeEtlTargets(root);
+        var targets = FileCleanupGroups.EnumerateKnownTreeEtlTargets(root).ToArray();
 
         CollectionAssert.AreEquivalent(
             new[] { root, child },
@@ -597,6 +1048,46 @@ public sealed class FileCleanupTests
         Assert.IsTrue(File.Exists(keepEtl1), ".etl1 は .etl として削除しない");
         Assert.IsTrue(File.Exists(keepEtlBackup), ".etlbackup は .etl として削除しない");
         Assert.IsTrue(File.Exists(linkedEtl), "リンク先の ETL は削除しない");
+    }
+
+    [TestMethod]
+    public async Task 実ETLツリーの列挙途中で取消したら残りを走査せず削除しない()
+    {
+        var root = Path.Combine(_root, "etl-cancel");
+        for (var index = 0; index < 16; index++)
+        {
+            CreateFile($@"etl-cancel\branch-{index}\leaf\trace.etl");
+        }
+
+        using var cancellation = new CancellationTokenSource();
+        var observed = 0;
+        IEnumerable<CleanupTarget> EnumerateTargets()
+        {
+            foreach (var target in FileCleanupGroups.EnumerateKnownTreeEtlTargets(root))
+            {
+                observed++;
+                if (observed == 2)
+                {
+                    // 最初の子を返した時点で実走査中のハンドルが保持されている。
+                    // 全ツリーを先にリスト化してから返す実装では、この検査は成立しない。
+                    Assert.ThrowsExactly<IOException>(() => Directory.Move(target.RawPath, target.RawPath + "-moved"));
+                    cancellation.Cancel();
+                }
+
+                yield return target;
+            }
+        }
+
+        var action = new FileCleanupAction("test-etl-cancel", "test", "test", EnumerateTargets);
+
+        Assert.AreEqual(MaintenanceActionStatus.Canceled, (await action.ExecuteAsync(cancellation.Token)).Status);
+
+        Assert.AreEqual(2, observed, "取消後は次の ETL ディレクトリ走査へ進まない");
+        Assert.HasCount(16, Directory.GetFiles(root, "*.etl", SearchOption.AllDirectories),
+            "対象確定前の取消では ETL ファイルを削除しない");
+        var movedRoot = Path.Combine(_root, "etl-cancel-moved");
+        Directory.Move(root, movedRoot);
+        Assert.IsTrue(Directory.Exists(movedRoot), "取消による列挙終了で走査用ハンドルを解放する");
     }
 
     [TestMethod]

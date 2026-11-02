@@ -52,7 +52,7 @@ function Remove-LocalWorkItem {
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-# 展開・実行せず、実際に配布するパッケージの版と win-x64 構成を確認する。
+# 実行せず、実際に配布するパッケージの版・署名と win-x64 構成を確認する。
 function Assert-ReleasePackage {
     param([string]$PackagePath, [string]$ExpectedVersion)
     $archive = [IO.Compression.ZipFile]::OpenRead($PackagePath)
@@ -69,33 +69,66 @@ function Assert-ReleasePackage {
         if ($null -eq $metadata -or $metadata.id -cne 'Lumin4ti' -or $metadata.version -cne $ExpectedVersion) {
             throw "パッケージの ID または版が一致しません: $PackagePath"
         }
-        foreach ($name in @('Lumin4ti.UI.exe', 'Lumin4ti.UI.dll', 'Lumin4ti.UI.deps.json', 'Lumin4ti.UI.runtimeconfig.json')) {
+        foreach ($name in @('Lumin4ti.UI.exe', 'Lumin4ti.UI.dll', 'Lumin4ti.UI.deps.json', 'Lumin4ti.UI.runtimeconfig.json',
+                'Lumin4ti.RebootCleanup.exe', 'Lumin4ti.RebootCleanup.dll', 'Lumin4ti.RebootCleanup.deps.json', 'Lumin4ti.RebootCleanup.runtimeconfig.json',
+                'Lumin4ti.Core.dll', 'coreclr.dll', 'hostfxr.dll', 'System.Private.CoreLib.dll')) {
             $entry = $archive.GetEntry("lib/app/$name")
             if ($null -eq $entry -or $entry.Length -eq 0) { throw "パッケージに必須ファイルがありません: $name" }
+        }
+        # 署名後の nupkg 内の実物を確認する。展開先は終端のリリース清掃まで保持する。
+        $inspectionDir = Join-Path $WorkDir "payload-verification-$ExpectedVersion"
+        [void][IO.Directory]::CreateDirectory($inspectionDir)
+        foreach ($name in @('Lumin4ti.UI.exe', 'Lumin4ti.UI.dll', 'Lumin4ti.RebootCleanup.exe', 'Lumin4ti.RebootCleanup.dll', 'Lumin4ti.Core.dll')) {
+            $destination = Join-Path $inspectionDir $name
+            [IO.Compression.ZipFileExtensions]::ExtractToFile($archive.GetEntry("lib/app/$name"), $destination, $true)
+            $signature = Get-AuthenticodeSignature -LiteralPath $destination
+            $fileVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo($destination).FileVersion
+            if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notlike "CN=$CertSubjectName*" -or
+                    $fileVersion -cne "$ExpectedVersion.0") {
+                throw "署名後のパッケージ内ファイルの版または署名が不一致です: $name ($fileVersion / $($signature.Status))"
+            }
         }
         $deps = (& $readText 'lib/app/Lumin4ti.UI.deps.json') | ConvertFrom-Json
         if (-not ([string]$deps.runtimeTarget.name).EndsWith('/win-x64', [StringComparison]::Ordinal)) {
             throw "パッケージの runtimeTarget が win-x64 ではありません: $PackagePath"
         }
-        $apphost = [IO.MemoryStream]::new()
-        $exeStream = $archive.GetEntry('lib/app/Lumin4ti.UI.exe').Open()
-        $binary = $null
-        try {
-            $exeStream.CopyTo($apphost)
-            $apphost.Position = 0
-            $binary = [IO.BinaryReader]::new($apphost)
-            if ($binary.ReadUInt16() -ne 0x5A4D) { throw 'apphost の DOS ヘッダーが不正です' }
-            $apphost.Position = 0x3C
-            $peOffset = $binary.ReadUInt32()
-            $apphost.Position = $peOffset
-            if ($binary.ReadUInt32() -ne 0x00004550 -or $binary.ReadUInt16() -ne 0x8664) {
-                throw "apphost の PE machine が x64 ではありません: $PackagePath"
-            }
+        $helperDeps = (& $readText 'lib/app/Lumin4ti.RebootCleanup.deps.json') | ConvertFrom-Json
+        if ($helperDeps.runtimeTarget.name -cne $deps.runtimeTarget.name) {
+            throw "helper と GUI の runtimeTarget が一致しません: $PackagePath"
         }
-        finally {
-            if ($null -ne $binary) { $binary.Dispose() }
-            $exeStream.Dispose()
-            $apphost.Dispose()
+        $coreDependency = @($deps.libraries.PSObject.Properties.Name | Where-Object { $_ -clike 'Lumin4ti.Core/*' })
+        $helperCoreDependency = @($helperDeps.libraries.PSObject.Properties.Name | Where-Object { $_ -clike 'Lumin4ti.Core/*' })
+        if ($coreDependency.Count -ne 1 -or $helperCoreDependency.Count -ne 1 -or $helperCoreDependency[0] -cne $coreDependency[0]) {
+            throw "helper と GUI の Core 依存が一致しません: $PackagePath"
+        }
+        $uiRuntime = ((& $readText 'lib/app/Lumin4ti.UI.runtimeconfig.json') | ConvertFrom-Json).runtimeOptions
+        $helperRuntime = ((& $readText 'lib/app/Lumin4ti.RebootCleanup.runtimeconfig.json') | ConvertFrom-Json).runtimeOptions
+        $uiFramework = @($uiRuntime.includedFrameworks | Where-Object { $_.name -ceq 'Microsoft.NETCore.App' })
+        $helperFramework = @($helperRuntime.includedFrameworks | Where-Object { $_.name -ceq 'Microsoft.NETCore.App' })
+        if ($uiFramework.Count -ne 1 -or $helperFramework.Count -ne 1 -or $uiFramework[0].version -cne $helperFramework[0].version) {
+            throw "helper と GUI の同梱 .NET runtime が一致しません: $PackagePath"
+        }
+        foreach ($executable in @('Lumin4ti.UI.exe', 'Lumin4ti.RebootCleanup.exe')) {
+            $apphost = [IO.MemoryStream]::new()
+            $exeStream = $archive.GetEntry("lib/app/$executable").Open()
+            $binary = $null
+            try {
+                $exeStream.CopyTo($apphost)
+                $apphost.Position = 0
+                $binary = [IO.BinaryReader]::new($apphost)
+                if ($binary.ReadUInt16() -ne 0x5A4D) { throw 'apphost の DOS ヘッダーが不正です' }
+                $apphost.Position = 0x3C
+                $peOffset = $binary.ReadUInt32()
+                $apphost.Position = $peOffset
+                if ($binary.ReadUInt32() -ne 0x00004550 -or $binary.ReadUInt16() -ne 0x8664) {
+                    throw "apphost の PE machine が x64 ではありません: $PackagePath"
+                }
+            }
+            finally {
+                if ($null -ne $binary) { $binary.Dispose() }
+                $exeStream.Dispose()
+                $apphost.Dispose()
+            }
         }
     }
     finally { $archive.Dispose() }
@@ -288,13 +321,14 @@ foreach ($runtime in $Runtimes) {
     Write-Host "== publish: $runtime ==" -ForegroundColor Cyan
     Invoke-Native "dotnet publish ($runtime)" {
         dotnet publish src/Lumin4ti.UI/Lumin4ti.UI.csproj -c Release -r $runtime `
-            --self-contained true --no-restore -o $publishDir
+            --self-contained true --no-restore -p:UseSharedCompilation=false -o $publishDir
     }
 
     if (-not (Test-Path (Join-Path $publishDir 'Lumin4ti.UI.exe'))) {
         throw "Lumin4ti.UI.exe が publish 出力にありません ($runtime)"
     }
 
+    # --signParams は helper を含む全 PE (exe/dll) を署名する。helper の署名除外は行わない。
     Write-Host "== vpk pack + 署名: $runtime ==" -ForegroundColor Cyan
     # StartMenu は packAuthors 名のサブフォルダを作るため、ルート直下へ登録する。
     Invoke-Native "vpk pack ($runtime)" {

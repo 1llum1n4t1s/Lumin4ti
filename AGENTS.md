@@ -32,9 +32,10 @@ dotnet test Lumin4ti.slnx --filter "FullyQualifiedName~UwpBackgroundToggleTests"
 
 ### メンテナンス項目の中核 (最重要)
 
-すべての「機能」は `IMaintenanceItem` を軸にした 3 型 ([IMaintenanceAction.cs](src/Lumin4ti.Core/Interfaces/IMaintenanceAction.cs)):
+すべての「機能」は `IMaintenanceItem` を軸にした 4 型 ([IMaintenanceAction.cs](src/Lumin4ti.Core/Interfaces/IMaintenanceAction.cs)):
 
 - **`IMaintenanceAction`** — 「実行」ボタン型 (1 回実行)。`ExecuteAsync(IProgress<string>?, ct)` でライブ進捗を UI へ流せる。
+- **`IMaintenanceBatchSetting`** — 対象一覧へ機能のON/OFFを繰り返し適用する一括設定型。同じカードの「一括OFF」「一括ON」から `ApplyAsync(bool enabled, ct)` を呼ぶ。`enabled = true` は対象機能を有効にする意味。現在状態の取得には依存せず、実行ごとに対象を再列挙する。UWPバックグラウンド実行が該当する。
 - **`IMaintenanceToggle`** — ON/OFF トグル型。**ON = 最適化を適用 / OFF = 項目の解除値へ設定または明示上書きを削除**。永続バックアップと適用前の元値復元は行わない。MMAgent 系は ON = 機能有効。`GetStateAsync`/`SetStateAsync`。
 - **`IMaintenanceChoice`** — ドロップダウン選択型。ON/OFF に収まらない数値・段階設定に使う (例: `MmAgentOperationApiChoice` は「無効」と記録ファイル数を 1 つの操作で選ばせる)。`Options`/`GetSelectedValueAsync`/`SetSelectedValueAsync`。選択肢の表示名は翻訳不要なら `Label` をそのまま出し、翻訳が要るものだけ `LabelKey` を持たせる。`IsDefault` を付けた選択肢に UI が「(既定)」を添える。
 
@@ -83,12 +84,12 @@ ON/OFF設定切り替えとDefenderの既定設定へのリセットは永続バ
 **安全ガード (回帰厳禁)**: 実運用では他人の PC の実データを消すため、次を外さない。
 
 - `TryResolve` が、環境変数の未解決 (`%ProgramData%` 未定義で `\LGHUB\cache` になる等)、相対パス、ドライブ直下、`%LOCALAPPDATA%` 等の基点フォルダを拒否する。基点フォルダは `Files` 指定 (`IconCache.db` / `FNTCACHE.DAT`) のときだけ許可する。
-- ジャンクション・シンボリックリンクは辿らず、リンク自体も削除しない。キャッシュを別ドライブへ逃がしている利用者の配置設定と、リンク先の実体を保護するため。
+- ジャンクション・シンボリックリンクは、対象確認時点と削除直前のハンドル属性で検出した場合、リンク自体を保持する。列挙・属性変更・削除は再解析を拒否して開いた同じオブジェクトのハンドルで行い、途中のパス差替えでもリンク先へ作用しない。最終確認後に別プロセスが同じ対象をリンク化する競合では、リンク自身の残存まで原子的には保証しない（2026-11-02の利用者判断）。キャッシュを別ドライブへ逃がしている利用者の配置設定と、リンク先の実体を保護するため。
 - 認証情報・鍵・アプリ設定のフォルダ (`.gnupg` / `.aws` / `.config` / `.codex` 等) はどのグループにも入れない。再生成できないので掃除の巻き添えにしない。[FileCleanupTests](src/Lumin4ti.Tests/FileCleanupTests.cs) が回帰を検出する。
 - npm は `%LOCALAPPDATA%\npm-cache` / `%USERPROFILE%\.npm` の基点全体を対象にせず、再取得可能な `_cacache` と診断用の `_logs` だけを削除する。`_npx` は展開済みの実行環境なので削除対象へ戻さない。
 - Windows のイベントログ、Defender の検出履歴、GPU 設定、スタートアップ登録、ファイル関連付け、アプリのパッケージ登録、WinSxS の旧コンポーネントはキャッシュではないため `FileCleanupGroups` では扱わない。リンク切れスタートアップと関連付け候補だけは専用アクションで扱い、`StartupCommandParser.IsConfirmedMissing` が準備済み固定ドライブ上の欠損を確定できた登録だけを削除する。UNC、リムーバブル、未準備ドライブ、再解析点配下、アクセス不能、解決不能なコマンドは保持する。
 - ETL トレースログは `%SystemRoot%\Logs`、`System32\LogFiles`、`Panther`、`%ProgramData%\Microsoft\Diagnosis\ETLLogs` の既知基点だけをリンク非追従で列挙し、`*.etl` のみ削除する。ドライブ全体を対象にする再帰パターン削除は復活させない。
-- シェルが握って離さないファイル (アイコン・フォントキャッシュ) は `MoveFileEx(MOVEFILE_DELAY_UNTIL_REBOOT)` で再起動時削除に回す。Explorer を kill しないのは、失敗時に利用者がシェル無しで取り残されるのを避けるため。
+- シェルが握って離さない選択済みキャッシュは、保護キューへ利用者 SID と既知5対象の ID を記録し、専用 `Lumin4ti.RebootCleanup.exe` を利用者 SID 別の S4U・Highest 起動タスクから実行して再列挙・再検証する。任意パスは保存せず、元対象と ProfileList の標準配置の実体一致を確認できない場合は予約しない。最大3実行・7日、未処理は保持して通常起動時に結果をログへ移す。既存の利用者別サインイン時クリーンアップとは別の固定タスクとし、保護された所有者・ACL・定義を検証する。旧 MoveFileEx 予約を読み取り・変更・移行しない。Explorer を kill しないのは、失敗時に利用者がシェル無しで取り残されるのを避けるため。
 - サインイン時クリーンアップは画面と同じ `FileCleanupGroups` と利用者設定を使い、タスクスケジューラーから最高権限で実行する。タスクへ登録できるのは、署名・MSI マーカー・`Program Files\Lumin4ti\current` の配置と各パス要素の所有者／ACL／再解析ポイントを検証できた実行ファイルだけとする。登録用 XML は `%TEMP%` へ置かず、Administrators / SYSTEM だけが書ける保護ストレージで作成し、登録後に削除する。
 - 固定名の既存タスクは Principal の利用者を照合し、別利用者・所有者不明の定義を上書き・削除しない。照会失敗時の新規登録に `/f` を付けない。起動時の修復条件は [DESIGN.md の起動と終了](DESIGN.md#起動と終了) を参照し、変更時は `ScheduledTempCleanupTests` の所有者・旧定義・照会失敗の検証を通す。
 
@@ -146,7 +147,7 @@ if ($LASTEXITCODE -eq 0) { pwsh -NoProfile -File scripts/release-local.ps1 } els
 
 ## コードレビュー時の注意点 (このコードベース特有)
 
-- トグルの多重操作レース: `ToggleSwitch` の `IsEnabled` は `CanToggle` (= 状態既知 かつ 非実行中 かつ 親がある場合は状態既知・ON) にバインドすること。`SupportsExplicitOff` / `SetOffCommand` の直接解除も同じ条件と既存の切替経路を通す。変更時は `CommandCategoryStateQueryTests` のOFF表示・状態不明・実行中・親子連動の検証を通す。表示の理由は [DESIGN.md のメンテナンス操作のモデル](DESIGN.md#メンテナンス操作のモデル) を参照する。
+- トグルの多重操作レース: `ToggleSwitch` の `IsEnabled` は `CanToggle` (= 状態既知 かつ 非実行中 かつ 親がある場合は状態既知・ON) にバインドすること。操作はスイッチへ集約する。既定値は `IMaintenanceToggle.DefaultState` (`true`=ON、`false`=OFF、`null`=環境による)、選択型は `Options.IsDefault` から表示し、現在値や推奨値と混同させない。変更時は `CommandCategoryStateQueryTests` のOFF表示・状態不明・実行中・親子連動と既定値表示の検証を通す。表示の理由は [DESIGN.md のメンテナンス操作のモデル](DESIGN.md#メンテナンス操作のモデル) を参照する。
 - 状態表示の乖離を避ける: `GetStateAsync` はレジストリだけでなく実適用状態も見る (例: VBS トグルは bcdedit の `hypervisorlaunchtype` も照合)。部分適用を避けるため、失敗しやすいステップ (bcdedit 等) を先に実行してから残りを書く。
 - 状態取得の診断は `StateErrorText`、操作結果は `ResultText` へ分け、状態回復時に診断だけを消す。状態不明の技術的理由は `StateFailureReason`、翻訳可能なトグル固有診断は `StateDiagnostic` で渡し、正常取得時には解除する。失敗・部分成功・受付拒否の記録は `MaintenanceItemLog` を使い、項目名と原因を残す。診断の境界は [DESIGN.md の状態と永続化](DESIGN.md#状態と永続化) を参照し、変更時は操作フロー検証も通す。親子の操作部品はローカライズ済み項目名をアクセシビリティ名にする。デバイスの空表示は列挙成功時だけ出す。
 - 部分失敗を成功と偽らない: マルチステップ (powercfg 等) は重要ステップの失敗で `Fail` を返す。使用中ファイルのスキップのように「想定内の一部未処理」は `Partial` と結果行で伝える。

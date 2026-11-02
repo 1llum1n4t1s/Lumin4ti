@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Security;
 using System.Security.Principal;
@@ -35,15 +36,19 @@ public sealed class ScheduledTempCleanupToggle(
     /// </summary>
     private readonly ITaskDefinitionStore _taskDefinitionStore = ProtectedTaskDefinitionStore.Default;
 
+    private readonly Func<bool> _taskExists = QueryTaskExists;
+
     /// <summary>置き場を差し替えるテスト用の経路 (非昇格のテスト実行では ProgramData へ書けない)。</summary>
     internal ScheduledTempCleanupToggle(
         ICommandExecutor executor,
         ITaskDefinitionStore taskDefinitionStore,
-        Func<string, bool>? isTrustedInstalledExecutable = null)
+        Func<string, bool>? isTrustedInstalledExecutable = null,
+        Func<bool>? taskExists = null)
         : this(executor, (ICleanupPreferences?)null, isTrustedInstalledExecutable)
     {
         ArgumentNullException.ThrowIfNull(taskDefinitionStore);
         _taskDefinitionStore = taskDefinitionStore;
+        _taskExists = taskExists ?? QueryTaskExists;
     }
 
     public string Id => "scheduled-temp-cleanup";
@@ -96,17 +101,41 @@ public sealed class ScheduledTempCleanupToggle(
 
     public bool RequiresReboot => false;
 
+    public bool? DefaultState => false;
+
     public MaintenanceStateDiagnostic? StateDiagnostic { get; private set; }
+
+    public string? StateFailureReason { get; private set; }
 
     public async Task<bool?> GetStateAsync(CancellationToken ct = default)
     {
         StateDiagnostic = null;
+        StateFailureReason = null;
         var result = await executor.RunAsync("schtasks", BuildQueryXmlArguments(), ct);
         if (!result.Success)
         {
-            // schtasks の非成功だけでは未登録と照会エラーを区別できない。既存の OFF 判定を保つ。
-            LogQueryFailure(result);
-            return false;
+            // ローカライズされた schtasks の出力では未登録と権限不足を区別できない。
+            // COM の読取で不存在を確認できた場合だけ OFF にする。
+            ct.ThrowIfCancellationRequested();
+            string? presenceFailure = null;
+            try
+            {
+                // 同期 COM を UI スレッドへ戻さない。開始後の COM 自体はキャンセルできないため、
+                // 応答まで同じ照会を待ち、完了後にキャンセルを確認する。
+                if (!await Task.Run(_taskExists, ct).ConfigureAwait(false))
+                {
+                    ct.ThrowIfCancellationRequested();
+                    return false;
+                }
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                presenceFailure = $"; タスク存在照会: {CommandFailureDiagnostic.Sanitize(ex.Message)} (HRESULT=0x{ex.HResult:X8})";
+            }
+
+            ct.ThrowIfCancellationRequested();
+            StateFailureReason = $"タスク定義の照会に失敗: {CommandFailureDiagnostic.Format(result)}{presenceFailure}";
+            return null;
         }
 
         var currentUser = GetCurrentUserIdentity();
@@ -124,6 +153,37 @@ public sealed class ScheduledTempCleanupToggle(
             : new("Toggle.ScheduledTaskOwnershipUnknown", "登録済みタスクの所有者を確認できないため操作できません。");
         LoggerBootstrap.Log.Error($"{Id} ({Label}): {StateDiagnostic.Fallback}");
         return null;
+    }
+
+    private static bool QueryTaskExists()
+    {
+        object? service = null;
+        object? root = null;
+        object? task = null;
+        try
+        {
+            var serviceType = Type.GetTypeFromProgID("Schedule.Service", throwOnError: true)!;
+            service = Activator.CreateInstance(serviceType)!;
+            ((dynamic)service).Connect();
+            root = ((dynamic)service).GetFolder(@"\");
+            try
+            {
+                task = ((dynamic)root).GetTask(TaskName);
+                return true;
+            }
+            catch (Exception ex) when (ex.HResult == unchecked((int)0x80070002))
+            {
+                // GetTask の ERROR_FILE_NOT_FOUND だけが不存在の根拠。
+                // 接続・ルート取得の失敗やアクセス拒否は呼出元へ伝える。
+                return false;
+            }
+        }
+        finally
+        {
+            if (task is not null) Marshal.FinalReleaseComObject(task);
+            if (root is not null) Marshal.FinalReleaseComObject(root);
+            if (service is not null) Marshal.FinalReleaseComObject(service);
+        }
     }
 
     /// <summary>

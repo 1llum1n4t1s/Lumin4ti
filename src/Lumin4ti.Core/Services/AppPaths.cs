@@ -15,7 +15,7 @@ public static class AppPaths
         : Path.Combine(AppDataDirectory, "logs");
 
     /// <summary>
-    /// HKLM / BCD へ復元する値の正本。ACL の作成・検証は
+    /// データ保護バックアップと特権タスク用データ。ACL の作成・検証は
     /// <see cref="ProtectedBackupStorage"/> が担当する。
     /// </summary>
     public static string ProtectedBackupsDirectory =>

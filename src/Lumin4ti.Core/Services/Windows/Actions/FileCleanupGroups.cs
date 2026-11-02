@@ -15,8 +15,9 @@ public static class FileCleanupGroups
     /// <summary>カタログへ登録するグループ (この順に画面へ並ぶ)。</summary>
     public static IEnumerable<IMaintenanceItem> CreateAll(
         ICommandExecutor executor,
-        ICleanupPreferences? preferences = null) =>
-        CreateCleanupActions(executor, preferences);
+        ICleanupPreferences? preferences = null,
+        IRebootCacheCleanupScheduler? rebootScheduler = null) =>
+        CreateCleanupActions(executor, preferences, rebootScheduler);
 
     /// <summary>
     /// 削除グループの実体。画面のカタログとサインイン時の定期実行が同じ生成経路を使い、
@@ -24,7 +25,8 @@ public static class FileCleanupGroups
     /// </summary>
     public static IReadOnlyList<IMaintenanceAction> CreateCleanupActions(
         ICommandExecutor executor,
-        ICleanupPreferences? preferences = null)
+        ICleanupPreferences? preferences = null,
+        IRebootCacheCleanupScheduler? rebootScheduler = null)
     {
         ArgumentNullException.ThrowIfNull(executor);
 
@@ -35,7 +37,7 @@ public static class FileCleanupGroups
             CreateAppCache(preferences),
             CreatePackageCache(preferences),
             CreateBrowserCache(preferences),
-            CreateShellCache(executor, preferences),
+            CreateShellCache(executor, preferences, rebootScheduler),
             CreateWindowsUpdateCache(executor, preferences),
             CreateOsIndex(executor, preferences),
         ];
@@ -134,7 +136,7 @@ public static class FileCleanupGroups
     /// FileCleanupEngine に渡す。汎用の再帰削除機能を復活させないため、対象作成側で
     /// フォルダを固定して展開する。
     /// </summary>
-    internal static IReadOnlyList<CleanupTarget> EnumerateKnownTreeEtlTargets(
+    internal static IEnumerable<CleanupTarget> EnumerateKnownTreeEtlTargets(
         string rawRoot,
         int maxDepth = 32)
     {
@@ -142,47 +144,52 @@ public static class FileCleanupGroups
         ArgumentOutOfRangeException.ThrowIfNegative(maxDepth);
 
         const string etlPattern = "*.etl";
-        var targets = new List<CleanupTarget> { CleanupTarget.Files(rawRoot, etlPattern) };
+        // ツリー全体を作ってから返すと、呼び出し元の取消検査へ戻れない。
+        // 基点・子ディレクトリごとに返し、次の走査前に取消を確認できるようにする。
+        yield return CleanupTarget.Files(rawRoot, etlPattern);
         if (!FileCleanupEngine.TryResolve(rawRoot, out var fullRoot, out _) ||
-            !FileCleanupEngine.CanSafelyTraverseDirectory(fullRoot))
+            !FileCleanupEngine.TryAcquireTraversalGuard(fullRoot, out var rootGuard))
         {
-            return targets;
+            yield break;
         }
 
+        using var heldRoot = rootGuard;
         var pending = new Stack<(DirectoryInfo Directory, int Depth)>();
         pending.Push((new DirectoryInfo(fullRoot), 0));
 
         while (pending.TryPop(out var entry))
         {
             if (entry.Depth >= maxDepth ||
-                !FileCleanupEngine.CanSafelyTraverseDirectory(entry.Directory.FullName))
+                !FileCleanupEngine.TryAcquireTraversalGuard(entry.Directory.FullName, out var entryGuard, rootGuard))
             {
                 continue;
             }
 
+            using var heldEntry = entryGuard;
             DirectoryInfo[] children;
             try
             {
-                children = entry.Directory.GetDirectories();
+                children = entryGuard.Enumerate()
+                    .Where(child => (child.Attributes & (FileAttributes.Directory | FileAttributes.ReparsePoint)) == FileAttributes.Directory)
+                    .Select(child => new DirectoryInfo(Path.Combine(entry.Directory.FullName, child.Name))).ToArray();
             }
-            catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+            catch (Exception ex) when (ex is UnauthorizedAccessException or IOException or System.ComponentModel.Win32Exception)
             {
                 continue;
             }
 
             foreach (var child in children)
             {
-                if (!FileCleanupEngine.CanSafelyTraverseDirectory(child.FullName))
+                if (!FileCleanupEngine.TryAcquireTraversalGuard(child.FullName, out var childGuard, rootGuard))
                 {
                     continue;
                 }
 
-                targets.Add(CleanupTarget.Files(child.FullName, etlPattern));
+                using var heldChild = childGuard;
+                yield return CleanupTarget.Files(child.FullName, etlPattern);
                 pending.Push((child, entry.Depth + 1));
             }
         }
-
-        return targets;
     }
 
     internal static string GetSystemTempGroupName(CleanupTarget target)
@@ -413,39 +420,44 @@ public static class FileCleanupGroups
         foreach (var rawRoot in browserRoots)
         {
             if (!FileCleanupEngine.TryResolve(rawRoot, out var root, out _) ||
-                !FileCleanupEngine.CanSafelyTraverseDirectory(root))
+                !FileCleanupEngine.TryAcquireTraversalGuard(root, out var rootGuard))
             {
                 continue;
             }
 
+            using var heldRoot = rootGuard;
             foreach (var relative in BrowserSharedCaches)
             {
                 yield return CleanupTarget.Contents(Path.Combine(root, relative));
             }
 
             var userData = Path.Combine(root, "User Data");
-            if (!FileCleanupEngine.CanSafelyTraverseDirectory(userData))
+            if (!FileCleanupEngine.TryAcquireTraversalGuard(userData, out var userDataGuard, rootGuard))
             {
                 continue;
             }
 
+            using var heldUserData = userDataGuard;
             string[] profiles;
             try
             {
-                profiles = Directory.GetDirectories(userData);
+                profiles = userDataGuard.Enumerate()
+                    .Where(child => (child.Attributes & (FileAttributes.Directory | FileAttributes.ReparsePoint)) == FileAttributes.Directory)
+                    .Select(child => Path.Combine(userData, child.Name)).ToArray();
             }
-            catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+            catch (Exception ex) when (ex is UnauthorizedAccessException or IOException or System.ComponentModel.Win32Exception)
             {
                 continue;
             }
 
             foreach (var profile in profiles)
             {
-                if (!FileCleanupEngine.CanSafelyTraverseDirectory(profile))
+                if (!FileCleanupEngine.TryAcquireTraversalGuard(profile, out var profileGuard, userDataGuard))
                 {
                     continue;
                 }
 
+                using var heldProfile = profileGuard;
                 foreach (var relative in BrowserProfileCaches)
                 {
                     yield return CleanupTarget.Contents(Path.Combine(profile, relative));
@@ -521,20 +533,23 @@ public static class FileCleanupGroups
     /// <summary>フォントキャッシュのファイルはフォントサービスが常時開いている。</summary>
     internal static readonly string[] ShellCacheServices = ["FontCache", "FontCache3.0.0.0"];
 
-    internal static FileCleanupAction CreateShellCache(ICommandExecutor executor, ICleanupPreferences? preferences = null) => new(
+    internal static FileCleanupAction CreateShellCache(ICommandExecutor executor, ICleanupPreferences? preferences = null,
+        IRebootCacheCleanupScheduler? rebootScheduler = null) => new(
         id: "cleanup-shell-cache",
         label: "アイコン・サムネイル・フォントのキャッシュを再構築",
         description:
             "エクスプローラーのアイコンキャッシュ、サムネイルキャッシュ、フォントキャッシュを削除して作り直させます。" +
             "アイコンが白紙・別アプリのものになる、サムネイルが古いまま更新されない、文字が正しく表示されない、といった表示の壊れに対する定番の修復です。" +
-            "シェルが開いたままで消せなかったファイルは次回の Windows 再起動時に削除されます。再構築を完了するには Windows を再起動してください。キャッシュ再構築の間だけ表示が一時的に遅くなります。",
+            "使用中の対象は署名済みの正規インストールで起動時の再列挙を予約します（最大3回・7日間）。" +
+            "起動時もロック中のファイルは保持します。標準と異なるプロファイルなど予約できない対象は結果に表示します。キャッシュ再構築の間だけ表示が一時的に遅くなります。",
         targetProvider: () => ShellCacheTargets,
         executor: executor,
         servicesToStop: ShellCacheServices,
         requiresReboot: true,
         scheduleBlockedForReboot: true,
         preferences: preferences,
-        checkListKeySelector: GetShellCacheGroupName);
+        checkListKeySelector: GetShellCacheGroupName,
+        rebootScheduler: rebootScheduler ?? new RebootCacheCleanupService(executor));
 
     // ═══ Windows Update のキャッシュ ═══
 

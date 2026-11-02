@@ -23,6 +23,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Lumin4ti.Core\Lumin4ti.Core.csproj" />
+    <!-- 別エントリポイントとして同じ Core/runtime を使う。UI の参照 assembly には含めない。 -->
+    <ProjectReference Include="..\Lumin4ti.RebootCleanup\Lumin4ti.RebootCleanup.csproj"
+                      ReferenceOutputAssembly="false" Private="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,9 +45,35 @@
     <Error Condition="'$(ApplicationManifest)' == '' Or !Exists('$(MSBuildProjectDirectory)\$(ApplicationManifest)')" Text="Windows アプリの ApplicationManifest が未設定か、ファイルが存在しません。" />
   </Target>
 
-  <!-- アイコンを Publish 出力にコピー (vpk pack の icon 引数用) -->
-  <Target Name="CopyAppIcon" AfterTargets="Publish">
-    <Copy SourceFiles="icon\app.ico" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" />
+  <!-- GetTargetPath で通常出力・ArtifactsPath・RID ごとの実出力先を取得する。 -->
+  <Target Name="CollectRebootCleanupArtifacts"
+          BeforeTargets="GetCopyToOutputDirectoryItems;ComputeResolvedFilesToPublishList"
+          DependsOnTargets="ResolveProjectReferences"
+          Condition="'$(DesignTimeBuild)' != 'true'">
+    <MSBuild Projects="$(MSBuildProjectDirectory)\..\Lumin4ti.RebootCleanup\Lumin4ti.RebootCleanup.csproj"
+             Targets="GetTargetPath"
+             Properties="Configuration=$(Configuration);TargetFramework=$(TargetFramework);RuntimeIdentifier=$(RuntimeIdentifier);SelfContained=$(SelfContained)">
+      <Output TaskParameter="TargetOutputs" ItemName="_RebootCleanupTargetPath" />
+    </MSBuild>
+    <ItemGroup>
+      <_RebootCleanupArtifact Include="@(_RebootCleanupTargetPath->'%(RootDir)%(Directory)Lumin4ti.RebootCleanup.exe')" />
+      <_RebootCleanupArtifact Include="@(_RebootCleanupTargetPath->'%(RootDir)%(Directory)Lumin4ti.RebootCleanup.dll')" />
+      <_RebootCleanupArtifact Include="@(_RebootCleanupTargetPath->'%(RootDir)%(Directory)Lumin4ti.RebootCleanup.deps.json')" />
+      <_RebootCleanupArtifact Include="@(_RebootCleanupTargetPath->'%(RootDir)%(Directory)Lumin4ti.RebootCleanup.runtimeconfig.json')" />
+      <ContentWithTargetPath Include="@(_RebootCleanupArtifact)"
+                             TargetPath="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+    <Error Condition="!Exists('%(_RebootCleanupArtifact.Identity)')"
+           Text="再起動時クリーンアップ helper の出力がありません: %(_RebootCleanupArtifact.Identity)" />
+  </Target>
+
+  <Target Name="IncludeRebootCleanupPublishArtifacts" BeforeTargets="ComputeResolvedFilesToPublishList"
+          DependsOnTargets="CollectRebootCleanupArtifacts">
+    <ItemGroup>
+      <!-- runtime/Core の重複コピーを避け、helper 自身の起動に必要な4ファイルだけを同梱する。 -->
+      <ResolvedFileToPublish Include="@(_RebootCleanupArtifact)"
+                             RelativePath="%(Filename)%(Extension)" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
   </Target>
 
 </Project>

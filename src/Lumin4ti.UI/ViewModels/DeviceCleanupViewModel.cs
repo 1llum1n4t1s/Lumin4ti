@@ -44,8 +44,11 @@ public partial class DeviceCleanupViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(CanRemove))]
     private bool isConfirmingRemoval;
 
-    [ObservableProperty]
-    private string statusText = string.Empty;
+    private (string Key, string Fallback, object[] Arguments)? _status;
+
+    public string StatusText => _status is { } status
+        ? App.Text(status.Key, status.Fallback, status.Arguments)
+        : string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SelectionText))]
@@ -94,9 +97,16 @@ public partial class DeviceCleanupViewModel : ObservableObject
 
         App.LocaleChanged += () =>
         {
+            OnPropertyChanged(nameof(StatusText));
             OnPropertyChanged(nameof(SelectionText));
             OnPropertyChanged(nameof(ConfirmationText));
         };
+    }
+
+    private void SetStatus(string key, string fallback, params object[] arguments)
+    {
+        _status = (key, fallback, arguments);
+        OnPropertyChanged(nameof(StatusText));
     }
 
     /// <summary>
@@ -109,7 +119,7 @@ public partial class DeviceCleanupViewModel : ObservableObject
         {
             IsLoading = true;
             HasSuccessfulLoad = false;
-            StatusText = App.Text("DeviceCleanup.Loading", "未接続デバイスを検索しています…");
+            SetStatus("DeviceCleanup.Loading", "未接続デバイスを検索しています…");
         }).ConfigureAwait(false);
 
         try
@@ -123,7 +133,7 @@ public partial class DeviceCleanupViewModel : ObservableObject
             {
                 ReplaceDevices(devices);
                 HasSuccessfulLoad = true;
-                StatusText = App.Text(
+                SetStatus(
                     "DeviceCleanup.Loaded",
                     "未接続デバイスを {0} 件検出しました。",
                     devices.Count);
@@ -132,14 +142,14 @@ public partial class DeviceCleanupViewModel : ObservableObject
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
             await _dispatchAsync(() =>
-                StatusText = App.Text("Status.Cancelled", "キャンセルされました")).ConfigureAwait(false);
+                SetStatus("Status.Cancelled", "キャンセルされました")).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
             MaintenanceItemLog.StateReadFailed("disconnected-devices", "未接続デバイス",
                 $"{ex.GetType().Name}: {ex.Message}");
             await _dispatchAsync(() =>
-                StatusText = App.Text(
+                SetStatus(
                     "DeviceCleanup.LoadFailed",
                     "未接続デバイスを読み込めませんでした (ログを確認してください)。")).ConfigureAwait(false);
         }
@@ -155,7 +165,7 @@ public partial class DeviceCleanupViewModel : ObservableObject
         if (!_operationCoordinator.TryBegin(out var operation))
         {
             LogBusy();
-            StatusText = App.Text(
+            SetStatus(
                 "Status.Busy",
                 "別のメンテナンス操作が実行中です。完了後にもう一度お試しください。");
             return;
@@ -242,7 +252,7 @@ public partial class DeviceCleanupViewModel : ObservableObject
         if (!_operationCoordinator.TryBegin(out var operation))
         {
             LogBusy();
-            StatusText = App.Text(
+            SetStatus(
                 "Status.Busy",
                 "別のメンテナンス操作が実行中です。完了後にもう一度お試しください。");
             return;
@@ -270,7 +280,7 @@ public partial class DeviceCleanupViewModel : ObservableObject
                 activeOperation.Token.ThrowIfCancellationRequested();
                 var item = selected[index];
                 await _dispatchAsync(() =>
-                    StatusText = App.Text(
+                    SetStatus(
                         "DeviceCleanup.Removing",
                         "削除中 {0} / {1}: {2}",
                         index + 1,
@@ -354,14 +364,14 @@ public partial class DeviceCleanupViewModel : ObservableObject
                     RemoveCompletedDevices(removedInstanceIds);
                 }
 
-                StatusText = App.Text(summaryKey, summaryFallback, removed, skipped, failed);
+                SetStatus(summaryKey, summaryFallback, removed, skipped, failed);
             }).ConfigureAwait(false);
             completed = true;
         }
         catch (OperationCanceledException) when (activeOperation.Token.IsCancellationRequested)
         {
             await _dispatchAsync(() =>
-                StatusText = App.Text("Status.Cancelled", "キャンセルされました")).ConfigureAwait(false);
+                SetStatus("Status.Cancelled", "キャンセルされました")).ConfigureAwait(false);
         }
         finally
         {

@@ -1,7 +1,5 @@
 using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using Microsoft.Win32.SafeHandles;
 
 namespace Lumin4ti.Core.Services.Windows.Actions;
 
@@ -50,16 +48,26 @@ public sealed class CleanupOutcome
 
     /// <summary>使用中・権限不足で削除できなかった項目数。</summary>
     public long Blocked { get; internal set; }
+    internal long LockBlocked { get; private set; }
 
     /// <summary>削除できなかった理由とパスの代表例。大量のファイルでも記録量を一定に保つ。</summary>
     public IReadOnlyList<string> BlockedExamples => _blockedExamples;
 
-    internal void RecordBlocked(string path, Exception exception) =>
-        RecordBlocked(path, $"{exception.Message} (HRESULT=0x{unchecked((uint)exception.HResult):X8})");
+    internal void RecordBlocked(string path, Exception exception)
+    {
+        var error = exception is System.ComponentModel.Win32Exception native
+            ? 0x80070000u | (uint)native.NativeErrorCode : unchecked((uint)exception.HResult);
+        var locked = error is 0x80070020 or 0x80070021;
+        RecordBlockedCore(path, $"{exception.Message} (HRESULT=0x{error:X8})", locked);
+    }
 
     internal void RecordBlocked(string path, string reason)
+        => RecordBlockedCore(path, reason, false);
+
+    private void RecordBlockedCore(string path, string reason, bool locked)
     {
         Blocked++;
+        if (locked) LockBlocked++;
         if (_blockedExamples.Count < MaxBlockedExamples)
         {
             var diagnostic = $"{path}: {reason}".Replace('\r', ' ').Replace('\n', ' ');
@@ -69,6 +77,8 @@ public sealed class CleanupOutcome
 
     /// <summary>再起動時削除として予約した項目数。</summary>
     public long ScheduledForReboot { get; internal set; }
+
+    internal List<CleanupTarget> BlockedTargets { get; } = [];
 
     /// <summary>存在しなかった対象の数 (未インストールのアプリ等。異常ではない)。</summary>
     public int MissingTargets { get; internal set; }
@@ -90,10 +100,6 @@ public sealed class CleanupOutcome
 public static class FileCleanupEngine
 {
     private const int MaxDepth = 64;
-    private const int MoveFileDelayUntilReboot = 0x00000004;
-    private const uint FileReadAttributes = 0x00000080;
-    private const uint FileFlagBackupSemantics = 0x02000000;
-    private const uint FileFlagOpenReparsePoint = 0x00200000;
 
     /// <summary>削除してはいけないフォルダ (これ自身、およびドライブ直下は対象にできない)。</summary>
     private static readonly Lazy<HashSet<string>> ProtectedPaths = new(BuildProtectedPaths);
@@ -141,25 +147,31 @@ public static class FileCleanupEngine
 
             // 対象だけでなく全祖先を no-follow で開き、走査が終わるまで名前の差し替えを防ぐ。
             // ブラウザプロファイル等の祖先がジャンクションでもリンク先へ入らない。
-            if (!DirectoryHandleGuard.TryOpenPath(fullPath, out var pathGuard, out var pathRejection))
+            if (!TryAcquireTraversalGuard(fullPath, out var pathGuard))
             {
-                outcome.RejectedTargets.Add($"{fullPath} ({pathRejection})");
+                outcome.RejectedTargets.Add($"{fullPath} (リンク非追従で開けませんでした)");
                 continue;
             }
 
             using (pathGuard)
             {
+                var blockedBefore = outcome.Blocked;
+                var locksBefore = outcome.LockBlocked;
+                var rejectedBefore = outcome.RejectedTargets.Count;
                 progress?.Report($"  - クリーンアップ: {fullPath}");
 
                 switch (target.Kind)
                 {
                     case CleanupTargetKind.Contents:
-                        DeleteContents(new DirectoryInfo(fullPath), outcome, scheduleBlockedForReboot, depth: 0, ct);
+                        DeleteContents(pathGuard, outcome, scheduleBlockedForReboot, depth: 0, ct);
                         break;
                     case CleanupTargetKind.Files:
-                        DeleteMatchingFiles(fullPath, target.Pattern!, outcome, scheduleBlockedForReboot, ct);
+                        DeleteMatchingFiles(pathGuard, target.Pattern!, outcome, scheduleBlockedForReboot, ct);
                         break;
                 }
+                var locks = outcome.LockBlocked - locksBefore;
+                if (scheduleBlockedForReboot && locks > 0 && locks == outcome.Blocked - blockedBefore &&
+                    outcome.RejectedTargets.Count == rejectedBefore) outcome.BlockedTargets.Add(target);
             }
         }
 
@@ -185,69 +197,24 @@ public static class FileCleanupEngine
 
         try
         {
-            if (!DirectoryHandleGuard.TryOpenPath(fullPath, out var pathGuard, out _))
-            {
-                return false;
-            }
-
-            using (pathGuard)
-            {
-                var directory = new DirectoryInfo(fullPath);
-                return target.Kind switch
-                {
-                    CleanupTargetKind.Contents => directory
-                        .EnumerateFileSystemInfos("*", SearchOption.TopDirectoryOnly)
-                        .Any(IsRemovableEntry),
-                    CleanupTargetKind.Files => directory
-                        .EnumerateFiles(target.Pattern!, SearchOption.TopDirectoryOnly)
-                        .Any(file => MatchesCleanupPattern(file.Name, target.Pattern!) && IsRemovableEntry(file)),
-                    _ => false,
-                };
-            }
+            using var directory = NativeCleanupEntry.Open(fullPath, true);
+            return directory.Enumerate().Any(entry =>
+                (entry.Attributes & FileAttributes.ReparsePoint) == 0 &&
+                (target.Kind == CleanupTargetKind.Contents ||
+                 ((entry.Attributes & FileAttributes.Directory) == 0 && MatchesCleanupPattern(entry.Name, target.Pattern!))));
         }
-        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
-        {
-            // 読み取れない対象は「検出済み」と断定せず、チェックリストから隠す。
-            return false;
-        }
+        catch (Exception ex) when (IsNativeFailure(ex)) { return false; }
     }
-
-    private static bool IsRemovableEntry(FileSystemInfo entry)
-    {
-        return TryGetAttributes(entry, out var attributes) &&
-               (attributes & FileAttributes.ReparsePoint) == 0;
-    }
-
     /// <summary>
-    /// 列挙元が通常ディレクトリだけで構成されているかを no-follow で確認する。
-    /// 可変のブラウザプロファイルや ETL ツリーを組み立てる側の防御にも使う。
+    /// 列挙元と全祖先を no-follow で確認し、名前差し替えを防ぐハンドルを返す。
+    /// 呼び出し側は列挙が終わるまで保持し、リンク先を列挙しない。
     /// </summary>
-    internal static bool CanSafelyTraverseDirectory(string path)
+    internal static bool TryAcquireTraversalGuard(string path, out NativeCleanupEntry guard, NativeCleanupEntry? context = null)
     {
-        if (!Directory.Exists(path) ||
-            !DirectoryHandleGuard.TryOpenPath(path, out var pathGuard, out _))
-        {
-            return false;
-        }
-
-        pathGuard.Dispose();
-        return true;
+        guard = null!;
+        try { guard = context is null ? NativeCleanupEntry.Open(path, true) : context.OpenDescendant(path, true); return true; }
+        catch (Exception ex) when (IsNativeFailure(ex)) { return false; }
     }
-
-    private static bool TryGetAttributes(FileSystemInfo entry, out FileAttributes attributes)
-    {
-        try
-        {
-            attributes = entry.Attributes;
-            return true;
-        }
-        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
-        {
-            attributes = default;
-            return false;
-        }
-    }
-
     /// <summary>
     /// 未展開パスを絶対パスへ解決し、削除して良い場所かを検査する。
     /// 環境変数が未定義でパスが壊れた場合 (例: %ProgramData% 未定義で "\LGHUB\cache") に
@@ -365,391 +332,106 @@ public static class FileCleanupEngine
     }
 
     private static void DeleteContents(
-        DirectoryInfo directory,
-        CleanupOutcome outcome,
-        bool scheduleBlockedForReboot,
-        int depth,
-        CancellationToken ct)
+        NativeCleanupEntry directory, CleanupOutcome outcome, bool scheduleBlockedForReboot, int depth, CancellationToken ct)
     {
         if (depth > MaxDepth)
         {
-            outcome.RecordBlocked(directory.FullName, "安全な再帰深度の上限を超えました");
+            outcome.RecordBlocked(directory.Path, "安全な再帰深度の上限を超えました");
             return;
         }
 
-        // 呼び出し元が祖先を固定したまま、現在の要素も no-follow で固定する。
-        // 属性検査と列挙の間に通常フォルダをジャンクションへ差し替える競合を防ぐ。
-        if (!DirectoryHandleGuard.TryOpenDirectory(directory.FullName, out var directoryGuard, out var rejection))
-        {
-            outcome.RejectedTargets.Add($"{directory.FullName} ({rejection})");
-            return;
-        }
-
-        using var pinnedDirectory = directoryGuard;
-
-        FileSystemInfo[] entries;
-        try
-        {
-            // 一度の列挙でスナップショットを確定し、ファイル→子フォルダの処理順は維持する。
-            entries = directory.GetFileSystemInfos();
-        }
-        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
-        {
-            outcome.RecordBlocked(directory.FullName, ex);
-            return;
-        }
-
-        foreach (var file in entries.OfType<FileInfo>())
+        IReadOnlyList<(string Name, FileAttributes Attributes)> entries;
+        try { entries = directory.Enumerate().ToArray(); }
+        catch (Exception ex) when (IsNativeFailure(ex)) { outcome.RecordBlocked(directory.Path, ex); return; }
+        foreach (var entry in entries.OrderBy(entry => (entry.Attributes & FileAttributes.Directory) != 0))
         {
             ct.ThrowIfCancellationRequested();
-            TryDeleteFile(file, outcome, scheduleBlockedForReboot);
-        }
-
-        foreach (var subdirectory in entries.OfType<DirectoryInfo>())
-        {
-            ct.ThrowIfCancellationRequested();
-
-            // ジャンクション・シンボリックリンクは辿らず、リンク自体も利用者が意図した
-            // キャッシュ配置設定かもしれないため削除しない。
-            // (%LOCALAPPDATA% 配下には旧 "Application Data" 等の再解析ポイントがあり、
-            //  追従すると同じ場所を無限に降りたり対象外を消したりする)。
-            if (!TryGetAttributes(subdirectory, out var subdirectoryAttributes))
+            var path = Path.Combine(directory.Path, entry.Name);
+            if ((entry.Attributes & FileAttributes.ReparsePoint) != 0)
             {
-                outcome.RecordBlocked(subdirectory.FullName, "フォルダの属性を取得できませんでした");
+                outcome.RejectedTargets.Add($"{path} (リンクを保護するため)");
                 continue;
             }
-
-            if ((subdirectoryAttributes & FileAttributes.ReparsePoint) != 0)
-            {
-                outcome.RejectedTargets.Add($"{subdirectory.FullName} (リンクを保護するため)");
-                continue;
-            }
-
-            DeleteContents(subdirectory, outcome, scheduleBlockedForReboot, depth + 1, ct);
-            TryDeleteDirectory(subdirectory, outcome);
+            var isDirectory = (entry.Attributes & FileAttributes.Directory) != 0;
+            DeleteEntry(directory, path, isDirectory, outcome, scheduleBlockedForReboot, depth, ct);
         }
     }
 
     private static void DeleteMatchingFiles(
-        string directory,
-        string pattern,
-        CleanupOutcome outcome,
-        bool scheduleBlockedForReboot,
-        CancellationToken ct)
+        NativeCleanupEntry directory, string pattern, CleanupOutcome outcome, bool scheduleBlockedForReboot, CancellationToken ct)
     {
-        FileInfo[] files;
-        try
-        {
-            files = new DirectoryInfo(directory)
-                .GetFiles(pattern, SearchOption.TopDirectoryOnly)
-                .Where(file => MatchesCleanupPattern(file.Name, pattern))
-                .ToArray();
-        }
-        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
-        {
-            outcome.RecordBlocked(directory, ex);
-            return;
-        }
-
-        foreach (var file in files)
+        IReadOnlyList<(string Name, FileAttributes Attributes)> entries;
+        try { entries = directory.Enumerate().ToArray(); }
+        catch (Exception ex) when (IsNativeFailure(ex)) { outcome.RecordBlocked(directory.Path, ex); return; }
+        foreach (var entry in entries)
         {
             ct.ThrowIfCancellationRequested();
-            TryDeleteFile(file, outcome, scheduleBlockedForReboot);
+            if ((entry.Attributes & FileAttributes.Directory) != 0 || !MatchesCleanupPattern(entry.Name, pattern)) continue;
+            var path = Path.Combine(directory.Path, entry.Name);
+            if ((entry.Attributes & FileAttributes.ReparsePoint) != 0)
+            {
+                outcome.RejectedTargets.Add($"{path} (リンクを保護するため)");
+                continue;
+            }
+            DeleteEntry(directory, path, false, outcome, scheduleBlockedForReboot, 0, ct);
         }
     }
 
-    /// <summary>
-    /// .NET の 3 文字拡張子ワイルドカードは、*.etl で .etl1 等も返すため、
-    /// 掃除で使う単純な拡張子・固定名パターンは名前側でも厳密に絞る。
-    /// </summary>
     internal static bool MatchesCleanupPattern(string fileName, string pattern)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
         ArgumentException.ThrowIfNullOrWhiteSpace(pattern);
-
-        if (pattern.StartsWith("*.", StringComparison.Ordinal) &&
-            pattern.AsSpan(2).IndexOfAny('*', '?') < 0)
-        {
+        if (pattern.StartsWith("*.", StringComparison.Ordinal) && pattern.AsSpan(2).IndexOfAny('*', '?') < 0)
             return string.Equals(Path.GetExtension(fileName), pattern[1..], StringComparison.OrdinalIgnoreCase);
-        }
-
-        if (pattern.AsSpan().IndexOfAny('*', '?') < 0)
-        {
-            return string.Equals(fileName, pattern, StringComparison.OrdinalIgnoreCase);
-        }
-
-        // 現行カタログに複雑なワイルドカードは無い。追加時は OS の列挙結果を維持する。
-        return true;
+        if (pattern.IndexOfAny(['*', '?']) < 0) return string.Equals(fileName, pattern, StringComparison.OrdinalIgnoreCase);
+        return System.IO.Enumeration.FileSystemName.MatchesSimpleExpression(pattern, fileName, ignoreCase: true);
     }
 
-    private static void TryDeleteFile(FileInfo file, CleanupOutcome outcome, bool scheduleBlockedForReboot)
+    private static bool IsNativeFailure(Exception ex) => ex is IOException or UnauthorizedAccessException or System.ComponentModel.Win32Exception;
+
+    private static void DeleteEntry(NativeCleanupEntry parent, string path, bool directory, CleanupOutcome outcome, bool schedule, int depth, CancellationToken ct)
     {
-        FileAttributes originalAttributes;
+        var blockedBefore = outcome.Blocked;
+        var rejectedBefore = outcome.RejectedTargets.Count;
         try
         {
-            originalAttributes = file.Attributes;
-            if ((originalAttributes & FileAttributes.ReparsePoint) != 0)
-            {
-                outcome.RejectedTargets.Add($"{file.FullName} (リンクを保護するため)");
-                return;
-            }
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            outcome.RecordBlocked(file.FullName, ex);
-            return;
-        }
-
-        long length;
-        try
-        {
-            length = file.Length;
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            length = 0;
-        }
-
-        var attributesChanged = false;
-        try
-        {
-            if ((originalAttributes & (FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System)) != 0)
-            {
-                file.Attributes = FileAttributes.Normal;
-                attributesChanged = true;
-            }
-
-            file.Delete();
-            outcome.DeletedFiles++;
-            outcome.FreedBytes += length;
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            if (scheduleBlockedForReboot && TryScheduleDeleteOnReboot(file.FullName))
-            {
-                outcome.ScheduledForReboot++;
-                return;
-            }
-
-            if (attributesChanged)
-            {
-                TryRestoreAttributes(file, originalAttributes);
-            }
-
-            outcome.RecordBlocked(file.FullName, ex);
-        }
-    }
-
-    private static void TryDeleteDirectory(DirectoryInfo directory, CleanupOutcome outcome)
-    {
-        var originalAttributes = FileAttributes.Normal;
-        var attributesChanged = false;
-        try
-        {
-            originalAttributes = directory.Attributes;
-            if ((originalAttributes & FileAttributes.ReparsePoint) != 0)
-            {
-                outcome.RejectedTargets.Add($"{directory.FullName} (リンクを保護するため)");
-                return;
-            }
-
-            if ((originalAttributes & FileAttributes.ReadOnly) != 0)
-            {
-                directory.Attributes = FileAttributes.Directory;
-                attributesChanged = true;
-            }
-
-            directory.Delete(recursive: false);
-            outcome.DeletedDirectories++;
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            if (attributesChanged)
-            {
-                TryRestoreAttributes(directory, originalAttributes);
-            }
-
-            // 中身が残っている (使用中) 場合はファイル側で Blocked を数えているため二重計上しない。
-        }
-    }
-
-    private static void TryRestoreAttributes(FileSystemInfo entry, FileAttributes attributes)
-    {
-        try
-        {
-            entry.Attributes = attributes;
-        }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        {
-            // 削除失敗を属性復元失敗で上書きせず、残った項目として集計を続ける。
-        }
-    }
-
-    /// <summary>
-    /// 各ディレクトリを FILE_FLAG_OPEN_REPARSE_POINT で開き、リンクを辿らず属性を確認する。
-    /// FILE_SHARE_DELETE を付けずに保持することで、走査中の名前差し替えも防ぐ。
-    /// </summary>
-    private sealed class DirectoryHandleGuard(List<SafeFileHandle> handles) : IDisposable
-    {
-        public static bool TryOpenPath(
-            string path,
-            out DirectoryHandleGuard guard,
-            out string rejection)
-        {
-            var handles = new List<SafeFileHandle>();
-            guard = null!;
-            rejection = string.Empty;
-
+            // 祖先は外側の directory handle 群で固定済み。別の祖先 handle を開かず、
+            // DELETE を要求した同じ実体を再帰終了・属性復元まで保持する。
+            using var entry = parent.OpenDescendant(path, directory, delete: true);
+            var original = entry.Attributes;
+            var changed = false;
             try
             {
-                var fullPath = Path.TrimEndingDirectorySeparator(Path.GetFullPath(path));
-                var root = Path.GetPathRoot(fullPath);
-                if (string.IsNullOrWhiteSpace(root))
+                if (directory) DeleteContents(entry, outcome, schedule, depth + 1, ct);
+                ct.ThrowIfCancellationRequested();
+                entry.EnsureNotReparse();
+                var clearAttributes = directory ? FileAttributes.ReadOnly : FileAttributes.ReadOnly | FileAttributes.Hidden | FileAttributes.System;
+                if ((original & clearAttributes) != 0)
                 {
-                    rejection = "パスのルートを確認できませんでした";
-                    return false;
+                    entry.SetAttributes(original & ~clearAttributes);
+                    changed = true;
                 }
-
-                if (!TryOpenComponent(root, handles, out rejection))
+                var length = directory ? 0 : entry.Length;
+                entry.Delete();
+                if (directory) outcome.DeletedDirectories++;
+                else { outcome.DeletedFiles++; outcome.FreedBytes += length; }
+            }
+            catch
+            {
+                if (changed)
                 {
-                    return false;
+                    try { entry.SetAttributes(original); }
+                    catch (Exception ex) when (IsNativeFailure(ex)) { /* 元の失敗を維持する。 */ }
                 }
-
-                var current = root;
-                var relative = Path.GetRelativePath(root, fullPath);
-                foreach (var segment in relative.Split(
-                             [Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar],
-                             StringSplitOptions.RemoveEmptyEntries))
-                {
-                    current = Path.Combine(current, segment);
-                    if (!TryOpenComponent(current, handles, out rejection))
-                    {
-                        return false;
-                    }
-                }
-
-                guard = new DirectoryHandleGuard(handles);
-                handles = [];
-                return true;
-            }
-            catch (Exception ex) when (ex is ArgumentException or NotSupportedException or IOException or UnauthorizedAccessException)
-            {
-                rejection = "再解析点の安全確認に失敗しました";
-                return false;
-            }
-            finally
-            {
-                foreach (var handle in handles)
-                {
-                    handle.Dispose();
-                }
+                throw;
             }
         }
-
-        public static bool TryOpenDirectory(
-            string path,
-            out DirectoryHandleGuard guard,
-            out string rejection)
+        catch (Exception ex) when (IsNativeFailure(ex))
         {
-            var handles = new List<SafeFileHandle>();
-            guard = null!;
-            if (!TryOpenComponent(path, handles, out rejection))
-            {
-                return false;
-            }
-
-            guard = new DirectoryHandleGuard(handles);
-            return true;
-        }
-
-        private static bool TryOpenComponent(
-            string path,
-            List<SafeFileHandle> handles,
-            out string rejection)
-        {
-            var handle = CreateFile(
-                path,
-                FileReadAttributes,
-                FileShare.ReadWrite,
-                nint.Zero,
-                FileMode.Open,
-                FileFlagBackupSemantics | FileFlagOpenReparsePoint,
-                nint.Zero);
-
-            if (handle.IsInvalid)
-            {
-                var error = Marshal.GetLastWin32Error();
-                handle.Dispose();
-                rejection = $"再解析点の安全確認に失敗しました (Win32 {error})";
-                return false;
-            }
-
-            if (!GetFileInformationByHandle(handle, out var information))
-            {
-                var error = Marshal.GetLastWin32Error();
-                handle.Dispose();
-                rejection = $"再解析点の属性を確認できませんでした (Win32 {error})";
-                return false;
-            }
-
-            if ((information.FileAttributes & FileAttributes.ReparsePoint) != 0)
-            {
-                handle.Dispose();
-                rejection = "リンク先の実体を消さないため";
-                return false;
-            }
-
-            if ((information.FileAttributes & FileAttributes.Directory) == 0)
-            {
-                handle.Dispose();
-                rejection = "ディレクトリではありません";
-                return false;
-            }
-
-            handles.Add(handle);
-            rejection = string.Empty;
-            return true;
-        }
-
-        public void Dispose()
-        {
-            for (var i = handles.Count - 1; i >= 0; i--)
-            {
-                handles[i].Dispose();
-            }
-
-            handles.Clear();
-        }
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct ByHandleFileInformation
-    {
-        public FileAttributes FileAttributes;
-        public System.Runtime.InteropServices.ComTypes.FILETIME CreationTime;
-        public System.Runtime.InteropServices.ComTypes.FILETIME LastAccessTime;
-        public System.Runtime.InteropServices.ComTypes.FILETIME LastWriteTime;
-        public uint VolumeSerialNumber;
-        public uint FileSizeHigh;
-        public uint FileSizeLow;
-        public uint NumberOfLinks;
-        public uint FileIndexHigh;
-        public uint FileIndexLow;
-    }
-
-    /// <summary>
-    /// 使用中のファイルを再起動時削除として予約する。シェルが常時開いている
-    /// アイコン・フォントキャッシュを消すための正規手段。
-    /// </summary>
-    private static bool TryScheduleDeleteOnReboot(string path)
-    {
-        try
-        {
-            return MoveFileEx(path, null, MoveFileDelayUntilReboot);
-        }
-        catch (Exception ex) when (ex is EntryPointNotFoundException or DllNotFoundException)
-        {
-            return false;
+            if (directory && ex is System.ComponentModel.Win32Exception { NativeErrorCode: 145 } &&
+                (outcome.Blocked > blockedBefore || outcome.RejectedTargets.Count > rejectedBefore)) return;
+            // 遅延したパス削除は行わない。呼出し側が既知ターゲットの意図だけを予約する。
+            outcome.RecordBlocked(path, ex);
         }
     }
 
@@ -765,7 +447,7 @@ public static class FileCleanupEngine
 
         if (outcome.ScheduledForReboot > 0)
         {
-            lines.Add($"  - 使用中の {outcome.ScheduledForReboot:N0} 個のファイルは次回の再起動時に削除するよう予約しました");
+            lines.Add($"  - 使用中のキャッシュ {outcome.ScheduledForReboot:N0} 種を、起動時に再列挙するよう予約しました");
         }
 
         if (outcome.Blocked > 0)
@@ -810,26 +492,4 @@ public static class FileCleanupEngine
             : value.ToString("N1", CultureInfo.InvariantCulture) + " " + units[unit];
     }
 
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [DllImport("kernel32.dll", EntryPoint = "CreateFileW", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern SafeFileHandle CreateFile(
-        string fileName,
-        uint desiredAccess,
-        FileShare shareMode,
-        nint securityAttributes,
-        FileMode creationDisposition,
-        uint flagsAndAttributes,
-        nint templateFile);
-
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [DllImport("kernel32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool GetFileInformationByHandle(
-        SafeFileHandle file,
-        out ByHandleFileInformation fileInformation);
-
-    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [DllImport("kernel32.dll", EntryPoint = "MoveFileExW", CharSet = CharSet.Unicode, SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool MoveFileEx(string existingFileName, string? newFileName, int flags);
 }

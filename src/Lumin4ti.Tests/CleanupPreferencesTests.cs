@@ -141,25 +141,45 @@ public sealed class CleanupPreferencesTests
     }
 
     [TestMethod]
-    public void ブラウザを1つ外すとその配下の対象がすべて外れる()
+    [DoNotParallelize]
+    public async Task ブラウザを1つ外すとその配下の対象がすべて外れる()
     {
-        var preferences = new CleanupPreferences(new FakeSettingsService());
-        var action = FileCleanupGroups.CreateBrowserCache(preferences);
-        var entries = action.GetCheckListEntries();
-        if (entries.Count == 0)
+        var previousLocalAppData = Environment.GetEnvironmentVariable("LOCALAPPDATA");
+        var root = Path.Combine(Path.GetTempPath(), "Lumin4tiCleanupPreferencesTests", Guid.NewGuid().ToString("N"));
+        var chromeCache = Path.Combine(root, "Google", "Chrome", "User Data", "Default", "Cache");
+        var edgeCache = Path.Combine(root, "Microsoft", "Edge", "User Data", "Default", "Cache");
+        try
         {
-            Assert.Inconclusive("Chromium 系ブラウザが 1 つも入っていない環境です");
+            Directory.CreateDirectory(chromeCache);
+            Directory.CreateDirectory(edgeCache);
+            var chromeFile = Path.Combine(chromeCache, "keep.bin");
+            var edgeFile = Path.Combine(edgeCache, "delete.bin");
+            await File.WriteAllTextAsync(chromeFile, "chrome");
+            await File.WriteAllTextAsync(edgeFile, "edge");
+            Environment.SetEnvironmentVariable("LOCALAPPDATA", root);
+
+            var preferences = new CleanupPreferences(new FakeSettingsService());
+            var action = FileCleanupGroups.CreateBrowserCache(preferences);
+            Assert.HasCount(2, action.GetCheckListEntries());
+            const string excluded = @"%LOCALAPPDATA%\Google\Chrome";
+            await action.SetCheckListEntrySelectedAsync(excluded, selected: false);
+
+            Assert.IsFalse(action.EnumerateSelectedTargets().Any(t => action.GetCheckListKey(t) == excluded));
+            Assert.IsTrue(action.GetCheckListEntries().Any(e => e.Value == excluded && !e.IsSelected));
+            var result = await action.ExecuteAsync();
+
+            Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
+            Assert.IsTrue(File.Exists(chromeFile), "除外したブラウザのキャッシュは保持する");
+            Assert.IsFalse(File.Exists(edgeFile), "選択中のブラウザのキャッシュは削除する");
         }
-
-        var excluded = entries[0].Value;
-        preferences.SetTargetEnabled(action.Id, excluded, enabled: false);
-
-        Assert.IsFalse(
-            action.EnumerateSelectedTargets().Any(t => action.GetCheckListKey(t) == excluded),
-            "チェックを外したブラウザの対象が残っています");
-        Assert.IsTrue(
-            action.EnumerateAllTargets().Any(t => action.GetCheckListKey(t) == excluded),
-            "一覧には外したブラウザも表示し続ける必要があります");
+        finally
+        {
+            Environment.SetEnvironmentVariable("LOCALAPPDATA", previousLocalAppData);
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
     }
 
     [TestMethod]
