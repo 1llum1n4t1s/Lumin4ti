@@ -83,6 +83,14 @@
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer dimulai ulang</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Gagal memulai ulang Explorer (silakan mulai ulang secara manual)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Tidak dapat membaca status (tanpa hak admin, atau fitur tidak tersedia di PC ini. Peluncuran mode debug tidak dijalankan dengan hak elevasi, jadi coba peluncuran normal).</x:String>
+  <x:String x:Key="Text.Toggle.VbsPartialState" xml:space="preserve">Pengaturan VBS / HVCI hanya diterapkan sebagian dan juga tidak cocok dengan keadaan awal yang disimpan. Operasi dihentikan demi keamanan.</x:String>
+  <x:String x:Key="Text.Toggle.UwpBackupInvalid" xml:space="preserve">Format atau pemilik data pemulihan tidak dapat diverifikasi. Cadangan lama tetap disimpan tanpa migrasi otomatis, dan operasi dihentikan untuk mencegah pemulihan yang keliru.</x:String>
+  <x:String x:Key="Text.Toggle.UwpPartialState" xml:space="preserve">Sebagian pengaturan latar belakang tidak cocok dengan keadaan yang disimpan. Pembaruan yang terhenti tidak dapat dibedakan dari perubahan eksternal, sehingga data pemulihan tetap disimpan dan operasi dihentikan.</x:String>
+  <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">DISM tidak dapat mengambil status Recall. PC ini mungkin tidak mendukung fitur tersebut atau hak administrator tidak mencukupi. Periksa log untuk detailnya.</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">Keluaran DISM tidak memuat status Recall. Periksa log untuk detailnya.</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">Status Recall yang dikembalikan DISM tidak dapat ditafsirkan. Periksa log untuk detailnya.</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">Tugas ini didaftarkan oleh pengguna Windows lain dan tidak dapat diubah.</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">Pemilik tugas yang terdaftar tidak dapat diverifikasi, sehingga tugas tidak dapat diubah.</x:String>
 
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Perbarui aplikasi terpasang sekaligus (winget)</x:String>

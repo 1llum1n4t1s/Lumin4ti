@@ -57,6 +57,8 @@ GUI とサインイン時クリーンアップを含め、状態変更操作は�
 
 状態読込の診断は`StateErrorText`、操作結果は`ResultText`へ分けて表示する。状態再取得に成功すると診断だけを消し、直近の操作結果を保持する。親子の操作部品にはローカライズ済み項目名をアクセシビリティ名として与える。
 
+サイドメニューのカラーアイコンはMicrosoft Fluent UI System Icons由来のPNGをAvaloniaリソースとして埋め込み、外部取得せず表示する。出典・元SVG・変換条件は [素材README](src/Lumin4ti.UI/Resources/FluentSystemIcons/README.md) にまとめ、MITライセンスをビルド・publish出力へ同梱する。
+
 ### 未接続デバイス管理
 
 未接続 PnP デバイスは複数項目の選択・確認・逐次削除を伴うため、`MaintenanceActionCatalog` の単一項目モデルではなく専用フローで扱う。`DeviceCleanupViewModel` が一覧、選択、二段階確認、進捗と結果集計を担当し、OS 操作はCoreの `IDisconnectedDeviceService` 境界へ委譲する。
@@ -101,6 +103,8 @@ MMAgentの状態は一括再読込ごとに完了済みキャッシュと操作�
 
 ## 状態と永続化
 
+項目の状態読み込みと設定・実行結果は`MaintenanceItemLog`で項目ID・日本語の項目名・操作・原因を記録する。例外やタイムアウトだけでなく、例外なしの状態不明、Failed/Partialの詳細、受付拒否も対象とする。状態取得の技術的な原因は`StateFailureReason`で共通境界へ渡し、理由が未提供ならその旨を明記する。共有MMAgent照会は原因を結果と一緒に保持し、後続の再試行で元の照会の原因を失わない。サインイン時の自動実行と未接続デバイス画面にも同じ診断方針を適用する。原因の要約は秘密値と制御文字を除き、記録量を制限する。
+
 - `%APPDATA%\Lumin4ti\settings.json`: 言語、自動更新確認、除外パス、スケジュール整理項目などの利用者設定。
 - `%LOCALAPPDATA%\Lumin4ti\logs\`: 起動、操作、例外、移行の診断ログ。旧インストール先を回収するときも保持する。
 - `%ProgramData%\Lumin4ti\backups\`: HKLMやBCDなど特権状態を戻すためのバックアップ。AdministratorsとSYSTEMだけが変更できるACLを検証する。
@@ -112,6 +116,8 @@ Windowsでは`LoggerBootstrap.Initialize()`がログ構成前に、旧`%APPDATA%
 復元可能なトグルは適用直前の実値を保存し、OFFでその値へ戻す。HKCUは利用者SIDごとのschema 1、HKLMはマシン共通で保持する。HKLM/HKCU混在項目ではHKLMをschema 2の共有退避とし、適用中の所有者SID集合を記録する。HKCUは各利用者の退避から復元し、HKLMは最後の所有者が解除するときだけ復元する。SID取得不能、所有者不明の旧混在退避、SIDスコープ導入前の共有HKCU退避は変更前に拒否し、現在利用者へ移行・復元・削除しない。UWPの復元ジャーナルも利用者SIDごとのschema 2を使い、旧共有ジャーナルを復元元にしない。保護バックアップのACL、所有者、パス、再解析ポイントを検証できない場合は、危険な要素を隔離して当該操作をfail closedにする。
 
 `RegistryValueBackup`はレジストリの元の型と未設定状態を保存する。既存退避は元値を保つため上書きせず、schema、対象のhive・key・value名、件数、型付き値を全件検証して再利用する。元値の型は適用する値の型と異なってもよく、旧形式・破損・対象不一致は設定変更前に拒否する。復元も全件の計画を確定してから書き戻す。共有JSONの`RegistryValueSnapshot`はメタデータ生成経路を使い、未使用のバイナリ値がnullから空Base64へ変化して再読込時に型不一致となることを防ぐ。
+
+VBS/HVCIのONはBCDとレジストリ3値への一括適用を表す。退避がない初回の混在構成は未適用（OFF）として、ON時にその実値を保存してから変更する。退避後の構成が元状態にも適用済み状態にも一致せず一部だけ適用値になっている場合は、状態不明として停止する。UWPの旧復元データや曖昧な途中更新も引き続き停止し、項目固有の翻訳可能な診断を表示する。診断は状態回復時に消し、操作結果は保持する。
 
 ONの失敗補償には今回の操作直前の実値を使い、OFF用の初回原本を使わない。補償後は今回追加した原本と所有登録だけを同一性の確認後に取り消し、既存原本を保持する。混在項目のOFFで全値復元後に所有更新が失敗した場合、更新済み定義を照合できれば完了とする。照合不能なら原本を保持して失敗を表示し、レジストリだけONへ戻さない。画面がOFFになった場合は、ON→OFFによる所有登録解除の再試行を案内する。
 
@@ -132,6 +138,8 @@ UI文字列は`src/Lumin4ti.UI/Resources/Locales/*.axaml`の17辞書で管理す
 ローカルのリリーススクリプトがrestore、self-contained publish、Velopack梱包と署名、MSI配置補正と再署名、Cloudflare R2 upload、配信検証を行う。`set-msi-program-files-location.ps1`がMSIのDirectory表を`ProgramFiles64Folder\Lumin4ti`へ補正し、固定配置を保証する。補正で元の署名が無効になるため、公開前に再署名と発行元の検証を行う。署名に対話的なSimplySign Desktopを使うため、リリースはCIではなくローカルで完結する。
 
 準備時に再生成するのは`local-release/artifacts`と対象RIDの`publish-*`だけで、同じ親ディレクトリの検証記録は保持する。清掃対象がその直下にあることと、再解析ポイントを含まないことを確認してから削除する。
+
+公開前には固定MSIと対象channelのmanifestを確認し、MSIの`ProductVersion`が対象版（末尾`.0`も許容）と一致することを検証する。manifestの各assetはローカル実体の存在、Package ID、版、サイズ、SHA256を照合する。参照するnupkgは展開・実行せずに読み、nuspecのIDと版、必須アプリファイル、depsの`win-x64`指定、apphostのx64 PEヘッダーを検証する。これにより、署名が有効でも版や構成の異なる成果物を公開することを防ぐ。`-SkipUpload`もこの検証を終えてから終了する。
 
 公開はassetを先にアップロードし、manifest参照先と固定MSIのHTTP 200・サイズ一致を確認してから、`releases.win.json`を最後に更新する。これを公開の確定点とすることで、途中失敗時も旧manifestの更新経路を維持する。固定名の配布物は公開内容のSHA256とローカルを照合し、不一致URLだけキャッシュをパージする。パージ後はmanifestのJSON内容がローカルと一致するまで待ち、確認できなければ旧assetの清掃を行わない。
 

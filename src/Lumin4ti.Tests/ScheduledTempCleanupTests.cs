@@ -218,6 +218,7 @@ public sealed class ScheduledTempCleanupTests
         var state = await toggle.GetStateAsync();
 
         Assert.AreEqual(true, state);
+        Assert.IsNull(toggle.StateDiagnostic);
         StringAssert.Contains(executor.LastArguments, "/query");
 
         var otherUserExecutor = new RecordingExecutor
@@ -226,9 +227,14 @@ public sealed class ScheduledTempCleanupTests
                 @"C:\Program Files\Lumin4ti\current\Lumin4ti.UI.exe",
                 @"OTHER-PC\OtherUser"),
         };
-        var otherUserState = await new ScheduledTempCleanupToggle(otherUserExecutor).GetStateAsync();
+        var otherUserToggle = new ScheduledTempCleanupToggle(otherUserExecutor);
+        var otherUserState = await otherUserToggle.GetStateAsync();
 
         Assert.IsNull(otherUserState, "別ユーザーの固定名タスクを現在ユーザーの ON 状態として扱ってはいけません");
+        Assert.AreEqual("Toggle.ScheduledTaskOtherUser", otherUserToggle.StateDiagnostic?.Key);
+        otherUserExecutor.QueryXml = executor.QueryXml;
+        Assert.AreEqual(true, await otherUserToggle.GetStateAsync());
+        Assert.IsNull(otherUserToggle.StateDiagnostic);
     }
 
     private static FileSecurity CreateTaskExecutableAcl()
@@ -256,12 +262,23 @@ public sealed class ScheduledTempCleanupTests
         var state = await toggle.GetStateAsync();
 
         Assert.AreEqual(false, state);
+        Assert.IsNull(toggle.StateDiagnostic, "未登録と照会エラーを区別できない場合も既存の OFF 判定を保ちます");
 
         var blocked = await toggle.SetStateAsync(false);
 
         Assert.AreEqual(MaintenanceActionStatus.Failed, blocked.Status);
         Assert.IsFalse(executor.Arguments.Any(
             arguments => arguments.Contains("/delete", StringComparison.OrdinalIgnoreCase)));
+    }
+
+    [TestMethod]
+    public async Task 所有者不明のタスクは診断付きの状態不明として扱う()
+    {
+        var executor = new RecordingExecutor { QueryXml = "<Task />" };
+        var toggle = new ScheduledTempCleanupToggle(executor);
+
+        Assert.IsNull(await toggle.GetStateAsync());
+        Assert.AreEqual("Toggle.ScheduledTaskOwnershipUnknown", toggle.StateDiagnostic?.Key);
     }
 
     [TestMethod]

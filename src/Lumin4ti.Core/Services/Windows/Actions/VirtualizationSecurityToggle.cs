@@ -51,8 +51,13 @@ public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
 
     public bool RequiresReboot => true;
 
+    public MaintenanceStateDiagnostic? StateDiagnostic { get; private set; }
+    public string? StateFailureReason { get; private set; }
+
     public async Task<bool?> GetStateAsync(CancellationToken ct = default)
     {
+        StateDiagnostic = null;
+        StateFailureReason = null;
         try
         {
             var current = await CaptureAsync(ct);
@@ -68,8 +73,17 @@ public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
                 return false;
             }
 
-            // 変更対象の一部だけが適用値なら部分適用。4 項目すべてを照合して判定する。
-            return current.HasAnyAppliedComponent ? null : false;
+            // 初回の独自構成は未適用として扱う。ON でその実値を退避してから変更できる。
+            // 退避後の混在状態は適用・復元途中の可能性があるため、操作を許可しない。
+            if (backup is not null && current.HasAnyAppliedComponent)
+            {
+                StateDiagnostic = new("Toggle.VbsPartialState",
+                    "VBS / HVCI の設定が一部だけ適用されています。保存済みの元状態とも一致しないため、安全のため操作を停止しました。");
+                LoggerBootstrap.Log.Error($"{Id}: 保存済みの元状態と異なる部分適用状態です");
+                return null;
+            }
+
+            return false;
         }
         catch (OperationCanceledException)
         {
@@ -77,7 +91,8 @@ public sealed class VirtualizationSecurityToggle : IMaintenanceToggle
         }
         catch (Exception ex)
         {
-            LoggerBootstrap.Log.Error($"{Id}: 状態取得に失敗しました", ex);
+            StateFailureReason = $"{ex.GetType().Name}: {ex.Message}";
+            MaintenanceItemLog.StateReadFailed(Id, Label, StateFailureReason);
             return null;
         }
     }

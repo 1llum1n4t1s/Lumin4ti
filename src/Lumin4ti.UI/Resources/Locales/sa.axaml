@@ -83,6 +83,14 @@
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer पुनःप्रारब्धम्</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Explorer पुनःप्रारम्भयितुं न शक्तम् (कृपया स्वहस्तेन पुनःप्रारभस्व)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">स्थितिं पठितुं न शक्तम् (व्यवस्थापकाधिकाराः न सन्ति, अथवा अस्मिन् PC वैशिष्ट्यम् अनुपलब्धम्। Debug-प्रारम्भाः उन्नताः न भवन्ति, अतः सामान्यप्रारम्भं प्रयत्नस्व)।</x:String>
+  <x:String x:Key="Text.Toggle.VbsPartialState" xml:space="preserve">VBS / HVCI विन्यासाः आंशिकरूपेणैव प्रयुक्ताः सन्ति, संरक्षितया मूलस्थित्या सहापि न सङ्गच्छन्ते। सुरक्षार्थं कार्यं स्थगितम्।</x:String>
+  <x:String x:Key="Text.Toggle.UwpBackupInvalid" xml:space="preserve">पुनःस्थापनदत्तांशस्य प्रारूपं स्वामिनं वा प्रमाणयितुं न शक्यते। पुरातनानि प्रतिरूपाणि स्वचालितस्थानान्तरणं विना संरक्षितानि, अशुद्धपुनःस्थापनं निवारयितुं च कार्यं स्थगितम्।</x:String>
+  <x:String x:Key="Text.Toggle.UwpPartialState" xml:space="preserve">केचन पृष्ठभूमिविन्यासाः संरक्षितया स्थित्या सह न सङ्गच्छन्ते। मध्ये बाधितं नवीकरणं बाह्यपरिवर्तनेभ्यः पृथक् ज्ञातुं न शक्यते, अतः पुनःस्थापनदत्तांशं संरक्ष्य कार्यं स्थगितम्।</x:String>
+  <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">DISM द्वारा Recall इत्यस्य स्थितिं प्राप्तुं न शक्यते। अस्मिन् सङ्गणके एतत् वैशिष्ट्यं न समर्थितं स्यात्, अथवा व्यवस्थापकाधिकाराः अपर्याप्ताः स्युः। विवरणार्थं वृत्तान्तं पश्यन्तु।</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">DISM इत्यस्य निर्गमे Recall इत्यस्य स्थितिः न दृश्यते। विवरणार्थं वृत्तान्तं पश्यन्तु।</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">DISM द्वारा दत्तां Recall इत्यस्य स्थितिं निर्णेतुं न शक्यते। विवरणार्थं वृत्तान्तं पश्यन्तु।</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">एतत् कार्यम् अन्येन Windows उपयोक्त्रा पञ्जीकृतम्, अतः परिवर्तयितुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">पञ्जीकृतकार्यस्य स्वामिनं प्रमाणयितुं न शक्यते, अतः कार्यं परिवर्तयितुं न शक्यते।</x:String>
 
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">स्थापितान् अनुप्रयोगान् समूहशः नवीकुरु (winget)</x:String>

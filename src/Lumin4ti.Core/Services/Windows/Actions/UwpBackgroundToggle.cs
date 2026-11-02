@@ -68,6 +68,9 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
 
     public bool RequiresReboot => false;
 
+    public MaintenanceStateDiagnostic? StateDiagnostic { get; private set; }
+    public string? StateFailureReason { get; private set; }
+
     private static string DefaultJournalPath =>
         Path.Combine(AppPaths.AppDataDirectory, "backups", "uwp-background.json");
 
@@ -105,11 +108,16 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
     public Task<bool?> GetStateAsync(CancellationToken ct = default) =>
         Task.Run<bool?>(() =>
         {
+            StateDiagnostic = null;
+            StateFailureReason = null;
             var load = _journal.Load();
             if (load.Status == UwpBackgroundJournalLoadStatus.Invalid)
             {
+                StateFailureReason = load.Error ?? "復元データの検証に失敗しました。詳細な理由が返されませんでした。";
+                StateDiagnostic = new("Toggle.UwpBackupInvalid",
+                    "復元データの形式または所有者を確認できません。旧バックアップは自動移行せず保持し、誤った復元を防ぐため操作を停止しました。");
                 LoggerBootstrap.Log.Error(
-                    "UWP バックグラウンド設定の復元 journal を検証できないため、状態を判定できませんでした");
+                    $"UWP バックグラウンド設定の復元 journal を検証できないため、状態を判定できませんでした: {CommandFailureDiagnostic.Sanitize(load.Error ?? "理由不明")}");
                 return null;
             }
 
@@ -134,6 +142,8 @@ public sealed class UwpBackgroundToggle : IMaintenanceToggle
                 if (hasApplied) return true;
                 if (hasAmbiguousPartial)
                 {
+                    StateDiagnostic = new("Toggle.UwpPartialState",
+                        "バックグラウンド設定の一部が保存済みの状態と一致しません。途中更新と外部変更を区別できないため、復元データを保持して操作を停止しました。");
                     LoggerBootstrap.Log.Error($"{Id}: ペア値の途中更新と外部変更を区別できないため、復元情報を保持して状態を不明にしました");
                     return null;
                 }

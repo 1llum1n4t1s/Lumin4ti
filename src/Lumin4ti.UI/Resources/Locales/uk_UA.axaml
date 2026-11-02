@@ -83,6 +83,14 @@
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer перезапущено</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Не вдалося перезапустити Explorer (перезапустіть його вручну)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Не вдалося прочитати стан (немає прав адміністратора або функція недоступна на цьому ПК. Запуск у режимі налагодження виконується без підвищення прав, тож спробуйте звичайний запуск).</x:String>
+  <x:String x:Key="Text.Toggle.VbsPartialState" xml:space="preserve">Налаштування VBS / HVCI застосовано лише частково, і вони також не відповідають збереженому початковому стану. Операцію зупинено з міркувань безпеки.</x:String>
+  <x:String x:Key="Text.Toggle.UwpBackupInvalid" xml:space="preserve">Не вдалося перевірити формат або власника даних відновлення. Старі резервні копії збережено без автоматичної міграції, а операцію зупинено, щоб запобігти некоректному відновленню.</x:String>
+  <x:String x:Key="Text.Toggle.UwpPartialState" xml:space="preserve">Деякі фонові налаштування не відповідають збереженому стану. Неможливо відрізнити перерване оновлення від зовнішніх змін, тому дані відновлення збережено, а операцію зупинено.</x:String>
+  <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">DISM не вдалося отримати стан Recall. Можливо, цей комп’ютер не підтримує функцію або бракує прав адміністратора. Докладніше див. у журналі.</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">Вивід DISM не містить стану Recall. Докладніше див. у журналі.</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">Не вдалося інтерпретувати стан Recall, повернутий DISM. Докладніше див. у журналі.</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">Це завдання зареєстровано іншим користувачем Windows, тому його не можна змінити.</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">Не вдалося перевірити власника зареєстрованого завдання, тому його не можна змінити.</x:String>
 
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Масове оновлення встановлених застосунків (winget)</x:String>

@@ -9,12 +9,14 @@ public sealed class RecallToggleTests
 {
     private sealed class StubExecutor(CommandExecutionResult result) : ICommandExecutor
     {
+        public CommandExecutionResult Result { get; set; } = result;
+
         public Task<CommandExecutionResult> RunAsync(
             string fileName,
             string arguments,
             CancellationToken ct = default,
             IProgress<string>? onOutputLine = null,
-            TimeSpan? timeout = null) => Task.FromResult(result);
+            TimeSpan? timeout = null) => Task.FromResult(Result);
     }
 
     [TestMethod]
@@ -60,6 +62,7 @@ public sealed class RecallToggleTests
         var state = await toggle.GetStateAsync();
 
         Assert.AreEqual(true, state);
+        Assert.IsNull(toggle.StateDiagnostic);
     }
 
     [TestMethod]
@@ -76,5 +79,22 @@ public sealed class RecallToggleTests
         var state = await toggle.GetStateAsync();
 
         Assert.IsNull(state);
+        Assert.AreEqual("Toggle.RecallQueryFailed", toggle.StateDiagnostic?.Key);
+    }
+
+    [TestMethod]
+    [DataRow("Feature Name : Recall", "Toggle.RecallStateMissing")]
+    [DataRow("State : Staged", "Toggle.RecallStateUnsupported")]
+    public async Task 判定不能の出力を診断し状態回復時に診断を消す(string output, string expectedKey)
+    {
+        var executor = new StubExecutor(new(true, "dism.exe", 0, output, string.Empty));
+        var toggle = new RecallToggle(executor);
+
+        Assert.IsNull(await toggle.GetStateAsync());
+        Assert.AreEqual(expectedKey, toggle.StateDiagnostic?.Key);
+
+        executor.Result = new(true, "dism.exe", 0, "State : Disabled", string.Empty);
+        Assert.AreEqual(true, await toggle.GetStateAsync());
+        Assert.IsNull(toggle.StateDiagnostic);
     }
 }

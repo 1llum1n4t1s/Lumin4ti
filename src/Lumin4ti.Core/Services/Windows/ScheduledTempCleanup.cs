@@ -91,7 +91,7 @@ public static class ScheduledTempCleanup
     /// 順に実行する。1 件の失敗で残りを止めると、後ろの項目が永久に実行されないため、
     /// 失敗しても続行し、最後に 1 件でも失敗があれば異常終了コードを返す。
     /// </summary>
-    private static async Task<int> RunAsync(IReadOnlyList<IMaintenanceAction> actions)
+    internal static async Task<int> RunAsync(IReadOnlyList<IMaintenanceAction> actions)
     {
         if (actions.Count == 0)
         {
@@ -105,12 +105,13 @@ public static class ScheduledTempCleanup
             try
             {
                 var result = await action.ExecuteAsync(CancellationToken.None);
-                LoggerBootstrap.Log.Info($"scheduled-cleanup: {action.Id} = {result.Status}");
+                MaintenanceItemLog.LogResult(action, "サインイン時クリーンアップ", result);
                 failed |= result.Status == MaintenanceActionStatus.Failed;
             }
             catch (Exception ex)
             {
-                LoggerBootstrap.Log.Error($"scheduled-cleanup: {action.Id} で例外が発生しました", ex);
+                MaintenanceItemLog.LogResult(action, "サインイン時クリーンアップ",
+                    MaintenanceActionResult.Fail($"{ex.GetType().Name}: {ex.Message}"));
                 failed = true;
             }
         }

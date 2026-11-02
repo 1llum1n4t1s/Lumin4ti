@@ -81,6 +81,14 @@
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Restarted Explorer</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Failed to restart Explorer (please restart it manually)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Could not read the state (no admin rights, or the feature is unavailable on this PC. Debug launches are not elevated, so try a normal launch).</x:String>
+  <x:String x:Key="Text.Toggle.VbsPartialState" xml:space="preserve">The VBS / HVCI settings are only partially applied and do not match the saved original state. The operation was stopped for safety.</x:String>
+  <x:String x:Key="Text.Toggle.UwpBackupInvalid" xml:space="preserve">The format or owner of the restore data could not be verified. Legacy backups were retained without automatic migration, and the operation was stopped to prevent an incorrect restore.</x:String>
+  <x:String x:Key="Text.Toggle.UwpPartialState" xml:space="preserve">Some background settings do not match the saved state. An interrupted update cannot be distinguished from external changes, so the restore data was retained and the operation was stopped.</x:String>
+  <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">DISM could not retrieve the Recall state. This PC may not support the feature, or administrator rights may be missing. Check the log for details.</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">The DISM output does not contain the Recall state. Check the log for details.</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">The Recall state returned by DISM could not be interpreted. Check the log for details.</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">This task was registered by another Windows user and cannot be modified.</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">The owner of the registered task could not be verified, so the task cannot be modified.</x:String>
 
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Update installed apps in bulk (winget)</x:String>

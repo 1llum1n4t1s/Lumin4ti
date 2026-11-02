@@ -22,12 +22,20 @@ public sealed class RecallToggle(ICommandExecutor executor) : IMaintenanceToggle
 
     public bool RequiresReboot => true;
 
+    public MaintenanceStateDiagnostic? StateDiagnostic { get; private set; }
+    public string? StateFailureReason { get; private set; }
+
     public async Task<bool?> GetStateAsync(CancellationToken ct = default)
     {
+        StateDiagnostic = null;
+        StateFailureReason = null;
         var result = await executor.RunAsync("dism.exe", "/online /get-featureinfo /featurename:Recall /english", ct);
         if (!DismExitCode.IsSuccessOrRebootRequired(result))
         {
-            // 非対応機種 (機能自体が存在しない) は状態不明
+            StateDiagnostic = new("Toggle.RecallQueryFailed",
+                "DISM で Recall の状態を取得できません。非対応環境や管理者権限の不足などが考えられます。詳細はログを確認してください。");
+            StateFailureReason = $"DISM の Recall 照会に失敗: {CommandFailureDiagnostic.Format(result)}";
+            MaintenanceItemLog.StateReadFailed(Id, Label, StateFailureReason);
             return null;
         }
 
@@ -37,10 +45,22 @@ public sealed class RecallToggle(ICommandExecutor executor) : IMaintenanceToggle
             .FirstOrDefault(l => l.StartsWith("State :", StringComparison.OrdinalIgnoreCase));
         if (stateLine is null)
         {
+            StateDiagnostic = new("Toggle.RecallStateMissing",
+                "DISM の出力に Recall の状態が見つかりません。詳細はログを確認してください。");
+            StateFailureReason = $"DISM の出力に Recall の State 行がありません: {CommandFailureDiagnostic.Format(result)}";
+            MaintenanceItemLog.StateReadFailed(Id, Label, StateFailureReason);
             return null;
         }
 
-        return ParseFeatureState(stateLine);
+        var state = ParseFeatureState(stateLine);
+        if (state is null)
+        {
+            StateDiagnostic = new("Toggle.RecallStateUnsupported",
+                "DISM が返した Recall の状態を判定できません。詳細はログを確認してください。");
+            StateFailureReason = $"DISM の Recall 状態値が未対応です: {CommandFailureDiagnostic.Sanitize(stateLine)}";
+            MaintenanceItemLog.StateReadFailed(Id, Label, StateFailureReason);
+        }
+        return state;
     }
 
     /// <summary>

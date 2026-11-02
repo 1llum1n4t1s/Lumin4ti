@@ -67,6 +67,19 @@ public sealed class HibernateToggle : IMaintenanceToggle
     private static bool IsHiberFilePresent()
     {
         var systemDrive = Path.GetPathRoot(Environment.SystemDirectory);
-        return !string.IsNullOrEmpty(systemDrive) && File.Exists(Path.Combine(systemDrive, "hiberfil.sys"));
+        if (string.IsNullOrEmpty(systemDrive))
+            throw new InvalidOperationException("システムドライブを特定できないため休止ファイルを確認できません。");
+        return IsHiberFilePresent(() => File.GetAttributes(Path.Combine(systemDrive, "hiberfil.sys")));
+    }
+
+    internal static bool IsHiberFilePresent(Func<FileAttributes> readAttributes)
+    {
+        try
+        {
+            // File.Exists はアクセス不能も false にするため、確認失敗を不在と区別する。
+            return (readAttributes() & FileAttributes.Directory) == 0;
+        }
+        catch (FileNotFoundException) { return false; }
+        catch (DirectoryNotFoundException) { return false; }
     }
 }

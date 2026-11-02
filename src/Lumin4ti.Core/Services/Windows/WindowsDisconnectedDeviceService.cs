@@ -27,6 +27,7 @@ public sealed class WindowsDisconnectedDeviceService : IDisconnectedDeviceServic
     private const int ErrorNoMoreItems = 259;
     private const int ErrorNoSuchDevice = 433;
     private const int ErrorNotFound = 1168;
+    private const int ErrorNoSuchDevinst = unchecked((int)0xE000020B);
     private const int MaximumPropertyBytes = 1024 * 1024;
 
     public Task<IReadOnlyList<DisconnectedDevice>> GetDisconnectedDevicesAsync(
@@ -78,9 +79,8 @@ public sealed class WindowsDisconnectedDeviceService : IDisconnectedDeviceServic
                 ref deviceInfoData))
         {
             var error = Marshal.GetLastWin32Error();
-            return error is ErrorNoSuchDevice or ErrorNotFound
-                ? new DisconnectedDeviceRemovalResult(DisconnectedDeviceRemovalStatus.AlreadyAbsent)
-                : Failure(error);
+            return ReconcileRemovalFailure(error, removalAttempted: false,
+                () => IsDeviceInstalled(instanceId));
         }
 
         // 列挙後に再接続されたデバイスを削除しない。確認後の短い競合窓は SetupAPI 側の
@@ -99,12 +99,66 @@ public sealed class WindowsDisconnectedDeviceService : IDisconnectedDeviceServic
                 0,
                 out var requiresRestart))
         {
-            return Failure(Marshal.GetLastWin32Error());
+            var error = Marshal.GetLastWin32Error();
+            return ReconcileRemovalFailure(error, removalAttempted: true,
+                () => IsDeviceInstalled(instanceId));
         }
 
         return new DisconnectedDeviceRemovalResult(
             DisconnectedDeviceRemovalStatus.Removed,
             requiresRestart);
+    }
+
+    internal static DisconnectedDeviceRemovalResult ReconcileRemovalFailure(
+        int error, bool removalAttempted, Func<bool> isInstalled)
+    {
+        // 削除が完了してから API が失敗する場合もある。エラー番号だけで成功にせず、
+        // 実際の不在を確認できた場合だけ結果を補正する。取消後もこの照合は完了させる。
+        try
+        {
+            if (!isInstalled())
+            {
+                return new DisconnectedDeviceRemovalResult(removalAttempted
+                    ? DisconnectedDeviceRemovalStatus.Removed
+                    : DisconnectedDeviceRemovalStatus.AlreadyAbsent);
+            }
+        }
+        catch (Win32Exception)
+        {
+            // 照合不能を不在とみなさず、元の失敗を保持する。
+        }
+
+        return Failure(error);
+    }
+
+    private static bool IsDeviceInstalled(string instanceId)
+    {
+        // 削除前の情報セットには古い要素が残り得るため、新しいセットで照合する。
+        using var deviceInfoSet = SetupDiCreateDeviceInfoList(IntPtr.Zero, IntPtr.Zero);
+        if (deviceInfoSet.IsInvalid)
+        {
+            throw new Win32Exception(Marshal.GetLastWin32Error());
+        }
+
+        var deviceInfoData = SpDevInfoData.Create();
+        var opened = SetupDiOpenDeviceInfoW(
+            deviceInfoSet, instanceId, IntPtr.Zero, 0, ref deviceInfoData);
+        return IsDeviceInstalledFromOpenResult(opened, opened ? 0 : Marshal.GetLastWin32Error());
+    }
+
+    internal static bool IsDeviceInstalledFromOpenResult(bool opened, int error)
+    {
+        if (opened)
+        {
+            return true;
+        }
+
+        if (error is ErrorNoSuchDevice or ErrorNotFound or ErrorNoSuchDevinst)
+        {
+            return false;
+        }
+
+        throw new Win32Exception(error);
     }
 
     private static HashSet<string> EnumerateDeviceIds(uint flags, CancellationToken ct)

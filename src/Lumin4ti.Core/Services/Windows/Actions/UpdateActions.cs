@@ -641,11 +641,21 @@ public sealed class DefenderSignatureUpdateAction : IMaintenanceAction
             throw;
         }
 
+        if (!remove.Success)
+        {
+            LoggerBootstrap.Log.Error($"{Id}: 定義の巻き戻しに失敗: {CommandFailureDiagnostic.Format(remove)}");
+        }
+
         // 定義を戻した後はクリティカル区間。UI のキャンセルで更新を中断しない。
         var update = await _executor.RunAsync(
             mpCmdRun,
             SignatureUpdateArguments,
             CancellationToken.None);
+        if (!update.Success)
+        {
+            LoggerBootstrap.Log.Error($"{Id}: 定義の再取得に失敗: {CommandFailureDiagnostic.Format(update)}");
+        }
+
         var lines = new List<string>
         {
             $"  - 定義ファイルを既定状態へ戻す: {(remove.Success ? "OK" : $"失敗 (exit={remove.ExitCode})")}",
@@ -726,7 +736,7 @@ public sealed class DefenderResetAction : IMaintenanceAction
             || !TryParseAvailability(availabilityResult.StandardOutput, out var availability))
         {
             LoggerBootstrap.Log.Error(
-                $"{Id}: Defender 利用状態を確認できませんでした (exit={availabilityResult.ExitCode})");
+                $"{Id}: Defender 利用状態を確認できませんでした: {CommandFailureDiagnostic.Format(availabilityResult)}");
             return MaintenanceActionResult.Fail(
                 "Microsoft Defender Antivirus の利用状態を確認できないため、設定は変更しませんでした。" +
                 Environment.NewLine + DefenderCommandSupport.DescribeFailure(availabilityResult));
@@ -804,13 +814,12 @@ public sealed class DefenderResetAction : IMaintenanceAction
                 TryDeleteIncompleteBackup(backupName);
             }
 
+            if (!result.Success)
+            {
+                LoggerBootstrap.Log.Error($"{Id}: {CommandFailureDiagnostic.Format(result)}");
+            }
             LoggerBootstrap.Log.Error($"{Id}: バックアップ検証失敗: {backupValidationFailure}");
-            var commandFailure = result.Success
-                ? string.Empty
-                : Environment.NewLine + DefenderCommandSupport.DescribeFailure(result);
-            return MaintenanceActionResult.Fail(
-                "Defender 設定のバックアップを確認できなかったため、処理を成功扱いにできません。" +
-                $"{Environment.NewLine}  - {backupValidationFailure}{commandFailure}");
+            return MaintenanceActionResult.Fail(DescribeBackupFailure(result, backupValidationFailure));
         }
 
         if (result.Success)
@@ -828,6 +837,18 @@ public sealed class DefenderResetAction : IMaintenanceAction
             $"リセットに失敗しました (exit={result.ExitCode}){Environment.NewLine}" +
             DefenderCommandSupport.DescribeFailure(result) +
             $"{Environment.NewLine}  - 変更前の除外設定は保存済みです: {backupFile}");
+    }
+
+    internal static string DescribeBackupFailure(CommandExecutionResult result, string backupValidationFailure)
+    {
+        // バックアップ作成前の中止理由（改ざん防止等）を、不完全なバックアップの診断で隠さない。
+        var commandFailure = result.Success
+            ? string.Empty
+            : $"リセットに失敗しました (exit={result.ExitCode}){Environment.NewLine}" +
+              DefenderCommandSupport.DescribeFailure(result) + Environment.NewLine;
+        return commandFailure +
+               "Defender 設定のバックアップを確認できなかったため、処理を成功扱いにできません。" +
+               $"{Environment.NewLine}  - {backupValidationFailure}";
     }
 
     internal static bool TryValidateBackupJson(string json, out string failureReason)

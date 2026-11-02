@@ -33,6 +33,8 @@ public sealed class MmAgentOperationApiChoice : IMaintenanceChoice
 
     public string Label => "オペレーションレコーダー API";
 
+    public string? StateFailureReason { get; private set; }
+
     public string Description =>
         "SysMain (旧 Superfetch) の動作を外部ツールが記録・再生するための API が、記録に使うファイル数を選びます。" +
         "ベンチマークや性能解析ツール向けの機能で、通常の利用では使いません。数を小さくするほど記録の負荷とディスク使用量を抑えられます。" +
@@ -63,6 +65,7 @@ public sealed class MmAgentOperationApiChoice : IMaintenanceChoice
     /// </summary>
     public async Task<string?> GetSelectedValueAsync(CancellationToken ct = default)
     {
+        StateFailureReason = null;
         var maxFiles = await ReadMaxFilesAsync(ct);
         return maxFiles?.ToString(CultureInfo.InvariantCulture);
     }
@@ -128,8 +131,7 @@ public sealed class MmAgentOperationApiChoice : IMaintenanceChoice
             ct);
         if (!result.Success || string.IsNullOrWhiteSpace(result.StandardOutput))
         {
-            LoggerBootstrap.Log.Error($"{Id}: 記録ファイル数を取得できません ({CommandFailureDiagnostic.Format(result)})");
-            return null;
+            return RecordStateFailure(result.Success ? "記録ファイル数の出力が空です" : "記録ファイル数の取得コマンドに失敗しました", result);
         }
 
         try
@@ -140,14 +142,19 @@ public sealed class MmAgentOperationApiChoice : IMaintenanceChoice
                 return maxFiles;
             }
 
-            LoggerBootstrap.Log.Error($"{Id}: 記録ファイル数 JSON が整数ではありません ({CommandFailureDiagnostic.Format(result)})");
-            return null;
+            return RecordStateFailure("記録ファイル数 JSON が整数ではありません", result);
         }
         catch (JsonException)
         {
-            LoggerBootstrap.Log.Error($"{Id}: 記録ファイル数 JSON を解析できません ({CommandFailureDiagnostic.Format(result)})");
-            return null;
+            return RecordStateFailure("記録ファイル数 JSON を解析できません", result);
         }
+    }
+
+    private int? RecordStateFailure(string reason, CommandExecutionResult result)
+    {
+        StateFailureReason = $"{reason} ({CommandFailureDiagnostic.Format(result)})";
+        LoggerBootstrap.Log.Error($"{Label} ({Id}): {StateFailureReason}");
+        return null;
     }
 
     private Task<CommandExecutionResult> RunAsync(string command, CancellationToken ct) =>

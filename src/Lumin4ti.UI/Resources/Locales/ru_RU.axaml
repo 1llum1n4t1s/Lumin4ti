@@ -83,6 +83,14 @@
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer перезапущен</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Не удалось перезапустить Explorer (перезапустите его вручную)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Не удалось прочитать состояние (нет прав администратора или функция недоступна на этом ПК. Запуск в режиме отладки выполняется без повышения прав, поэтому попробуйте обычный запуск).</x:String>
+  <x:String x:Key="Text.Toggle.VbsPartialState" xml:space="preserve">Настройки VBS / HVCI применены лишь частично и не совпадают с сохранённым исходным состоянием. Операция остановлена в целях безопасности.</x:String>
+  <x:String x:Key="Text.Toggle.UwpBackupInvalid" xml:space="preserve">Не удалось проверить формат или владельца данных восстановления. Старые резервные копии сохранены без автоматической миграции, а операция остановлена во избежание некорректного восстановления.</x:String>
+  <x:String x:Key="Text.Toggle.UwpPartialState" xml:space="preserve">Некоторые фоновые настройки не совпадают с сохранённым состоянием. Невозможно отличить прерванное обновление от внешних изменений, поэтому данные восстановления сохранены, а операция остановлена.</x:String>
+  <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">DISM не удалось получить состояние Recall. Возможно, этот компьютер не поддерживает функцию или недостаточно прав администратора. Подробности см. в журнале.</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">Вывод DISM не содержит состояния Recall. Подробности см. в журнале.</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">Не удалось интерпретировать состояние Recall, возвращённое DISM. Подробности см. в журнале.</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">Эта задача зарегистрирована другим пользователем Windows, поэтому её нельзя изменить.</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">Не удалось проверить владельца зарегистрированной задачи, поэтому её нельзя изменить.</x:String>
 
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Массовое обновление установленных приложений (winget)</x:String>

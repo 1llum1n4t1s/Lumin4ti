@@ -83,6 +83,14 @@
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer மறுதொடக்கம் செய்யப்பட்டது</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Explorer-ஐ மறுதொடக்கம் செய்ய முடியவில்லை (கைமுறையாக மறுதொடக்கம் செய்யவும்)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">நிலையைப் படிக்க முடியவில்லை (நிர்வாக உரிமை இல்லை, அல்லது இந்த PC-யில் அம்சம் கிடைக்கவில்லை. Debug தொடக்கங்கள் உயர்த்தப்படாதவை, எனவே இயல்பான தொடக்கத்தை முயற்சிக்கவும்).</x:String>
+  <x:String x:Key="Text.Toggle.VbsPartialState" xml:space="preserve">VBS / HVCI அமைப்புகள் பகுதியளவு மட்டுமே பயன்படுத்தப்பட்டுள்ளன; சேமிக்கப்பட்ட அசல் நிலையுடனும் பொருந்தவில்லை. பாதுகாப்பிற்காகச் செயல் நிறுத்தப்பட்டது.</x:String>
+  <x:String x:Key="Text.Toggle.UwpBackupInvalid" xml:space="preserve">மீட்டெடுப்புத் தரவின் வடிவத்தை அல்லது உரிமையாளரைச் சரிபார்க்க முடியவில்லை. பழைய காப்புப்பிரதிகள் தானாக மாற்றப்படாமல் பாதுகாக்கப்பட்டன; தவறான மீட்டெடுப்பைத் தடுக்கச் செயல் நிறுத்தப்பட்டது.</x:String>
+  <x:String x:Key="Text.Toggle.UwpPartialState" xml:space="preserve">சில பின்னணி அமைப்புகள் சேமிக்கப்பட்ட நிலையுடன் பொருந்தவில்லை. இடைநிறுத்தப்பட்ட புதுப்பிப்பையும் வெளிப்புற மாற்றங்களையும் வேறுபடுத்த முடியாததால், மீட்டெடுப்புத் தரவு பாதுகாக்கப்பட்டுச் செயல் நிறுத்தப்பட்டது.</x:String>
+  <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">DISM மூலம் Recall நிலையைப் பெற முடியவில்லை. இந்தக் கணினியில் இவ்வசதிக்கான ஆதரவு இல்லாமல் இருக்கலாம் அல்லது நிர்வாக உரிமைகள் போதாமல் இருக்கலாம். விவரங்களுக்குப் பதிவைப் பார்க்கவும்.</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">DISM வெளியீட்டில் Recall நிலை இல்லை. விவரங்களுக்குப் பதிவைப் பார்க்கவும்.</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">DISM வழங்கிய Recall நிலையைப் புரிந்துகொள்ள முடியவில்லை. விவரங்களுக்குப் பதிவைப் பார்க்கவும்.</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">இந்தப் பணியை மற்றொரு Windows பயனர் பதிவு செய்துள்ளதால் மாற்ற முடியாது.</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">பதிவுசெய்யப்பட்ட பணியின் உரிமையாளரைச் சரிபார்க்க முடியாததால் பணியை மாற்ற முடியாது.</x:String>
 
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">நிறுவப்பட்ட பயன்பாடுகளை மொத்தமாகப் புதுப்பி (winget)</x:String>

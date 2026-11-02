@@ -14,7 +14,7 @@ namespace Lumin4ti.Core.Services.Windows.Actions;
 public sealed class MmAgentStateProvider(ICommandExecutor executor)
 {
     private readonly object _cacheSync = new();
-    private Task<Dictionary<string, bool>?>? _cacheTask;
+    private Task<StateSnapshot>? _cacheTask;
     private readonly ConcurrentDictionary<string, StateOverride> _overrides =
         new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, byte> _unsupported =
@@ -41,46 +41,49 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
         }
     }
 
-    public async Task<bool?> GetAsync(string propertyName, CancellationToken ct = default)
+    public async Task<bool?> GetAsync(string propertyName, CancellationToken ct = default) =>
+        (await QueryAsync(propertyName, ct)).Value;
+
+    internal async Task<StateQuery> QueryAsync(string propertyName, CancellationToken ct = default)
     {
         if (_unsupported.ContainsKey(propertyName))
         {
-            return null;
+            return new(null, $"この Windows では {propertyName} の切り替えがサポートされていません");
         }
 
         if (_overrides.TryGetValue(propertyName, out var stateOverride))
         {
             return stateOverride.IsKnown
-                ? stateOverride.Value
+                ? new(stateOverride.Value)
                 : await RefreshInvalidatedAsync(propertyName, ct);
         }
 
         // 共有ロード自体は最初の呼び出しのキャンセルで汚染せず、各呼び出しは個別に待機を中断できる。
-        // 成功結果だけを保持し、プロセス失敗・不正 JSON の null・Task 例外は次回呼び出しで再試行する。
+        // 成功結果だけを保持し、プロセス失敗・不正 JSON・Task 例外は次回呼び出しで再試行する。
         // 実プロセスの上限時間は ProcessCommandExecutor が保証する。
         var all = await GetOrCreateSharedLoad().WaitAsync(ct);
 
         // 共有ロード中に SetStateAsync が完了・中断した場合は、ロード開始時の古い値より
-        // その後の既知値または再取得要求を優先する。共有ロード失敗 (null) 時も先に確認する。
+        // その後の既知値または再取得要求を優先する。共有ロード失敗時も先に確認する。
         if (_overrides.TryGetValue(propertyName, out stateOverride))
         {
             return stateOverride.IsKnown
-                ? stateOverride.Value
+                ? new(stateOverride.Value)
                 : await RefreshInvalidatedAsync(propertyName, ct);
         }
 
-        return all is not null && all.TryGetValue(propertyName, out var value) ? value : null;
+        return all.Query(propertyName);
     }
 
-    private Task<Dictionary<string, bool>?> GetOrCreateSharedLoad()
+    private Task<StateSnapshot> GetOrCreateSharedLoad()
     {
         lock (_cacheSync)
         {
             // 完了前は同じ Task を全呼び出しで共有する。完了後も成功値は保持するが、
-            // null・fault・cancel は新しい Task へ置換して一時的な取得失敗を固定化しない。
+            // 失敗・fault・cancel は新しい Task へ置換して一時的な取得失敗を固定化しない。
             var shouldRetry = _cacheTask is null ||
                 _cacheTask.IsCanceled ||
-                (_cacheTask.IsCompletedSuccessfully && _cacheTask.Result is null);
+                (_cacheTask.IsCompletedSuccessfully && _cacheTask.Result.Values is null);
             if (_cacheTask?.IsFaulted == true)
             {
                 // 待機側が先にキャンセルされていた場合も、破棄する fault を未観測のまま残さない。
@@ -141,18 +144,18 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
     public async Task<bool?> ReadFreshAsync(string propertyName, CancellationToken ct = default)
     {
         var all = await LoadAsync(executor, ct);
-        return all is not null && all.TryGetValue(propertyName, out var value) ? value : null;
+        return all.Query(propertyName).Value;
     }
 
-    private async Task<bool?> RefreshInvalidatedAsync(string propertyName, CancellationToken ct)
+    private async Task<StateQuery> RefreshInvalidatedAsync(string propertyName, CancellationToken ct)
     {
-        var fresh = await ReadFreshAsync(propertyName, ct);
-        if (fresh is not bool value)
+        var fresh = (await LoadAsync(executor, ct)).Query(propertyName);
+        if (fresh.Value is not bool value)
         {
             // 再取得中に別の成功した Set が既知値を置いた場合は、失敗した再取得よりそちらを優先する。
             return _overrides.TryGetValue(propertyName, out var latest) && latest.IsKnown
-                ? latest.Value
-                : null;
+                ? new(latest.Value)
+                : fresh;
         }
 
         // Unknown のままなら新鮮な値へ置換する。並行 Set が既知値を置いていれば上書きしない。
@@ -160,14 +163,25 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
             propertyName,
             new StateOverride(IsKnown: true, Value: value),
             new StateOverride(IsKnown: false, Value: false));
-        return _overrides.TryGetValue(propertyName, out var current) && current.IsKnown
+        return new(_overrides.TryGetValue(propertyName, out var current) && current.IsKnown
             ? current.Value
-            : value;
+            : value);
     }
 
     private readonly record struct StateOverride(bool IsKnown, bool Value);
 
-    private static async Task<Dictionary<string, bool>?> LoadAsync(ICommandExecutor executor, CancellationToken ct = default)
+    internal readonly record struct StateQuery(bool? Value, string? FailureReason = null);
+
+    // 原因も共有 Task の結果に含め、後続の再試行で元の待機者の診断を上書きしない。
+    private sealed record StateSnapshot(Dictionary<string, bool>? Values, string? FailureReason = null)
+    {
+        internal StateQuery Query(string propertyName) =>
+            Values is not null && Values.TryGetValue(propertyName, out var value)
+                ? new(value)
+                : new(null, FailureReason ?? $"Get-MMAgent の {propertyName} が存在しないか真偽値ではありません");
+    }
+
+    private static async Task<StateSnapshot> LoadAsync(ICommandExecutor executor, CancellationToken ct = default)
     {
         var result = await executor.RunAsync(
             "powershell.exe",
@@ -175,8 +189,9 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
             ct);
         if (!result.Success || string.IsNullOrWhiteSpace(result.StandardOutput))
         {
-            LoggerBootstrap.Log.Error($"Get-MMAgent: 状態取得に失敗 ({CommandFailureDiagnostic.Format(result)})");
-            return null;
+            var reason = $"{(result.Success ? "Get-MMAgent の出力が空です" : "Get-MMAgent の実行に失敗しました")} ({CommandFailureDiagnostic.Format(result)})";
+            LoggerBootstrap.Log.Error(reason);
+            return new(null, reason);
         }
 
         try
@@ -184,8 +199,9 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
             using var doc = JsonDocument.Parse(result.StandardOutput);
             if (doc.RootElement.ValueKind != JsonValueKind.Object)
             {
-                LoggerBootstrap.Log.Error($"Get-MMAgent: 状態 JSON がオブジェクトではありません ({CommandFailureDiagnostic.Format(result)})");
-                return null;
+                var reason = $"Get-MMAgent: 状態 JSON がオブジェクトではありません ({CommandFailureDiagnostic.Format(result)})";
+                LoggerBootstrap.Log.Error(reason);
+                return new(null, reason);
             }
 
             var dict = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
@@ -199,16 +215,18 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
 
             if (dict.Count == 0)
             {
-                LoggerBootstrap.Log.Error($"Get-MMAgent: 状態 JSON に真偽値がありません ({CommandFailureDiagnostic.Format(result)})");
-                return null;
+                var reason = $"Get-MMAgent: 状態 JSON に真偽値がありません ({CommandFailureDiagnostic.Format(result)})";
+                LoggerBootstrap.Log.Error(reason);
+                return new(null, reason);
             }
 
-            return dict;
+            return new(dict);
         }
         catch (JsonException)
         {
-            LoggerBootstrap.Log.Error($"Get-MMAgent: 状態 JSON を解析できません ({CommandFailureDiagnostic.Format(result)})");
-            return null;
+            var reason = $"Get-MMAgent: 状態 JSON を解析できません ({CommandFailureDiagnostic.Format(result)})";
+            LoggerBootstrap.Log.Error(reason);
+            return new(null, reason);
         }
     }
 }
@@ -245,11 +263,15 @@ public sealed class MmAgentFeatureToggle(
     /// <summary>Get-MMAgent のプロパティ名 = Enable/Disable-MMAgent のパラメーター名。</summary>
     internal string PropertyName => propertyName;
 
-    public Task<bool?> GetStateAsync(CancellationToken ct = default)
+    public string? StateFailureReason { get; private set; }
+
+    public async Task<bool?> GetStateAsync(CancellationToken ct = default)
     {
+        StateFailureReason = null;
         if (stateProvider.IsUnsupported(propertyName))
         {
-            return Task.FromResult<bool?>(null);
+            StateFailureReason = $"この Windows では {propertyName} の切り替えがサポートされていません";
+            return null;
         }
 
         // レジストリ経由で無効化した直後は、再起動まで Get-MMAgent が有効のままを報告することがある。
@@ -257,10 +279,12 @@ public sealed class MmAgentFeatureToggle(
         if (MmAgentRegistryFallback.CanFallBack(propertyName) &&
             MmAgentRegistryFallback.TryReadState(propertyName) is false)
         {
-            return Task.FromResult<bool?>(false);
+            return false;
         }
 
-        return stateProvider.GetAsync(propertyName, ct);
+        var state = await stateProvider.QueryAsync(propertyName, ct);
+        StateFailureReason = state.FailureReason;
+        return state.Value;
     }
 
     public async Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default)

@@ -25,6 +25,8 @@
 | デバイス列挙 | 例外を空一覧成功と表示、retry できない | 失敗時 IsEmpty=false、retry 空成功時 true、削除呼出し禁止 |
 | パーサ | canary 入力を shell に渡す、解決不能コマンドを欠損と断定 | RERE_CANARY を純粋パーサにだけ渡し安全に拒否 |
 | 診断 | 失敗 tool の stdout を捨てる | mock 失敗の終了コード/出力が診断に残り、秘密値を伏せる（OEM 復号は `ProcessCommandExecutorDecodeTests` で検証） |
+| 項目の状態読込ログ | null・例外・timeout が ID だけ／理由なしで記録される | 実 VM の状態照会へ fake toggle/choice を渡し、診断付き null・理由なし null・IOException・30ms timeout の項目名/ID/原因を確認。token は伏字、既知 OFF は失敗ログなし |
+| 項目の設定・実行ログ | Failed/Partial の Detail 消失、Busy の理由欠落、自動実行で失敗を Info のみに記録 | 実 category/card VM の toggle/choice/action 操作を fake で通し、各 Failed/Partial と Busy の項目名/ID/原因、秘密値の伏字、拒否時の未実行を確認。自動実行も fake の失敗・部分成功・例外を記録し、最後の成功項目まで続行 |
 | MSI 取得 | headers 到着で timeout が解除され body が無期限に待つ、利用者 cancel を timeout と誤判定 | mock HTTP body で timeout / OCE / 正常 copy を区別、外部通信なし |
 | 自動実行の選択解除 | 設定に大文字小文字違いの重複 ID があり、OFF 後もサインイン時に実行 | 実 checklist 操作→保存→選択を通し、全重複を解除。無関係な ID と順序、繰返し OFF/ON の冪等性を保持。削除対象の解決や task 実行は禁止 |
 | 更新スキップ解除 | 保存先の障害が生成 command へ未処理例外として伝播 | 正常保存と IOException 注入の両方で実 command を完了、画面・設定の tag を解除、空 tag の再実行は保存不要 |
@@ -39,6 +41,8 @@
 - 起動コマンド: 引用符なしの空白入りパス、`.exe`で終わるディレクトリ、環境変数からの空白展開、正常な引用パス/空白なしパスと引数。曖昧な入力を欠損確定へ渡さない。
 - MMAgent: 失敗終了、空出力、不正JSON、非object JSON、不正数値、同時照会。原因を共有照会境界で一度記録し、秘密値を診断へ出さず、状態不明と再試行を保つ。
 - UI: toggle/choiceの汎用不明診断が言語変更で古いまま、具体的例外の誤置換、既知状態回復で結果まで消す、親子の実行/取消の同名、言語変更通知漏れ。
+- 項目固有診断: 所有者不明のUWP復元データの理由を実VMへ渡し、17言語の変更に追従する。既知状態へ回復したら診断だけを消し、前回の操作結果を保持する。
+- 項目ログ: 読込の null/例外/timeout、toggle/choice/action の Failed/Partial、Busy と自動実行で項目名と原因を失わない。検証専用 token を理由へ混ぜ、全ての関連ログで秘密値が伏字になることを確認する。VM の選択反映だけ Dispatcher を処理し、実 GUI・OS 操作は起動しない。
 
 ## 再現
 

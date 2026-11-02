@@ -83,6 +83,14 @@
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer reiniciado</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Falha ao reiniciar o Explorer (reinicie-o manualmente)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Não foi possível ler o estado (sem permissões de administrador ou o recurso não está disponível neste PC. As execuções em modo de depuração não são elevadas, então tente uma execução normal).</x:String>
+  <x:String x:Key="Text.Toggle.VbsPartialState" xml:space="preserve">As configurações de VBS / HVCI foram aplicadas apenas parcialmente e também não correspondem ao estado original salvo. A operação foi interrompida por segurança.</x:String>
+  <x:String x:Key="Text.Toggle.UwpBackupInvalid" xml:space="preserve">Não foi possível verificar o formato ou o proprietário dos dados de restauração. Os backups antigos foram mantidos sem migração automática, e a operação foi interrompida para evitar uma restauração incorreta.</x:String>
+  <x:String x:Key="Text.Toggle.UwpPartialState" xml:space="preserve">Algumas configurações de segundo plano não correspondem ao estado salvo. Não é possível distinguir uma atualização interrompida de alterações externas, então os dados de restauração foram mantidos e a operação foi interrompida.</x:String>
+  <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">O DISM não conseguiu obter o estado do Recall. Este PC pode não oferecer suporte ao recurso ou podem faltar permissões de administrador. Consulte o log para mais detalhes.</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">A saída do DISM não contém o estado do Recall. Consulte o log para mais detalhes.</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">Não foi possível interpretar o estado do Recall retornado pelo DISM. Consulte o log para mais detalhes.</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">Esta tarefa foi registrada por outro usuário do Windows e não pode ser alterada.</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">Não foi possível verificar o proprietário da tarefa registrada, portanto ela não pode ser alterada.</x:String>
 
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Atualizar os aplicativos instalados em lote (winget)</x:String>

@@ -11,6 +11,9 @@ public interface IMaintenanceItem
 {
     string Id { get; }
 
+    /// <summary>直近の状態読み込みで判定できなかった技術的理由。ログ専用で、正常取得時は null。</summary>
+    string? StateFailureReason => null;
+
     /// <summary>ラベルの日本語マスター (ローカライズ辞書に訳が無い場合のフォールバック)。</summary>
     string Label { get; }
 
@@ -102,6 +105,9 @@ public interface IMaintenanceChoice : IMaintenanceItem
 /// </summary>
 public interface IMaintenanceToggle : IMaintenanceItem
 {
+    /// <summary>直近の状態照会が不明だった具体的な理由。正常取得時は null。</summary>
+    MaintenanceStateDiagnostic? StateDiagnostic => null;
+
     /// <summary>現在の適用状態を読み取る。null = 状態を判定できない (非対応環境等)。</summary>
     Task<bool?> GetStateAsync(CancellationToken ct = default);
 

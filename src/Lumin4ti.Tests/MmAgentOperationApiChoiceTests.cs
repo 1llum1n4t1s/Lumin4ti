@@ -7,6 +7,44 @@ namespace Lumin4ti.Tests;
 [TestClass]
 public sealed class MmAgentOperationApiChoiceTests
 {
+    [TestMethod]
+    [DataRow(false, "", "実行に失敗", "取得コマンドに失敗")]
+    [DataRow(true, "", "", "出力が空")]
+    [DataRow(true, "invalid", "", "解析できません")]
+    [DataRow(true, "null", "", "整数ではありません")]
+    [DataRow(true, "1.5", "", "整数ではありません")]
+    [DataRow(true, "2147483648", "", "整数ではありません")]
+    public async Task 不正な現在値は原因付きで状態不明にし回復したら消す(bool success, string output, string error, string expected)
+    {
+        var first = true;
+        var executor = new FakeExecutor(_ =>
+        {
+            if (!first) return Ok("256");
+            first = false;
+            return new(success, "powershell.exe", success ? 0 : 1, output, error + " token=private-value\u001b[31m\t");
+        });
+        var choice = CreateChoice(executor);
+
+        Assert.IsNull(await choice.GetSelectedValueAsync());
+        StringAssert.Contains(choice.StateFailureReason!, expected);
+        StringAssert.Contains(choice.StateFailureReason!, "token=[redacted]");
+        Assert.IsFalse(choice.StateFailureReason!.Contains("private-value", StringComparison.Ordinal));
+        Assert.IsFalse(choice.StateFailureReason!.Any(char.IsControl));
+        Assert.AreEqual("256", await choice.GetSelectedValueAsync());
+        Assert.IsNull(choice.StateFailureReason);
+    }
+
+    [TestMethod]
+    [DataRow("0")]
+    [DataRow("-1")]
+    public async Task 選択肢にない整数の現在値も失敗扱いせず表示する(string output)
+    {
+        var choice = CreateChoice(new FakeExecutor(_ => Ok(output)));
+
+        Assert.AreEqual(output, await choice.GetSelectedValueAsync());
+        Assert.IsNull(choice.StateFailureReason);
+    }
+
     /// <summary>コマンド文字列に応じた結果を返すスタブ。実行されたコマンドも記録する。</summary>
     private sealed class FakeExecutor(Func<string, CommandExecutionResult> respond) : ICommandExecutor
     {

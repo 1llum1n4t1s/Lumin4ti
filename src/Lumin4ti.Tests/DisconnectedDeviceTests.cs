@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Services.Windows;
 using Lumin4ti.UI.Services;
@@ -8,6 +9,76 @@ namespace Lumin4ti.Tests;
 [TestClass]
 public sealed class DisconnectedDeviceTests
 {
+    [TestMethod]
+    [DataRow(false, DisconnectedDeviceRemovalStatus.AlreadyAbsent)]
+    [DataRow(true, DisconnectedDeviceRemovalStatus.Removed)]
+    public void 不在を再確認できた場合だけ削除エラーを補正する(
+        bool removalAttempted, DisconnectedDeviceRemovalStatus expected)
+    {
+        var probes = 0;
+        var result = WindowsDisconnectedDeviceService.ReconcileRemovalFailure(
+            unchecked((int)0xE000020B), removalAttempted, () =>
+            {
+                probes++;
+                return WindowsDisconnectedDeviceService.IsDeviceInstalledFromOpenResult(
+                    opened: false, unchecked((int)0xE000020B));
+            });
+
+        Assert.AreEqual(1, probes);
+        Assert.AreEqual(expected, result.Status);
+        Assert.IsFalse(result.RequiresRestart);
+    }
+
+    [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void 不在を示す削除エラーでも再照合で存在すれば失敗を保持する(bool removalAttempted)
+    {
+        const int error = unchecked((int)0xE000020B);
+        var result = WindowsDisconnectedDeviceService.ReconcileRemovalFailure(
+            error, removalAttempted,
+            () => WindowsDisconnectedDeviceService.IsDeviceInstalledFromOpenResult(opened: true, 0));
+
+        Assert.AreEqual(DisconnectedDeviceRemovalStatus.Failed, result.Status);
+        Assert.AreEqual(error, result.ErrorCode);
+    }
+
+    [TestMethod]
+    [DataRow(0)]
+    [DataRow(5)]
+    [DataRow(87)]
+    public void 再照合の失敗を不在に変換せず元の削除エラーを保持する(int probeError)
+    {
+        const int originalError = unchecked((int)0xE000020B);
+        var result = WindowsDisconnectedDeviceService.ReconcileRemovalFailure(
+            originalError, removalAttempted: true,
+            () => WindowsDisconnectedDeviceService.IsDeviceInstalledFromOpenResult(
+                opened: false, probeError));
+
+        Assert.AreEqual(DisconnectedDeviceRemovalStatus.Failed, result.Status);
+        Assert.AreEqual(originalError, result.ErrorCode);
+    }
+
+    [TestMethod]
+    [DataRow(433)]
+    [DataRow(1168)]
+    [DataRow(unchecked((int)0xE000020B))]
+    public void 新しい情報セットの既知の不在エラーだけを不在と判定する(int error)
+    {
+        Assert.IsFalse(WindowsDisconnectedDeviceService.IsDeviceInstalledFromOpenResult(
+            opened: false, error));
+    }
+
+    [TestMethod]
+    public void 再照合で情報セットを作成できなければ元の削除エラーを保持する()
+    {
+        var result = WindowsDisconnectedDeviceService.ReconcileRemovalFailure(
+            5, removalAttempted: true, () => throw new Win32Exception(8));
+
+        Assert.AreEqual(DisconnectedDeviceRemovalStatus.Failed, result.Status);
+        Assert.AreEqual(5, result.ErrorCode);
+    }
+
     [TestMethod]
     [DataRow(@"ROOT\LEGACY_TEST\0000")]
     [DataRow(@"SWD\PRINTENUM\TEST")]

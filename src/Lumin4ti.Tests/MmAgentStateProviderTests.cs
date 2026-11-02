@@ -8,6 +8,52 @@ namespace Lumin4ti.Tests;
 public sealed class MmAgentStateProviderTests
 {
     [TestMethod]
+    [DataRow(false, "", "アクセス拒否 token=private-value", "実行に失敗")]
+    [DataRow(true, "", "", "出力が空")]
+    [DataRow(true, "invalid", "", "解析できません")]
+    [DataRow(true, "[]", "", "オブジェクトではありません")]
+    [DataRow(true, "{}", "", "真偽値がありません")]
+    [DataRow(true, "{\"PageCombining\":true}", "", "MemoryCompression が存在しないか真偽値ではありません")]
+    [DataRow(true, "{\"MemoryCompression\":42,\"PageCombining\":true}", "", "MemoryCompression が存在しないか真偽値ではありません")]
+    public async Task 項目の状態不明は原因を保持し回復したら消す(bool success, string output, string error, string expected)
+    {
+        var executor = new SequenceExecutor(
+            Result(success, output, error),
+            Result(true, "{\"MemoryCompression\":true}"));
+        var provider = new MmAgentStateProvider(executor);
+        var toggle = CreateToggle(executor, provider);
+
+        Assert.IsNull(await toggle.GetStateAsync());
+        StringAssert.Contains(toggle.StateFailureReason!, expected);
+        Assert.IsFalse(toggle.StateFailureReason!.Contains("private-value", StringComparison.Ordinal));
+        Assert.IsFalse(toggle.StateFailureReason!.Any(char.IsControl));
+
+        provider.ResetSnapshot();
+        Assert.AreEqual(true, await toggle.GetStateAsync());
+        Assert.IsNull(toggle.StateFailureReason);
+    }
+
+    [TestMethod]
+    public async Task 共有照会の失敗理由は後続再試行の結果に置き換わらない()
+    {
+        var executor = new RetryingSharedLoadExecutor();
+        var provider = new MmAgentStateProvider(executor);
+        var memory = provider.QueryAsync("MemoryCompression");
+        var combining = provider.QueryAsync("PageCombining");
+        executor.CompleteFirst(Result(false, error: "first failure"));
+        var firstMemory = await memory;
+        var retry = provider.QueryAsync("MemoryCompression");
+        executor.CompleteSecond(Result(false, error: "second failure"));
+        var secondMemory = await retry;
+        var firstCombining = await combining;
+
+        StringAssert.Contains(firstMemory.FailureReason!, "first failure");
+        Assert.AreEqual(firstMemory.FailureReason, firstCombining.FailureReason);
+        StringAssert.Contains(secondMemory.FailureReason!, "second failure");
+        Assert.AreEqual(2, executor.CallCount);
+    }
+
+    [TestMethod]
     public async Task 初期取得後の切り替え成功をキャッシュへ反映する()
     {
         var executor = new SequenceExecutor(
@@ -186,6 +232,7 @@ public sealed class MmAgentStateProviderTests
         StringAssert.Contains(result.Detail, "変更を拒否する");
         StringAssert.Contains(result.Detail, "設定は変更していません");
         Assert.IsNull(await toggle.GetStateAsync());
+        StringAssert.Contains(toggle.StateFailureReason!, "サポートされていません");
         Assert.AreEqual(3, executor.CallCount, "非対応判定後に追加の状態照会を実行してはいけません");
     }
 

@@ -203,6 +203,27 @@ public sealed class UwpBackgroundToggleTests
     }
 
     [TestMethod]
+    public async Task 所有者不明の旧Journalは具体的な診断を示し状態回復時に消す()
+    {
+        var settings = new FakeSettingsStore();
+        var invalid = true;
+        var toggle = new UwpBackgroundToggle(
+            () => Array.Empty<string>(), settings,
+            () => invalid
+                ? new(UwpBackgroundJournalLoadStatus.Invalid, Error: "旧 journal の所有者 SID を証明できません。")
+                : new(UwpBackgroundJournalLoadStatus.Missing),
+            _ => Assert.Fail("状態照会で復元データを書き込まない"),
+            () => throw new InvalidOperationException("状態照会で復元データを消さない"));
+
+        Assert.IsNull(await toggle.GetStateAsync());
+        Assert.AreEqual("Toggle.UwpBackupInvalid", toggle.StateDiagnostic?.Key);
+        Assert.AreEqual(0, settings.Writes.Count);
+        invalid = false;
+        Assert.AreEqual(false, await toggle.GetStateAsync());
+        Assert.IsNull(toggle.StateDiagnostic);
+    }
+
+    [TestMethod]
     public void 所有者不明の旧AppDataJournalは保護領域へ移行せず保持する()
     {
         var protectedPath = Path.Combine(_tempDirectory, "protected", "uwp-background.json");

@@ -190,6 +190,35 @@ public sealed class DefenderActionTests
     }
 
     [TestMethod]
+    public void バックアップ作成前のリセット失敗理由を先頭へ表示する()
+    {
+        const string commandFailure = "Tamper Protection が有効なため Defender 設定を変更できません。";
+        Assert.IsFalse(DefenderResetAction.TryValidateBackupJson(
+            "{\"Lumin4tiPending\":true}", out var backupFailure));
+
+        var detail = DefenderResetAction.DescribeBackupFailure(Failure(1, commandFailure), backupFailure);
+
+        StringAssert.StartsWith(detail, "リセットに失敗しました (exit=1)");
+        StringAssert.Contains(detail, commandFailure);
+        StringAssert.Contains(detail, backupFailure);
+        Assert.IsTrue(detail.IndexOf(commandFailure, StringComparison.Ordinal) <
+                      detail.IndexOf(backupFailure, StringComparison.Ordinal));
+        var script = DefenderResetAction.BuildResetScript(@"C:\backup\defender.json");
+        Assert.IsTrue(script.IndexOf("if ($null -ne $status.IsTamperProtected", StringComparison.Ordinal) <
+                      script.IndexOf("[System.IO.File]::WriteAllText", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
+    public void コマンド成功でも不正バックアップを成功やコマンド失敗として表示しない()
+    {
+        var detail = DefenderResetAction.DescribeBackupFailure(Success(), "バックアップが空です。");
+
+        StringAssert.StartsWith(detail, "Defender 設定のバックアップを確認できなかったため");
+        StringAssert.Contains(detail, "バックアップが空です。");
+        Assert.IsFalse(detail.Contains("exit=", StringComparison.Ordinal));
+    }
+
+    [TestMethod]
     public void 設定バックアップは必須プロパティと文字列値を検証する()
     {
         const string valid = """

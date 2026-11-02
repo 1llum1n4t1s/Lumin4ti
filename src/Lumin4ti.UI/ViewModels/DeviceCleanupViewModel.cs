@@ -136,7 +136,8 @@ public partial class DeviceCleanupViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            LoggerBootstrap.Log.Error("未接続デバイスの列挙に失敗しました", ex);
+            MaintenanceItemLog.StateReadFailed("disconnected-devices", "未接続デバイス",
+                $"{ex.GetType().Name}: {ex.Message}");
             await _dispatchAsync(() =>
                 StatusText = App.Text(
                     "DeviceCleanup.LoadFailed",
@@ -153,6 +154,7 @@ public partial class DeviceCleanupViewModel : ObservableObject
     {
         if (!_operationCoordinator.TryBegin(out var operation))
         {
+            LogBusy();
             StatusText = App.Text(
                 "Status.Busy",
                 "別のメンテナンス操作が実行中です。完了後にもう一度お試しください。");
@@ -239,6 +241,7 @@ public partial class DeviceCleanupViewModel : ObservableObject
 
         if (!_operationCoordinator.TryBegin(out var operation))
         {
+            LogBusy();
             StatusText = App.Text(
                 "Status.Busy",
                 "別のメンテナンス操作が実行中です。完了後にもう一度お試しください。");
@@ -288,7 +291,8 @@ public partial class DeviceCleanupViewModel : ObservableObject
                 catch (Exception ex)
                 {
                     failed++;
-                    LoggerBootstrap.Log.Error($"未接続デバイスを削除できませんでした: {item.InstanceId}", ex);
+                    MaintenanceItemLog.Failure(item.InstanceId, item.DisplayName, "未接続デバイスの削除",
+                        $"{ex.GetType().Name}: {ex.Message}");
                     continue;
                 }
 
@@ -311,9 +315,8 @@ public partial class DeviceCleanupViewModel : ObservableObject
                         break;
                     default:
                         failed++;
-                        LoggerBootstrap.Log.Error(
-                            $"未接続デバイスを削除できませんでした: {item.InstanceId} " +
-                            $"(Win32={result.ErrorCode}: {result.ErrorMessage})");
+                        MaintenanceItemLog.Failure(item.InstanceId, item.DisplayName, "未接続デバイスの削除",
+                            $"Win32={result.ErrorCode}: {result.ErrorMessage}");
                         break;
                 }
             }
@@ -327,7 +330,8 @@ public partial class DeviceCleanupViewModel : ObservableObject
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                LoggerBootstrap.Log.Error("削除後の未接続デバイス再読込に失敗しました", ex);
+                MaintenanceItemLog.StateReadFailed("disconnected-devices", "未接続デバイス (削除後の再読込)",
+                    $"{ex.GetType().Name}: {ex.Message}");
             }
 
             var summaryKey = requiresRestart
@@ -430,6 +434,10 @@ public partial class DeviceCleanupViewModel : ObservableObject
         OnPropertyChanged(nameof(CanRemove));
         OnPropertyChanged(nameof(SelectionText));
     }
+
+    private static void LogBusy() =>
+        MaintenanceItemLog.Failure("disconnected-devices", "未接続デバイス", "操作受付",
+            "別のメンテナンス操作が実行中、終了処理中、または共有ロックを取得できないため受け付けられませんでした。");
 
     private static async Task DispatchToUiAsync(Action action) =>
         await Dispatcher.UIThread.InvokeAsync(action);

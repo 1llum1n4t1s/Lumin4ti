@@ -112,7 +112,7 @@ public partial class CommandCategoryViewModel : ObservableObject
             {
                 state = await QueryStateAsync(
                     token => ((IMaintenanceToggle)item.Item).GetStateAsync(token),
-                    item.Item.Id,
+                    item.Item,
                     ct);
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -134,7 +134,7 @@ public partial class CommandCategoryViewModel : ObservableObject
             {
                 value = await QueryStateAsync(
                     token => ((IMaintenanceChoice)item.Item).GetSelectedValueAsync(token),
-                    item.Item.Id,
+                    item.Item,
                     ct);
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -152,18 +152,43 @@ public partial class CommandCategoryViewModel : ObservableObject
         })));
     }
 
-    internal static async Task<T?> QueryStateAsync<T>(
+    internal static Task<T?> QueryStateAsync<T>(
         Func<CancellationToken, Task<T?>> query,
         string itemId,
         CancellationToken ct = default,
-        TimeSpan? timeout = null)
+        TimeSpan? timeout = null) =>
+        QueryStateCoreAsync(query, itemId, itemId, () => null, ct, timeout);
+
+    internal static Task<T?> QueryStateAsync<T>(
+        Func<CancellationToken, Task<T?>> query,
+        IMaintenanceItem item,
+        CancellationToken ct = default,
+        TimeSpan? timeout = null) =>
+        QueryStateCoreAsync(query, item.Id, item.Label,
+            () => item.StateFailureReason ?? (item as IMaintenanceToggle)?.StateDiagnostic?.Fallback, ct, timeout);
+
+    private static async Task<T?> QueryStateCoreAsync<T>(
+        Func<CancellationToken, Task<T?>> query,
+        string itemId,
+        string itemName,
+        Func<string?> failureReason,
+        CancellationToken ct,
+        TimeSpan? timeout)
     {
         var effectiveTimeout = timeout ?? StateQueryTimeout;
         using var queryCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         queryCts.CancelAfter(effectiveTimeout);
         try
         {
-            return await query(queryCts.Token);
+            var state = await query(queryCts.Token);
+            if (state is null)
+            {
+                // 例外を投げず不明を返す項目も、失敗を画面だけに残さない。
+                ct.ThrowIfCancellationRequested();
+                MaintenanceItemLog.StateReadFailed(itemId, itemName, failureReason() ??
+                    "状態を判定できませんでした。項目から詳細な理由が返されませんでした (非対応環境を含みます)。");
+            }
+            return state;
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
@@ -171,13 +196,13 @@ public partial class CommandCategoryViewModel : ObservableObject
         }
         catch (OperationCanceledException) when (queryCts.IsCancellationRequested)
         {
-            LoggerBootstrap.Log.Error(
-                $"{itemId} の状態取得が {effectiveTimeout.TotalSeconds:0} 秒でタイムアウトしました");
+            MaintenanceItemLog.StateReadFailed(itemId, itemName,
+                $"状態取得が {effectiveTimeout.TotalSeconds:0} 秒でタイムアウトしました");
             return default;
         }
         catch (Exception ex)
         {
-            LoggerBootstrap.Log.Error($"{itemId} の状態取得に失敗しました", ex);
+            MaintenanceItemLog.StateReadFailed(itemId, itemName, $"{ex.GetType().Name}: {ex.Message}");
             return default;
         }
     }
@@ -220,7 +245,7 @@ public partial class CommandCategoryViewModel : ObservableObject
             }
             catch (Exception ex)
             {
-                LoggerBootstrap.Log.Error($"{item.Item.Id} の適用に失敗しました", ex);
+                MaintenanceItemLog.LogException(item.Item, "選択の適用", ex);
                 result = MaintenanceActionResult.Fail(ex.Message);
             }
 
@@ -253,7 +278,7 @@ public partial class CommandCategoryViewModel : ObservableObject
             case IMaintenanceToggle childToggle:
                 var state = await QueryStateAsync(
                     childToggle.GetStateAsync,
-                    childToggle.Id);
+                    child.Item);
 
                 await Dispatcher.UIThread.InvokeAsync(() => child.ApplyState(state));
                 break;
@@ -264,7 +289,7 @@ public partial class CommandCategoryViewModel : ObservableObject
     {
         var actual = await QueryStateAsync(
             choice.GetSelectedValueAsync,
-            choice.Id);
+            item.Item);
 
         await Dispatcher.UIThread.InvokeAsync(() => item.ApplySelectedValue(actual));
     }
@@ -323,7 +348,7 @@ public partial class CommandCategoryViewModel : ObservableObject
             }
             catch (Exception ex)
             {
-                LoggerBootstrap.Log.Error($"{item.Item.Id} の実行に失敗しました", ex);
+                MaintenanceItemLog.LogException(item.Item, "実行", ex);
                 result = MaintenanceActionResult.Fail(ex.Message);
             }
             finally
@@ -357,16 +382,7 @@ public partial class CommandCategoryViewModel : ObservableObject
         MaintenanceActionResult result,
         long startedAt)
     {
-        var seconds = Stopwatch.GetElapsedTime(startedAt).TotalSeconds;
-        var message = $"{item.Item.Id}: {operation} {result.Status} ({seconds:F1} 秒)";
-        if (result.Status is MaintenanceActionStatus.Failed or MaintenanceActionStatus.Partial)
-        {
-            LoggerBootstrap.Log.Error(message);
-        }
-        else
-        {
-            LoggerBootstrap.Log.Info(message);
-        }
+        MaintenanceItemLog.LogResult(item.Item, operation, result, Stopwatch.GetElapsedTime(startedAt));
     }
 
     private async Task SetToggleAsync(CommandItemViewModel item, bool on)
@@ -406,7 +422,7 @@ public partial class CommandCategoryViewModel : ObservableObject
             }
             catch (Exception ex)
             {
-                LoggerBootstrap.Log.Error($"{item.Item.Id} の切り替えに失敗しました", ex);
+                MaintenanceItemLog.LogException(item.Item, "切り替え", ex);
                 result = MaintenanceActionResult.Fail(ex.Message);
             }
 
@@ -414,7 +430,7 @@ public partial class CommandCategoryViewModel : ObservableObject
             // 補償後も検証できる独立 token を使いつつ、終了処理を長時間塞がないよう上限を設ける。
             var actualState = await QueryStateAsync(
                 toggle.GetStateAsync,
-                item.Item.Id);
+                item.Item);
 
             item.ApplyState(actualState);
 
@@ -458,7 +474,8 @@ public partial class CommandCategoryViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            LoggerBootstrap.Log.Error("エクスプローラーの再起動に失敗しました", ex);
+            MaintenanceItemLog.Failure(item.Item.Id, item.Item.Label, "エクスプローラーの再起動",
+                $"{ex.GetType().Name}: {ex.Message}");
             return MarkExplorerRestartFailed(
                 result,
                 App.Text(
@@ -503,6 +520,8 @@ public partial class CommandCategoryViewModel : ObservableObject
 
     private void ShowBusyResult(CommandItemViewModel item)
     {
+        MaintenanceItemLog.LogRejected(item.Item,
+            "別のメンテナンス操作が実行中、終了処理中、または共有ロックを取得できないため受け付けられませんでした。");
         var message = App.Text("Status.Busy", "別のメンテナンス操作が実行中です。完了後にもう一度お試しください。");
         item.ResultText = message;
         item.ApplyResultStatus(MaintenanceActionStatus.Failed);

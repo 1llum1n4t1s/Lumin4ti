@@ -169,7 +169,9 @@ public partial class CommandItemViewModel : ObservableObject
     /// <summary>状態読込の診断。操作結果と分け、再取得成功時にだけ消す。</summary>
     public string StateErrorText
     {
-        get => _isGenericStateError
+        get => _isGenericStateError && _stateDiagnostic is { } diagnostic
+            ? App.Text(diagnostic.Key, diagnostic.Fallback)
+            : _isGenericStateError
             ? App.Text(
                 "Toggle.StateUnknown",
                 "状態を取得できませんでした (管理者権限がないか、この PC では利用できない機能です。デバッグ起動は昇格されないため、通常起動でお試しください)")
@@ -179,6 +181,7 @@ public partial class CommandItemViewModel : ObservableObject
             // 明示的な診断は翻訳対象にせず、その内容を保持する。
             var wasGeneric = _isGenericStateError;
             _isGenericStateError = false;
+            _stateDiagnostic = null;
             if (!SetProperty(ref _stateErrorText, value) && wasGeneric)
             {
                 OnPropertyChanged();
@@ -188,9 +191,11 @@ public partial class CommandItemViewModel : ObservableObject
 
     private string _stateErrorText = string.Empty;
     private bool _isGenericStateError;
+    private MaintenanceStateDiagnostic? _stateDiagnostic;
 
     private void ShowGenericStateError()
     {
+        _stateDiagnostic = (Item as IMaintenanceToggle)?.StateDiagnostic;
         _isGenericStateError = true;
         OnPropertyChanged(nameof(StateErrorText));
     }
@@ -291,7 +296,8 @@ public partial class CommandItemViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            LoggerBootstrap.Log.Error($"{Item.Id}: 削除対象の選択を保存できませんでした ({entry.Value})", ex);
+            MaintenanceItemLog.Failure(Item.Id, Item.Label, "削除対象の選択保存",
+                $"{entry.Value}: {ex.GetType().Name}: {ex.Message}");
             ResultText = App.Text("CheckList.SaveFailed", "選択を保存できませんでした (ログを確認してください)");
             ApplyResultStatus(MaintenanceActionStatus.Failed);
         }

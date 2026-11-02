@@ -49,6 +49,8 @@ internal static class Program
     }
     public static async Task<int> Main(string[] args)
     {
+        if (args.Length == 1 && args[0] == "--preview-state-diagnostics")
+            return StateDiagnosticsPreview.Run();
         if (args.Length is < 2 or > 3 || args.Length == 3 && args[2] != "--simulate-missing-download-cancellation") return 2;
         _simulateMissingDownloadCancellation = args.Length == 3;
         _repo = Path.GetFullPath(args[0]);
@@ -87,7 +89,9 @@ internal static class Program
         await Run("scheduled-checklist-duplicate-off-selection", ScheduledSelectionWorkflow);
         await Run("clear-ignored-update-save-failure-boundary", IgnoredUpdateWorkflow);
         await Run("migration-pending-json-legacy-compatibility", PendingJsonWorkflow);
+        await Run("item-operation-failure-partial-busy-log-causes", OperationFailureLogWorkflow);
         await Run("actual-app-locale-version-vm-update-getters", LocaleWorkflow);
+        await Run("item-state-null-exception-timeout-log-causes", StateFailureLogWorkflow);
         await Run("locale-and-accessibility-static-supplement", StaticWorkflow);
         Directory.CreateDirectory(Path.GetDirectoryName(artifact)!);
         var assemblies = new[] { typeof(Program).Assembly, typeof(RegistryToggle).Assembly, typeof(CommandItemViewModel).Assembly }
@@ -107,6 +111,222 @@ internal static class Program
     }
     private static CommandItemViewModel Vm(IMaintenanceItem item) => new(item, _ => Task.CompletedTask,
         async (vm, on) => { var result = await ((IMaintenanceToggle)item).SetStateAsync(on); vm.ResultText = result.Detail; vm.ApplyResultStatus(result.Status); });
+
+    private const string LogCanaryCause = "GOGO_LOG_CAUSE";
+    private const string LogCanarySecret = "GOGO_LOG_SECRET_123";
+    private const string LogCanaryDetail = LogCanaryCause + " token=" + LogCanarySecret;
+
+    private static void RequireItemCauseLog(int start, IMaintenanceItem item, string cause, bool redacted = false)
+    {
+        var messages = Logs.Messages.Skip(start).ToArray();
+        Require(messages.Any(message => message.Contains(item.Id, StringComparison.Ordinal) &&
+            message.Contains(item.Label, StringComparison.Ordinal) &&
+            message.Contains(cause, StringComparison.Ordinal)),
+            $"item name/id/cause missing for {item.Id}: " + string.Join(" | ", messages));
+        Require(messages.All(message => !message.Contains(LogCanarySecret, StringComparison.Ordinal)),
+            "secret leaked into failure log for " + item.Id);
+        if (redacted)
+            Require(messages.Any(message => message.Contains("[redacted]", StringComparison.Ordinal)),
+                "redaction marker missing for " + item.Id);
+    }
+
+    private static async Task<string> StateFailureLogWorkflow()
+    {
+        var diagnostic = new LogProbeToggle("state-diagnostic")
+        {
+            Diagnostic = new("Gogo.LogDiagnostic", LogCanaryDetail),
+            Query = _ => Task.FromResult<bool?>(null),
+        };
+        var before = Logs.Messages.Count;
+        Require(await CommandCategoryViewModel.QueryStateAsync<bool?>(diagnostic.GetStateAsync, diagnostic) is null,
+            "diagnostic null state became known");
+        RequireItemCauseLog(before, diagnostic, LogCanaryCause, redacted: true);
+
+        var technical = new LogProbeToggle("state-technical")
+        {
+            StateFailureReason = LogCanaryDetail,
+            Query = _ => Task.FromResult<bool?>(null),
+        };
+        before = Logs.Messages.Count;
+        Require(await CommandCategoryViewModel.QueryStateAsync<bool?>(technical.GetStateAsync, technical) is null,
+            "technical failure became known");
+        RequireItemCauseLog(before, technical, LogCanaryCause, redacted: true);
+
+        var unknown = new LogProbeToggle("state-null") { Query = _ => Task.FromResult<bool?>(null) };
+        before = Logs.Messages.Count;
+        Require(await CommandCategoryViewModel.QueryStateAsync<bool?>(unknown.GetStateAsync, unknown) is null,
+            "unexplained null state became known");
+        RequireItemCauseLog(before, unknown, "詳細な理由が返されませんでした");
+
+        var choice = new LogProbeChoice("choice-state-null") { Query = _ => Task.FromResult<string?>(null) };
+        before = Logs.Messages.Count;
+        Require(await CommandCategoryViewModel.QueryStateAsync<string?>(choice.GetSelectedValueAsync, choice) is null,
+            "null choice state became known");
+        RequireItemCauseLog(before, choice, "詳細な理由が返されませんでした");
+
+        var catalog = new MaintenanceActionCatalog(new MockExecutor((_, _, _) =>
+            throw new InvalidOperationException("メタデータ検証でOSコマンドを実行しない")));
+        foreach (var item in catalog.Items.Where(item => item is IMaintenanceToggle or IMaintenanceChoice))
+        {
+            before = Logs.Messages.Count;
+            await CommandCategoryViewModel.QueryStateAsync<bool?>(_ => Task.FromResult<bool?>(null), item);
+            RequireItemCauseLog(before, item, "詳細な理由が返されませんでした");
+        }
+
+        var exception = new LogProbeToggle("state-exception")
+        {
+            Query = _ => Task.FromException<bool?>(new IOException(LogCanaryDetail)),
+        };
+        before = Logs.Messages.Count;
+        Require(await CommandCategoryViewModel.QueryStateAsync<bool?>(exception.GetStateAsync, exception) is null,
+            "exception escaped state query boundary");
+        RequireItemCauseLog(before, exception, LogCanaryCause, redacted: true);
+
+        Require(HibernateToggle.IsHiberFilePresent(() => FileAttributes.System)
+            && !HibernateToggle.IsHiberFilePresent(() => FileAttributes.Directory)
+            && !HibernateToggle.IsHiberFilePresent(() => throw new FileNotFoundException())
+            && !HibernateToggle.IsHiberFilePresent(() => throw new DirectoryNotFoundException()),
+            "hiberfile present/missing classification changed");
+        foreach (var readError in new Exception[] { new IOException(LogCanaryDetail), new UnauthorizedAccessException(LogCanaryDetail) })
+        {
+            var hibernate = new HibernateToggle(new MockExecutor((_, _, _) =>
+                throw new InvalidOperationException("状態照会でpowercfgを実行しない")),
+                () => HibernateToggle.IsHiberFilePresent(() => throw readError));
+            before = Logs.Messages.Count;
+            Require(await CommandCategoryViewModel.QueryStateAsync<bool?>(hibernate.GetStateAsync, hibernate) is null,
+                "hiberfile read failure became optimization ON");
+            RequireItemCauseLog(before, hibernate, LogCanaryCause, redacted: true);
+        }
+
+        var timeout = new LogProbeToggle("state-timeout")
+        {
+            Query = async ct => { await Task.Delay(Timeout.InfiniteTimeSpan, ct); return false; },
+        };
+        before = Logs.Messages.Count;
+        Require(await CommandCategoryViewModel.QueryStateAsync<bool?>(timeout.GetStateAsync, timeout,
+            timeout: TimeSpan.FromMilliseconds(30)) is null, "timeout state became known");
+        RequireItemCauseLog(before, timeout, "タイムアウト");
+
+        before = Logs.Messages.Count;
+        var known = new LogProbeToggle("state-known");
+        Require(await CommandCategoryViewModel.QueryStateAsync<bool?>(known.GetStateAsync, known) == false &&
+            Logs.Messages.Count == before, "known OFF state logged a failure");
+        return "Actual item-aware VM state query: null with/without diagnostic, null choice, IOException and bounded cancellation timeout retained item name/id/cause; token redacted; known OFF emitted no failure";
+    }
+
+    private static Task<string> OperationFailureLogWorkflow()
+    {
+        // 同期 fake の操作を同じ thread で完了し、選択状態反映だけ Dispatcher へ流す。
+        foreach (var partial in new[] { false, true })
+        {
+            var result = partial ? MaintenanceActionResult.Partial(LogCanaryDetail) : MaintenanceActionResult.Fail(LogCanaryDetail);
+            foreach (var kind in new[] { "toggle", "choice", "action" })
+            {
+                LogProbeItem item = kind switch
+                {
+                    "toggle" => new LogProbeToggle(kind + "-" + result.Status) { Result = result },
+                    "choice" => new LogProbeChoice(kind + "-" + result.Status) { Result = result },
+                    _ => new LogProbeAction(kind + "-" + result.Status) { Result = result },
+                };
+                var coordinator = new MaintenanceOperationCoordinator(() => new NoopLease());
+                var category = new CommandCategoryViewModel(new MaintenanceActionCatalog(new IMaintenanceItem[] { item }),
+                    coordinator, CommandCategory.System, "検証", "検証");
+                var vm = category.Items.Single();
+                var before = Logs.Messages.Count;
+                TriggerLogProbe(vm, kind);
+                RequireItemCauseLog(before, item, LogCanaryCause, redacted: true);
+                Require(item.OperationCalls == 1 && coordinator.ActiveCount == 0 &&
+                    (partial ? vm.LastRunWarning : vm.LastRunFailed), "operation result or lease state lost for " + item.Id);
+            }
+        }
+
+        foreach (var kind in new[] { "toggle", "choice", "action" })
+        {
+            LogProbeItem item = kind switch
+            {
+                "toggle" => new LogProbeToggle(kind + "-busy"),
+                "choice" => new LogProbeChoice(kind + "-busy"),
+                _ => new LogProbeAction(kind + "-busy"),
+            };
+            var category = new CommandCategoryViewModel(new MaintenanceActionCatalog(new IMaintenanceItem[] { item }),
+                new MaintenanceOperationCoordinator(() => null), CommandCategory.System, "検証", "検証");
+            var before = Logs.Messages.Count;
+            TriggerLogProbe(category.Items.Single(), kind);
+            RequireItemCauseLog(before, item, "別のメンテナンス操作");
+            Require(item.OperationCalls == 0, "busy operation reached OS fake for " + item.Id);
+        }
+        var scheduledFailed = new LogProbeAction("scheduled-failed") { Result = MaintenanceActionResult.Fail(LogCanaryDetail) };
+        var scheduledPartial = new LogProbeAction("scheduled-partial") { Result = MaintenanceActionResult.Partial(LogCanaryDetail) };
+        var scheduledException = new LogProbeAction("scheduled-exception") { Failure = new IOException(LogCanaryDetail) };
+        var scheduledLast = new LogProbeAction("scheduled-last-success");
+        var scheduledStart = Logs.Messages.Count;
+        Require(ScheduledTempCleanup.RunAsync([scheduledFailed, scheduledPartial, scheduledException, scheduledLast])
+            .GetAwaiter().GetResult() == 1, "scheduled failure exit code lost");
+        foreach (var action in new[] { scheduledFailed, scheduledPartial, scheduledException })
+            RequireItemCauseLog(scheduledStart, action, LogCanaryCause, redacted: true);
+        Require(scheduledLast.OperationCalls == 1, "scheduled sequence stopped after earlier failure");
+        return Task.FromResult("Actual category/card VM toggle, choice and action: Failed/Partial retained name/id/sanitized cause; Busy rejected without fake calls; scheduled fake batch retained Failed/Partial/exception causes and continued through final success");
+    }
+
+    private static void TriggerLogProbe(CommandItemViewModel vm, string kind)
+    {
+        Task? action = null;
+        switch (kind)
+        {
+            case "toggle": vm.ApplyState(false); vm.IsChecked = true; break;
+            case "choice": vm.ApplySelectedValue("off"); vm.SelectedChoice = vm.ChoiceOptions.Single(option => option.Value == "on"); break;
+            default: action = vm.RunCommand.ExecuteAsync(null); break;
+        }
+        var deadline = System.Diagnostics.Stopwatch.StartNew();
+        while (vm.IsRunning || action is { IsCompleted: false })
+        {
+            Require(deadline.Elapsed < TimeSpan.FromSeconds(3), "fake VM operation did not finish");
+            Avalonia.Threading.Dispatcher.UIThread.RunJobs();
+            Thread.Sleep(1);
+        }
+        action?.GetAwaiter().GetResult();
+    }
+
+    private abstract class LogProbeItem(string id) : IMaintenanceItem
+    {
+        public string Id => "gogo-log-" + id;
+        public string Label => "ログ検証項目 " + id;
+        public string Description => "メモリ内の検証専用項目";
+        public CommandCategory Category => CommandCategory.System;
+        public bool RequiresReboot => false;
+        public string? StateFailureReason { get; init; }
+        public MaintenanceActionResult Result { get; init; } = MaintenanceActionResult.Ok();
+        public int OperationCalls { get; protected set; }
+    }
+
+    private sealed class LogProbeToggle(string id) : LogProbeItem(id), IMaintenanceToggle
+    {
+        public MaintenanceStateDiagnostic? Diagnostic { get; init; }
+        public MaintenanceStateDiagnostic? StateDiagnostic => Diagnostic;
+        public Func<CancellationToken, Task<bool?>> Query { get; init; } = _ => Task.FromResult<bool?>(false);
+        public Task<bool?> GetStateAsync(CancellationToken ct = default) => Query(ct);
+        public Task<MaintenanceActionResult> SetStateAsync(bool on, CancellationToken ct = default)
+        { OperationCalls++; return Task.FromResult(Result); }
+    }
+
+    private sealed class LogProbeChoice(string id) : LogProbeItem(id), IMaintenanceChoice
+    {
+        public IReadOnlyList<MaintenanceChoiceOption> Options { get; } = [new("off", "OFF"), new("on", "ON")];
+        public Func<CancellationToken, Task<string?>> Query { get; init; } = _ => Task.FromResult<string?>("off");
+        public Task<string?> GetSelectedValueAsync(CancellationToken ct = default) => Query(ct);
+        public Task<MaintenanceActionResult> SetSelectedValueAsync(string value, CancellationToken ct = default)
+        { OperationCalls++; return Task.FromResult(Result); }
+    }
+
+    private sealed class LogProbeAction(string id) : LogProbeItem(id), IMaintenanceAction
+    {
+        public Exception? Failure { get; init; }
+        public Task<MaintenanceActionResult> ExecuteAsync(CancellationToken ct = default)
+        {
+            OperationCalls++;
+            return Failure is null ? Task.FromResult(Result) : Task.FromException<MaintenanceActionResult>(Failure);
+        }
+    }
     private static RegistryToggle Toggle(string id, MemoryRegistry registry, MemoryBackups storage, string sid, RegistryToggleSpec[] specs) =>
         new(id, "検証", "検証", CommandCategory.System, specs, false, false, registry, new RegistryValueBackup(storage, registry, () => sid));
     private static async Task<string> RegistryReapplyWorkflow()
@@ -370,7 +590,11 @@ internal static class Program
     {
         var service = new MockDevices();
         var vm = new DeviceCleanupViewModel(service, new MaintenanceOperationCoordinator(() => new NoopLease()), action => { action(); return Task.CompletedTask; });
+        var logStart = Logs.Messages.Count;
         await vm.LoadDisconnectedDevicesAsync();
+        Require(Logs.Messages.Skip(logStart).Any(message => message.Contains("disconnected-devices")
+            && message.Contains("未接続デバイス") && message.Contains("RERE_CANARY enumeration failure")),
+            "device loading failure lost name or cause");
         Require(!vm.IsEmpty && !vm.HasSuccessfulLoad && vm.CanRefresh && vm.StatusText.Length > 0, "failed enumeration looked like successful empty");
         service.FailEnumeration = false; await vm.LoadDisconnectedDevicesAsync();
         Require(vm.IsEmpty && vm.HasSuccessfulLoad && service.EnumerationCalls == 2, "retry empty success not observed");
@@ -552,6 +776,9 @@ internal static class Program
         var locales = Directory.GetFiles(Path.Combine(_repo, "src/Lumin4ti.UI/Resources/Locales"), "*.axaml");
         Require(locales.Length == 17, "locale count differs from 17");
         string[] added = ["UpdateDialog.Title", "UpdateDialog.AvailableHeader", "UpdateDialog.DownloadAndInstall", "UpdateDialog.IgnoreThisVersion", "UpdateDialog.UpToDateMessage", "UpdateDialog.ErrorHeader", "UpdateDialog.Close", "UpdateDialog.CheckingMessage", "UpdateDialog.DevelopmentBuild", "UpdateDialog.CheckFailed", "Status.Applying", "Status.Applied", "Status.ApplyFailed", "Shutdown.BlockReason"];
+        added = [.. added, "Toggle.VbsPartialState", "Toggle.UwpBackupInvalid", "Toggle.UwpPartialState",
+            "Toggle.RecallQueryFailed", "Toggle.RecallStateMissing", "Toggle.RecallStateUnsupported",
+            "Toggle.ScheduledTaskOtherUser", "Toggle.ScheduledTaskOwnershipUnknown"];
         foreach (var path in locales)
         {
             var keys = XDocument.Load(path).Descendants().Select(e => (string?)e.Attribute(x + "Key")).Where(k => k is not null).ToArray();
@@ -563,7 +790,7 @@ internal static class Program
         var actionButtons = XDocument.Load(Path.Combine(_repo, "src/Lumin4ti.UI/Views/CommandCategoryView.axaml"))
             .Descendants().Where(element => element.Name.LocalName == "Button" && element.Attributes().Any(attribute => attribute.Name.LocalName == "Command" && (attribute.Value == "{Binding RunCommand}" || attribute.Value == "{Binding CancelCommand}"))).ToArray();
         Require(actionButtons.Length == 4 && actionButtons.All(button => button.Attributes().Any(attribute => attribute.Name.LocalName == "AutomationProperties.Name" && attribute.Value == (button.Attribute("Command")!.Value.Contains("RunCommand") ? "{Binding RunAutomationName}" : "{Binding CancelAutomationName}"))), "parent/child run/cancel names not correctly bound");
-        return Task.FromResult("Supplement only: 17 XML dictionaries parsed, 14 required keys/no duplicates, getter and automation-name source present; this is not GUI accessibility validation");
+        return Task.FromResult($"Supplement only: 17 XML dictionaries parsed, {added.Length} required keys/no duplicates, getter and automation-name source present; this is not GUI accessibility validation");
     }
     private static Task<string> LocaleWorkflow()
     {
@@ -602,6 +829,13 @@ internal static class Program
         var genericToggle = Vm(new MmAgentFeatureToggle(toggleExecutor, new MmAgentStateProvider(toggleExecutor), "MemoryCompression", "gogo-locale", "検証", "検証"));
         var genericChoice = new CommandItemViewModel(new MmAgentOperationApiChoice(toggleExecutor, new MmAgentStateProvider(toggleExecutor)), _ => Task.CompletedTask, (_, _) => Task.CompletedTask);
         var specific = Vm(genericToggle.Item);
+        var invalidUwp = new UwpBackgroundToggle(() => [], new MemoryUwpSettings(),
+            () => new(UwpBackgroundJournalLoadStatus.Invalid, Error: "旧 journal の所有者 SID を証明できません。"),
+            _ => throw new InvalidOperationException("状態照会で保存してはいけません"),
+            () => throw new InvalidOperationException("状態照会で削除してはいけません"));
+        var journalDiagnostic = Vm(invalidUwp);
+        journalDiagnostic.ApplyState(invalidUwp.GetStateAsync().GetAwaiter().GetResult());
+        journalDiagnostic.ResultText = "GOGO_CANARY previous UWP result";
         genericToggle.ApplyState(null); genericChoice.ApplySelectedValue(null); specific.ApplyState(null);
         specific.StateErrorText = "GOGO_CANARY specific IOException";
         genericToggle.ResultText = "GOGO_CANARY previous result";
@@ -623,10 +857,15 @@ internal static class Program
             const string unknownFallback = "状態を取得できませんでした (管理者権限がないか、この PC では利用できない機能です。デバッグ起動は昇格されないため、通常起動でお試しください)";
             Require(genericToggle.StateErrorText == expected[locale.Key].GetValueOrDefault("Text.Toggle.StateUnknown", unknownFallback) && genericChoice.StateErrorText == genericToggle.StateErrorText, "generic toggle/choice error remained in old language: " + locale.Key);
             Require(specific.StateErrorText == "GOGO_CANARY specific IOException", "locale switch replaced explicit diagnostic");
+            Require(journalDiagnostic.StateErrorText == expected[locale.Key]["Text.Toggle.UwpBackupInvalid"]
+                && !journalDiagnostic.CanToggle, "journal diagnostic remained generic, stale or enabled: " + locale.Key);
             Require(genericToggle.RunAutomationName.Contains(App.Text("Button.Run", "実行")) && genericToggle.CancelAutomationName.Contains(App.Text("Button.Cancel", "中断")) && genericToggle.RunAutomationName != genericToggle.CancelAutomationName, "action automation identities ambiguous/stale");
             Require(new[] { "StateErrorText", "RunAutomationName", "CancelAutomationName" }.All(notifications.Contains), "locale change missed property notification");
         }
         genericToggle.ApplyState(true); genericChoice.ApplySelectedValue("512");
+        journalDiagnostic.ApplyState(false);
+        Require(journalDiagnostic.StateErrorText.Length == 0 && journalDiagnostic.CanToggle
+            && journalDiagnostic.ResultText == "GOGO_CANARY previous UWP result", "journal recovery erased result or retained diagnostic");
         Require(genericToggle.StateErrorText.Length == 0 && genericChoice.StateErrorText.Length == 0 && genericToggle.ResultText == "GOGO_CANARY previous result", "known state recovery did not clear only diagnosis");
         setStatus.Invoke(vm, [null, "", Array.Empty<object>()]);
         Require(vm.UpdateStatusText.Length == 0, "status reset retained translated text");

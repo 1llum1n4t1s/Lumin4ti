@@ -83,6 +83,14 @@
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - 已重启 Explorer</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - 重启 Explorer 失败（请手动重启）</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">无法读取状态（没有管理员权限，或此电脑不支持该功能。调试启动不会提权，请尝试正常启动）。</x:String>
+  <x:String x:Key="Text.Toggle.VbsPartialState" xml:space="preserve">VBS / HVCI 设置仅部分应用，也与已保存的原始状态不一致。为确保安全，已停止操作。</x:String>
+  <x:String x:Key="Text.Toggle.UwpBackupInvalid" xml:space="preserve">无法验证恢复数据的格式或所有者。旧备份已保留且不会自动迁移；为防止错误恢复，已停止操作。</x:String>
+  <x:String x:Key="Text.Toggle.UwpPartialState" xml:space="preserve">部分后台设置与已保存的状态不一致。无法区分中途更新与外部更改，因此已保留恢复数据并停止操作。</x:String>
+  <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">无法通过 DISM 获取 Recall 状态。此电脑可能不支持该功能，或缺少管理员权限。请查看日志了解详情。</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">DISM 输出中未找到 Recall 状态。请查看日志了解详情。</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">无法解析 DISM 返回的 Recall 状态。请查看日志了解详情。</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">此任务由另一位 Windows 用户注册，无法修改。</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">无法验证已注册任务的所有者，因此无法修改。</x:String>
 
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">批量更新已安装的应用（winget）</x:String>

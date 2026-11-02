@@ -83,6 +83,14 @@
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Explorer restitutus est</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Explorer restitui non potuit (quaeso manu eum restitue)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Status legi non potuit (iura administratoris desunt, aut facultas in hoc PC non praesto est. Initia Debug non exaltantur, ergo initium normale conare).</x:String>
+  <x:String x:Key="Text.Toggle.VbsPartialState" xml:space="preserve">Configurationes VBS / HVCI ex parte tantum adhibitae sunt neque cum statu pristino servato congruunt. Operatio securitatis causa interclusa est.</x:String>
+  <x:String x:Key="Text.Toggle.UwpBackupInvalid" xml:space="preserve">Forma aut possessor datorum restitutionis comprobari non potest. Exemplaria vetera sine migratione automatica servata sunt, et operatio interclusa est ne restitutio falsa fiat.</x:String>
+  <x:String x:Key="Text.Toggle.UwpPartialState" xml:space="preserve">Quaedam configurationes operandi in recessu cum statu servato non congruunt. Renovatio interrupta a mutationibus externis distingui non potest; itaque data restitutionis servata sunt et operatio interclusa est.</x:String>
+  <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">DISM statum Recall obtinere non potuit. Fortasse haec facultas in hoc computatro non praesto est aut iura administratoris desunt. Plura in actis inspice.</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">Status Recall in exitu DISM non invenitur. Plura in actis inspice.</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">Status Recall a DISM redditus interpretari non potest. Plura in actis inspice.</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">Hoc opus ab alio usore Windows inscriptum est ideoque mutari non potest.</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">Possessor operis inscripti comprobari non potest; opus igitur mutari non potest.</x:String>
 
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Applicationes installatas simul renova (winget)</x:String>

@@ -96,22 +96,34 @@ public sealed class ScheduledTempCleanupToggle(
 
     public bool RequiresReboot => false;
 
+    public MaintenanceStateDiagnostic? StateDiagnostic { get; private set; }
+
     public async Task<bool?> GetStateAsync(CancellationToken ct = default)
     {
+        StateDiagnostic = null;
         var result = await executor.RunAsync("schtasks", BuildQueryXmlArguments(), ct);
         if (!result.Success)
         {
+            // schtasks の非成功だけでは未登録と照会エラーを区別できない。既存の OFF 判定を保つ。
+            LogQueryFailure(result);
             return false;
         }
 
         var currentUser = GetCurrentUserIdentity();
-        return GetTaskOwnership(
+        var ownership = GetTaskOwnership(
             result.StandardOutput,
             currentUser.AccountName,
-            currentUser.Sid)
-            == TaskOwnership.CurrentUser
-            ? true
-            : null;
+            currentUser.Sid);
+        if (ownership == TaskOwnership.CurrentUser)
+        {
+            return true;
+        }
+
+        StateDiagnostic = ownership == TaskOwnership.OtherUser
+            ? new("Toggle.ScheduledTaskOtherUser", "別の Windows ユーザーが登録したタスクのため操作できません。")
+            : new("Toggle.ScheduledTaskOwnershipUnknown", "登録済みタスクの所有者を確認できないため操作できません。");
+        LoggerBootstrap.Log.Error($"{Id} ({Label}): {StateDiagnostic.Fallback}");
+        return null;
     }
 
     /// <summary>
@@ -128,9 +140,13 @@ public sealed class ScheduledTempCleanupToggle(
 
         var queryResult = await executor.RunAsync(
             "schtasks", BuildQueryXmlArguments(), ct, timeout: TimeSpan.FromSeconds(15));
+        if (!queryResult.Success)
+        {
+            LogQueryFailure(queryResult);
+            return;
+        }
         var currentUser = GetCurrentUserIdentity();
-        if (!queryResult.Success
-            || GetTaskOwnership(
+        if (GetTaskOwnership(
                 queryResult.StandardOutput,
                 currentUser.AccountName,
                 currentUser.Sid) != TaskOwnership.CurrentUser
@@ -259,6 +275,7 @@ public sealed class ScheduledTempCleanupToggle(
             "schtasks", BuildQueryXmlArguments(), ct, timeout: TimeSpan.FromSeconds(15));
         if (!queryResult.Success)
         {
+            LogQueryFailure(queryResult);
             return (false, TaskOwnership.Unknown);
         }
 
@@ -288,6 +305,9 @@ public sealed class ScheduledTempCleanupToggle(
         LoggerBootstrap.Log.Error($"{Id}: {message}");
         return MaintenanceActionResult.Fail(message);
     }
+
+    private void LogQueryFailure(CommandExecutionResult result) =>
+        LoggerBootstrap.Log.Error($"{Id} ({Label}): タスク照会に失敗したか、タスクが未登録です。{CommandFailureDiagnostic.Format(result)}");
 
     internal static string BuildQueryXmlArguments() => $"/query /tn \"{TaskName}\" /xml ONE";
 

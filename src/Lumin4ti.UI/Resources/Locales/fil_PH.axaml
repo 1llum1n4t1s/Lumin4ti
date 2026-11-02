@@ -83,6 +83,14 @@
   <x:String x:Key="Text.Result.ExplorerRestarted" xml:space="preserve">  - Ni-restart ang Explorer</x:String>
   <x:String x:Key="Text.Result.ExplorerRestartFailed" xml:space="preserve">  - Nabigong i-restart ang Explorer (pakiusap i-restart ito nang manu-mano)</x:String>
   <x:String x:Key="Text.Toggle.StateUnknown" xml:space="preserve">Hindi mabasa ang estado (walang admin rights, o hindi available ang feature sa PC na ito. Ang mga debug launch ay hindi elevated, kaya subukan ang normal na paglunsad).</x:String>
+  <x:String x:Key="Text.Toggle.VbsPartialState" xml:space="preserve">Bahagya lang naipatupad ang mga setting ng VBS / HVCI at hindi rin tumutugma ang mga ito sa naka-save na orihinal na estado. Itinigil ang operasyon para sa kaligtasan.</x:String>
+  <x:String x:Key="Text.Toggle.UwpBackupInvalid" xml:space="preserve">Hindi ma-verify ang format o may-ari ng datos para sa pagpapanumbalik. Pinanatili ang mga lumang backup nang hindi awtomatikong inililipat, at itinigil ang operasyon upang maiwasan ang maling pagpapanumbalik.</x:String>
+  <x:String x:Key="Text.Toggle.UwpPartialState" xml:space="preserve">Hindi tumutugma ang ilang setting sa background sa naka-save na estado. Hindi matukoy kung naantalang pag-update o panlabas na pagbabago ang sanhi, kaya pinanatili ang datos para sa pagpapanumbalik at itinigil ang operasyon.</x:String>
+  <x:String x:Key="Text.Toggle.RecallQueryFailed" xml:space="preserve">Hindi makuha ng DISM ang estado ng Recall. Maaaring hindi suportado ang feature sa PC na ito o kulang ang mga karapatan ng administrator. Tingnan ang log para sa mga detalye.</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">Walang estado ng Recall sa output ng DISM. Tingnan ang log para sa mga detalye.</x:String>
+  <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">Hindi maunawaan ang estado ng Recall na ibinalik ng DISM. Tingnan ang log para sa mga detalye.</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">Ibang Windows user ang nagrehistro sa task na ito, kaya hindi ito maaaring baguhin.</x:String>
+  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">Hindi ma-verify ang may-ari ng nakarehistrong task, kaya hindi ito maaaring baguhin.</x:String>
 
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">I-update nang sabay-sabay ang mga naka-install na app (winget)</x:String>

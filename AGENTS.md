@@ -127,11 +127,11 @@ dotnet test Lumin4ti.slnx --filter "Name=既存の現行バックアップは再
 - MSI / MSIX 等へのインストーラー形式変更、Velopack の置換、per-user / machine-wide のインストール範囲変更、NativeAOT 等のパッケージング方式変更、更新元・channel・署名方式の変更は、ユーザーが対象を個別に明示した場合だけ実装する。明示がない場合は現行契約を維持し、設計案と影響だけを報告する。
 - `dotnet publish` によるローカル検証は通常の検証に含めてよい。`vpk pack`、署名、R2 upload、cache purge、配信確認は、リリースまたは `/vava` が明示された場合だけ実行する。
 
-- 実行は `pwsh scripts/release-local.ps1` (build + PerMachine MSI生成 + 署名 + R2 アップロード + キャッシュパージ + 配信確認 + 旧 nupkg 掃除を一括)。`-SkipUpload` で署名までの動作確認。
+- 実行は `pwsh scripts/release-local.ps1` (build + PerMachine MSI生成 + 署名 + R2 アップロード + キャッシュパージ + 配信確認 + 旧 nupkg 掃除を一括)。`-SkipUpload` では署名後の公開前検証まで行う。検証内容は [DESIGN.md のリリース成果物と公開順序](DESIGN.md#リリース成果物と公開順序) を参照し、検証失敗時は公開へ進めない。
 - [set-msi-program-files-location.ps1](scripts/set-msi-program-files-location.ps1) による Program Files 配置補正と、補正後 MSI の再署名・署名検証を省略しない。
 - 移行コードを変更するときは [DESIGN.md の旧配置からの移行](DESIGN.md#旧配置からの移行) の信頼確認・回収範囲・期限を維持し、`WindowsPerMachineMigrationTests` と操作フロー検証を通す。旧 `Update.exe` を実行せず、設定・ログ・復元原本と任意のカスタム配置を回収対象へ広げない。
 - リリース準備の清掃は今回再生成する `local-release/artifacts` と対象 RID の `publish-*` に限定し、検証記録を保持する。公開順序と配信確認は [DESIGN.md](DESIGN.md#リリース成果物と公開順序) に従う。
-- 前提: SimplySign Desktop がログイン済み (`Cert:\CurrentUser\My` に `CN=Open Source Developer Yuichiro Shinozaki` が見える) / `<Version>` が `/vava` 済み / `C:\Users\IMT\dev\Secret\secrets.json` に `cloudflare.api_token`。
+- 前提: SimplySign Desktop がログイン済み (`Cert:\CurrentUser\My` に `CN=Open Source Developer Yuichiro Shinozaki` が見える) / `<Version>` が `/vava` 済み / `D:\Dev\Secret\secrets.json` に `cloudflare.api_token`。
 - 製品ページの配信は `../vps-web/deploy/deploy-lp.ps1` を使う。配信先は [DESIGN.md](DESIGN.md#製品ページの配信先) を参照し、公開ホスト・更新ファイルの既存経路を維持する。
 - R2 バケット `lumin4ti-updates` (account `10901bfadbf1005164774a7350082985` / zone `kagayoi.com`)。`local-release/` は `.gitignore` 済み。
 

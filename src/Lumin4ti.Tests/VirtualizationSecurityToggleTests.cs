@@ -76,11 +76,41 @@ public sealed class VirtualizationSecurityToggleTests
         platform.State = VirtualizationSecuritySnapshot.Applied();
         Assert.AreEqual(true, await toggle.GetStateAsync());
 
+        new VirtualizationSecurityBackupStore(_backupPath).SaveNew(NotAppliedState());
+
         platform.State = VirtualizationSecuritySnapshot.Applied() with
         {
             Lsa = RegistryValueSnapshot.Dword(1),
         };
         Assert.IsNull(await toggle.GetStateAsync());
+        Assert.AreEqual("Toggle.VbsPartialState", toggle.StateDiagnostic?.Key);
+        platform.State = NotAppliedState();
+        Assert.AreEqual(false, await toggle.GetStateAsync());
+        Assert.IsNull(toggle.StateDiagnostic);
+    }
+
+    [TestMethod]
+    public async Task 初回の混在構成は適用できOFFでBCDの未設定も含めて元に戻す()
+    {
+        var original = VirtualizationSecuritySnapshot.Applied() with
+        {
+            HypervisorLaunchType = BcdValueSnapshot.Missing(),
+        };
+        var platform = new FakePlatform(original);
+        var toggle = CreateToggle(platform);
+
+        Assert.AreEqual(false, await toggle.GetStateAsync());
+        Assert.IsNull(toggle.StateDiagnostic);
+        Assert.IsFalse(File.Exists(_backupPath), "状態照会だけで退避を作成しない");
+
+        var applied = await toggle.SetStateAsync(true);
+        Assert.IsTrue(applied.Success, applied.Detail);
+        Assert.AreEqual(true, await toggle.GetStateAsync());
+        var restored = await toggle.SetStateAsync(false);
+        Assert.IsTrue(restored.Success, restored.Detail);
+        Assert.IsTrue(platform.State.EquivalentTo(original));
+        Assert.AreEqual(false, await toggle.GetStateAsync());
+        Assert.IsFalse(File.Exists(_backupPath));
     }
 
     [TestMethod]

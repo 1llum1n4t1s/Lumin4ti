@@ -16,6 +16,8 @@ public sealed class MaintenanceActionCatalog
 {
     public IReadOnlyList<IMaintenanceItem> Items { get; }
 
+    internal MaintenanceActionCatalog(IReadOnlyList<IMaintenanceItem> items) => Items = items;
+
     public MaintenanceActionCatalog(ICommandExecutor executor, ICleanupPreferences? preferences = null)
         : this(executor, new UnelevatedCommandExecutor(), preferences)
     {
