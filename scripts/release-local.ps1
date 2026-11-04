@@ -1,4 +1,4 @@
-# release-local.ps1 — ローカル署名付き Velopack リリース (Shisui テンプレートから横展開)
+﻿# release-local.ps1 — ローカル署名付き Velopack リリース (Shisui テンプレートから横展開)
 #
 # SimplySign (Certum クラウド署名) は Desktop 接続 + スマホトークンが必要で
 # GitHub Actions からは署名できないため、リリースは本スクリプトでローカル実行する。
@@ -47,6 +47,24 @@ function Remove-LocalWorkItem {
         Remove-Item -LiteralPath $resolved -Recurse:($item.PSIsContainer -and -not $leafLink) -Force -ErrorAction Stop
         if (Test-Path -LiteralPath $resolved) { throw "Cleanup target remains: $resolved" }
     }
+}
+
+# R2 への書込みは同梱の PowerShell/.NET 実装で行う。
+. (Join-Path $PSScriptRoot 'R2Distribution.Common.ps1')
+
+function Send-ReleaseR2Object {
+    param([Parameter(Mandatory)][System.IO.FileInfo]$File)
+    # バージョン付き成果物は不変、固定 URL とメタデータは毎回再検証する。
+    $immutable = $File.Extension -eq '.nupkg' -or $File.Name -match '\d+\.\d+\.\d+'
+    $cacheControl = if ($immutable) { 'public, max-age=31536000, immutable' } else { 'no-cache, must-revalidate' }
+    $contentType = switch ($File.Extension.ToLowerInvariant()) {
+        '.json' { 'application/json'; break }
+        '.exe' { 'application/vnd.microsoft.portable-executable'; break }
+        '.zip' { 'application/zip'; break }
+        default { if ($File.Name -like 'RELEASES*') { 'text/plain; charset=utf-8' } else { 'application/octet-stream' } }
+    }
+    $null = Publish-R2Object -AccountId $AccountId -Bucket $Bucket -FilePath $File.FullName `
+        -ApiToken $env:CLOUDFLARE_API_TOKEN -ContentType $contentType -CacheControl $cacheControl -Immutable:$immutable
 }
 
 $ErrorActionPreference = 'Stop'
@@ -168,7 +186,6 @@ function Assert-MsiVersion {
 # 更新時は公式 NuGet の安定版を確認し、-SkipUpload で署名成果物を検証してから変更する。
 $VpkVersion = '1.2.161'
 Write-Host "vpk 固定バージョン: $VpkVersion"
-$WranglerVersion = '4.156.1'        # サプライチェーン対策でバージョン固定
 $Bucket = 'lumin4ti-updates'
 $BaseUrl = 'https://lumin4ti.kagayoi.com'
 $AccountId = '10901bfadbf1005164774a7350082985'
@@ -200,13 +217,11 @@ function Invoke-Native {
     if ($LASTEXITCODE -ne 0) { throw "$Description が失敗しました (exit $LASTEXITCODE)" }
 }
 
-function Publish-R2Object {
+function Publish-R2Artifact {
     param([System.IO.FileInfo]$File)
 
     Write-Host "  ↑ $($File.Name)"
-    Invoke-Native "R2 put ($($File.Name))" {
-        pnpm dlx "wrangler@$WranglerVersion" r2 object put "$Bucket/$($File.Name)" --file $File.FullName --remote
-    }
+    Send-ReleaseR2Object -File $File
 }
 
 function Wait-RemoteAsset {
@@ -481,13 +496,14 @@ foreach ($manifestName in $expectedManifestNames) {
     }
 }
 
-$preCommitFiles = @($publishArtifacts | Where-Object { $_.Name -notlike 'releases.*.json' } | Sort-Object Name)
+$metadataFiles = @(Get-ChildItem -LiteralPath $ArtifactsDir -File | Where-Object { ($_.Name -like 'assets.*.json' -or $_.Name -like 'RELEASES*') -and $_.Name -notlike 'releases.*.json' } | Sort-Object Name)
+$preCommitFiles = @($publishArtifacts | Where-Object { $_.Name -notlike 'releases.*.json' -and $_.Name -notlike 'assets.*.json' -and $_.Name -notlike 'RELEASES*' } | Sort-Object Name)
 if ($preCommitFiles.Count -eq 0) { throw 'manifest より先に公開する asset がありません' }
 
 Write-Host '== R2 asset アップロード ==' -ForegroundColor Cyan
 $uploaded = 0
 foreach ($file in $preCommitFiles) {
-    Publish-R2Object $file
+    Publish-R2Artifact $file
     $uploaded++
 }
 Write-Host "✅ R2 asset アップロード完了: $uploaded ファイル"
@@ -504,8 +520,8 @@ foreach ($msiFile in $msiFiles) {
 
 # SimpleWebSource が読む releases.{channel}.json を最後に公開し、ここをリリースの commit point とする。
 Write-Host '== manifest commit point 公開 ==' -ForegroundColor Cyan
-foreach ($manifestFile in $manifestFiles) {
-    Publish-R2Object $manifestFile
+foreach ($manifestFile in @($metadataFiles + $manifestFiles)) {
+    Publish-R2Artifact $manifestFile
     $uploaded++
 }
 Write-Host "✅ R2 全アップロード完了: $uploaded ファイル (manifest は最後に公開)"
