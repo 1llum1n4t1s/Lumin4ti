@@ -19,7 +19,7 @@ dotnet test Lumin4ti.slnx --filter "FullyQualifiedName~UwpBackgroundToggleTests"
 ```
 
 - TFM は `net10.0-windows10.0.20348.0` ([Directory.Build.props](Directory.Build.props))。UWP パッケージ列挙 (WinRT `PackageManager`) のため Windows SDK 付き。
-- `.github/workflows/dependency-validation.yml` は Dependabot PR と手動実行を対象に Windows 上で restore・Release build・test を行う。`dependabot-auto-merge.yml` は必須検証と変更内容を確認して対象の Dependabot PR を merge する。通常の変更後もローカルの `dotnet build` (0 warnings) と `dotnet test` を必ず両方通す。
+- `.github/workflows/dependency-validation.yml` は Dependabot PR と手動実行を対象に Windows 上で restore・Release build・test を行う。通常の変更後もローカルの `dotnet build` (0 warnings) と `dotnet test` を必ず両方通す。
 - **バージョン (`Directory.Build.props` の `<Version>`) は `/vava` 経由でのみ更新**。コード修正のついでに触らない。
 - 復元・サービス補償・終了時排他・状態表示などの操作フローを変更したら、`pwsh -NoProfile -File scripts/verify-review-fixes.ps1` も実行する。対象ケースと再現方法は [WORKFLOWS.md](scripts/verification/WORKFLOWS.md) を参照し、成果物 `local-release/review-fixes-verification.json` を保持する。検証の境界は [DESIGN.md](DESIGN.md#主要コンポーネント) に記載し、実 GUI の E2E 検証と区別する。
 
