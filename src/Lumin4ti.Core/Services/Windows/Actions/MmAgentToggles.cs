@@ -13,7 +13,7 @@ namespace Lumin4ti.Core.Services.Windows.Actions;
 /// </summary>
 public sealed class MmAgentStateProvider(ICommandExecutor executor)
 {
-    private readonly object _cacheSync = new();
+    private readonly Lock _cacheSync = new();
     private Task<StateSnapshot>? _cacheTask;
     private readonly ConcurrentDictionary<string, StateOverride> _overrides =
         new(StringComparer.OrdinalIgnoreCase);
@@ -111,8 +111,8 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
         _overrides[propertyName] = new StateOverride(IsKnown: false, Value: false);
 
     /// <summary>
-    /// 指定した機能以外の共有スナップショットを捨てる。MMAgent は機能同士が OS 側で連動するため
-    /// (プリフェッチを切るとオペレーションレコーダーも無効になる)、1 つ切り替えたら他は取り直す。
+    /// 共有スナップショット全体を捨て、変更した機能以外の上書き値を削除する。MMAgent は機能同士が
+    /// OS 側で連動するため (プリフェッチを切るとオペレーションレコーダーも無効になる)、1 つ切り替えたら他は取り直す。
     /// </summary>
     internal void InvalidateOthers(string changedPropertyName)
     {
@@ -189,9 +189,7 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
             ct);
         if (!result.Success || string.IsNullOrWhiteSpace(result.StandardOutput))
         {
-            var reason = $"{(result.Success ? "Get-MMAgent の出力が空です" : "Get-MMAgent の実行に失敗しました")} ({CommandFailureDiagnostic.Format(result)})";
-            LoggerBootstrap.Log.Error(reason);
-            return new(null, reason);
+            return Failed($"{(result.Success ? "Get-MMAgent の出力が空です" : "Get-MMAgent の実行に失敗しました")} ({CommandFailureDiagnostic.Format(result)})");
         }
 
         try
@@ -199,9 +197,7 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
             using var doc = JsonDocument.Parse(result.StandardOutput);
             if (doc.RootElement.ValueKind != JsonValueKind.Object)
             {
-                var reason = $"Get-MMAgent: 状態 JSON がオブジェクトではありません ({CommandFailureDiagnostic.Format(result)})";
-                LoggerBootstrap.Log.Error(reason);
-                return new(null, reason);
+                return Failed($"Get-MMAgent: 状態 JSON がオブジェクトではありません ({CommandFailureDiagnostic.Format(result)})");
             }
 
             var dict = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
@@ -215,16 +211,19 @@ public sealed class MmAgentStateProvider(ICommandExecutor executor)
 
             if (dict.Count == 0)
             {
-                var reason = $"Get-MMAgent: 状態 JSON に真偽値がありません ({CommandFailureDiagnostic.Format(result)})";
-                LoggerBootstrap.Log.Error(reason);
-                return new(null, reason);
+                return Failed($"Get-MMAgent: 状態 JSON に真偽値がありません ({CommandFailureDiagnostic.Format(result)})");
             }
 
             return new(dict);
         }
         catch (JsonException)
         {
-            var reason = $"Get-MMAgent: 状態 JSON を解析できません ({CommandFailureDiagnostic.Format(result)})";
+            return Failed($"Get-MMAgent: 状態 JSON を解析できません ({CommandFailureDiagnostic.Format(result)})");
+        }
+
+        // 取得失敗はすべて同じ形で記録・返却する (理由をログへ残し、状態不明として UI へ渡す)。
+        static StateSnapshot Failed(string reason)
+        {
             LoggerBootstrap.Log.Error(reason);
             return new(null, reason);
         }

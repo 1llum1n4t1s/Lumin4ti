@@ -13,7 +13,7 @@ namespace Lumin4ti.UI.Services;
 /// </summary>
 public sealed class MaintenanceOperationCoordinator
 {
-    private readonly object _sync = new();
+    private readonly Lock _sync = new();
     private readonly HashSet<CancellationTokenSource> _active = [];
     private readonly Func<IDisposable?> _tryAcquireProcessLock;
     private TaskCompletionSource? _idleSignal;
@@ -133,7 +133,8 @@ public sealed class MaintenanceOperationCoordinator
             }
             catch (AggregateException ex)
             {
-                System.Diagnostics.Debug.WriteLine(ex);
+                // Release でも原因を残す (Debug.WriteLine は Release ビルドで消える)。
+                LoggerBootstrap.Log.Error("操作のキャンセル通知で購読先が例外を返しました", ex);
             }
         }
 
@@ -182,7 +183,7 @@ public sealed class MaintenanceOperationCoordinator
             catch (Exception ex)
             {
                 // 表示の購読先の失敗で操作リースや終了待ちを失わせない。
-                System.Diagnostics.Debug.WriteLine(ex);
+                LoggerBootstrap.Log.Error("操作状態の変更通知で購読先が例外を返しました", ex);
             }
         }
     }

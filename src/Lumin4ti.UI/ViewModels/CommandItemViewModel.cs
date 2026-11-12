@@ -169,8 +169,14 @@ public partial class CommandItemViewModel : ObservableObject
         OnPropertyChanged(nameof(HasChildren));
     }
 
+    /// <summary>
+    /// 親項目が子の操作を許しているか。親なし、または親の状態が既知かつ ON のときだけ true。
+    /// トグル・選択・一括設定の可否で同じ条件を使うため 1 か所にまとめる。
+    /// </summary>
+    private bool ParentAllowsOperation => Parent is null || (Parent.IsStateKnown && Parent.IsChecked);
+
     /// <summary>ドロップダウンを操作できるか (状態既知・非実行中・親が有効)。</summary>
-    public bool CanChoose => IsStateKnown && !IsRunning && (Parent is null || (Parent.IsStateKnown && Parent.IsChecked));
+    public bool CanChoose => IsStateKnown && !IsRunning && ParentAllowsOperation;
 
     /// <summary>直近に「実状態として確認できた」選択値 (適用できなかったときの戻し先)。</summary>
     private ChoiceOptionViewModel? _lastKnownChoice;
@@ -266,7 +272,7 @@ public partial class CommandItemViewModel : ObservableObject
     /// <summary>
     /// トグルを操作可能か。状態既知かつ実行中でなく (多重操作レース防止)、親が有効なときのみ。
     /// </summary>
-    public bool CanToggle => IsStateKnown && !IsRunning && (Parent is null || (Parent.IsStateKnown && Parent.IsChecked));
+    public bool CanToggle => IsStateKnown && !IsRunning && ParentAllowsOperation;
 
     /// <summary>実行中のアクションをキャンセルするための CTS (実行中のみ非 null)。</summary>
     private CancellationTokenSource? _cts;
@@ -589,8 +595,7 @@ public partial class CommandItemViewModel : ObservableObject
         ApplyBatchOffCommand.NotifyCanExecuteChanged();
     }
 
-    private bool CanApplyBatch() => IsBatchSetting && !IsRunning && _applyBatch is not null &&
-        (Parent is null || (Parent.IsStateKnown && Parent.IsChecked));
+    private bool CanApplyBatch() => IsBatchSetting && !IsRunning && _applyBatch is not null && ParentAllowsOperation;
 
     private Task ApplyBatchAsync(bool enabled) =>
         CanApplyBatch() ? _applyBatch!(this, enabled) : Task.CompletedTask;

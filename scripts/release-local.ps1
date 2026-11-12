@@ -1,4 +1,4 @@
-﻿# release-local.ps1 — ローカル署名付き Velopack リリース (Shisui テンプレートから横展開)
+# release-local.ps1 — ローカル署名付き Velopack リリース (Shisui テンプレートから横展開)
 #
 # SimplySign (Certum クラウド署名) は Desktop 接続 + スマホトークンが必要で
 # GitHub Actions からは署名できないため、リリースは本スクリプトでローカル実行する。
@@ -224,44 +224,6 @@ function Publish-R2Artifact {
     Send-ReleaseR2Object -File $File
 }
 
-function Wait-RemoteAsset {
-    param(
-        [System.IO.FileInfo]$File,
-        [string]$BaseUrl,
-        [int]$MaxAttempts = 18
-    )
-
-    $encodedName = [uri]::EscapeDataString($File.Name)
-    $assetUrl = "$BaseUrl/$encodedName"
-    $lastReason = '応答なし'
-
-    for ($attempt = 1; $attempt -le $MaxAttempts; $attempt++) {
-        try {
-            $requestUrl = "${assetUrl}?_=$([Guid]::NewGuid().ToString('N'))"
-            $response = Invoke-WebRequest -Method Head -Uri $requestUrl `
-                -Headers @{ 'Cache-Control' = 'no-cache' } -TimeoutSec 30
-            $contentLengths = @($response.Headers['Content-Length'])
-            $remoteLength = if ($contentLengths.Count -eq 1) { [long]$contentLengths[0] } else { -1 }
-            if ([int]$response.StatusCode -eq 200 -and $remoteLength -eq $File.Length) {
-                Write-Host "  ✅ $($File.Name): HTTP 200 / $remoteLength bytes (attempt $attempt)"
-                return
-            }
-
-            $lastReason = "HTTP $([int]$response.StatusCode) / Content-Length=$remoteLength (期待値 $($File.Length))"
-        }
-        catch {
-            $lastReason = $_.Exception.Message
-        }
-
-        if ($attempt -lt $MaxAttempts) {
-            Write-Host "  ⚠️ $($File.Name) をまだ取得確認できません (attempt $attempt / $MaxAttempts)、5 秒待機..."
-            Start-Sleep -Seconds 5
-        }
-    }
-
-    throw "公開 asset を取得確認できないため manifest を公開しません: $($File.Name) — $lastReason"
-}
-
 # ---- 0. プリフライト ----
 Write-Host '== プリフライト ==' -ForegroundColor Cyan
 
@@ -271,7 +233,7 @@ if (-not ${env:ProgramFiles(x86)}) { ${env:ProgramFiles(x86)} = 'C:\Program File
 $vsInstallerDir = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer'
 if ($env:PATH -notlike "*$vsInstallerDir*") { $env:PATH = "$env:PATH;$vsInstallerDir" }
 
-# vpk (dotnet tool) は .NET 9 ランタイム要求だがローカルは 10 のみ → ロールフォワード
+# vpk (dotnet tool) は .NET 9 ランタイム要求だが、ローカルに .NET 9 ランタイムが無い場合でも新しいメジャー (10 / 11) で動かすためロールフォワード
 $env:DOTNET_ROLL_FORWARD = 'Major'
 
 # XPath で取得 (member enumeration は Version を持たない PropertyGroup 混在時に StrictMode で throw する)
@@ -392,10 +354,10 @@ foreach ($signedArtifact in Get-ChildItem $ArtifactsDir -File | Where-Object { $
     Write-Host "  ✅ $($signedArtifact.Name): Valid ($($sig.SignerCertificate.Subject -replace ',.*$'))"
 }
 
-# ---- 2. R2 アップロード (asset → 取得検証 → manifest commit point) ----
+# ---- 2. R2 アップロード (asset → manifest commit point) ----
 $artifacts = @(Get-ChildItem $ArtifactsDir -File)
 $legacySetupFiles = @($artifacts | Where-Object { $_.Name -like '*-Setup.exe' })
-# PerUser Setup.exe は今後公開せず、MSIの伝播確認後にR2上の旧Setupも削除する。
+# PerUser Setup.exe は今後公開せず、MSIのアップロードと固定URLのパージの受付成功後にR2上の旧Setupも削除する。
 $publishArtifacts = @($artifacts | Where-Object { $_.Name -notlike '*-Setup.exe' })
 $msiFiles = @($publishArtifacts | Where-Object { $_.Extension -eq '.msi' })
 if ($msiFiles.Count -ne 1 -or $msiFiles[0].Name -ne 'Lumin4ti-win.msi') {
@@ -425,7 +387,6 @@ foreach ($msiFile in $msiFiles) {
 }
 $artifactByName = @{}
 foreach ($artifact in $artifacts) { $artifactByName[$artifact.Name] = $artifact }
-$referencedAssets = @{}
 foreach ($manifestFile in $manifestFiles) {
     $manifest = Get-Content $manifestFile.FullName -Raw | ConvertFrom-Json
     $assetsProperty = $manifest.PSObject.Properties['Assets']
@@ -446,7 +407,6 @@ foreach ($manifestFile in $manifestFiles) {
             throw "manifest とローカル asset の SHA256 が一致しません: $fileName"
         }
         Assert-ReleasePackage -PackagePath $assetFile.FullName -ExpectedVersion $version
-        $referencedAssets[$fileName] = $assetFile
     }
 }
 
@@ -508,16 +468,6 @@ foreach ($file in $preCommitFiles) {
 }
 Write-Host "✅ R2 asset アップロード完了: $uploaded ファイル"
 
-# releases.*.json が参照する不変 asset を公開 URL から取得でき、サイズも一致するまで
-# commit point は更新しない。途中失敗時は旧 manifest がそのまま有効なので更新経路を壊さない。
-Write-Host '== 公開 asset 取得検証 ==' -ForegroundColor Cyan
-foreach ($assetFile in @($referencedAssets.Values | Sort-Object Name)) {
-    Wait-RemoteAsset -File $assetFile -BaseUrl $BaseUrl
-}
-foreach ($msiFile in $msiFiles) {
-    Wait-RemoteAsset -File $msiFile -BaseUrl $BaseUrl
-}
-
 # SimpleWebSource が読む releases.{channel}.json を最後に公開し、ここをリリースの commit point とする。
 Write-Host '== manifest commit point 公開 ==' -ForegroundColor Cyan
 foreach ($manifestFile in @($metadataFiles + $manifestFiles)) {
@@ -535,19 +485,7 @@ $zoneName = ([uri]$BaseUrl).Host -replace '^[^.]+\.', ''   # <sub>.kagayoi.com �
 $zoneResp = Invoke-RestMethod -Uri "https://api.cloudflare.com/client/v4/zones?name=$zoneName" -Headers $cfHeaders -TimeoutSec 30
 if (-not $zoneResp.success -or @($zoneResp.result).Count -eq 0) { throw "Cloudflare zone '$zoneName' の取得に失敗しました" }
 $zoneId = $zoneResp.result[0].id
-$purgeUrls = @()
-$verificationClient = [Net.Http.HttpClient]::new()
-$verificationClient.Timeout = [TimeSpan]::FromMinutes(3)
-try {
-    foreach ($fixedArtifact in @($publishArtifacts | Where-Object { $_.Name -notlike '*.nupkg' })) {
-        $fixedUrl = "$BaseUrl/$([uri]::EscapeDataString($fixedArtifact.Name))"
-        $remoteBytes = $verificationClient.GetByteArrayAsync($fixedUrl).GetAwaiter().GetResult()
-        $remoteHash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($remoteBytes))
-        $localHash = (Get-FileHash -LiteralPath $fixedArtifact.FullName -Algorithm SHA256).Hash
-        if ($remoteHash -ne $localHash) { $purgeUrls += $fixedUrl }
-        else { Write-Host "  ✅ 最新配信の SHA256 一致: $($fixedArtifact.Name)" }
-    }
-} finally { $verificationClient.Dispose() }
+$purgeUrls = @($publishArtifacts | Where-Object { $_.Name -notlike '*.nupkg' } | ForEach-Object { "$BaseUrl/$([uri]::EscapeDataString($_.Name))" })
 if ($purgeUrls.Count -gt 0) {
     $purgeBody = [PSCustomObject]@{ files = $purgeUrls } | ConvertTo-Json -Compress
     $purgeResp = Invoke-RestMethod -Method Post -Uri "https://api.cloudflare.com/client/v4/zones/$zoneId/purge_cache" `
@@ -558,40 +496,7 @@ if ($purgeUrls.Count -gt 0) {
     Write-Host '  パージ対象なし'
 }
 
-# ---- 3. 配信確認 (manifest 完全一致リトライ方式) ----
-# 単純な HTTP 200 だと CDN/edge が古い manifest を返している間に cleanup が走り、旧 manifest を
-# 取得したクライアントが直後に消える .nupkg を取りに行って 404 する race がある。
-# ローカルアップロード済 manifest と完全一致するまでリトライしてから次へ進む。
-Write-Host '== 配信確認 (manifest 伝播待機) ==' -ForegroundColor Cyan
-foreach ($runtime in $Runtimes) {
-    $channel = $RuntimeMatrix[$runtime].Channel
-    $url = "$BaseUrl/releases.$channel.json"
-    $localManifest = Get-Content (Join-Path $ArtifactsDir "releases.$channel.json") -Raw |
-        ConvertFrom-Json | ConvertTo-Json -Depth 100 -Compress
-
-    $maxAttempts = 18
-    $matched = $false
-    for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
-        $resp = Invoke-WebRequest -Uri "${url}?_=$([Guid]::NewGuid().ToString('N'))" `
-            -Headers @{ 'Cache-Control' = 'no-cache' } -TimeoutSec 30
-        # R2 は text 系でない Content-Type で返すことがあり、その場合 .Content は byte[] になる
-        $raw = $resp.Content
-        if ($raw -is [byte[]]) { $raw = [System.Text.Encoding]::UTF8.GetString($raw) }
-        $remoteManifest = $raw | ConvertFrom-Json | ConvertTo-Json -Depth 100 -Compress
-        if ($localManifest -eq $remoteManifest) {
-            Write-Host "  ✅ $url がローカル manifest と一致 (attempt $attempt)"
-            $matched = $true
-            break
-        }
-        Write-Host "  ⚠️ remote manifest がまだ古い (attempt $attempt / $maxAttempts)、5 秒待機..."
-        Start-Sleep -Seconds 5
-    }
-    if (-not $matched) {
-        throw "remote manifest が $($maxAttempts * 5) 秒以内にローカルと一致しませんでした。race 回避のため cleanup を中止します: $url"
-    }
-}
-
-# ---- 4. 旧バージョン nupkg のクリーンアップ ----
+# ---- 3. 旧バージョン nupkg のクリーンアップ ----
 # 現世代と直前世代を必ず保持し、それ以前も grace period 内は残す。manifest 取得失敗や
 # last_modified 不明の object は削除せず、更新確認済みクライアントの取得 race を避ける。
 Write-Host '== 旧 nupkg クリーンアップ ==' -ForegroundColor Cyan
@@ -609,7 +514,7 @@ Write-Host "  保持対象 asset (現世代 + 直前世代): $($keep.Count) 件"
 $api = "https://api.cloudflare.com/client/v4/accounts/$AccountId/r2/buckets/$Bucket"
 $headers = @{ Authorization = "Bearer $($env:CLOUDFLARE_API_TOKEN)" }
 
-# MSIが配信済みになった後で、再びPerUser版を導入できないよう旧Setup.exeをR2から除去する。
+# MSIのアップロードと固定URLのパージの受付成功後に、再びPerUser版を導入できないよう旧Setup.exeをR2から除去する。
 foreach ($legacySetup in $legacySetupFiles) {
     $encoded = [uri]::EscapeDataString($legacySetup.Name)
     try {
@@ -704,4 +609,11 @@ if ($toDelete.Count -eq 0) {
     if ($failed -gt 0 -and $deleted -eq 0) { throw '旧 nupkg の削除がすべて失敗しました。API token の権限を確認してください。' }
 }
 
-Write-Host "`n🎉 リリース完了: v$version → $BaseUrl" -ForegroundColor Green
+# 公開自体は manifest commit point で確定済み。旧 nupkg 清掃の一部失敗は公開を巻き戻さないが、
+# 完了表示で「全工程成功」と誤認させないよう区別して伝える (部分失敗を成功と偽らない)。
+$cleanupFailedCount = if ($toDelete.Count -gt 0) { $failed } else { 0 }
+if ($cleanupFailedCount -gt 0) {
+    Write-Host "`n⚠️ リリース公開完了 (旧 nupkg の清掃で $cleanupFailedCount 件失敗): v$version → $BaseUrl" -ForegroundColor Yellow
+} else {
+    Write-Host "`n🎉 リリース完了: v$version → $BaseUrl" -ForegroundColor Green
+}

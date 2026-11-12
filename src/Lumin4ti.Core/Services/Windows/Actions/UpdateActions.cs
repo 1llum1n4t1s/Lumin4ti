@@ -11,8 +11,12 @@ namespace Lumin4ti.Core.Services.Windows.Actions;
 /// winget はパッケージマネージャー CLI そのものが正規の手段のため外部プロセスで実行し、
 /// 出力の要約は C# 側で行う。
 /// </summary>
-public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanceAction
+public sealed partial class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanceAction
 {
+    /// <summary>更新チャネル判定用の英字の連なり。ビルド時生成で毎回の解釈を省く (パターンは従来と同一)。</summary>
+    [GeneratedRegex("[A-Za-z]+")]
+    private static partial Regex AsciiLetterRun();
+
     internal const string SourceExportArguments = "source export winget --disable-interactivity";
     internal const string ListUpgradesArguments =
         "list --upgrade-available --include-unknown --disable-interactivity --source winget --accept-source-agreements";
@@ -324,7 +328,7 @@ public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanc
     {
         var channels = new HashSet<string>(StringComparer.Ordinal);
         // 記号や数字に隣接する「(Nightly)」「Beta2」もチャネルとして扱う。
-        foreach (Match match in Regex.Matches(name, "[A-Za-z]+"))
+        foreach (Match match in AsciiLetterRun().Matches(name))
         {
             var token = match.Value.ToLowerInvariant();
             if (token == "insiders")
@@ -406,14 +410,14 @@ public sealed class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanc
     private static string SanitizeDiagnosticLine(string line)
     {
         // ANSI制御シーケンスとログ表示を崩す制御文字を除き、1行あたりの記録量を制限する。
-        var withoutAnsi = Regex.Replace(line, "\\x1B\\[[0-?]*[ -/]*[@-~]", string.Empty);
+        var withoutAnsi = CommandFailureDiagnostic.AnsiEscapeSequence().Replace(line, string.Empty);
         var sanitized = new StringBuilder(withoutAnsi.Length);
         foreach (var character in withoutAnsi)
         {
             sanitized.Append(char.IsControl(character) ? ' ' : character);
         }
 
-        var normalized = Regex.Replace(sanitized.ToString(), "\\s+", " ").Trim();
+        var normalized = CommandFailureDiagnostic.WhitespaceRun().Replace(sanitized.ToString(), " ").Trim();
         return normalized.Length <= MaxDiagnosticLineLength
             ? normalized
             : normalized[..MaxDiagnosticLineLength] + "…";
@@ -733,13 +737,13 @@ public sealed class DefenderResetAction : IMaintenanceAction
                 "他社製アンチウイルス使用中でも Defender がパッシブモードでサービスを利用できる環境なら実行できます。");
         }
 
-        var encodedScript = Convert.ToBase64String(Encoding.Unicode.GetBytes(BuildResetScript()));
+        var arguments = PowerShellArguments.EncodedCommand(BuildResetScript());
         // 複数設定を順次変更するため、開始前だけキャンセルを反映し、開始後は確認まで継続する。
         ct.ThrowIfCancellationRequested();
 
         var result = await _executor.RunAsync(
             "powershell.exe",
-            $"-NoProfile -NonInteractive -EncodedCommand {encodedScript}",
+            arguments,
             // 除外を順番に削除するスクリプトを途中で kill すると部分リセットになる。
             // 開始前のキャンセルだけを受け付け、開始後は検証まで一体で完了させる。
             CancellationToken.None);
@@ -778,8 +782,7 @@ public sealed class DefenderResetAction : IMaintenanceAction
                 exit 1
             }
             """;
-        var encodedScript = Convert.ToBase64String(Encoding.Unicode.GetBytes(script));
-        return $"-NoProfile -NonInteractive -EncodedCommand {encodedScript}";
+        return PowerShellArguments.EncodedCommand(script);
     }
 
     internal static bool TryParseAvailability(
@@ -1070,10 +1073,9 @@ public sealed class SecurityAppResetAction(ICommandExecutor executor) : IMainten
 
     public async Task<MaintenanceActionResult> ExecuteAsync(CancellationToken ct = default)
     {
-        var encodedScript = Convert.ToBase64String(Encoding.Unicode.GetBytes(BuildResetScript()));
         var result = await executor.RunAsync(
             "powershell.exe",
-            $"-NoProfile -NonInteractive -EncodedCommand {encodedScript}",
+            PowerShellArguments.EncodedCommand(BuildResetScript()),
             ct);
 
         if (result.Success)

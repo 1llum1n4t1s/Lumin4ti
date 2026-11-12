@@ -95,10 +95,7 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
 
     internal UnelevatedCommandExecutor(TimeSpan timeout)
     {
-        if (timeout <= TimeSpan.Zero)
-        {
-            throw new ArgumentOutOfRangeException(nameof(timeout));
-        }
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(timeout, TimeSpan.Zero);
 
         _timeout = timeout;
     }
@@ -386,10 +383,7 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
                 throw NewWin32Exception("medium process の終了コードを取得できませんでした");
             }
 
-            if (ct.IsCancellationRequested)
-            {
-                throw new OperationCanceledException(ct);
-            }
+            ct.ThrowIfCancellationRequested();
 
             return new(unchecked((int)exitCode), executionCts.IsCancellationRequested);
         }

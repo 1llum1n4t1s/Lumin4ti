@@ -283,8 +283,27 @@ public sealed class FileCleanupTests
             restored = file.GetAccessControl(AccessControlSections.Access);
         }
 
-        Assert.AreEqual(new RawSecurityDescriptor(original, 0).GetSddlForm(AccessControlSections.Access),
-            restored.GetSecurityDescriptorSddlForm(AccessControlSections.Access), $"テスト用 DACL の復元失敗: {entry.FullName}");
+        Assert.AreEqual(WithoutAutoInheritFlags(new RawSecurityDescriptor(original, 0).GetSddlForm(AccessControlSections.Access)),
+            WithoutAutoInheritFlags(restored.GetSecurityDescriptorSddlForm(AccessControlSections.Access)), $"テスト用 DACL の復元失敗: {entry.FullName}");
+    }
+
+    /// <summary>
+    /// DACL の SDDL から自動継承の制御フラグ (AI / AR) だけを除く。
+    /// SetAccessControl は継承を再計算して AI を付け直すため、元 DACL に AI が無い環境
+    /// (GitHub Actions の runner の一時フォルダー等) では ACE が同一でも "D:(" と "D:AI(" で不一致になる。
+    /// 保護フラグ (P) と ACE 列はそのまま比較し、復元の検出能力は落とさない。
+    /// </summary>
+    private static string WithoutAutoInheritFlags(string? sddl)
+    {
+        ArgumentNullException.ThrowIfNull(sddl);
+        var start = sddl.IndexOf("D:", StringComparison.Ordinal);
+        if (start < 0) return sddl;
+        var flagsStart = start + 2;
+        var aceStart = sddl.IndexOf('(', flagsStart);
+        var flagsEnd = aceStart < 0 ? sddl.Length : aceStart;
+        var flags = sddl[flagsStart..flagsEnd].Replace("AI", string.Empty, StringComparison.Ordinal)
+            .Replace("AR", string.Empty, StringComparison.Ordinal);
+        return string.Concat(sddl.AsSpan(0, flagsStart), flags, sddl.AsSpan(flagsEnd));
     }
 
     [TestMethod]

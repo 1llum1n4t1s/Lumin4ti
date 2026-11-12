@@ -137,7 +137,7 @@ public static class LoggerBootstrap
 
     private sealed class DetachableProvider(ILoggerProvider provider) : ILoggerProvider
     {
-        private readonly object _gate = new();
+        private readonly Lock _gate = new();
         private ILoggerProvider? _provider = provider;
 
         public ILogger CreateLogger(string categoryName)

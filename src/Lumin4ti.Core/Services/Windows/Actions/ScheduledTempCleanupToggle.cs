@@ -385,12 +385,6 @@ public sealed class ScheduledTempCleanupToggle(
     /// schtasks は Principal と LogonTrigger の UserId を SID / アカウント名という異なる表記へ
     /// 正規化する場合があるため、実効ユーザーの両表記と照合する。
     /// </summary>
-    internal static bool IsCurrentTaskDefinition(string xml, string exePath)
-    {
-        var currentUser = GetCurrentUserIdentity();
-        return IsCurrentTaskDefinition(xml, exePath, currentUser.AccountName, currentUser.Sid);
-    }
-
     internal static bool IsCurrentTaskDefinition(
         string xml,
         string exePath,

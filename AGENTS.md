@@ -15,10 +15,10 @@ dotnet test Lumin4ti.slnx            # 全テスト (MSTest)
 dotnet test Lumin4ti.slnx --filter "FullyQualifiedName~RegistryToggleTests"
 dotnet test Lumin4ti.slnx --filter "FullyQualifiedName~UwpBackgroundToggleTests"
 # 実行 (通常起動は UAC 昇格が入る):
-./src/Lumin4ti.UI/bin/Debug/net10.0-windows10.0.20348.0/Lumin4ti.UI.exe
+./src/Lumin4ti.UI/bin/Debug/net11.0-windows10.0.20348.0/Lumin4ti.UI.exe
 ```
 
-- TFM は `net10.0-windows10.0.20348.0` ([Directory.Build.props](Directory.Build.props))。UWP パッケージ列挙 (WinRT `PackageManager`) のため Windows SDK 付き。
+- TFM は `net11.0-windows10.0.20348.0` ([Directory.Build.props](Directory.Build.props))。UWP パッケージ列挙 (WinRT `PackageManager`) のため Windows SDK 付き。
 - `.github/workflows/dependency-validation.yml` は Dependabot PR と手動実行を対象に Windows 上で restore・Release build・test を行う。通常の変更後もローカルの `dotnet build` (0 warnings) と `dotnet test` を必ず両方通す。
 - **バージョン (`Directory.Build.props` の `<Version>`) は `/vava` 経由でのみ更新**。コード修正のついでに触らない。
 - 復元・サービス補償・終了時排他・状態表示などの操作フローを変更したら、`pwsh -NoProfile -File scripts/verify-review-fixes.ps1` も実行する。対象ケースと再現方法は [WORKFLOWS.md](scripts/verification/WORKFLOWS.md) を参照し、成果物 `local-release/review-fixes-verification.json` を保持する。検証の境界は [DESIGN.md](DESIGN.md#主要コンポーネント) に記載し、実 GUI の E2E 検証と区別する。
@@ -128,12 +128,12 @@ ON/OFF設定切り替えとDefenderの既定設定へのリセットは永続バ
 - 現行の配布契約は [DESIGN.md](DESIGN.md#更新と配布) に記載する。`win-x64` のみを対象とし、restore / publish の RID と `vpk pack --runtime` を一致させる。`--channel win` は維持し、runtime と channel を混同しない。PerUser `Setup.exe` は公開しない。
 - 不具合調査、全体レビュー、セキュリティレビュー、および「見つかったものを全部直してよい」という許可は、この現行契約内の修正に適用する。レビューで配布や昇格の設計リスクを発見しても、それを理由に対応スコープを配布方式の変更へ広げない。
 - MSI / MSIX 等へのインストーラー形式変更、Velopack の置換、per-user / machine-wide のインストール範囲変更、NativeAOT 等のパッケージング方式変更、更新元・channel・署名方式の変更は、ユーザーが対象を個別に明示した場合だけ実装する。明示がない場合は現行契約を維持し、設計案と影響だけを報告する。
-- `dotnet publish` によるローカル検証は通常の検証に含めてよい。`vpk pack`、署名、R2 upload、cache purge、配信確認は、リリースまたは `/vava` が明示された場合だけ実行する。
+- `dotnet publish` によるローカル検証は通常の検証に含めてよい。`vpk pack`、署名、R2 upload、cache purge は、リリースまたは `/vava` が明示された場合だけ実行する。公開後の配信内容取得・ハッシュ照合・伝播待ちは行わず、公開前検証と API の受付成功を確認する。
 
-- 実行は `pwsh scripts/release-local.ps1` (build + PerMachine MSI生成 + 署名 + R2 アップロード + キャッシュパージ + 配信確認 + 旧 nupkg 掃除を一括)。`-SkipUpload` では署名後の公開前検証まで行う。検証内容は [DESIGN.md のリリース成果物と公開順序](DESIGN.md#リリース成果物と公開順序) を参照し、検証失敗時は公開へ進めない。
+- 実行は `pwsh scripts/release-local.ps1` (build + PerMachine MSI生成 + 署名 + R2 アップロード + キャッシュパージ + 旧 nupkg 掃除を一括)。`-SkipUpload` では署名後の公開前検証まで行う。検証内容は [DESIGN.md のリリース成果物と公開順序](DESIGN.md#リリース成果物と公開順序) を参照し、検証失敗時は公開へ進めない。
 - [set-msi-program-files-location.ps1](scripts/set-msi-program-files-location.ps1) による Program Files 配置補正と、補正後 MSI の再署名・署名検証を省略しない。
 - 移行コードを変更するときは [DESIGN.md の旧配置からの移行](DESIGN.md#旧配置からの移行) の信頼確認・回収範囲・期限を維持し、`WindowsPerMachineMigrationTests` と操作フロー検証を通す。旧 `Update.exe` を実行せず、設定・ログ・復元原本と任意のカスタム配置を回収対象へ広げない。
-- リリース準備の清掃は今回再生成する `local-release/artifacts` と対象 RID の `publish-*` に限定し、検証記録を保持する。公開順序と配信確認は [DESIGN.md](DESIGN.md#リリース成果物と公開順序) に従う。
+- リリース準備の清掃は今回再生成する `local-release/artifacts` と対象 RID の `publish-*` に限定し、検証記録を保持する。公開順序と受付成功の確認は [DESIGN.md](DESIGN.md#リリース成果物と公開順序) に従う。
 - 前提: SimplySign Desktop がログイン済み (`Cert:\CurrentUser\My` に `CN=Open Source Developer Yuichiro Shinozaki` が見える) / `<Version>` が `/vava` 済み / `D:\Dev\Secret\secrets.json` に `cloudflare.api_token`。
 - 製品ページの配信は `../vps-web/deploy/deploy-lp.ps1` を使う。配信先は [DESIGN.md](DESIGN.md#製品ページの配信先) を参照し、公開ホスト・更新ファイルの既存経路を維持する。
 - R2 バケット `lumin4ti-updates` (account `10901bfadbf1005164774a7350082985` / zone `kagayoi.com`)。`local-release/` は `.gitignore` 済み。

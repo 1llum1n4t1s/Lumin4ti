@@ -51,10 +51,7 @@ public class ProcessCommandExecutor : ICommandExecutor
 
     internal ProcessCommandExecutor(TimeSpan commandTimeout, TimeSpan? outputDrainGrace = null)
     {
-        if (commandTimeout <= TimeSpan.Zero)
-        {
-            throw new ArgumentOutOfRangeException(nameof(commandTimeout));
-        }
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(commandTimeout, TimeSpan.Zero);
 
         _commandTimeout = commandTimeout;
         _outputDrainGrace = outputDrainGrace ?? DefaultOutputDrainGrace;
@@ -112,7 +109,7 @@ public class ProcessCommandExecutor : ICommandExecutor
 
             // 無出力のまま長時間かかるコマンド (WU 待ちの DISM 等) でも生存が分かるようにする。
             using var heartbeatCts = CancellationTokenSource.CreateLinkedTokenSource(executionToken);
-            var heartbeat = ReportHeartbeatAsync(gatedProgress, commandLine, heartbeatCts.Token);
+            var heartbeat = ReportHeartbeatAsync(gatedProgress, heartbeatCts.Token);
             try
             {
                 await process.WaitForExitAsync(executionToken).ConfigureAwait(false);
@@ -174,7 +171,6 @@ public class ProcessCommandExecutor : ICommandExecutor
     /// </summary>
     private static async Task ReportHeartbeatAsync(
         IProgress<string>? progress,
-        string commandLine,
         CancellationToken ct)
     {
         if (progress is null)

@@ -5,7 +5,7 @@ namespace Lumin4ti.Core.Services;
 
 public sealed class SettingsService : ISettingsService
 {
-    private readonly object _saveQueueLock = new();
+    private readonly Lock _saveQueueLock = new();
     private readonly string _appDataDirectory;
     private readonly string _settingsFilePath;
     private Task _pendingSave = Task.CompletedTask;

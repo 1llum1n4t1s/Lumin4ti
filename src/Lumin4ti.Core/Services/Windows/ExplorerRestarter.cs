@@ -35,6 +35,12 @@ public static class ExplorerRestarter
         {
             try
             {
+                // 他セッションの Explorer はどのみち対象外。MainModule (モジュール列挙) を読む前に除外する。
+                if (process.SessionId != currentSessionId)
+                {
+                    continue;
+                }
+
                 var imagePath = process.MainModule?.FileName;
                 if (!IsCurrentSessionExplorer(
                         process.SessionId,
@@ -106,7 +112,9 @@ public static class ExplorerRestarter
         {
             try
             {
+                // 200ms ごとに再列挙するため、停止済み・他セッションを MainModule の読取より先に除外する。
                 if (!stoppedProcessIds.Contains(process.Id) &&
+                    process.SessionId == currentSessionId &&
                     IsCurrentSessionExplorer(
                         process.SessionId,
                         process.MainModule?.FileName,

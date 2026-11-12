@@ -20,6 +20,11 @@ internal sealed class RebootCleanupTask(string helperPath) : IRebootCleanupTask
     internal const string SecurityDescriptor = "O:BAG:BAD:P(A;;FA;;;BA)(A;;FA;;;SY)";
     private const string Source = "Lumin4ti.RebootCleanup.v1";
 
+    // ITaskFolder::RegisterTask の TASK_CREATION フラグ (taskschd.h)。値は従来の数値リテラルと同一。
+    private const int TaskCreate = 0x2;                 // TASK_CREATE: 新規登録
+    private const int TaskUpdate = 0x4;                 // TASK_UPDATE: 既存定義の更新
+    private const int TaskDontAddPrincipalAce = 0x10;   // TASK_DONT_ADD_PRINCIPAL_ACE: Principal への ACE を自動付与しない (DACL は SecurityDescriptor で明示する)
+
     internal static string TaskName(string sid)
     {
         RebootCleanupTargets.ValidateSid(sid);
@@ -42,7 +47,7 @@ internal sealed class RebootCleanupTask(string helperPath) : IRebootCleanupTask
                 catch (COMException ex) when (IsMissing(ex)) { }
                 if (existing is not null) ValidateTask(existing, sid);
                 var rawFolder = (ITaskFolderRaw)folder;
-                var result = rawFolder.RegisterTask(name, BuildXml(helperPath, expires, sid), (existing is null ? 2 : 4) | 16,
+                var result = rawFolder.RegisterTask(name, BuildXml(helperPath, expires, sid), (existing is null ? TaskCreate : TaskUpdate) | TaskDontAddPrincipalAce,
                     sid, null, 2, SecurityDescriptor, out registered);
                 CompleteRegistration(result, existing is not null,
                     () => ValidateTask(registered ?? throw new SecurityException("登録したタスクを取得できません。"), sid),

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <!-- Windows 専用アプリ。UWP パッケージ列挙 (WinRT PackageManager) を使うため
          RealTimeTranslator と同じ Windows SDK 付き TFM を指定する。 -->
-    <TargetFramework>net10.0-windows10.0.20348.0</TargetFramework>
+    <TargetFramework>net11.0-windows10.0.20348.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>

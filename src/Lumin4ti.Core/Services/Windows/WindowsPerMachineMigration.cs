@@ -734,7 +734,12 @@ public static class WindowsPerMachineMigration
     {
         Directory.CreateDirectory(AppPaths.AppDataDirectory);
         var pending = new PendingMigration(legacyRoot, parentProcessId, installedExecutable);
-        File.WriteAllText(PendingFilePath, Lumin4tiJson.Serialize(pending));
+        // 書込み途中の中断で壊れた JSON が残ると ReadPendingMigration が null を返し、
+        // 待機対象の旧プロセス ID と導入先実行ファイルの記録が失われる。
+        // 設定保存 (SettingsService) と同じく一時ファイルへ書き切ってから置き換える。
+        var tempPath = PendingFilePath + ".tmp";
+        File.WriteAllText(tempPath, Lumin4tiJson.Serialize(pending));
+        File.Move(tempPath, PendingFilePath, overwrite: true);
         if (installedExecutable is not null)
         {
             RegisterCleanupRunOnce(installedExecutable);
@@ -837,6 +842,8 @@ public static class WindowsPerMachineMigration
     private static void ClearPendingMigration()
     {
         DeleteIfExists(PendingFilePath);
+        // 書込みと置換の間で中断した場合に残る一時ファイルも、移行完了時に回収する。
+        DeleteIfExists(PendingFilePath + ".tmp");
         RemoveCleanupRunOnce();
     }
 
