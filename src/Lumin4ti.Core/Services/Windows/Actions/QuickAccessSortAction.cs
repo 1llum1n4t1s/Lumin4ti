@@ -39,9 +39,10 @@ public sealed class QuickAccessSortAction : IMaintenanceAction
         $ErrorActionPreference = 'Stop'
         $quickAccessNamespace = 'shell:::{679f85cb-0220-4080-b29b-5540cc05aab6}'
         $result = [ordered]@{
-            SchemaVersion = 2
+            SchemaVersion = 3
             Status = 'error'
             PinnedCount = 0
+            PreservedPaths = @()
             SkipReason = $null
             BackupPath = $null
             BackupFailed = $false
@@ -80,6 +81,28 @@ public sealed class QuickAccessSortAction : IMaintenanceAction
                 }
             }
             return $null
+        }
+
+        # ピン留め済みの項目は「外す」verb しか持たないため、pin verb の有無では判定できない。
+        # 再ピン留めに必要な Shell 名前空間を開けるか (ドライブ削除・アンインストール済みの
+        # クラウドドライブ等ではない か) を、変更前にここで判定する。
+        function Test-FolderAvailable($shell, [string]$path) {
+            try {
+                $folder = $shell.NameSpace($path)
+                return ($null -ne $folder -and $null -ne $folder.Self)
+            }
+            catch {
+                return $false
+            }
+        }
+
+        function Test-PathInSet([string]$path, $paths) {
+            foreach ($candidate in @($paths)) {
+                if ([string]::Equals([string]$candidate, $path, [StringComparison]::OrdinalIgnoreCase)) {
+                    return $true
+                }
+            }
+            return $false
         }
 
         function Get-PinnedItems($shell) {
@@ -316,9 +339,11 @@ public sealed class QuickAccessSortAction : IMaintenanceAction
             }
         }
 
-        function Remove-AllPinned($shell) {
+        # $keepPaths に含まれる項目 (再ピン留めできない項目) は外さずに位置ごと残す。
+        # 外すと二度と付け直せず、利用者のピン留めを失うため。
+        function Remove-AllPinned($shell, [string[]]$keepPaths) {
             for ($iteration = 0; $iteration -lt 250; $iteration++) {
-                $remaining = @(Get-PinnedPaths $shell)
+                $remaining = @(Get-PinnedPaths $shell | Where-Object { -not (Test-PathInSet $_ $keepPaths) })
                 if ($remaining.Count -eq 0) { return }
 
                 $namespace = $shell.NameSpace($quickAccessNamespace)
@@ -328,6 +353,7 @@ public sealed class QuickAccessSortAction : IMaintenanceAction
 
                 $unpinVerb = $null
                 foreach ($item in @($namespace.Items())) {
+                    if (Test-PathInSet ([string]$item.Path) $keepPaths) { continue }
                     $unpinVerb = Find-QuickAccessVerb -Verbs ($item.Verbs()) -WantUnpin $true
                     if ($null -ne $unpinVerb) { break }
                 }
@@ -339,7 +365,7 @@ public sealed class QuickAccessSortAction : IMaintenanceAction
                 Start-Sleep -Milliseconds 150
             }
 
-            if (@(Get-PinnedPaths $shell).Count -ne 0) {
+            if (@(Get-PinnedPaths $shell | Where-Object { -not (Test-PathInSet $_ $keepPaths) }).Count -ne 0) {
                 throw 'ピン留め解除が安全上限の250回以内に完了しませんでした'
             }
         }
@@ -391,12 +417,18 @@ public sealed class QuickAccessSortAction : IMaintenanceAction
             $actual = @(Get-PinnedPaths $verificationShell)
             if (-not (Test-PathSequence $actual $originalPaths)) {
                 Add-Warning 'バックアップの反映をShell verbで同期してから再検証します'
-                Remove-AllPinned $shell
+                # 開けない項目は付け直せないため残し、開ける項目だけを元の順序で付け直す。
+                # Shell verb での中間状態は「残した項目 + 付け直した項目」になり、
+                # 元の並びは直後のバックアップ再適用と最終検証で確定させる。
+                $unavailable = @($originalPaths | Where-Object { -not (Test-FolderAvailable $shell $_) })
+                $repinPaths = @($originalPaths | Where-Object { -not (Test-PathInSet $_ $unavailable) })
+                Remove-AllPinned $shell $unavailable
                 Start-Sleep -Milliseconds 600
-                Add-PinnedPaths $shell $originalPaths $true
+                $intermediateExpected = @(Get-PinnedPaths $shell) + $repinPaths
+                Add-PinnedPaths $shell $repinPaths $true
                 Start-Sleep -Milliseconds 600
                 $actual = @(Get-PinnedPaths $shell)
-                if (-not (Test-PathSequence $actual $originalPaths)) {
+                if (-not (Test-PathSequence $actual $intermediateExpected)) {
                     throw 'Shell verbによる元のピン留め状態の復元検証に失敗しました'
                 }
 
@@ -470,17 +502,30 @@ public sealed class QuickAccessSortAction : IMaintenanceAction
             if ($pinned.Count -gt 250) {
                 throw 'ピン留め件数が安全上限の250件を超えています'
             }
-            if ($pinned.Count -le 1) {
+
+            # 削除済みドライブ・アンインストール済みクラウドドライブ等を指すピン留めは
+            # 外すと付け直せない。自動で消すと一時的に外したUSB等の利用者データも失うため、
+            # 外さずに元の相対順のまま残し、開ける項目だけを並べ替える。
+            $preserved = @($pinnedItems |
+                Where-Object { -not (Test-FolderAvailable $shell ([string]$_.Path)) } |
+                ForEach-Object { [string]$_.Path })
+            $result.PreservedPaths = @($preserved)
+            $movableItems = @($pinnedItems | Where-Object { -not (Test-PathInSet ([string]$_.Path) $preserved) })
+            if ($movableItems.Count -le 1) {
                 $result.SkipReason = 'single'
                 return
             }
 
-            $sorted = @($pinnedItems |
+            $sorted = @($movableItems |
                 Sort-Object @{ Expression = { [string]$_.Path }; Ascending = $true } |
                 ForEach-Object { [string]$_.Path })
+            # 付け直した項目は末尾へ追加されるため、到達可能な並びは
+            # 「残した項目 (元の相対順) + 並べ替えた項目」だけになる。
+            # スキップ判定と変更後の実状態検証は同じこの並びを基準にする。
+            $expected = @($preserved) + @($sorted)
             $alreadySorted = $true
             for ($index = 0; $index -lt $pinned.Count; $index++) {
-                if (-not [string]::Equals($pinned[$index], $sorted[$index], [StringComparison]::Ordinal)) {
+                if (-not [string]::Equals($pinned[$index], $expected[$index], [StringComparison]::Ordinal)) {
                     $alreadySorted = $false
                     break
                 }
@@ -504,20 +549,20 @@ public sealed class QuickAccessSortAction : IMaintenanceAction
             Save-PendingJournal $journalPath $jumpList $backupPath $backupHash $pinned
             try {
                 $result.MutationStarted = $true
-                Remove-AllPinned $shell
+                Remove-AllPinned $shell $preserved
                 Start-Sleep -Milliseconds 600
                 Add-PinnedPaths $shell $sorted $false
                 Start-Sleep -Milliseconds 600
 
                 $actual = @(Get-PinnedPaths $shell)
-                if (-not (Test-PathSequence $actual $sorted)) {
+                if (-not (Test-PathSequence $actual $expected)) {
                     foreach ($folderPath in $sorted) {
                         Add-FailedPath $folderPath
                     }
                     throw '並べ替え後の実際のピン留め順序が期待値と一致しません'
                 }
 
-                $result.SuccessCount = $pinned.Count
+                $result.SuccessCount = $sorted.Count
                 $result.VerificationSucceeded = $true
                 Remove-PendingJournal $journalPath
             }
@@ -631,15 +676,53 @@ public sealed class QuickAccessSortAction : IMaintenanceAction
         {
             $"  - 検出: ピン留め {result.PinnedCount} 件",
         };
+
+        // 開けないピン留めを残した場合は「想定内の一部未処理」として Partial で伝える。
+        // 自動では外さないため、利用者が不要と判断したら手動で外せるようパスを示す。
+        var hasPreserved = result.PreservedPaths.Length > 0;
+        void AddPreservedLines()
+        {
+            foreach (var path in result.PreservedPaths.Take(20))
+            {
+                lines.Add($"  - 開けないため外さずに先頭へ残しました: {Sanitize(path)}");
+            }
+
+            if (result.PreservedPaths.Length > 20)
+            {
+                lines.Add($"  - ほか {result.PreservedPaths.Length - 20} 件も外さずに残しました");
+            }
+
+            lines.Add("  - ドライブやフォルダが既に存在しない場合は、エクスプローラーでピン留めを外してください");
+        }
+
+        if (hasPreserved)
+        {
+            LoggerBootstrap.Log.Warn(
+                $"{Id}: 開けないピン留め {result.PreservedPaths.Length} 件を外さずに残しました: " +
+                string.Join(", ", result.PreservedPaths.Take(20).Select(Sanitize)));
+        }
+
         if (result.SkipReason == "single")
         {
-            lines.Add("  - 対象が1件以下のためスキップ");
+            lines.Add("  - 並べ替えできる対象が1件以下のためスキップ");
+            if (hasPreserved)
+            {
+                AddPreservedLines();
+                return MaintenanceActionResult.Partial(lines);
+            }
+
             return MaintenanceActionResult.Ok(lines);
         }
 
         if (result.SkipReason == "sorted")
         {
             lines.Add("  - 既に昇順のためスキップ");
+            if (hasPreserved)
+            {
+                AddPreservedLines();
+                return MaintenanceActionResult.Partial(lines);
+            }
+
             return MaintenanceActionResult.Ok(lines);
         }
 
@@ -669,6 +752,12 @@ public sealed class QuickAccessSortAction : IMaintenanceAction
         }
 
         LoggerBootstrap.Log.Info($"{Id}: 並び替えと実状態検証に成功 {result.SuccessCount} 件");
+        if (hasPreserved)
+        {
+            AddPreservedLines();
+            return MaintenanceActionResult.Partial(lines);
+        }
+
         return MaintenanceActionResult.Ok(lines);
     }
 
@@ -699,10 +788,13 @@ public sealed class QuickAccessSortAction : IMaintenanceAction
         {
             result = Lumin4tiJson.Deserialize<QuickAccessScriptResult>(json) ??
                 throw new JsonException("結果 JSON が null です");
-            if (result.SchemaVersion != 2 ||
+            if (result.SchemaVersion != 3 ||
                 result.Status is not ("ok" or "error") ||
                 result.PinnedCount is < 0 or > 10000 ||
                 result.SuccessCount is < 0 or > 10000 ||
+                result.PreservedPaths is null ||
+                result.PreservedPaths.Length > result.PinnedCount ||
+                result.PreservedPaths.Any(value => !IsBoundedText(value, 32767)) ||
                 result.FailedPaths is null ||
                 result.UnrecoveredPaths is null ||
                 result.Warnings is null ||
@@ -774,7 +866,7 @@ public sealed class QuickAccessSortAction : IMaintenanceAction
                     result.RecoveryAttempted ||
                     result.RestoredFromBackup ||
                     !result.VerificationSucceeded ||
-                    result.SuccessCount != result.PinnedCount ||
+                    result.SuccessCount + result.PreservedPaths.Length != result.PinnedCount ||
                     result.FailedPaths.Length != 0 ||
                     result.UnrecoveredPaths.Length != 0)
                 {
@@ -843,6 +935,11 @@ internal sealed class QuickAccessScriptResult
     public string? Status { get; set; }
 
     public int PinnedCount { get; set; }
+
+    /// <summary>
+    /// 開けない (付け直せない) ため外さずに残したピン留めのパス。元の相対順で先頭に残る。
+    /// </summary>
+    public string[] PreservedPaths { get; set; } = [];
 
     public string? SkipReason { get; set; }
 

@@ -1,3 +1,4 @@
+using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services;
 using Lumin4ti.Core.Services.Windows.Actions;
 
@@ -70,11 +71,111 @@ public sealed class QuickAccessVerbTests
     }
 
     [TestMethod]
-    public void 正常なmedium結果を解析できる()
+    public void 開けないピン留めは外さずに残し残りだけを並べ替える()
+    {
+        var script = QuickAccessSortAction.PowerShellScript;
+
+        // 再ピン留めできるかは pin verb ではなく Shell 名前空間を開けるかで判定する
+        // (ピン留め済み項目は「外す」verb しか持たないため)。
+        StringAssert.Contains(script, "function Test-FolderAvailable($shell, [string]$path)");
+        StringAssert.Contains(script, "Where-Object { -not (Test-FolderAvailable $shell ([string]$_.Path)) }");
+        // 開けない項目は解除対象から除外し、復元の Shell verb 経路でも外さない。
+        StringAssert.Contains(script, "Remove-AllPinned $shell $preserved");
+        StringAssert.Contains(script, "Remove-AllPinned $shell $unavailable");
+        Assert.IsFalse(System.Text.RegularExpressions.Regex.IsMatch(
+            script,
+            @"Remove-AllPinned \$shell\s*$",
+            System.Text.RegularExpressions.RegexOptions.Multiline));
+        // スキップ判定と実状態検証は「残した項目 + 並べ替えた項目」を共通の期待値にする。
+        StringAssert.Contains(script, "$expected = @($preserved) + @($sorted)");
+        StringAssert.Contains(script, "$expected[$index]");
+        StringAssert.Contains(script, "Test-PathSequence $actual $expected");
+        // 開けない項目の判定は backup・journal・変更より前に行う。
+        var classified = script.IndexOf("$result.PreservedPaths = @($preserved)", StringComparison.Ordinal);
+        var backup = script.IndexOf("$backupHash = New-VerifiedBackup", StringComparison.Ordinal);
+        Assert.IsTrue(classified >= 0 && backup > classified);
+    }
+
+    [TestMethod]
+    public void 開けない項目を残した成功結果を解析できる()
+    {
+        const string json =
+            """
+            {"SchemaVersion":3,"Status":"ok","PinnedCount":3,"PreservedPaths":["G:\\マイドライブ"],"SkipReason":null,"BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":false,"RestoredFromBackup":false,"VerificationSucceeded":true,"SuccessCount":2,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
+            """;
+
+        Assert.IsTrue(QuickAccessSortAction.TryParseScriptResult(json, out var result, out var failure), failure);
+        Assert.AreEqual(2, result.SuccessCount);
+        CollectionAssert.AreEqual(new[] { @"G:\マイドライブ" }, result.PreservedPaths);
+    }
+
+    [TestMethod]
+    public void 残した項目と成功件数が全件と一致しない成功結果を拒否する()
+    {
+        const string json =
+            """
+            {"SchemaVersion":3,"Status":"ok","PinnedCount":3,"PreservedPaths":["G:\\マイドライブ"],"SkipReason":null,"BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":false,"RestoredFromBackup":false,"VerificationSucceeded":true,"SuccessCount":3,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
+            """;
+
+        Assert.IsFalse(QuickAccessSortAction.TryParseScriptResult(json, out _, out var failure));
+        StringAssert.Contains(failure, "成功結果");
+    }
+
+    [TestMethod]
+    public void 旧schemaの結果を拒否する()
     {
         const string json =
             """
             {"SchemaVersion":2,"Status":"ok","PinnedCount":3,"SkipReason":null,"BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":false,"RestoredFromBackup":false,"VerificationSucceeded":true,"SuccessCount":3,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
+            """;
+
+        Assert.IsFalse(QuickAccessSortAction.TryParseScriptResult(json, out _, out _));
+    }
+
+    [TestMethod]
+    public async Task 開けない項目を残して並べ替えた場合は部分成功として残した項目を示す()
+    {
+        var action = new QuickAccessSortAction(new RecordingExecutor((_, _) => Task.FromResult(
+            new UnelevatedCommandExecutionResult(
+                true,
+                0,
+                """
+                {"SchemaVersion":3,"Status":"ok","PinnedCount":3,"PreservedPaths":["G:\\マイドライブ"],"SkipReason":null,"BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":false,"RestoredFromBackup":false,"VerificationSucceeded":true,"SuccessCount":2,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
+                """,
+                string.Empty))));
+
+        var result = await action.ExecuteAsync();
+
+        Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
+        StringAssert.Contains(result.Detail, @"G:\マイドライブ");
+        StringAssert.Contains(result.Detail, "外さずに先頭へ残しました");
+    }
+
+    [TestMethod]
+    public async Task 開けない項目以外が昇順なら部分成功のスキップとして残した項目を示す()
+    {
+        var action = new QuickAccessSortAction(new RecordingExecutor((_, _) => Task.FromResult(
+            new UnelevatedCommandExecutionResult(
+                true,
+                0,
+                """
+                {"SchemaVersion":3,"Status":"ok","PinnedCount":3,"PreservedPaths":["G:\\マイドライブ"],"SkipReason":"sorted","BackupPath":null,"BackupFailed":false,"BackupVerified":false,"MutationStarted":false,"RecoveryAttempted":false,"RestoredFromBackup":false,"VerificationSucceeded":false,"SuccessCount":0,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
+                """,
+                string.Empty))));
+
+        var result = await action.ExecuteAsync();
+
+        Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
+        StringAssert.Contains(result.Detail, "既に昇順");
+        StringAssert.Contains(result.Detail, @"G:\マイドライブ");
+    }
+
+    [TestMethod]
+    public void 正常なmedium結果を解析できる()
+    {
+        const string json =
+            """
+            {"SchemaVersion":3,"Status":"ok","PinnedCount":3,"SkipReason":null,"BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":false,"RestoredFromBackup":false,"VerificationSucceeded":true,"SuccessCount":3,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
             """;
 
         Assert.IsTrue(QuickAccessSortAction.TryParseScriptResult(json, out var result, out var failure), failure);
@@ -88,7 +189,7 @@ public sealed class QuickAccessVerbTests
     {
         const string json =
             """
-            {"SchemaVersion":2,"Status":"ok","PinnedCount":3,"SkipReason":null,"BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":false,"RestoredFromBackup":false,"VerificationSucceeded":true,"SuccessCount":3,"FailedPaths":["C:\\B"],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
+            {"SchemaVersion":3,"Status":"ok","PinnedCount":3,"SkipReason":null,"BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":false,"RestoredFromBackup":false,"VerificationSucceeded":true,"SuccessCount":3,"FailedPaths":["C:\\B"],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
             """;
 
         Assert.IsFalse(QuickAccessSortAction.TryParseScriptResult(json, out _, out var failure));
@@ -100,7 +201,7 @@ public sealed class QuickAccessVerbTests
     {
         const string json =
             """
-            {"SchemaVersion":2,"Status":"ok","PinnedCount":3,"SkipReason":null,"BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":false,"RestoredFromBackup":false,"VerificationSucceeded":false,"SuccessCount":3,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
+            {"SchemaVersion":3,"Status":"ok","PinnedCount":3,"SkipReason":null,"BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":false,"RestoredFromBackup":false,"VerificationSucceeded":false,"SuccessCount":3,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
             """;
 
         Assert.IsFalse(QuickAccessSortAction.TryParseScriptResult(json, out _, out var failure));
@@ -112,7 +213,7 @@ public sealed class QuickAccessVerbTests
     {
         const string json =
             """
-            {"SchemaVersion":2,"Status":"error","PinnedCount":3,"SkipReason":null,"BackupPath":null,"BackupFailed":true,"BackupVerified":false,"MutationStarted":true,"RecoveryAttempted":true,"RestoredFromBackup":false,"VerificationSucceeded":false,"SuccessCount":0,"FailedPaths":["C:\\B"],"UnrecoveredPaths":["C:\\A"],"Warnings":[],"Error":"backup失敗後に変更開始"}
+            {"SchemaVersion":3,"Status":"error","PinnedCount":3,"SkipReason":null,"BackupPath":null,"BackupFailed":true,"BackupVerified":false,"MutationStarted":true,"RecoveryAttempted":true,"RestoredFromBackup":false,"VerificationSucceeded":false,"SuccessCount":0,"FailedPaths":["C:\\B"],"UnrecoveredPaths":["C:\\A"],"Warnings":[],"Error":"backup失敗後に変更開始"}
             """;
 
         Assert.IsFalse(QuickAccessSortAction.TryParseScriptResult(json, out _, out var failure));
@@ -124,7 +225,7 @@ public sealed class QuickAccessVerbTests
     {
         const string json =
             """
-            {"SchemaVersion":2,"Status":"error","PinnedCount":0,"SkipReason":null,"BackupPath":null,"BackupFailed":false,"BackupVerified":false,"MutationStarted":false,"RecoveryAttempted":false,"RestoredFromBackup":false,"VerificationSucceeded":false,"SuccessCount":0,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
+            {"SchemaVersion":3,"Status":"error","PinnedCount":0,"SkipReason":null,"BackupPath":null,"BackupFailed":false,"BackupVerified":false,"MutationStarted":false,"RecoveryAttempted":false,"RestoredFromBackup":false,"VerificationSucceeded":false,"SuccessCount":0,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
             """;
 
         Assert.IsFalse(QuickAccessSortAction.TryParseScriptResult(json, out _, out var failure));
@@ -136,7 +237,7 @@ public sealed class QuickAccessVerbTests
     {
         const string json =
             """
-            {"SchemaVersion":2,"Status":"ok","PinnedCount":3,"SkipReason":"recovered","BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":true,"RestoredFromBackup":true,"VerificationSucceeded":true,"SuccessCount":0,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
+            {"SchemaVersion":3,"Status":"ok","PinnedCount":3,"SkipReason":"recovered","BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":true,"RestoredFromBackup":true,"VerificationSucceeded":true,"SuccessCount":0,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
             """;
 
         Assert.IsTrue(QuickAccessSortAction.TryParseScriptResult(json, out var result, out var failure), failure);
@@ -150,7 +251,7 @@ public sealed class QuickAccessVerbTests
     {
         const string json =
             """
-            {"SchemaVersion":2,"Status":"ok","PinnedCount":3,"SkipReason":"recovered","BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":true,"RestoredFromBackup":true,"VerificationSucceeded":false,"SuccessCount":0,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
+            {"SchemaVersion":3,"Status":"ok","PinnedCount":3,"SkipReason":"recovered","BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":true,"RestoredFromBackup":true,"VerificationSucceeded":false,"SuccessCount":0,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
             """;
 
         Assert.IsFalse(QuickAccessSortAction.TryParseScriptResult(json, out _, out var failure));
@@ -237,7 +338,7 @@ public sealed class QuickAccessVerbTests
         true,
         0,
         """
-        {"SchemaVersion":2,"Status":"ok","PinnedCount":3,"SkipReason":null,"BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":false,"RestoredFromBackup":false,"VerificationSucceeded":true,"SuccessCount":3,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
+        {"SchemaVersion":3,"Status":"ok","PinnedCount":3,"SkipReason":null,"BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":false,"RestoredFromBackup":false,"VerificationSucceeded":true,"SuccessCount":3,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
         """,
         string.Empty);
 
@@ -245,7 +346,7 @@ public sealed class QuickAccessVerbTests
         false,
         1,
         """
-        {"SchemaVersion":2,"Status":"error","PinnedCount":3,"SkipReason":null,"BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":true,"RestoredFromBackup":true,"VerificationSucceeded":true,"SuccessCount":0,"FailedPaths":["C:\\B"],"UnrecoveredPaths":[],"Warnings":[],"Error":"並べ替え失敗。元状態は復元済み"}
+        {"SchemaVersion":3,"Status":"error","PinnedCount":3,"SkipReason":null,"BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":true,"RestoredFromBackup":true,"VerificationSucceeded":true,"SuccessCount":0,"FailedPaths":["C:\\B"],"UnrecoveredPaths":[],"Warnings":[],"Error":"並べ替え失敗。元状態は復元済み"}
         """,
         "script failed");
 
@@ -253,7 +354,7 @@ public sealed class QuickAccessVerbTests
         false,
         1,
         """
-        {"SchemaVersion":2,"Status":"error","PinnedCount":3,"SkipReason":null,"BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":true,"RestoredFromBackup":false,"VerificationSucceeded":false,"SuccessCount":0,"FailedPaths":["C:\\B"],"UnrecoveredPaths":["C:\\A","C:\\B","C:\\C"],"Warnings":[],"Error":"並べ替えと自動復元に失敗"}
+        {"SchemaVersion":3,"Status":"error","PinnedCount":3,"SkipReason":null,"BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":true,"RestoredFromBackup":false,"VerificationSucceeded":false,"SuccessCount":0,"FailedPaths":["C:\\B"],"UnrecoveredPaths":["C:\\A","C:\\B","C:\\C"],"Warnings":[],"Error":"並べ替えと自動復元に失敗"}
         """,
         "script failed");
 
@@ -261,7 +362,7 @@ public sealed class QuickAccessVerbTests
         true,
         0,
         """
-        {"SchemaVersion":2,"Status":"ok","PinnedCount":3,"SkipReason":"recovered","BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":true,"RestoredFromBackup":true,"VerificationSucceeded":true,"SuccessCount":0,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
+        {"SchemaVersion":3,"Status":"ok","PinnedCount":3,"SkipReason":"recovered","BackupPath":"C:\\Users\\test\\backup.lumin4tibak","BackupFailed":false,"BackupVerified":true,"MutationStarted":true,"RecoveryAttempted":true,"RestoredFromBackup":true,"VerificationSucceeded":true,"SuccessCount":0,"FailedPaths":[],"UnrecoveredPaths":[],"Warnings":[],"Error":null}
         """,
         string.Empty);
 
