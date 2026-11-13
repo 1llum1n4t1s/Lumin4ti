@@ -119,7 +119,7 @@ ON/OFF設定切り替えとDefenderの既定設定へのリセットは永続バ
 - `App.SetLocale()` が辞書を差し替え、`App.LocaleChanged` を購読する VM プロパティが再評価される。既定言語は `App.DetectDefaultLocale()` が OS ロケールから判定、選択は settings.json の `Locale` に保存。
 - アクションの実行結果ログ行 (`  - ...しました`) は技術的詳細なので日本語のまま。
 
-## リリース・配信 (Cloudflare R2 + ローカル署名)
+## リリース・配信 (Cloudflare R2 + Sigilune 署名)
 
 更新・移行・配信の構造と理由は [DESIGN.md の更新と配布](DESIGN.md#更新と配布) を参照する。GitHub Releases は使わない。
 
@@ -130,21 +130,28 @@ ON/OFF設定切り替えとDefenderの既定設定へのリセットは永続バ
 - MSI / MSIX 等へのインストーラー形式変更、Velopack の置換、per-user / machine-wide のインストール範囲変更、NativeAOT 等のパッケージング方式変更、更新元・channel・署名方式の変更は、ユーザーが対象を個別に明示した場合だけ実装する。明示がない場合は現行契約を維持し、設計案と影響だけを報告する。
 - `dotnet publish` によるローカル検証は通常の検証に含めてよい。`vpk pack`、署名、R2 upload、cache purge は、リリースまたは `/vava` が明示された場合だけ実行する。公開後の配信内容取得・ハッシュ照合・伝播待ちは行わず、公開前検証と API の受付成功を確認する。
 
-- 実行は `pwsh scripts/release-local.ps1` (build + PerMachine MSI生成 + 署名 + R2 アップロード + キャッシュパージ + 旧 nupkg 掃除を一括)。`-SkipUpload` では署名後の公開前検証まで行う。検証内容は [DESIGN.md のリリース成果物と公開順序](DESIGN.md#リリース成果物と公開順序) を参照し、検証失敗時は公開へ進めない。
-- [set-msi-program-files-location.ps1](scripts/set-msi-program-files-location.ps1) による Program Files 配置補正と、補正後 MSI の再署名・署名検証を省略しない。
+- 通常は `.github/workflows/release.yml`（手動起動・Environment `release`）が同じスクリプトを実行する。ローカル実行は `pwsh scripts/release-local.ps1` (build + PerMachine MSI生成 + 署名 + R2 アップロード + キャッシュパージ + 旧 nupkg 掃除を一括)。`-SkipUpload` では署名後の公開前検証まで行う。検証内容は [DESIGN.md のリリース成果物と公開順序](DESIGN.md#リリース成果物と公開順序) を参照し、検証失敗時は公開へ進めない。
+- [set-msi-program-files-location.ps1](scripts/set-msi-program-files-location.ps1) による Program Files 配置補正と、補正後 MSI の再署名（`sigilune sign --replace`）・署名検証を省略しない。
 - 移行コードを変更するときは [DESIGN.md の旧配置からの移行](DESIGN.md#旧配置からの移行) の信頼確認・回収範囲・期限を維持し、`WindowsPerMachineMigrationTests` と操作フロー検証を通す。旧 `Update.exe` を実行せず、設定・ログ・復元原本と任意のカスタム配置を回収対象へ広げない。
 - リリース準備の清掃は今回再生成する `local-release/artifacts` と対象 RID の `publish-*` に限定し、検証記録を保持する。公開順序と受付成功の確認は [DESIGN.md](DESIGN.md#リリース成果物と公開順序) に従う。
-- 前提: SimplySign Desktop がログイン済み (`Cert:\CurrentUser\My` に `CN=Open Source Developer Yuichiro Shinozaki` が見える) / `<Version>` が `/vava` 済み / `D:\Dev\Secret\secrets.json` に `cloudflare.api_token`。
+- 前提: 署名は Sigilune（`scripts/Sigilune.Common.ps1`、署名者 `CN=Open Source Developer Yuichiro Shinozaki`。SimplySign Desktop は不要）。CI は Environment `release` の `SIGILUNE_EMAIL` / `SIGILUNE_TOTP_URI` / `CLOUDFLARE_API_TOKEN`、ローカルは `sigilune setup` 済みで `D:\Dev\Secret\secrets.json` に `cloudflare.api_token` / `<Version>` が `/vava` 済み。
 - 製品ページの配信は `../vps-web/deploy/deploy-lp.ps1` を使う。配信先は [DESIGN.md](DESIGN.md#製品ページの配信先) を参照し、公開ホスト・更新ファイルの既存経路を維持する。
 - R2 バケット `lumin4ti-updates` (account `10901bfadbf1005164774a7350082985` / zone `kagayoi.com`)。`local-release/` は `.gitignore` 済み。
 
 ### ローカルリリースの実行
 
-リポジトリルートで事前確認を行い、失敗時は「署名証明書が見つからないよ。SimplySign Desktop を起動してトークンでログインしてから /vava を再実行してね」。公開依頼時に成功を確認してから実行する。
+通常は GitHub Actions で実行する（本人の PC は不要）。`skip_upload=true` でビルド・署名・公開前検証だけを行い、成果物を Actions に残す。
 
 ```powershell
-pwsh -NoProfile -Command 'if (-not (Get-ChildItem Cert:\CurrentUser\My | Where-Object { $_.Subject -like "CN=Open Source Developer Yuichiro Shinozaki*" -and $_.NotAfter -gt (Get-Date) })) { exit 1 }'
-if ($LASTEXITCODE -eq 0) { pwsh -NoProfile -File scripts/release-local.ps1 } else { throw '署名証明書が見つからないよ。SimplySign Desktop を起動してトークンでログインしてから /vava を再実行してね' }
+gh workflow run release.yml --repo 1llum1n4t1s/Lumin4ti --ref main -f skip_upload=false
+```
+
+ローカルで実行する場合は、リポジトリルートで Sigilune のクラウドログインを事前確認し、成功した場合だけ実行する。失敗時は「Sigilune でクラウドにログインできなかったよ。sigilune status で登録を確認してから /vava を再実行してね」。ログインを自動再試行せず、署名を省略して続行しない。
+
+```powershell
+$sigilune = if ($env:SIGILUNE_EXE) { $env:SIGILUNE_EXE } else { Join-Path $env:USERPROFILE '.local\Sigilune\bin\sigilune.exe' }
+& $sigilune login
+if ($LASTEXITCODE -eq 0) { pwsh -NoProfile -File scripts/release-local.ps1 } else { throw 'Sigilune でクラウドにログインできなかったよ。sigilune status で登録を確認してから /vava を再実行してね' }
 ```
 
 ## コードレビュー時の注意点 (このコードベース特有)

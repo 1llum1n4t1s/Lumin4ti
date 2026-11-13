@@ -1,12 +1,14 @@
-# release-local.ps1 — ローカル署名付き Velopack リリース (Shisui テンプレートから横展開)
+# release-local.ps1 — 署名付き Velopack リリース (Shisui テンプレートから横展開)
 #
-# SimplySign (Certum クラウド署名) は Desktop 接続 + スマホトークンが必要で
-# GitHub Actions からは署名できないため、リリースは本スクリプトでローカル実行する。
+# 署名は Sigilune (Certum SimplySign のクラウド鍵を signtool /dlib で使う CLI) で行う。
+# 通常のリリースは GitHub Actions の .github/workflows/release.yml (手動起動・Environment "release") が
+# 本スクリプトを実行する。ローカル実行も同じ手順で動き、検証や再実行に使う。
 #
 # 前提:
-#   - SimplySign Desktop が接続済み (証明書が CurrentUser\My に見えていること)
+#   - Sigilune を使えること (scripts/Sigilune.Common.ps1 参照)。
+#     ローカルは `sigilune setup` で Certum アカウントを登録済み、CI は SIGILUNE_EMAIL / SIGILUNE_TOTP_URI を渡す
 #   - Directory.Build.props の <Version> がリリースしたいバージョンになっていること (/vava 済み)
-#   - D:\Dev\Secret\secrets.json に cloudflare.api_token があること
+#   - 環境変数 CLOUDFLARE_API_TOKEN (CI)、なければ D:\Dev\Secret\secrets.json の cloudflare.api_token (ローカル)
 #
 # 使い方:
 #   pwsh scripts/release-local.ps1                # フルリリース (build + sign + upload + cleanup)
@@ -191,15 +193,9 @@ $BaseUrl = 'https://lumin4ti.kagayoi.com'
 $AccountId = '10901bfadbf1005164774a7350082985'
 $KeepVersionCount = 2                # 全プロジェクト共通の保持ポリシー: 直近 2 バージョン
 $SecretsPath = 'D:\Dev\Secret\secrets.json'
+# 署名者の CN。証明書の年次更新で thumbprint が変わっても同じ値で照合できる。
+# アプリ側の WindowsPerMachineMigration.ExpectedPublisher もこの CN で MSI・実行ファイルを照合するため、一致を保つ。
 $CertSubjectName = 'Open Source Developer Yuichiro Shinozaki'
-# /n (Subject 名) で選択: 証明書の年次更新で thumbprint が変わっても動く
-$SignParams = "/n `"$CertSubjectName`" /fd SHA256 /td SHA256 /tr http://time.certum.pl"
-$SignToolPath = Get-ChildItem -LiteralPath 'C:\Program Files (x86)\Windows Kits\10\bin' `
-    -Filter 'signtool.exe' -File -Recurse -ErrorAction SilentlyContinue |
-    Where-Object { $_.DirectoryName -like '*\x64' } |
-    Sort-Object { [version]$_.Directory.Parent.Name } -Descending |
-    Select-Object -First 1 -ExpandProperty FullName
-if (-not $SignToolPath) { throw 'Windows SDK x64 signtool.exe が見つかりません' }
 
 # Lumin4ti は win-x64 のみ配信 (ARM64 配信なし)。
 $RuntimeMatrix = @{
@@ -242,13 +238,14 @@ $version = if ($versionNode) { $versionNode.InnerText.Trim() } else { $null }
 if (-not $version) { throw 'Directory.Build.props から <Version> を取得できませんでした' }
 Write-Host "バージョン: $version"
 
-# SimplySign 接続確認 (証明書が見えなければ署名できないので最初に落とす)
-$cert = Get-ChildItem Cert:\CurrentUser\My |
-    Where-Object { $_.Subject -like "CN=$CertSubjectName*" -and $_.NotAfter -gt (Get-Date) }
-if (-not $cert) {
-    throw "署名証明書 (CN=$CertSubjectName) が見つかりません。SimplySign Desktop を起動してトークンでログインしてください。"
-}
-Write-Host "署名証明書: $($cert.Subject) (期限 $($cert.NotAfter.ToString('yyyy-MM-dd')))"
+# 署名の準備 (Sigilune の場所とクラウドへのログインを、ビルド前に確認して早く落とす)。
+. (Join-Path $PSScriptRoot 'Sigilune.Common.ps1')
+$Sigilune = Resolve-SigiluneExe
+Connect-Sigilune -SigiluneExe $Sigilune
+# Velopack はファイルごとに別プロセスで署名テンプレートを実行する。Sigilune はログインを共有し、
+# 署名後に有効性・署名者・タイムスタンプを検証して失敗なら非0で終わる。
+# 同梱ランタイムなど既に信頼済み署名のあるファイルは vpk 自身が飛ばす。
+$SignTemplate = "`"$Sigilune`" sign {{file}}"
 
 # vpk を固定バージョンで用意
 $vpkInstalled = (dotnet tool list --global | Select-String -SimpleMatch 'vpk') -match [regex]::Escape($VpkVersion)
@@ -260,9 +257,12 @@ if (-not $vpkInstalled) {
 
 # Cloudflare トークン (アップロード時のみ必要)
 if (-not $SkipUpload) {
-    $secrets = Get-Content $SecretsPath -Raw | ConvertFrom-Json
-    if (-not $secrets.cloudflare.api_token) { throw "secrets.json に cloudflare.api_token が見つかりません" }
-    $env:CLOUDFLARE_API_TOKEN = $secrets.cloudflare.api_token
+    # CI では Environment "release" の Secret が環境変数で渡る。ローカルは secrets.json から必要なキーだけ読む。
+    if (-not $env:CLOUDFLARE_API_TOKEN) {
+        $secrets = Get-Content $SecretsPath -Raw | ConvertFrom-Json
+        if (-not $secrets.cloudflare.api_token) { throw "secrets.json に cloudflare.api_token が見つかりません" }
+        $env:CLOUDFLARE_API_TOKEN = $secrets.cloudflare.api_token
+    }
     $env:CLOUDFLARE_ACCOUNT_ID = $AccountId
 }
 
@@ -311,7 +311,7 @@ foreach ($runtime in $Runtimes) {
         throw "Lumin4ti.UI.exe が publish 出力にありません ($runtime)"
     }
 
-    # --signParams は helper を含む全 PE (exe/dll) を署名する。helper の署名除外は行わない。
+    # --signTemplate は helper を含む未署名の全 PE (exe/dll) を署名する。helper の署名除外は行わない。
     Write-Host "== vpk pack + 署名: $runtime ==" -ForegroundColor Cyan
     # StartMenu は packAuthors 名のサブフォルダを作るため、ルート直下へ登録する。
     Invoke-Native "vpk pack ($runtime)" {
@@ -329,18 +329,19 @@ foreach ($runtime in $Runtimes) {
             --shortcuts 'StartMenuRoot,Desktop' `
             --msi `
             --instLocation PerMachine `
-            --signParams $SignParams
+            --signTemplate $SignTemplate
     }
 }
 
 # Velopack 1.2.0 の生成MSIは PerMachine 指定でも INSTALLFOLDER が TARGETDIR 直下になり、
 # Windows Installer が C:\Lumin4ti と解決する。Directory表を公式の64-bit Program Files構造へ直し、
 # 変更によって無効になったMSI本体の署名を上書きして再署名する。
+# 補正後の MSI は「署名あり・ダイジェスト不一致」の状態で、Sigilune は既存署名のあるファイルを
+# 既定で拒否するため --replace で置き換える。署名者・タイムスタンプは Sigilune と直後の検証で確認する。
 foreach ($msi in Get-ChildItem $ArtifactsDir -Filter '*.msi' -File) {
     & (Join-Path $PSScriptRoot 'set-msi-program-files-location.ps1') -MsiPath $msi.FullName
     Invoke-Native "Program Files固定MSIの再署名 ($($msi.Name))" {
-        & $SignToolPath sign /n $CertSubjectName /fd SHA256 /td SHA256 `
-            /tr 'http://time.certum.pl' $msi.FullName
+        & $Sigilune sign --replace $msi.FullName
     }
 }
 

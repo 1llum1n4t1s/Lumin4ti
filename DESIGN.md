@@ -175,7 +175,7 @@ UI文字列は`src/Lumin4ti.UI/Resources/Locales/*.axaml`の17辞書で管理す
 
 ### リリース成果物と公開順序
 
-ローカルのリリーススクリプトがrestore、self-contained publish、Velopack梱包と署名、MSI配置補正と再署名、Cloudflare R2 upload、配信検証を行う。`set-msi-program-files-location.ps1`がMSIのDirectory表を`ProgramFiles64Folder\Lumin4ti`へ補正し、固定配置を保証する。補正で元の署名が無効になるため、公開前に再署名と発行元の検証を行う。署名に対話的なSimplySign Desktopを使うため、リリースはCIではなくローカルで完結する。
+リリーススクリプト（通常は手動起動の`release.yml`がGitHub Actionsで実行し、ローカルでも同じ手順で動く）がrestore、self-contained publish、Velopack梱包と署名、MSI配置補正と再署名、Cloudflare R2 upload、配信検証を行う。`set-msi-program-files-location.ps1`がMSIのDirectory表を`ProgramFiles64Folder\Lumin4ti`へ補正し、固定配置を保証する。補正で元の署名が無効になるため、公開前に`sigilune sign --replace`で再署名し、発行元を検証する。署名はSigiluneがCertumのクラウド鍵をsigntool `/dlib`で使って行い、SimplySign Desktopを必要としないため、CIで完結できる。署名者のCNは従来と同じ証明書であり、アプリの実行時検証（`ExpectedPublisher`）は変わらない。
 
 準備時に再生成するのは`local-release/artifacts`と対象RIDの`publish-*`だけで、同じ親ディレクトリの検証記録は保持する。清掃対象がその直下にあることと、再解析ポイントを含まないことを確認してから削除する。
 
@@ -206,7 +206,7 @@ Cloudflare Workerは`/`、`/index.html`と`/common.css`を`LP_CONTENT`サービ�
 | カタログ駆動でAction / BatchSetting / Toggle / Choiceを共通表示する | 機能追加時のUI分岐を抑え、状態・結果処理を統一できる | 特殊機能も共通契約へ適合させる必要がある |
 | 手動DIをSingletonで構成する | デスクトップアプリの単一Window・共有操作状態を単純に保てる | componentごとの短いlifetimeは使わない |
 | 更新元とchannelをコードで固定する | 設定改ざんによる第三者ホストへの誘導を防ぐ | 利用者が任意mirrorへ切り替えることはできない |
-| PerMachine MSIとローカル署名を採用する | 管理者ツールをユーザー書込み可能領域から実行せず、対話署名を維持できる | リリースは署名環境のあるWindows端末へ依存する |
+| PerMachine MSIとSigiluneによるCI署名を採用する | 管理者ツールをユーザー書込み可能領域から実行せず、本人のPCなしで署名・配信できる | TOTP登録情報をEnvironment `release`のSecretsに置くため、それを読めるワークフローを増やさない |
 | サインイン時クリーンアップを信頼済みPerMachine実体の最高権限タスクに限定する | UACなしでサービス停止を伴う掃除を可能にしつつ、ユーザー書込み可能な実体への差し替えを防ぐ | 手動コピーや開発ビルドからはタスクを登録できない |
 
 ## 製品ページの配信先
