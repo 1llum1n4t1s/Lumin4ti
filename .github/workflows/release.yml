@@ -31,7 +31,48 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # 署名・配信の前に既存の回帰テストを通す。失敗したら release ジョブは始まらない (Environment の Secrets にも触れない)。
+  # 手順は dependency-validation.yml と同じ (R2 転送の fixture 検証、restore、Release build、dotnet test)。
+  test:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: リポジトリをチェックアウト
+        # actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: R2 転送の fixture を検証
+        run: |
+          & (Join-Path $env:GITHUB_WORKSPACE 'tests/R2Transfer/Run.ps1') -WorkRoot (Join-Path $env:RUNNER_TEMP 'r2-transfer-check')
+
+      - name: .NET SDK をセットアップ
+        # actions/setup-dotnet@v6.1.0
+        uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73
+        with:
+          dotnet-version: 11.0.x
+
+      - name: Restore
+        run: |
+          dotnet restore Lumin4ti.slnx
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Build
+        run: |
+          dotnet build Lumin4ti.slnx -c Release --no-restore
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 回帰テストを実行
+        run: |
+          dotnet test Lumin4ti.slnx -c Release --no-build
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
   release:
+    needs: test
     runs-on: windows-latest
     timeout-minutes: 90
     environment: release
