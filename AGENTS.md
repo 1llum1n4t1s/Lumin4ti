@@ -130,7 +130,7 @@ ON/OFF設定切り替えとDefenderの既定設定へのリセットは永続バ
 - MSI / MSIX 等へのインストーラー形式変更、Velopack の置換、per-user / machine-wide のインストール範囲変更、NativeAOT 等のパッケージング方式変更、更新元・channel・署名方式の変更は、ユーザーが対象を個別に明示した場合だけ実装する。明示がない場合は現行契約を維持し、設計案と影響だけを報告する。
 - `dotnet publish` によるローカル検証は通常の検証に含めてよい。`vpk pack`、署名、R2 upload、cache purge は、リリースまたは `/vava` が明示された場合だけ実行する。公開後の配信内容取得・ハッシュ照合・伝播待ちは行わず、公開前検証と API の受付成功を確認する。
 
-- 通常は `.github/workflows/release.yml`（`release/**` への push で自動起動・Environment `release`）が同じスクリプトを実行する。ローカル実行は `pwsh scripts/release-local.ps1` (build + PerMachine MSI生成 + 署名 + R2 アップロード + キャッシュパージ + 旧 nupkg 掃除を一括)。`-SkipUpload` では署名後の公開前検証まで行う。検証内容は [DESIGN.md のリリース成果物と公開順序](DESIGN.md#リリース成果物と公開順序) を参照し、検証失敗時は公開へ進めない。
+- 通常は `.github/workflows/release.yml`（版タグ `v<x.y.z>` の push で自動起動・Environment `release`）が同じスクリプトを実行する。ローカル実行は `pwsh scripts/release-local.ps1` (build + PerMachine MSI生成 + 署名 + R2 アップロード + キャッシュパージ + 旧 nupkg 掃除を一括)。`-SkipUpload` では署名後の公開前検証まで行う。検証内容は [DESIGN.md のリリース成果物と公開順序](DESIGN.md#リリース成果物と公開順序) を参照し、検証失敗時は公開へ進めない。
 - [set-msi-program-files-location.ps1](scripts/set-msi-program-files-location.ps1) による Program Files 配置補正と、補正後 MSI の再署名（`sigilune sign --replace`）・署名検証を省略しない。
 - 移行コードを変更するときは [DESIGN.md の旧配置からの移行](DESIGN.md#旧配置からの移行) の信頼確認・回収範囲・期限を維持し、`WindowsPerMachineMigrationTests` と操作フロー検証を通す。旧 `Update.exe` を実行せず、設定・ログ・復元原本と任意のカスタム配置を回収対象へ広げない。
 - リリース準備の清掃は今回再生成する `local-release/artifacts` と対象 RID の `publish-*` に限定し、検証記録を保持する。公開順序と受付成功の確認は [DESIGN.md](DESIGN.md#リリース成果物と公開順序) に従う。
@@ -140,10 +140,10 @@ ON/OFF設定切り替えとDefenderの既定設定へのリセットは永続バ
 
 ### ローカルリリースの実行
 
-通常は GitHub Actions で実行する（本人の PC は不要）。`/vava` が main と `release/<version>` を push すると、`release/**` への push で `release.yml` が自動で起動する。`workflow_dispatch` は同じ `release/<version>` を指定した再実行にだけ使う（`skip_upload=true` でビルド・署名・公開前検証だけを行い、成果物を Actions に残せる）。main を指定した実行は、Environment `release` が `release/*` だけを許可するため拒否される。タグは使わない。
+通常は GitHub Actions で実行する（本人の PC は不要）。`/vava` が版を上げた main へ軽量タグ `v<version>` を付けて push すると、そのタグの push で `release.yml` が自動で起動する（先に `guard` ジョブが、軽量タグ・main の祖先・`Directory.Build.props` の版との一致を Secrets なしで確かめる）。`workflow_dispatch` は同じタグを指定した再実行にだけ使う（`skip_upload=true` でビルド・署名・公開前検証だけを行い、成果物を Actions に残せる）。ブランチを指定した実行は、`guard` ジョブと Environment `release` の tag ポリシー `v[0-9]*.[0-9]*.[0-9]*` が拒否する。GitHub Release は作らない。
 
 ```powershell
-gh workflow run release.yml --repo 1llum1n4t1s/Lumin4ti --ref release/<version> -f skip_upload=false
+gh workflow run release.yml --repo 1llum1n4t1s/Lumin4ti --ref v<version> -f skip_upload=false
 ```
 
 ローカルで実行する場合は、リポジトリルートで Sigilune のクラウドログインを事前確認し、成功した場合だけ実行する。失敗時は「Sigilune でクラウドにログインできなかったよ。sigilune status で登録を確認してから /vava を再実行してね」。ログインを自動再試行せず、署名を省略して続行しない。

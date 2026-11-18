@@ -175,7 +175,7 @@ UI文字列は`src/Lumin4ti.UI/Resources/Locales/*.axaml`の17辞書で管理す
 
 ### リリース成果物と公開順序
 
-リリーススクリプト（通常は手動起動の`release.yml`がGitHub Actionsで実行し、ローカルでも同じ手順で動く）がrestore、self-contained publish、Velopack梱包と署名、MSI配置補正と再署名、Cloudflare R2 upload、配信検証を行う。`set-msi-program-files-location.ps1`がMSIのDirectory表を`ProgramFiles64Folder\Lumin4ti`へ補正し、固定配置を保証する。補正で元の署名が無効になるため、公開前に`sigilune sign --replace`で再署名し、発行元を検証する。署名はSigiluneがCertumのクラウド鍵をsigntool `/dlib`で使って行い、SimplySign Desktopを必要としないため、CIで完結できる。署名者のCNは従来と同じ証明書であり、アプリの実行時検証（`ExpectedPublisher`）は変わらない。
+リリーススクリプト（通常は版タグ`v<x.y.z>`のpushで起動する`release.yml`がGitHub Actionsで実行し、ローカルでも同じ手順で動く）がrestore、self-contained publish、Velopack梱包と署名、MSI配置補正と再署名、Cloudflare R2 upload、配信検証を行う。`set-msi-program-files-location.ps1`がMSIのDirectory表を`ProgramFiles64Folder\Lumin4ti`へ補正し、固定配置を保証する。補正で元の署名が無効になるため、公開前に`sigilune sign --replace`で再署名し、発行元を検証する。署名はSigiluneがCertumのクラウド鍵をsigntool `/dlib`で使って行い、SimplySign Desktopを必要としないため、CIで完結できる。署名者のCNは従来と同じ証明書であり、アプリの実行時検証（`ExpectedPublisher`）は変わらない。
 
 準備時に再生成するのは`local-release/artifacts`と対象RIDの`publish-*`だけで、同じ親ディレクトリの検証記録は保持する。清掃対象がその直下にあることと、再解析ポイントを含まないことを確認してから削除する。
 
