@@ -175,7 +175,7 @@ public sealed class WingetOutputFilterTests
         Assert.AreEqual(3, executor.Calls.Count);
         Assert.IsFalse(executor.Calls.Any(call =>
             call.Arguments.StartsWith("upgrade ", StringComparison.Ordinal)));
-        StringAssert.Contains(result.Detail, "安全確認で除外 1 件");
+        StringAssert.Contains(result.Detail, "安全確認で除外 1 件 / 自動更新の対象外 0 件");
     }
 
     [TestMethod]
@@ -219,7 +219,7 @@ public sealed class WingetOutputFilterTests
         var result = await action.ExecuteAsync();
 
         Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
-        StringAssert.Contains(result.Detail, "成功 1 件 / 失敗 0 件 / 安全確認で除外 1 件");
+        StringAssert.Contains(result.Detail, "成功 1 件 / 失敗 0 件 / 安全確認で除外 1 件 / 自動更新の対象外 0 件");
         Assert.AreEqual(
             WingetUpgradeAction.BuildUpgradeArguments("astral-sh.uv"),
             executor.Calls[4].Arguments);
@@ -287,7 +287,7 @@ public sealed class WingetOutputFilterTests
 
         Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
         Assert.IsFalse(result.Success);
-        StringAssert.Contains(result.Detail, "成功 1 件 / 失敗 1 件 / 安全確認で除外 0 件");
+        StringAssert.Contains(result.Detail, "成功 1 件 / 失敗 1 件 / 安全確認で除外 0 件 / 自動更新の対象外 0 件");
         StringAssert.Contains(result.Detail, "Certum.SmartSignSimplySignDesktop");
         StringAssert.Contains(result.Detail, "exit=-1978335090/0x8A15008E");
         StringAssert.Contains(result.Detail, "stdout=Installer failed with exit code: 0x8a15008e");
@@ -382,6 +382,162 @@ public sealed class WingetOutputFilterTests
         Assert.AreEqual(2, packages.Count);
         Assert.AreEqual("Brave Origin", packages[0].Name);
         Assert.AreEqual("Brave.BraveOrigin.Nightly", packages[0].Id);
+    }
+
+    private const int PortableScopeFailure = unchecked((int)0x8A15007D);
+    private const int NoApplicableUpgradeFailure = unchecked((int)0x8A150014);
+    private const string GuidanceCommand = "winget upgrade --id Mozilla.Firefox --exact --source winget";
+
+    private static CommandExecutionResult Failed(int exitCode, string output = "", string error = "") =>
+        new(false, string.Empty, exitCode, output, error);
+
+    private static RecordingExecutor UpgradeSequence(CommandExecutionResult upgrade, string id = "Mozilla.Firefox")
+    {
+        var table = PackageTable(("Firefox", id));
+        return new RecordingExecutor(Success(OfficialSource), Success(table), Success(table), upgrade);
+    }
+
+    private sealed class RetryRecorder(Func<string, CancellationToken, Task<UnelevatedWingetRetryResult>> handler)
+    {
+        public List<string> PackageIds { get; } = [];
+
+        public Task<UnelevatedWingetRetryResult> Invoke(string packageId, CancellationToken ct)
+        {
+            PackageIds.Add(packageId);
+            return handler(packageId, ct);
+        }
+    }
+
+    private static RetryRecorder RetryReturning(UnelevatedWingetRetryResult result) =>
+        new((_, _) => Task.FromResult(result));
+
+    [TestMethod]
+    public async Task ポータブルのスコープ失敗だけ通常権限で1回再試行して成功に計上する()
+    {
+        var retry = RetryReturning(new(true, Success("done"), string.Empty));
+        var action = new WingetUpgradeAction(UpgradeSequence(Failed(PortableScopeFailure)), retry.Invoke);
+        var received = new List<string>();
+
+        var result = await action.ExecuteAsync(new InlineProgress<string>(received.Add));
+
+        Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
+        CollectionAssert.AreEqual(new[] { "Mozilla.Firefox" }, retry.PackageIds);
+        StringAssert.Contains(result.Detail, "成功 1 件 / 失敗 0 件 / 安全確認で除外 0 件 / 自動更新の対象外 0 件");
+        StringAssert.Contains(result.Detail, "通常権限で更新完了");
+        Assert.IsTrue(received.Any(line => line.Contains("通常権限で再試行しています", StringComparison.Ordinal)));
+    }
+
+    [TestMethod]
+    [DataRow(1)]
+    [DataRow(NoApplicableUpgradeFailure)]
+    [DataRow(-1978335090)]
+    public async Task ポータブル以外の失敗では通常権限で再試行しない(int exitCode)
+    {
+        var retry = RetryReturning(new(true, Success("done"), string.Empty));
+        var action = new WingetUpgradeAction(UpgradeSequence(Failed(exitCode)), retry.Invoke);
+
+        await action.ExecuteAsync();
+
+        Assert.AreEqual(0, retry.PackageIds.Count);
+    }
+
+    [TestMethod]
+    public async Task 昇格側が成功なら再試行しない()
+    {
+        var retry = RetryReturning(new(true, Success("done"), string.Empty));
+        var action = new WingetUpgradeAction(UpgradeSequence(Success("ok")), retry.Invoke);
+
+        var result = await action.ExecuteAsync();
+
+        Assert.IsTrue(result.Success);
+        Assert.AreEqual(0, retry.PackageIds.Count);
+    }
+
+    [TestMethod]
+    public async Task 再試行も非0なら失敗し再試行側の終了コードと出力を残す()
+    {
+        var retry = RetryReturning(new(
+            true,
+            Failed(NoApplicableUpgradeFailure, "retry stdout", "retry stderr"),
+            string.Empty));
+        var action = new WingetUpgradeAction(UpgradeSequence(Failed(PortableScopeFailure)), retry.Invoke);
+
+        var result = await action.ExecuteAsync();
+
+        Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
+        Assert.AreEqual(1, retry.PackageIds.Count);
+        StringAssert.Contains(result.Detail, "成功 0 件 / 失敗 1 件 / 安全確認で除外 0 件 / 自動更新の対象外 0 件");
+        StringAssert.Contains(result.Detail, "exit=-1978335212/0x8A150014");
+        StringAssert.Contains(result.Detail, "stdout=retry stdout");
+        StringAssert.Contains(result.Detail, "stderr=retry stderr");
+    }
+
+    [TestMethod]
+    public async Task 再試行を起動できないときは失敗し理由と案内コマンドを示す()
+    {
+        var retry = RetryReturning(new(false, null, "winget の実体を確認できませんでした"));
+        var action = new WingetUpgradeAction(UpgradeSequence(Failed(PortableScopeFailure)), retry.Invoke);
+
+        var result = await action.ExecuteAsync();
+
+        Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
+        StringAssert.Contains(result.Detail, "winget の実体を確認できませんでした");
+        StringAssert.Contains(result.Detail, GuidanceCommand);
+        StringAssert.Contains(result.Detail, "exit=-1978335107/0x8A15007D");
+    }
+
+    [TestMethod]
+    public async Task 再試行中の取消は例外として伝播する()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var retry = new RetryRecorder((_, ct) =>
+        {
+            cancellation.Cancel();
+            ct.ThrowIfCancellationRequested();
+            return Task.FromResult(new UnelevatedWingetRetryResult(true, Success("done"), string.Empty));
+        });
+        var action = new WingetUpgradeAction(UpgradeSequence(Failed(PortableScopeFailure)), retry.Invoke);
+
+        await Assert.ThrowsAsync<OperationCanceledException>(
+            () => action.ExecuteAsync(null, cancellation.Token));
+    }
+
+    [TestMethod]
+    public async Task 対象外の終了コードだけなら部分成功で失敗0と対象外1を示す()
+    {
+        var retry = RetryReturning(new(true, Success("done"), string.Empty));
+        var action = new WingetUpgradeAction(
+            UpgradeSequence(Failed(NoApplicableUpgradeFailure, "no applicable", "detail"), "Microsoft.PowerShell"),
+            retry.Invoke);
+
+        var result = await action.ExecuteAsync();
+
+        Assert.AreEqual(MaintenanceActionStatus.Partial, result.Status);
+        Assert.AreEqual(0, retry.PackageIds.Count);
+        StringAssert.Contains(result.Detail, "成功 0 件 / 失敗 0 件 / 安全確認で除外 0 件 / 自動更新の対象外 1 件");
+        StringAssert.Contains(result.Detail, "自動更新の対象外");
+        StringAssert.Contains(result.Detail, "MSI から MSIX への変更");
+        StringAssert.Contains(result.Detail, "exit=-1978335212/0x8A150014");
+        StringAssert.Contains(result.Detail, "stdout=no applicable");
+    }
+
+    [TestMethod]
+    public async Task 対象外と通常の失敗が混在し成功が無ければ失敗とする()
+    {
+        var table = PackageTable(("PowerShell", "Microsoft.PowerShell"), ("Git", "Git.Git"));
+        var executor = new RecordingExecutor(
+            Success(OfficialSource),
+            Success(table),
+            Success(PackageTable(("PowerShell", "Microsoft.PowerShell"))),
+            Failed(NoApplicableUpgradeFailure),
+            Success(PackageTable(("Git", "Git.Git"))),
+            Failed(1, "boom"));
+        var action = new WingetUpgradeAction(executor, RetryReturning(new(false, null, "unused")).Invoke);
+
+        var result = await action.ExecuteAsync();
+
+        Assert.AreEqual(MaintenanceActionStatus.Failed, result.Status);
+        StringAssert.Contains(result.Detail, "失敗 1 件 / 安全確認で除外 0 件 / 自動更新の対象外 1 件");
     }
 
     private static CommandExecutionResult Success(string output) =>

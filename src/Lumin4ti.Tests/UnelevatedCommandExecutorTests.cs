@@ -140,6 +140,61 @@ public sealed class UnelevatedCommandExecutorTests
         StringAssert.Contains(message, "CreateProcessAsUserW=Win32 5");
     }
 
+    private static UnelevatedCommandExecutor.LaunchedProcessFacts ValidChildFacts() =>
+        new(
+            @"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
+            @"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
+            SessionId: 1,
+            ExpectedSessionId: 1,
+            IntegrityRid: 0x2000,
+            IsAppContainer: false,
+            IsElevated: false,
+            SameUser: true);
+
+    [TestMethod]
+    public void 再開前検証は想定どおりの停止状態の子を通す()
+    {
+        Assert.IsNull(UnelevatedCommandExecutor.FindLaunchedProcessViolation(ValidChildFacts()));
+        Assert.IsNull(UnelevatedCommandExecutor.FindLaunchedProcessViolation(
+            ValidChildFacts() with { IntegrityRid = 0x1000, ActualPath = @"c:\windows\system32\windowspowershell\v1.0\POWERSHELL.EXE" }));
+    }
+
+    [TestMethod]
+    public void 再開前検証は実行パス不一致を拒否する()
+    {
+        Assert.IsNotNull(UnelevatedCommandExecutor.FindLaunchedProcessViolation(
+            ValidChildFacts() with { ActualPath = @"C:\Windows\System32\cmd.exe" }));
+        Assert.IsNotNull(UnelevatedCommandExecutor.FindLaunchedProcessViolation(
+            ValidChildFacts() with { ActualPath = null }));
+        Assert.IsNotNull(UnelevatedCommandExecutor.FindLaunchedProcessViolation(
+            ValidChildFacts() with { ActualPath = "powershell.exe" }));
+    }
+
+    [TestMethod]
+    public void 再開前検証はセッション不一致を拒否する()
+    {
+        Assert.IsNotNull(UnelevatedCommandExecutor.FindLaunchedProcessViolation(
+            ValidChildFacts() with { SessionId = 0 }));
+    }
+
+    [TestMethod]
+    public void 再開前検証は高整合性とAppContainerと昇格を拒否する()
+    {
+        Assert.IsNotNull(UnelevatedCommandExecutor.FindLaunchedProcessViolation(
+            ValidChildFacts() with { IntegrityRid = 0x3000 }));
+        Assert.IsNotNull(UnelevatedCommandExecutor.FindLaunchedProcessViolation(
+            ValidChildFacts() with { IsAppContainer = true }));
+        Assert.IsNotNull(UnelevatedCommandExecutor.FindLaunchedProcessViolation(
+            ValidChildFacts() with { IsElevated = true }));
+    }
+
+    [TestMethod]
+    public void 再開前検証は利用者SID不一致を拒否する()
+    {
+        Assert.IsNotNull(UnelevatedCommandExecutor.FindLaunchedProcessViolation(
+            ValidChildFacts() with { SameUser = false }));
+    }
+
     [TestMethod]
     public void 環境ブロックは安定順序で二重null終端になる()
     {

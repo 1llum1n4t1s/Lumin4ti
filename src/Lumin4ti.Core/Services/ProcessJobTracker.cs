@@ -50,8 +50,11 @@ internal static class ProcessJobTracker
         JobHandles.Add(job);
     }
 
-    /// <summary>CREATE_SUSPENDED で生成したプロセスだけを登録し、成功後に再開する。</summary>
-    public static void TrackAndResume(nint processHandle, nint threadHandle)
+    /// <summary>
+    /// CREATE_SUSPENDED で生成したプロセスだけを登録し、成功後に再開する。
+    /// 戻り値でその子専用の Job を終了できる。ハンドルは <see cref="JobHandles"/> が保持し続けるため、呼び出し側は閉じない。
+    /// </summary>
+    public static ProcessJobControl TrackAndResume(nint processHandle, nint threadHandle)
     {
         var job = CreateKillOnCloseJob();
         if (job is null)
@@ -68,7 +71,49 @@ internal static class ProcessJobTracker
             var error = Marshal.GetLastWin32Error();
             throw new Win32Exception(error, $"子プロセスを再開できませんでした: Win32 {error} ({new Win32Exception(error).Message})");
         }
+
+        return new ProcessJobControl(job);
     }
+
+    /// <summary>子ごとの Job を明示的に終了する手段。ハンドルの所有は <see cref="ProcessJobTracker"/> に残る。</summary>
+    internal sealed class ProcessJobControl
+    {
+        private readonly SafeFileHandle _job;
+
+        internal ProcessJobControl(SafeFileHandle job) => _job = job;
+
+        /// <summary>Job 内の全プロセスを終了する。失敗は例外にせずログへ残す。</summary>
+        internal void Terminate()
+        {
+            var addedRef = false;
+            try
+            {
+                _job.DangerousAddRef(ref addedRef);
+                if (!TerminateJobObject(_job.DangerousGetHandle(), 1))
+                {
+                    var error = Marshal.GetLastWin32Error();
+                    LoggerBootstrap.Log.Error(
+                        $"子プロセスの Job を終了できませんでした: Win32 {error} ({new Win32Exception(error).Message})");
+                }
+            }
+            catch (ObjectDisposedException ex)
+            {
+                LoggerBootstrap.Log.Error($"子プロセスの Job を終了できませんでした: {ex.Message}");
+            }
+            finally
+            {
+                if (addedRef)
+                {
+                    _job.DangerousRelease();
+                }
+            }
+        }
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool TerminateJobObject(nint hJob, uint exitCode);
+
 
     private static string DescribeAssignmentFailure(int error, nint processHandle) =>
         $"子プロセスの Job 登録に失敗しました: Win32 {error} ({new Win32Exception(error).Message}); " +

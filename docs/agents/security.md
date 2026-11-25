@@ -4,7 +4,7 @@
 
 ## 外部プロセス実行
 
-`ICommandExecutor` → `ProcessCommandExecutor` が唯一の実装 (DI で単一登録)。DISM/regsvr32/powercfg/winget/bcdedit/MMAgent cmdlet など「OS 提供ツールが唯一の手段」のものだけ外部プロセスで実行し、レジストリ・COM・WinRT で代替可能なものは C# ネイティブで書く。
+`ICommandExecutor` → `ProcessCommandExecutor` が唯一の実装 (DI で単一登録)。DISM/regsvr32/powercfg/winget/bcdedit/MMAgent cmdlet など「OS 提供ツールが唯一の手段」のものだけ外部プロセスで実行し、レジストリ・COM・WinRT で代替可能なものは C# ネイティブで書く。winget を非昇格で起動する唯一の経路は、ユーザースコープ portable 更新（終了コード `0x8A15007D`）だけを `UnelevatedCommandExecutor` の厳格設定（`CreateForCurrentUserTree`）で再試行する経路とする。厳格設定は複製tokenに `TOKEN_ADJUST_DEFAULT|TOKEN_ADJUST_SESSIONID` を加えて起動し（無いと昇格側で Win32 5/1314 になる）、停止状態の子の実行パス・セッション・IL・非昇格・SID を再開前に検証する。QuickAccess と ExplorerLauncher の経路・権限は変えない。
 
 - **セキュリティ (回帰厳禁)**: bare exe 名を渡すと `CreateProcess` の検索順序でインストールディレクトリが `System32` より先に照合され、昇格プロセスがバイナリプランティング LPE を踏む。`ProcessCommandExecutor` は [SystemProcessResolver](../../src/Lumin4ti.Core/Services/SystemProcessResolver.cs) でフルパス解決 + `WorkingDirectory=System32` 固定してこれを封じている。呼び出し側は論理名でよいが、この解決を外さないこと。
 - 子プロセスは [ProcessJobTracker](../../src/Lumin4ti.Core/Services/ProcessJobTracker.cs) で子ごとに独立した Job Object (KILL_ON_JOB_CLOSE) へ登録する。生成を制御できる経路では停止状態で登録してから再開し、登録失敗時は実行させない。`ct` キャンセル時はプロセスツリーごと kill。Job の共有を再導入しないこと。理由と Explorer broker 経路の制約は [DESIGN.md の OS操作の境界](../design/security.md#os操作の境界) を参照する。

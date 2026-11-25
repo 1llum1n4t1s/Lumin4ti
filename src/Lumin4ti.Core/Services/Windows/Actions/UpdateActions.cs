@@ -11,8 +11,28 @@ namespace Lumin4ti.Core.Services.Windows.Actions;
 /// winget はパッケージマネージャー CLI そのものが正規の手段のため外部プロセスで実行し、
 /// 出力の要約は C# 側で行う。
 /// </summary>
-public sealed partial class WingetUpgradeAction(ICommandExecutor executor) : IMaintenanceAction
+public sealed partial class WingetUpgradeAction : IMaintenanceAction
 {
+    /// <summary>ユーザースコープ portable を昇格側から更新できないときの winget 終了コード (0x8A15007D)。</summary>
+    internal const uint PortableScopeExitCode = 0x8A15007D;
+
+    /// <summary>更新対象としてインストールを特定できないときの winget 終了コード (0x8A150014)。</summary>
+    internal const uint NoPackageFoundExitCode = 0x8A150014;
+
+    private readonly ICommandExecutor executor;
+    private readonly UnelevatedWingetRetry retryUnelevated;
+
+    public WingetUpgradeAction(ICommandExecutor executor)
+        : this(executor, UnelevatedWingetUpgrade.RunAsync)
+    {
+    }
+
+    internal WingetUpgradeAction(ICommandExecutor executor, UnelevatedWingetRetry retryUnelevated)
+    {
+        this.executor = executor;
+        this.retryUnelevated = retryUnelevated;
+    }
+
     /// <summary>更新チャネル判定用の英字の連なり。ビルド時生成で毎回の解釈を省く (パターンは従来と同一)。</summary>
     [GeneratedRegex("[A-Za-z]+")]
     private static partial Regex AsciiLetterRun();
@@ -101,6 +121,7 @@ public sealed partial class WingetUpgradeAction(ICommandExecutor executor) : IMa
         var succeeded = 0;
         var failed = 0;
         var skipped = 0;
+        var unsupported = 0;
 
         for (var index = 0; index < candidates.Count; index++)
         {
@@ -163,44 +184,134 @@ public sealed partial class WingetUpgradeAction(ICommandExecutor executor) : IMa
                 BuildUpgradeArguments(candidate.Id),
                 ct,
                 filtered);
-            if (result.Success)
+            var outcome = await ClassifyUpgradeAsync(
+                candidateDisplayName,
+                candidate.Id,
+                result,
+                progress,
+                ct);
+            switch (outcome.Kind)
             {
-                succeeded++;
-                var detail = DescribeCommandResult(
-                    $"{candidateDisplayName} [{candidate.Id}]: 更新完了",
-                    result);
-                details.Add(detail);
-                progress?.Report(detail);
-                LoggerBootstrap.Log.Info($"{Id}: {detail}");
-                continue;
+                case UpgradeKind.Succeeded:
+                    succeeded++;
+                    break;
+                case UpgradeKind.Unsupported:
+                    unsupported++;
+                    break;
+                default:
+                    failed++;
+                    break;
             }
 
-            failed++;
-            var failure = DescribeCommandResult(
-                $"{candidateDisplayName} [{candidate.Id}]: 更新失敗",
-                result);
-            details.Add(failure);
-            progress?.Report(failure);
-            LoggerBootstrap.Log.Error($"{Id}: {failure}");
+            details.Add(outcome.Detail);
+            progress?.Report(outcome.Detail);
+            if (outcome.Kind == UpgradeKind.Failed)
+            {
+                LoggerBootstrap.Log.Error($"{Id}: {outcome.Detail}");
+            }
+            else
+            {
+                LoggerBootstrap.Log.Info($"{Id}: {outcome.Detail}");
+            }
         }
 
         LoggerBootstrap.Log.Info(
-            $"{Id}: 完了 (成功={succeeded}, 失敗={failed}, 安全確認で除外={skipped})");
-        details.Insert(0, $"  - 成功 {succeeded} 件 / 失敗 {failed} 件 / 安全確認で除外 {skipped} 件");
+            $"{Id}: 完了 (成功={succeeded}, 失敗={failed}, 安全確認で除外={skipped}, 自動更新の対象外={unsupported})");
+        details.Insert(
+            0,
+            $"  - 成功 {succeeded} 件 / 失敗 {failed} 件 / 安全確認で除外 {skipped} 件 / 自動更新の対象外 {unsupported} 件");
+        return BuildOverallResult(succeeded, failed, skipped, unsupported, details);
+    }
 
-        if (failed == 0 && skipped == 0)
+    private enum UpgradeKind
+    {
+        Succeeded,
+        Failed,
+        Unsupported,
+    }
+
+    private readonly record struct UpgradeOutcome(UpgradeKind Kind, string Detail);
+
+    private static MaintenanceActionResult BuildOverallResult(
+        int succeeded,
+        int failed,
+        int skipped,
+        int unsupported,
+        List<string> details)
+    {
+        if (failed == 0 && skipped == 0 && unsupported == 0)
         {
             return MaintenanceActionResult.Ok(details);
         }
 
-        // 安全確認による除外は「意図して更新を見送った」であって失敗ではない。
-        // 更新に失敗した候補が 1 件も無ければ、除外だけを理由に全体を失敗扱いにしない。
+        // 安全確認による除外と自動更新の対象外は「更新を見送った」であって失敗ではない。
+        // 更新に失敗した候補が 1 件も無ければ、それだけを理由に全体を失敗扱いにしない。
         if (succeeded > 0 || failed == 0)
         {
             return MaintenanceActionResult.Partial(details);
         }
 
         return MaintenanceActionResult.Fail(string.Join(Environment.NewLine, details));
+    }
+
+    private async Task<UpgradeOutcome> ClassifyUpgradeAsync(
+        string displayName,
+        string packageId,
+        CommandExecutionResult result,
+        IProgress<string>? progress,
+        CancellationToken ct)
+    {
+        var label = $"{displayName} [{packageId}]";
+        if (result.Success)
+        {
+            return new(UpgradeKind.Succeeded, DescribeCommandResult($"{label}: 更新完了", result));
+        }
+
+        var exitCode = unchecked((uint)result.ExitCode);
+        if (exitCode == NoPackageFoundExitCode)
+        {
+            return new(
+                UpgradeKind.Unsupported,
+                DescribeCommandResult(
+                    $"{label}: 自動更新の対象外 (winget の一覧には出ますが、このインストールを更新対象として特定できませんでした。" +
+                    "MSI から MSIX への変更など、配布形式が変わった可能性があります。" +
+                    "発行元の案内で更新・移行方法を確認してください)",
+                    result));
+        }
+
+        if (exitCode == PortableScopeExitCode)
+        {
+            return await RetryWithoutElevationAsync(label, packageId, result, progress, ct);
+        }
+
+        return new(UpgradeKind.Failed, DescribeCommandResult($"{label}: 更新失敗", result));
+    }
+
+    private async Task<UpgradeOutcome> RetryWithoutElevationAsync(
+        string label,
+        string packageId,
+        CommandExecutionResult elevatedResult,
+        IProgress<string>? progress,
+        CancellationToken ct)
+    {
+        progress?.Report($"  - {label}: 通常権限で再試行しています");
+        var retry = await retryUnelevated(packageId, ct);
+        if (!retry.Completed || retry.Result is null)
+        {
+            var reason = SanitizeDiagnosticLine(retry.Error);
+            return new(
+                UpgradeKind.Failed,
+                DescribeCommandResult(
+                    $"{label}: 更新失敗 (昇格側では更新できず、通常権限での再試行を実行できませんでした: {reason})",
+                    elevatedResult)
+                + $"。管理者ではないターミナルで `winget upgrade --id {packageId} --exact --source winget` を実行してください");
+        }
+
+        return retry.Result.Success
+            ? new(UpgradeKind.Succeeded, DescribeCommandResult($"{label}: 通常権限で更新完了", retry.Result))
+            : new(
+                UpgradeKind.Failed,
+                DescribeCommandResult($"{label}: 通常権限での再試行も失敗", retry.Result));
     }
 
     internal static string BuildSearchArguments(string packageId) =>
@@ -359,7 +470,7 @@ public sealed partial class WingetUpgradeAction(ICommandExecutor executor) : IMa
         return builder.ToString();
     }
 
-    private static bool IsSafePackageId(string? packageId) =>
+    internal static bool IsSafePackageId(string? packageId) =>
         !string.IsNullOrWhiteSpace(packageId)
         && packageId.Length <= 255
         && packageId.Contains('.')

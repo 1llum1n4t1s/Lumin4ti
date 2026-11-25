@@ -53,6 +53,9 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
     private const uint TokenDuplicate = 0x0002;
     private const uint TokenImpersonate = 0x0004;
     private const uint TokenQuery = 0x0008;
+    private const uint TokenAdjustDefault = 0x0080;
+    private const uint TokenAdjustSessionId = 0x0100;
+    private const int TokenElevationClass = 20;
     private const int SecurityImpersonation = 2;
     private const int TokenPrimary = 1;
     private const int TokenIntegrityLevel = 25;
@@ -88,17 +91,30 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
         "&([ScriptBlock]::Create($r.ReadToEnd()))";
 
     private readonly TimeSpan _timeout;
+    private readonly bool _strictCurrentUserTree;
 
     public UnelevatedCommandExecutor() : this(DefaultTimeout)
     {
     }
 
-    internal UnelevatedCommandExecutor(TimeSpan timeout)
+    internal UnelevatedCommandExecutor(TimeSpan timeout) : this(timeout, strictCurrentUserTree: false)
+    {
+    }
+
+    private UnelevatedCommandExecutor(TimeSpan timeout, bool strictCurrentUserTree)
     {
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(timeout, TimeSpan.Zero);
 
         _timeout = timeout;
+        _strictCurrentUserTree = strictCurrentUserTree;
     }
+
+    /// <summary>
+    /// 昇格プロセスと同一利用者の Explorer token だけを使い、Explorer broker へ退避せず、
+    /// 取消・timeout 時は子孫プロセスも含めて終了する厳格設定の executor を作る。
+    /// </summary>
+    internal static UnelevatedCommandExecutor CreateForCurrentUserTree(TimeSpan timeout) =>
+        new(timeout, strictCurrentUserTree: true);
 
     public async Task<UnelevatedCommandExecutionResult> RunPowerShellAsync(
         string script,
@@ -193,7 +209,15 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
         using (shellToken)
         {
             EnsureAllowedToken(shellToken);
-            using var primaryToken = DuplicatePrimaryToken(shellToken, "対話中 Explorer");
+            if (_strictCurrentUserTree)
+            {
+                EnsureShellTokenIsCurrentUser(shellToken);
+            }
+
+            using var primaryToken = DuplicatePrimaryToken(
+                shellToken,
+                "対話中 Explorer",
+                _strictCurrentUserTree ? TokenAdjustDefault | TokenAdjustSessionId : 0);
             EnsureAllowedToken(primaryToken);
             var folders = new ShellKnownFolders(
                 GetKnownFolderPath(FolderIdProfile, primaryToken, "ユーザープロファイル"),
@@ -227,10 +251,11 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
                         commandLine,
                         environmentBlock,
                         systemDirectory,
+                        shellSessionId,
                         timeout,
                         ct).ConfigureAwait(false);
                 }
-                catch (MediumProcessLaunchException tokenLaunchException)
+                catch (MediumProcessLaunchException tokenLaunchException) when (!_strictCurrentUserTree)
                 {
                     try
                     {
@@ -299,6 +324,7 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
         string commandLine,
         string environmentBlock,
         string workingDirectory,
+        uint expectedSessionId,
         TimeSpan timeout,
         CancellationToken ct)
     {
@@ -316,9 +342,18 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
 
             using var processHandle = new SafeKernelHandle(processInformation.ProcessHandle, ownsHandle: true);
             using var threadHandle = new SafeKernelHandle(processInformation.ThreadHandle, ownsHandle: true);
+            ProcessJobTracker.ProcessJobControl job;
             try
             {
-                ProcessJobTracker.TrackAndResume(processHandle.DangerousGetHandle(), threadHandle.DangerousGetHandle());
+                if (_strictCurrentUserTree)
+                {
+                    // 停止状態の子が想定どおりの実行ファイル・セッション・非昇格 token であることを、再開前に確認する。
+                    VerifySuspendedChild(processHandle, processInformation.ProcessId, applicationPath, expectedSessionId);
+                }
+
+                job = ProcessJobTracker.TrackAndResume(
+                    processHandle.DangerousGetHandle(),
+                    threadHandle.DangerousGetHandle());
             }
             catch
             {
@@ -327,70 +362,101 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
                 throw;
             }
 
-            using var executionCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            if (timeout != Timeout.InfiniteTimeSpan)
+            try
             {
-                executionCts.CancelAfter(timeout);
+                return await WaitForProcessAsync(processHandle, job, processInformation.ProcessId, timeout, ct)
+                    .ConfigureAwait(false);
             }
-            await Task.Run(
-                () =>
+            finally
+            {
+                if (_strictCurrentUserTree)
                 {
-                    while (true)
-                    {
-                        var waitResult = WaitForSingleObject(processHandle, ProcessPollMilliseconds);
-                        if (waitResult == WaitObject0)
-                        {
-                            return;
-                        }
-
-                        if (waitResult == WaitFailed)
-                        {
-                            throw NewWin32Exception("medium process の終了待機に失敗しました");
-                        }
-
-                        if (waitResult != WaitTimeout)
-                        {
-                            throw new InvalidOperationException(
-                                $"medium process の待機結果が不正です: 0x{waitResult:X8}");
-                        }
-
-                        if (!executionCts.IsCancellationRequested)
-                        {
-                            continue;
-                        }
-
-                        // process creation API が返した full-access handle で停止する。
-                        // 失敗しても既に終了した可能性を考慮して、有限時間だけ終了を再確認する。
-                        _ = TerminateProcess(processHandle, 1);
-                        var terminationWait = WaitForSingleObject(
-                            processHandle,
-                            TerminationWaitMilliseconds);
-                        if (terminationWait != WaitObject0)
-                        {
-                            throw terminationWait == WaitFailed
-                                ? NewWin32Exception("キャンセルした medium process の終了待機に失敗しました")
-                                : new InvalidOperationException(
-                                    "キャンセルした medium process を5秒以内に終了できませんでした");
-                        }
-
-                        return;
-                    }
-                },
-                CancellationToken.None).ConfigureAwait(false);
-
-            if (!GetExitCodeProcess(processHandle, out var exitCode))
-            {
-                throw NewWin32Exception("medium process の終了コードを取得できませんでした");
+                    // ルートが先に終了しても、Job 内の子孫を残さない。winget は Job 外のため対象にならない。
+                    job.Terminate();
+                }
             }
-
-            ct.ThrowIfCancellationRequested();
-
-            return new(unchecked((int)exitCode), executionCts.IsCancellationRequested);
         }
         finally
         {
             Marshal.FreeHGlobal(environmentPointer);
         }
+    }
+
+    private async Task<ProcessWaitResult> WaitForProcessAsync(
+        SafeKernelHandle processHandle,
+        ProcessJobTracker.ProcessJobControl job,
+        uint rawProcessId,
+        TimeSpan timeout,
+        CancellationToken ct)
+    {
+        var processId = checked((int)rawProcessId);
+        using var executionCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        if (timeout != Timeout.InfiniteTimeSpan)
+        {
+            executionCts.CancelAfter(timeout);
+        }
+        await Task.Run(
+            () =>
+            {
+                while (true)
+                {
+                    var waitResult = WaitForSingleObject(processHandle, ProcessPollMilliseconds);
+                    if (waitResult == WaitObject0)
+                    {
+                        return;
+                    }
+
+                    if (waitResult == WaitFailed)
+                    {
+                        throw NewWin32Exception("medium process の終了待機に失敗しました");
+                    }
+
+                    if (waitResult != WaitTimeout)
+                    {
+                        throw new InvalidOperationException(
+                            $"medium process の待機結果が不正です: 0x{waitResult:X8}");
+                    }
+
+                    if (!executionCts.IsCancellationRequested)
+                    {
+                        continue;
+                    }
+
+                    // process creation API が返した full-access handle で停止する。
+                    // 失敗しても既に終了した可能性を考慮して、有限時間だけ終了を再確認する。
+                    if (_strictCurrentUserTree)
+                    {
+                        // handle を保持している間は PID が再利用されないため、補助として子孫ごと止める。
+                        TryKillProcessTree(processId);
+                        // 子ごとの Job で、ツリーから外れた孫まで止める。
+                        job.Terminate();
+                    }
+
+                    _ = TerminateProcess(processHandle, 1);
+                    var terminationWait = WaitForSingleObject(
+                        processHandle,
+                        TerminationWaitMilliseconds);
+                    if (terminationWait != WaitObject0)
+                    {
+                        throw terminationWait == WaitFailed
+                            ? NewWin32Exception("キャンセルした medium process の終了待機に失敗しました")
+                            : new InvalidOperationException(
+                                "キャンセルした medium process を5秒以内に終了できませんでした");
+                    }
+
+                    return;
+                }
+            },
+            CancellationToken.None).ConfigureAwait(false);
+
+        if (!GetExitCodeProcess(processHandle, out var exitCode))
+        {
+            throw NewWin32Exception("medium process の終了コードを取得できませんでした");
+        }
+
+        ct.ThrowIfCancellationRequested();
+
+        return new(unchecked((int)exitCode), executionCts.IsCancellationRequested);
     }
 
     private static async Task<ProcessWaitResult> StartWithExplorerBrokerAsync(
@@ -592,6 +658,31 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
         }
     }
 
+    private static void TryKillProcessTree(int processId)
+    {
+        try
+        {
+            using var process = System.Diagnostics.Process.GetProcessById(processId);
+            process.Kill(entireProcessTree: true);
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or ArgumentException or Win32Exception
+                                       or AggregateException)
+        {
+            LoggerBootstrap.Log.Error($"非昇格プロセスのツリー終了に失敗しました: {ex.Message}");
+        }
+    }
+
+    private static void EnsureShellTokenIsCurrentUser(SafeAccessTokenHandle shellToken)
+    {
+        using var shellIdentity = new WindowsIdentity(shellToken.DangerousGetHandle());
+        using var currentIdentity = WindowsIdentity.GetCurrent();
+        if (!AreSameUser(shellIdentity.User, currentIdentity.User))
+        {
+            throw new InvalidOperationException(
+                "昇格に別の Windows アカウントを使用しているため、同一利用者の非昇格操作を実行できません");
+        }
+    }
+
     private static bool UserFileExists(SafeAccessTokenHandle token, string path) =>
         WindowsIdentity.RunImpersonated(token, () => File.Exists(path));
 
@@ -656,13 +747,14 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
 
     private static SafeAccessTokenHandle DuplicatePrimaryToken(
         SafeAccessTokenHandle token,
-        string tokenDescription)
+        string tokenDescription,
+        uint additionalAccess = 0)
     {
-        const uint duplicatedTokenAccess =
+        const uint baseTokenAccess =
             TokenAssignPrimary | TokenDuplicate | TokenImpersonate | TokenQuery;
         if (!DuplicateTokenEx(
                 token,
-                duplicatedTokenAccess,
+                baseTokenAccess | additionalAccess,
                 nint.Zero,
                 SecurityImpersonation,
                 TokenPrimary,
@@ -674,16 +766,107 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
         return primaryToken;
     }
 
+    private static void VerifySuspendedChild(
+        SafeKernelHandle process,
+        uint processId,
+        string expectedPath,
+        uint expectedSessionId)
+    {
+        if (!ProcessIdToSessionId(processId, out var sessionId))
+        {
+            throw NewWin32Exception("停止状態の子プロセスのセッションを取得できませんでした");
+        }
+
+        var actualPath = QueryProcessPath(process, "停止状態の子プロセス");
+        if (!OpenProcessToken(process, TokenQuery, out var childToken))
+        {
+            throw NewWin32Exception("停止状態の子プロセスの token を開けませんでした");
+        }
+
+        using (childToken)
+        {
+            using var childIdentity = new WindowsIdentity(childToken.DangerousGetHandle());
+            using var currentIdentity = WindowsIdentity.GetCurrent();
+            var facts = new LaunchedProcessFacts(
+                actualPath,
+                expectedPath,
+                sessionId,
+                expectedSessionId,
+                GetTokenIntegrityRid(childToken),
+                GetTokenUInt32(childToken, TokenIsAppContainer) != 0,
+                GetTokenUInt32(childToken, TokenElevationClass) != 0,
+                AreSameUser(childIdentity.User, currentIdentity.User));
+            var violation = FindLaunchedProcessViolation(facts);
+            if (violation is not null)
+            {
+                throw new InvalidOperationException($"停止状態の子プロセスの検証に失敗したため終了しました: {violation}");
+            }
+        }
+    }
+
+    internal readonly record struct LaunchedProcessFacts(
+        string? ActualPath,
+        string ExpectedPath,
+        uint SessionId,
+        uint ExpectedSessionId,
+        uint IntegrityRid,
+        bool IsAppContainer,
+        bool IsElevated,
+        bool SameUser);
+
+    /// <summary>再開前の子プロセスが想定どおりか判定する。不成立ならその理由、成立なら null。</summary>
+    internal static string? FindLaunchedProcessViolation(LaunchedProcessFacts facts)
+    {
+        if (!IsSameExecutablePath(facts.ActualPath, facts.ExpectedPath))
+        {
+            return $"実行ファイルが想定と異なります: {facts.ActualPath}";
+        }
+
+        if (facts.SessionId != facts.ExpectedSessionId)
+        {
+            return $"セッションが Explorer と異なります ({facts.SessionId}/{facts.ExpectedSessionId})";
+        }
+
+        if (facts.IntegrityRid > SecurityMandatoryMediumRid)
+        {
+            return $"整合性レベルが medium を超えています (RID=0x{facts.IntegrityRid:X})";
+        }
+
+        if (facts.IsAppContainer)
+        {
+            return "AppContainer の token です";
+        }
+
+        if (facts.IsElevated)
+        {
+            return "昇格した token です";
+        }
+
+        return facts.SameUser ? null : "利用者 SID が現在のプロセスと一致しません";
+    }
+
+    private static bool IsSameExecutablePath(string? actual, string expected)
+    {
+        if (string.IsNullOrWhiteSpace(actual) || !Path.IsPathFullyQualified(actual))
+        {
+            return false;
+        }
+
+        return Path.GetFullPath(actual).Equals(Path.GetFullPath(expected), StringComparison.OrdinalIgnoreCase);
+    }
+
     private static bool TokensRepresentSameUser(
         SafeAccessTokenHandle left,
         SafeAccessTokenHandle right)
     {
         using var leftIdentity = new WindowsIdentity(left.DangerousGetHandle());
         using var rightIdentity = new WindowsIdentity(right.DangerousGetHandle());
-        return leftIdentity.User is { } leftUser &&
-               rightIdentity.User is { } rightUser &&
-               leftUser.Equals(rightUser);
+        return AreSameUser(leftIdentity.User, rightIdentity.User);
     }
+
+    /// <summary>両方の SID を取得でき、かつ一致する場合だけ true。取得できない側があれば false。</summary>
+    internal static bool AreSameUser(SecurityIdentifier? left, SecurityIdentifier? right) =>
+        left is not null && right is not null && left.Equals(right);
 
     private static uint GetTokenIntegrityRid(SafeAccessTokenHandle token)
     {
@@ -752,14 +935,14 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
         }
     }
 
-    private static string QueryProcessPath(SafeKernelHandle process)
+    private static string QueryProcessPath(SafeKernelHandle process, string description = "対話中 Explorer")
     {
         const int maximumPathCharacters = 32768;
         var builder = new StringBuilder(maximumPathCharacters);
         var size = (uint)builder.Capacity;
         if (!QueryFullProcessImageNameW(process, 0, builder, ref size) || size == 0)
         {
-            throw NewWin32Exception("対話中 Explorer の実体パスを取得できませんでした");
+            throw NewWin32Exception($"{description} の実体パスを取得できませんでした");
         }
 
         return builder.ToString();
@@ -1252,7 +1435,7 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
         }
     }
 
-    private static ProcessInformation CreateMediumProcess(
+    private ProcessInformation CreateMediumProcess(
         SafeAccessTokenHandle primaryToken,
         string applicationPath,
         string commandLine,
@@ -1303,10 +1486,22 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
         }
 
         var asUserError = Marshal.GetLastWin32Error();
+        var message = BuildProcessLaunchFailureMessage(withTokenError, asUserError);
         throw new MediumProcessLaunchException(
             asUserError,
-            BuildProcessLaunchFailureMessage(withTokenError, asUserError));
+            _strictCurrentUserTree
+                ? BuildStrictLaunchFailureMessage(message, DescribeCallerJob())
+                : message);
     }
+
+    internal static string BuildStrictLaunchFailureMessage(string apiMessage, string callerJob) =>
+        $"{apiMessage}; 起動方法=複製token(+TOKEN_ADJUST_DEFAULT|TOKEN_ADJUST_SESSIONID)で " +
+        $"CreateProcessWithTokenW、失敗時 CreateProcessAsUserW; 呼出し元Job={callerJob}";
+
+    private static string DescribeCallerJob() =>
+        IsProcessInJob(GetCurrentProcess(), nint.Zero, out var belongs)
+            ? belongs ? "所属" : "未所属"
+            : $"照会失敗 Win32 {Marshal.GetLastWin32Error()}";
 
     internal static string BuildProcessLaunchFailureMessage(int withTokenError, int asUserError) =>
         "medium token で Windows PowerShell を起動できませんでした: " +
@@ -1484,6 +1679,18 @@ internal sealed class UnelevatedCommandExecutor : IUnelevatedCommandExecutor
         string currentDirectory,
         ref StartupInfo startupInfo,
         out ProcessInformation processInformation);
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("kernel32.dll", ExactSpelling = true)]
+    private static extern nint GetCurrentProcess();
+
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool IsProcessInJob(
+        nint process,
+        nint job,
+        [MarshalAs(UnmanagedType.Bool)] out bool result);
 
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [DllImport("ole32.dll", ExactSpelling = true)]
