@@ -1,0 +1,34 @@
+# 安全に関わる規約
+
+[AGENTS.md](../../AGENTS.md) から分割した詳細。
+
+## 外部プロセス実行
+
+`ICommandExecutor` → `ProcessCommandExecutor` が唯一の実装 (DI で単一登録)。DISM/regsvr32/powercfg/winget/bcdedit/MMAgent cmdlet など「OS 提供ツールが唯一の手段」のものだけ外部プロセスで実行し、レジストリ・COM・WinRT で代替可能なものは C# ネイティブで書く。
+
+- **セキュリティ (回帰厳禁)**: bare exe 名を渡すと `CreateProcess` の検索順序でインストールディレクトリが `System32` より先に照合され、昇格プロセスがバイナリプランティング LPE を踏む。`ProcessCommandExecutor` は [SystemProcessResolver](../../src/Lumin4ti.Core/Services/SystemProcessResolver.cs) でフルパス解決 + `WorkingDirectory=System32` 固定してこれを封じている。呼び出し側は論理名でよいが、この解決を外さないこと。
+- 子プロセスは [ProcessJobTracker](../../src/Lumin4ti.Core/Services/ProcessJobTracker.cs) で子ごとに独立した Job Object (KILL_ON_JOB_CLOSE) へ登録する。生成を制御できる経路では停止状態で登録してから再開し、登録失敗時は実行させない。`ct` キャンセル時はプロセスツリーごと kill。Job の共有を再導入しないこと。理由と Explorer broker 経路の制約は [DESIGN.md の OS操作の境界](../design/security.md#os操作の境界) を参照する。
+- 出力の復号とライブ進捗通知は `ProcessCommandExecutor` に集約し、呼び出し側で固定コードページを仮定しない。復号の順序は [DESIGN.md](../design/security.md#os操作の境界) を参照する。
+- サービスの停止・再開が要る操作は [WindowsServiceControl](../../src/Lumin4ti.Core/Services/Windows/WindowsServiceControl.cs) を通す。停止を確認できなければ削除・設定変更を進めず、返された `ServiceSuspension` の `ResumeAsync()` を失敗・キャンセル時も `finally` で必ず実行する。依存サービス確認、標準入力 EOF、停止・開始の期限、復帰の再照合は [DESIGN.md](../design/security.md#os操作の境界) の共通補償フローを維持し、`net stop /y` を再導入しない。復帰失敗をキャンセルや成功で隠さず `Failed` として表示する。
+
+## 破壊的操作の復元性
+
+ON/OFF設定切り替えとDefenderの既定設定へのリセットは永続バックアップを使わない。既存の旧バックアップは参照・移行・削除しない。型付きの操作直前値はメモリにだけ保持し、失敗・キャンセル時の補償と再検証は [DESIGN.md の状態と永続化](../design/data-model.md#状態と永続化) に従う。HKLMの変更は他利用者にも影響し、利用者別の共有所有者管理は行わない。Path・クイックアクセスの並べ替えはデータ書き換えとして保護バックアップを維持する。変更時は `RegistryToggleTests` と `UwpBackgroundToggleTests` の該当検証、および操作フロー検証を通す。
+
+## 一時ファイル・キャッシュの削除 (グループ実行)
+
+対象は再生成可能と確認できる既知のキャッシュ・ログ・一時領域に限り、リンク先を辿らない。対象の追加や削除処理の変更前に、回帰厳禁の安全ガードを定めた [section-01.md](section-01.md) を必ず読む。起動時再試行とサインイン時クリーンアップのタスクは [workflow.md](workflow.md) に従う。
+
+## 同時実行と終了処理
+
+状態変更は lease でマシン全体の 1 件に制限し、補償を含む `finally` より先に終了しない。変更前に [workflow.md](workflow.md#同時実行と終了処理) を必ず読む。
+
+## 昇格とデバッグ起動
+
+旧版移行は自己昇格より前、`SingleInstanceGuard` の取得は自己昇格後とする。デバッグ時の扱いを含め [workflow.md](workflow.md#昇格とデバッグ起動) に従う。
+
+## 未接続 PnP デバイスの削除
+
+[WindowsDisconnectedDeviceService](../../src/Lumin4ti.Core/Services/Windows/WindowsDisconnectedDeviceService.cs) は SetupAPI で接続中 ID とインストール済み ID の差を列挙し、ソフトウェア／仮想デバイスを含む未接続デバイスを UI へ返す。利用者が個別または全選択した項目だけを対象にし、削除直前にも再接続を確認してから `DiUninstallDevice` を呼ぶ。接続中デバイスと空の Instance ID は対象にしない。
+
+専用 UI は [DeviceCleanupViewModel](../../src/Lumin4ti.UI/ViewModels/DeviceCleanupViewModel.cs) が個別／全選択、二段階確認、削除結果の集計を担当し、`MaintenanceOperationCoordinator` の排他制御へ参加する。検証は [DisconnectedDeviceTests](../../src/Lumin4ti.Tests/DisconnectedDeviceTests.cs) とモックサービスで行い、実機デバイスを削除して確認しない。
