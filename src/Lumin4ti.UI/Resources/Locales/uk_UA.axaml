@@ -106,10 +106,6 @@
   <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">Виправляє спотворення відображення, наприклад коли імена системних папок (як-от «Завантаження») показуються англійською, шляхом повторної реєстрації shell32.dll.</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">Скинути кеш значків системного трея</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">Очищає кеш значків області сповіщень (системного трея). Усуває випадки, коли значки видалених застосунків залишаються в області прихованих значків. Ваше налаштування показу/приховування значків трея буде скинуто один раз.</x:String>
-  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">Видалити непрацездатні елементи автозавантаження</x:String>
-  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">Видаляє елементи автозавантаження (поточного користувача), виконуваний файл яких більше не існує, разом із відповідними осиротілими записами.</x:String>
-  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">Видалити неіснуючі застосунки з «Відкрити за допомогою»</x:String>
-  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">Видаляє застосунки, виконуваний файл яких більше не існує, зі списку варіантів «Відкрити за допомогою» та з реєстрації Applications.</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Label" xml:space="preserve">Виправити пошук, введення та віджети (перереєстрація системного застосунку оболонки)</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Desc" xml:space="preserve">Перереєстровує MicrosoftWindows.Client.CBS - системний застосунок, який забезпечує пошук Windows (SearchHost), введення тексту та панель емодзі (TextInputHost), а також віджети (WebExperienceHost). Допомагає, коли файли цілі, але зламано реєстрацію: поле пошуку зависає, підказки введення не з'являються, віджети лишаються порожніми. Нічого не видаляється, налаштування та журнал зберігаються. На час перереєстрації запущені процеси завершуються, і Windows запускає їх знову, коли вони потрібні.</x:String>
   <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">Очистити кеш Microsoft Store</x:String>
@@ -219,6 +215,7 @@
   <x:String x:Key="Text.Cleanup.Tab.Slim" xml:space="preserve">Зменшення розміру</x:String>
   <x:String x:Key="Text.Cleanup.Tab.Settings" xml:space="preserve">Налаштування</x:String>
   <x:String x:Key="Text.Cleanup.Tab.Other" xml:space="preserve">Інше</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Registry" xml:space="preserve">Реєстр</x:String>
   <x:String x:Key="Text.Cleanup.Action.Scan" xml:space="preserve">Сканувати</x:String>
   <x:String x:Key="Text.Cleanup.Action.Rescan" xml:space="preserve">Сканувати знову</x:String>
   <x:String x:Key="Text.Cleanup.Action.CancelScan" xml:space="preserve">Зупинити сканування</x:String>
@@ -725,6 +722,112 @@
   <x:String x:Key="Text.Cleanup.Msg.LanguageSettingsUnreadable" xml:space="preserve">Пропущено, бо мовні параметри користувачів прочитано не повністю: {0}</x:String>
   <x:String x:Key="Text.Cleanup.Msg.LanguageListUnavailable" xml:space="preserve">Не вдалося отримати або розібрати список функцій мовного введення (код виходу {0}).</x:String>
   <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderNotScannable" xml:space="preserve">Цю папку не вдалося безпечно просканувати через посилання або захист.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanMissingFile" xml:space="preserve">Указаний файл не існує: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanProgIdMissing" xml:space="preserve">Пов’язаний застосунок (ProgID) не зареєстровано: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUnknownPath" xml:space="preserve">Залишено, бо ціль не вдалося перевірити: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUnresolvedCommand" xml:space="preserve">Залишено, бо не вдалося визначити виконуваний файл за командою.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUnsupportedType" xml:space="preserve">Залишено, бо тип значення ({0}) не підтримується.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanProtectedPath" xml:space="preserve">Залишено, бо вказує на захищене розташування: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanTrustedInstaller" xml:space="preserve">Не змінено, бо належить TrustedInstaller.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanAccessDenied" xml:space="preserve">Не вдалося перевірити: доступ заборонено.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanDelegatedCommand" xml:space="preserve">Неможливо оцінити: реєстрація передає обробку іншому механізму.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanNoCommand" xml:space="preserve">Неможливо оцінити: команду для запуску не знайдено.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanEmptyValue" xml:space="preserve">Неможливо оцінити: значення порожнє.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanNoRegistration" xml:space="preserve">Неможливо оцінити: реєстрацію застосунку не знайдено.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanMsiIndeterminate" xml:space="preserve">Залишено, бо не вдалося визначити стан реєстрації в Windows Installer.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanProgIdUnverifiable" xml:space="preserve">Залишено, бо не вдалося перевірити реєстрацію пов’язаного застосунку (ProgID).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanSubtreeTooLarge" xml:space="preserve">Залишено, бо вміст розділу завеликий або занадто глибоко вкладений.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUserScopeUnavailable" xml:space="preserve">Реєстр користувача неможливо просканувати ({0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanStale" xml:space="preserve">Нічого не виконано, бо результат сканування застарів. Виконайте сканування ще раз.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanNothingSelected" xml:space="preserve">Не вибрано жодного елемента для виконання.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanRestorePointUnavailable" xml:space="preserve">Нічого не виконано, бо точка відновлення недоступна: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanCanceledNotRun" xml:space="preserve">Не виконано, бо операцію скасовано.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanNotInScan" xml:space="preserve">Не виконано, бо елемента немає в результаті сканування.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanPathNotAllowed" xml:space="preserve">Не виконано, бо видалення в цьому розташуванні заборонено.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanGone" xml:space="preserve">Залишено, бо після сканування елемента вже не існує.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanChanged" xml:space="preserve">Залишено, бо елемент змінився після сканування.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanAccessDenied" xml:space="preserve">Не видалено: доступ заборонено.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanTrustedInstaller" xml:space="preserve">Не змінено, бо належить TrustedInstaller.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanItemFailed" xml:space="preserve">Не вдалося видалити: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanBackupItemFailed" xml:space="preserve">Не видалено, бо не вдалося зберегти резервну копію: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanBackupFailed" xml:space="preserve">Нічого не видалено, бо не вдалося зберегти резервну копію: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanCoveredByOther" xml:space="preserve">Видалено разом із батьківським елементом.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanCompanionFailed" xml:space="preserve">Не вдалося видалити пов’язаний елемент: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanResultNotWritten" xml:space="preserve">Не вдалося зберегти файл результату: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreNotFound" xml:space="preserve">Резервну копію не знайдено.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreLoadFailed" xml:space="preserve">Не вдалося завантажити резервну копію: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreRejected" xml:space="preserve">Не відновлено, бо вміст резервної копії не вдалося перевірити: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreSidMismatch" xml:space="preserve">Не відновлено, бо резервна копія належить іншому користувачу.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreConflict" xml:space="preserve">Не перезаписано, бо існує інше значення.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreFailed" xml:space="preserve">Не вдалося відновити: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreVerifyFailed" xml:space="preserve">Не вдалося виконати перевірку після відновлення.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Purpose" xml:space="preserve">Очищення реєстру не пришвидшує роботу комп’ютера. Перед видаленням зберігається резервна копія, тож пізніше все можна відновити.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.NotScanned" xml:space="preserve">Сканування ще не виконувалося.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Scanning" xml:space="preserve">Сканування реєстру…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ScanDone" xml:space="preserve">Сканування завершено. Кандидатів на видалення: {0}, залишено: {1}.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ScanFailed" xml:space="preserve">Сканування не вдалося.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Stale" xml:space="preserve">Нічого не виконано, бо результат сканування застарів. Виконайте сканування ще раз.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ScanInvalidated" xml:space="preserve">Результат сканування відхилено, бо було відновлено резервну копію. Виконайте сканування ще раз.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body" xml:space="preserve">Вибрані записи реєстру ({0}) буде видалено. Спочатку буде збережено резервну копію.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithRestorePoint" xml:space="preserve">Перед виконанням буде створено точку відновлення.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">Точку відновлення створено не буде.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Running" xml:space="preserve">Видалення записів: {0}…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.RunFailed" xml:space="preserve">Не вдалося виконати операцію.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success" xml:space="preserve">Видалено записів: {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Partial" xml:space="preserve">Видалено записів: {0}; не видалено: {1}.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Failed" xml:space="preserve">Нічого не вдалося видалити (видалено: {0}, не видалено: {1}).</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Canceled" xml:space="preserve">Скасовано (видалено: {0}, не видалено: {1}).</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonLine" xml:space="preserve">{0}: {1} (елементів: {2})</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonMore" xml:space="preserve">Є ще причин іншого виду: {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.BackupSaved" xml:space="preserve">Резервну копію збережено: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.View32" xml:space="preserve">32-розрядне представлення</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Retained" xml:space="preserve">Залишено записів: {0}, бо їх неможливо оцінити або вони захищені: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Deleted" xml:space="preserve">Видалено</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Retained" xml:space="preserve">Залишено</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Skipped" xml:space="preserve">Пропущено</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Failed" xml:space="preserve">Помилка</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Restored" xml:space="preserve">Відновлено</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.AlreadyPresent" xml:space="preserve">Уже існує</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Conflict" xml:space="preserve">Конфлікт</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.NotLoaded" xml:space="preserve">Список резервних копій не завантажено.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Loaded" xml:space="preserve">Резервних копій: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.ListFailed" xml:space="preserve">Не вдалося отримати список резервних копій.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Count" xml:space="preserve">Записів: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.CountUnknown" xml:space="preserve">Кількість записів невідома</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.HasResult" xml:space="preserve">Є файл результату</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.NoResult" xml:space="preserve">Немає файлу результату</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.DeleteConfirm" xml:space="preserve">Резервну копію від {0} буде видалено. Після видалення з неї нічого не можна буде відновити.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Deleting" xml:space="preserve">Видалення резервної копії…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Deleted" xml:space="preserve">Резервну копію видалено.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.DeleteFailed" xml:space="preserve">Не вдалося видалити резервну копію.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Restoring" xml:space="preserve">Відновлення з резервної копії…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Restore.Summary" xml:space="preserve">Відновлено: {0}, уже існувало: {1}, конфліктів: {2}, пропущено: {3}, помилок: {4}.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Restore.Failed" xml:space="preserve">Не вдалося виконати відновлення.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.AppPaths.Name" xml:space="preserve">Реєстрації застосунків (App Paths)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.AppPaths.Description" xml:space="preserve">Реєстрації запуску застосунків, у яких цільового виконуваного файлу не існує.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Startup.Name" xml:space="preserve">Автозапуск</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Startup.Description" xml:space="preserve">Реєстрації, що запускаються під час старту Windows, у яких виконуваного файлу не існує. Параметр увімкнення або вимкнення автозапуску видаляється разом із ними.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Fonts.Name" xml:space="preserve">Шрифти</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Fonts.Description" xml:space="preserve">Реєстрації шрифтів, у яких файлу шрифту не існує.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Name" xml:space="preserve">Зіставлення файлів</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Description" xml:space="preserve">Зіставлення, наприклад «Відкрити за допомогою», для застосунків, яких більше немає. Параметри застосунків за замовчуванням не змінюються.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Name" xml:space="preserve">Відомості про видалення</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">Записи про видалення, у яких немає ні програми видалення, ні папки встановлення. За замовчуванням вимкнено, і кожен елемент потребує вашого підтвердження.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Name" xml:space="preserve">Спільні DLL</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">Лічильники посилань на спільні DLL, у яких самої DLL не існує. За замовчуванням вимкнено й не входить до «Вибрати все».</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Title" xml:space="preserve">Реєстр</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.ExcludedFromSelectAll" xml:space="preserve">Не входить до «Вибрати все». Вибирайте лише потрібні елементи по одному.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.RequiresApproval" xml:space="preserve">Для видалення кожен елемент потрібно підтвердити на екрані підтвердження.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.NoCandidates" xml:space="preserve">Кандидатів немає.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.ValueName" xml:space="preserve">Назва значення:</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Approval.Title" xml:space="preserve">Наступні елементи потребують окремого підтвердження. Перевірте їх і позначте ті, які можна видалити.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Title" xml:space="preserve">Резервні копії та відновлення</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Refresh" xml:space="preserve">Оновити список</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Empty" xml:space="preserve">Резервних копій немає.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Restore" xml:space="preserve">Відновити</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Delete" xml:space="preserve">Видалити резервну копію</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">Видалити цю резервну копію?</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">Видалити</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">Зразки записаних передач</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">Видаляє лише відомий зразок запису, що входив до складу Windows 7. Інші файли в папці не зачіпаються.</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Кеш програм Internet Explorer (AppCache)</x:String>

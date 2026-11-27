@@ -100,6 +100,22 @@
   <x:String x:Key="Text.Cleanup.Tab.Slim" xml:space="preserve">スリム化</x:String>
   <x:String x:Key="Text.Cleanup.Tab.Settings" xml:space="preserve">設定</x:String>
   <x:String x:Key="Text.Cleanup.Tab.Other" xml:space="preserve">その他</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Registry" xml:space="preserve">レジストリ</x:String>
+
+  <!-- レジストリタブ -->
+  <x:String x:Key="Text.Cleanup.Registry.View.Title" xml:space="preserve">レジストリ</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.ExcludedFromSelectAll" xml:space="preserve">「すべて選択」の対象外です。必要な項目だけ個別に選んでください。</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.RequiresApproval" xml:space="preserve">削除するには、確認の画面で項目ごとの承認が必要です。</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.NoCandidates" xml:space="preserve">候補はありません。</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.ValueName" xml:space="preserve">値名:</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Approval.Title" xml:space="preserve">次の項目は個別の承認が必要です。内容を確認し、削除してよい項目にチェックしてください。</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Title" xml:space="preserve">バックアップと復元</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Refresh" xml:space="preserve">一覧を更新</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Empty" xml:space="preserve">バックアップはありません。</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Restore" xml:space="preserve">復元</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Delete" xml:space="preserve">バックアップを削除</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">バックアップを削除しますか</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">削除</x:String>
 
   <!-- 共通の操作・列見出し -->
   <x:String x:Key="Text.Cleanup.Action.Scan" xml:space="preserve">走査</x:String>

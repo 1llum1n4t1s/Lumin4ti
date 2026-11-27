@@ -106,10 +106,6 @@
   <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">Corruptionem monstrationis, sicut nomina directoriorum systematis (e.g. Downloads) Anglice apparentia, per shell32.dll denuo registrandam reparat.</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">Cameram iconum in area systematis (tray) restitue</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">Cameram iconum areae notificationis (systematis tray) purgat. Casus solvit ubi icones applicationum deinstallatarum in area iconum absconditarum persistunt. Accommodatio tua monstrationis/occultationis tray semel restituitur.</x:String>
-  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">Introitus initiales fractos remove</x:String>
-  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">Introitus initiales (usoris currentis) quorum exsecutabile iam non exsistit, una cum congruentibus introitibus orbatis, removet.</x:String>
-  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">Applicationes non exsistentes e Aperi-cum remove</x:String>
-  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">Applicationes quarum exsecutabile iam non exsistit e indice candidatorum Aperi-cum et e registratione Applications removet.</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Label" xml:space="preserve">Quaesitionem, inscriptionem et widgeta reficere (applicationem systematis testae denuo registrare)</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Desc" xml:space="preserve">MicrosoftWindows.Client.CBS, applicationem systematis quae Quaesitionem Windows (SearchHost), textus inscriptionem et tabulam emojorum (TextInputHost) atque widgeta (WebExperienceHost) praebet, denuo registrat. Prodest cum tabellae integrae sunt sed registratio fracta est: capsa quaesitionis obriget, suggestiones scribendi non apparent, aut widgeta vacua manent. Nihil deinstallatur nec ullae optiones vel historia amittuntur. Processus residentes dum denuo registratur clauduntur et a Windows, cum opus est, iterum incipiuntur.</x:String>
   <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">Cameram Microsoft Store purga</x:String>
@@ -221,6 +217,7 @@
   <x:String x:Key="Text.Cleanup.Tab.Slim" xml:space="preserve">Extenuatio</x:String>
   <x:String x:Key="Text.Cleanup.Tab.Settings" xml:space="preserve">Optiones</x:String>
   <x:String x:Key="Text.Cleanup.Tab.Other" xml:space="preserve">Alia</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Registry" xml:space="preserve">Registrum</x:String>
 
   <!-- 共通の操作・列見出し -->
   <x:String x:Key="Text.Cleanup.Action.Scan" xml:space="preserve">Perscrutare</x:String>
@@ -759,6 +756,112 @@
   <x:String x:Key="Text.Cleanup.Msg.LanguageSettingsUnreadable" xml:space="preserve">Omissum est quia ordinationes linguae usorum non omnino lectae sunt: {0}</x:String>
   <x:String x:Key="Text.Cleanup.Msg.LanguageListUnavailable" xml:space="preserve">Index facultatum inputandi linguae obtineri vel interpretari non potuit (codex exitus {0}).</x:String>
   <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderNotScannable" xml:space="preserve">Hic fasciculus propter nexum vel tutelam tuto perscrutari non potuit.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanMissingFile" xml:space="preserve">Fasciculus relatus non exstat: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanProgIdMissing" xml:space="preserve">Applicatio coniuncta (ProgID) non est registrata: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUnknownPath" xml:space="preserve">Servatum quia scopus verificari non potuit: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUnresolvedCommand" xml:space="preserve">Servatum quia fasciculus exsecutabilis ex mandato cognosci non potuit.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUnsupportedType" xml:space="preserve">Servatum quia genus valoris ({0}) non sustinetur.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanProtectedPath" xml:space="preserve">Servatum quia ad locum tutum spectat: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanTrustedInstaller" xml:space="preserve">Non mutatum quia a TrustedInstaller possidetur.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanAccessDenied" xml:space="preserve">Inspici non potuit quia aditus negatus est.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanDelegatedCommand" xml:space="preserve">Diiudicari non potest quia registratio tractationem ad aliam rationem delegat.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanNoCommand" xml:space="preserve">Diiudicari non potest quia nullum mandatum exsequendum inventum est.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanEmptyValue" xml:space="preserve">Diiudicari non potest quia valor vacuus est.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanNoRegistration" xml:space="preserve">Diiudicari non potest quia nulla applicationis registratio inventa est.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanMsiIndeterminate" xml:space="preserve">Servatum quia status registrationis Windows Installer definiri non potuit.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanProgIdUnverifiable" xml:space="preserve">Servatum quia registratio applicationis coniunctae (ProgID) verificari non potuit.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanSubtreeTooLarge" xml:space="preserve">Servatum quia contenta clavis nimis magna vel nimis profunda sunt.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUserScopeUnavailable" xml:space="preserve">Registrum utentis perscrutari non potest ({0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanStale" xml:space="preserve">Nihil exsecutum est quia eventus perscrutationis obsoletus erat. Iterum perscrutare.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanNothingSelected" xml:space="preserve">Nullum elementum exsequendum selectum est.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanRestorePointUnavailable" xml:space="preserve">Nihil exsecutum est quia punctum restitutionis praesto non est: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanCanceledNotRun" xml:space="preserve">Non exsecutum quia cancellatum est.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanNotInScan" xml:space="preserve">Non exsecutum quia elementum in eventu perscrutationis non est.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanPathNotAllowed" xml:space="preserve">Non exsecutum quia locus ad deletionem non permittitur.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanGone" xml:space="preserve">Servatum quia post perscrutationem iam non exstat.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanChanged" xml:space="preserve">Servatum quia post perscrutationem mutatum est.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanAccessDenied" xml:space="preserve">Non deletum quia aditus negatus est.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanTrustedInstaller" xml:space="preserve">Non mutatum quia a TrustedInstaller possidetur.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanItemFailed" xml:space="preserve">Deleri non potuit: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanBackupItemFailed" xml:space="preserve">Non deletum quia exemplar tutum servari non potuit: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanBackupFailed" xml:space="preserve">Nihil deletum est quia exemplar tutum servari non potuit: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanCoveredByOther" xml:space="preserve">Una cum elemento parente deletum.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanCompanionFailed" xml:space="preserve">Elementum coniunctum deleri non potuit: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanResultNotWritten" xml:space="preserve">Fasciculus eventus servari non potuit: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreNotFound" xml:space="preserve">Exemplar tutum non inventum est.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreLoadFailed" xml:space="preserve">Exemplar tutum onerari non potuit: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreRejected" xml:space="preserve">Non restitutum quia contenta exemplaris tuti validari non potuerunt: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreSidMismatch" xml:space="preserve">Non restitutum quia exemplar tutum ad alium utentem pertinet.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreConflict" xml:space="preserve">Non superscriptum quia valor diversus exstat.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreFailed" xml:space="preserve">Restitui non potuit: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreVerifyFailed" xml:space="preserve">Verificatio post restitutionem defecit.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Purpose" xml:space="preserve">Purgator registri computatrum tuum celerius non facit. Exemplar tutum servatur antequam quicquam delebitur, ut postea restituere possis.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.NotScanned" xml:space="preserve">Nondum perscrutatum.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Scanning" xml:space="preserve">Registrum perscrutatur…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ScanDone" xml:space="preserve">Perscrutatio absoluta. {0} candidata deletionis, {1} servata.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ScanFailed" xml:space="preserve">Perscrutatio defecit.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Stale" xml:space="preserve">Nihil exsecutum est quia eventus perscrutationis obsoletus erat. Iterum perscrutare.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ScanInvalidated" xml:space="preserve">Eventus perscrutationis abiectus est quia exemplar tutum restitutum est. Iterum perscrutare.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body" xml:space="preserve">Ingressus registri selecti {0} delebuntur. Prius exemplar tutum servatur.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithRestorePoint" xml:space="preserve">Punctum restitutionis ante exsecutionem creatur.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">Nullum punctum restitutionis creatur.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Running" xml:space="preserve">Ingressus {0} delentur…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.RunFailed" xml:space="preserve">Exsecutio defecit.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success" xml:space="preserve">Ingressus {0} deleti sunt.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Partial" xml:space="preserve">Ingressus {0} deleti sunt; {1} non deleti sunt.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Failed" xml:space="preserve">Nihil deleri potuit ({0} deleti, {1} non deleti).</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Canceled" xml:space="preserve">Cancellatum ({0} deleti, {1} non deleti).</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonLine" xml:space="preserve">{0}: {1} ({2} elementa)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonMore" xml:space="preserve">Adhuc {0} genera causarum supersunt.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.BackupSaved" xml:space="preserve">Exemplar tutum servatum: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.View32" xml:space="preserve">Visus 32-bit</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Retained" xml:space="preserve">Ingressus {0} servati sunt quia diiudicari non possunt vel tuti sunt: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Deleted" xml:space="preserve">Deletum</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Retained" xml:space="preserve">Servatum</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Skipped" xml:space="preserve">Praetermissum</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Failed" xml:space="preserve">Defecit</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Restored" xml:space="preserve">Restitutum</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.AlreadyPresent" xml:space="preserve">Iam adest</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Conflict" xml:space="preserve">Conflictus</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.NotLoaded" xml:space="preserve">Index exemplarium tutorum nondum oneratus est.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Loaded" xml:space="preserve">Exemplaria tuta {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.ListFailed" xml:space="preserve">Index exemplarium tutorum recuperari non potuit.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Count" xml:space="preserve">Ingressus {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.CountUnknown" xml:space="preserve">Numerus ingressuum ignotus</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.HasResult" xml:space="preserve">Fasciculum eventus habet</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.NoResult" xml:space="preserve">Fasciculum eventus non habet</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.DeleteConfirm" xml:space="preserve">Exemplar tutum diei {0} delebitur. Postquam deletum erit, nihil ex eo restitui poterit.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Deleting" xml:space="preserve">Exemplar tutum delet…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Deleted" xml:space="preserve">Exemplar tutum deletum est.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.DeleteFailed" xml:space="preserve">Exemplar tutum deleri non potuit.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Restoring" xml:space="preserve">Exemplar tutum restituitur…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Restore.Summary" xml:space="preserve">{0} restituti, {1} iam adsunt, {2} conflictus, {3} praetermissi, {4} defecerunt.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Restore.Failed" xml:space="preserve">Restitutio defecit.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.AppPaths.Name" xml:space="preserve">Registrationes applicationum (App Paths)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.AppPaths.Description" xml:space="preserve">Registrationes initii applicationum quarum fasciculus exsecutabilis scopus non exstat.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Startup.Name" xml:space="preserve">Initium</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Startup.Description" xml:space="preserve">Registrationes quae initio Windows exsecuntur et quarum fasciculus exsecutabilis non exstat. Optio initii activi vel inactivi una cum eis delebitur.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Fonts.Name" xml:space="preserve">Fontes</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Fonts.Description" xml:space="preserve">Registrationes fontium quarum fasciculus fontis non exstat.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Name" xml:space="preserve">Associationes fasciculorum</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Description" xml:space="preserve">Associationes ut "Aperire cum" quarum applicatio iam non exstat. Optiones applicationis praefinitae non mutantur.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Name" xml:space="preserve">Informationes deinstallationis</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">Ingressus deinstallationis quorum deinstallator et locus installationis ambo non exstant. Praefinite inactivum est, et quodque elementum approbationem tuam requirit.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Name" xml:space="preserve">DLL communes</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">Numeri referentiarum DLL communium quarum DLL non exstat. Praefinite inactivum est et in "Omnia selige" non includitur.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Title" xml:space="preserve">Registrum</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.ExcludedFromSelectAll" xml:space="preserve">In "Omnia selige" non includitur. Elementa necessaria tantum singillatim selige.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.RequiresApproval" xml:space="preserve">Ad delendum, quodque elementum approbationem tuam in tabula confirmationis requirit.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.NoCandidates" xml:space="preserve">Nulla candidata.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.ValueName" xml:space="preserve">Nomen valoris:</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Approval.Title" xml:space="preserve">Haec elementa singillatim approbari debent. Inspice ea et signa quae deleri possunt.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Title" xml:space="preserve">Exemplaria tuta et restitutio</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Refresh" xml:space="preserve">Indicem renova</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Empty" xml:space="preserve">Nulla exemplaria tuta sunt.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Restore" xml:space="preserve">Restitue</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Delete" xml:space="preserve">Exemplar tutum dele</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">Hocne exemplar tutum delere?</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">Dele</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">Registra televisifica exempli gratia</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">Registrum exempli gratia notum tantum delet quod cum Windows 7 veniebat. Reliqui fasciculi in directorio intacti relinquuntur.</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Cella applicationum Internet Explorer (AppCache)</x:String>

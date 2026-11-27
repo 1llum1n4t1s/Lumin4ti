@@ -106,10 +106,6 @@
   <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">Memperbaiki kerusakan tampilan seperti nama folder sistem (mis. Downloads) yang tampil dalam bahasa Inggris, dengan mendaftarkan ulang shell32.dll.</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">Setel ulang cache ikon system tray</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">Membersihkan cache ikon area notifikasi (system tray). Mengatasi kasus di mana ikon aplikasi yang telah dicopot tetap tertinggal di area ikon tersembunyi. Penyesuaian tampilkan/sembunyikan ikon tray Anda disetel ulang satu kali.</x:String>
-  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">Hapus entri startup yang rusak</x:String>
-  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">Menghapus entri startup (pengguna saat ini) yang file eksekusinya sudah tidak ada, beserta entri yatim yang terkait.</x:String>
-  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">Hapus aplikasi tidak ada dari Buka dengan</x:String>
-  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">Menghapus aplikasi yang file eksekusinya sudah tidak ada dari daftar kandidat Buka dengan dan registrasi Applications.</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Label" xml:space="preserve">Perbaiki pencarian, input, dan widget (daftarkan ulang aplikasi sistem shell)</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Desc" xml:space="preserve">Mendaftarkan ulang MicrosoftWindows.Client.CBS, aplikasi sistem yang menyediakan Pencarian Windows (SearchHost), input teks dan panel emoji (TextInputHost), serta widget (WebExperienceHost). Berguna saat berkasnya baik-baik saja tetapi registrasinya rusak: kotak pencarian membeku, saran pengetikan tidak muncul, atau widget tampil kosong. Tidak ada yang dicopot dan tidak ada pengaturan atau riwayat yang hilang. Proses yang berjalan dihentikan saat pendaftaran ulang dan Windows menjalankannya lagi saat dibutuhkan.</x:String>
   <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">Bersihkan cache Microsoft Store</x:String>
@@ -219,6 +215,7 @@
   <x:String x:Key="Text.Cleanup.Tab.Slim" xml:space="preserve">Ringkas</x:String>
   <x:String x:Key="Text.Cleanup.Tab.Settings" xml:space="preserve">Pengaturan</x:String>
   <x:String x:Key="Text.Cleanup.Tab.Other" xml:space="preserve">Lainnya</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Registry" xml:space="preserve">Registri</x:String>
   <x:String x:Key="Text.Cleanup.Action.Scan" xml:space="preserve">Pindai</x:String>
   <x:String x:Key="Text.Cleanup.Action.Rescan" xml:space="preserve">Pindai ulang</x:String>
   <x:String x:Key="Text.Cleanup.Action.CancelScan" xml:space="preserve">Hentikan pemindaian</x:String>
@@ -725,6 +722,112 @@
   <x:String x:Key="Text.Cleanup.Msg.LanguageSettingsUnreadable" xml:space="preserve">Dilewati karena pengaturan bahasa pengguna tidak dapat dibaca sepenuhnya: {0}</x:String>
   <x:String x:Key="Text.Cleanup.Msg.LanguageListUnavailable" xml:space="preserve">Tidak dapat memperoleh atau menafsirkan daftar fitur input bahasa (kode keluar {0}).</x:String>
   <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderNotScannable" xml:space="preserve">Folder ini tidak dapat dipindai dengan aman karena tautan atau perlindungan.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanMissingFile" xml:space="preserve">File yang dirujuk tidak ada: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanProgIdMissing" xml:space="preserve">Aplikasi terkait (ProgID) tidak terdaftar: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUnknownPath" xml:space="preserve">Dipertahankan karena target tidak dapat diverifikasi: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUnresolvedCommand" xml:space="preserve">Dipertahankan karena file eksekusi tidak dapat ditentukan dari perintah.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUnsupportedType" xml:space="preserve">Dipertahankan karena jenis nilai ({0}) tidak didukung.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanProtectedPath" xml:space="preserve">Dipertahankan karena menunjuk ke lokasi yang dilindungi: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanTrustedInstaller" xml:space="preserve">Tidak diubah karena dimiliki oleh TrustedInstaller.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanAccessDenied" xml:space="preserve">Tidak dapat diperiksa karena akses ditolak.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanDelegatedCommand" xml:space="preserve">Tidak dapat dinilai karena pendaftaran menyerahkan penanganan ke mekanisme lain.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanNoCommand" xml:space="preserve">Tidak dapat dinilai karena tidak ditemukan perintah yang dijalankan.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanEmptyValue" xml:space="preserve">Tidak dapat dinilai karena nilainya kosong.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanNoRegistration" xml:space="preserve">Tidak dapat dinilai karena pendaftaran aplikasi tidak ditemukan.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanMsiIndeterminate" xml:space="preserve">Dipertahankan karena status pendaftaran Windows Installer tidak dapat ditentukan.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanProgIdUnverifiable" xml:space="preserve">Dipertahankan karena pendaftaran aplikasi terkait (ProgID) tidak dapat diverifikasi.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanSubtreeTooLarge" xml:space="preserve">Dipertahankan karena isi kunci terlalu besar atau terlalu dalam.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUserScopeUnavailable" xml:space="preserve">Registri pengguna tidak dapat dipindai ({0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanStale" xml:space="preserve">Tidak ada yang dijalankan karena hasil pemindaian sudah usang. Pindai ulang.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanNothingSelected" xml:space="preserve">Tidak ada item yang dapat dijalankan yang dipilih.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanRestorePointUnavailable" xml:space="preserve">Tidak ada yang dijalankan karena titik pemulihan tidak tersedia: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanCanceledNotRun" xml:space="preserve">Tidak dijalankan karena dibatalkan.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanNotInScan" xml:space="preserve">Tidak dijalankan karena item tidak ada dalam hasil pemindaian.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanPathNotAllowed" xml:space="preserve">Tidak dijalankan karena lokasi tidak diizinkan untuk dihapus.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanGone" xml:space="preserve">Dipertahankan karena sudah tidak ada sejak pemindaian.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanChanged" xml:space="preserve">Dipertahankan karena berubah setelah pemindaian.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanAccessDenied" xml:space="preserve">Tidak dihapus karena akses ditolak.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanTrustedInstaller" xml:space="preserve">Tidak diubah karena dimiliki oleh TrustedInstaller.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanItemFailed" xml:space="preserve">Tidak dapat dihapus: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanBackupItemFailed" xml:space="preserve">Tidak dihapus karena cadangan tidak dapat disimpan: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanBackupFailed" xml:space="preserve">Tidak ada yang dihapus karena cadangan tidak dapat disimpan: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanCoveredByOther" xml:space="preserve">Dihapus bersama item induknya.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanCompanionFailed" xml:space="preserve">Item terkait tidak dapat dihapus: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanResultNotWritten" xml:space="preserve">File hasil tidak dapat disimpan: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreNotFound" xml:space="preserve">Cadangan tidak ditemukan.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreLoadFailed" xml:space="preserve">Cadangan tidak dapat dimuat: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreRejected" xml:space="preserve">Tidak dipulihkan karena isi cadangan tidak dapat divalidasi: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreSidMismatch" xml:space="preserve">Tidak dipulihkan karena cadangan milik pengguna lain.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreConflict" xml:space="preserve">Tidak ditimpa karena sudah ada nilai yang berbeda.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreFailed" xml:space="preserve">Tidak dapat dipulihkan: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreVerifyFailed" xml:space="preserve">Verifikasi setelah pemulihan gagal.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Purpose" xml:space="preserve">Pembersih registri tidak membuat PC Anda lebih cepat. Cadangan disimpan sebelum apa pun dihapus, sehingga Anda dapat memulihkannya nanti.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.NotScanned" xml:space="preserve">Belum dipindai.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Scanning" xml:space="preserve">Memindai registri…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ScanDone" xml:space="preserve">Pemindaian selesai. {0} kandidat penghapusan, {1} dipertahankan.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ScanFailed" xml:space="preserve">Pemindaian gagal.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Stale" xml:space="preserve">Tidak ada yang dijalankan karena hasil pemindaian sudah usang. Pindai ulang.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ScanInvalidated" xml:space="preserve">Hasil pemindaian dibuang karena cadangan telah dipulihkan. Pindai ulang.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body" xml:space="preserve">{0} entri registri yang dipilih akan dihapus. Cadangan disimpan terlebih dahulu.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithRestorePoint" xml:space="preserve">Titik pemulihan dibuat sebelum menjalankan.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">Titik pemulihan tidak dibuat.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Running" xml:space="preserve">Menghapus {0} entri…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.RunFailed" xml:space="preserve">Proses gagal dijalankan.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success" xml:space="preserve">{0} entri dihapus.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Partial" xml:space="preserve">{0} entri dihapus; {1} tidak dihapus.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Failed" xml:space="preserve">Tidak ada yang dapat dihapus ({0} dihapus, {1} tidak dihapus).</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Canceled" xml:space="preserve">Dibatalkan ({0} dihapus, {1} tidak dihapus).</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonLine" xml:space="preserve">{0}: {1} ({2} item)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonMore" xml:space="preserve">Masih ada {0} jenis alasan lain.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.BackupSaved" xml:space="preserve">Cadangan disimpan: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.View32" xml:space="preserve">Tampilan 32-bit</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Retained" xml:space="preserve">{0} entri dipertahankan karena tidak dapat dinilai atau dilindungi: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Deleted" xml:space="preserve">Dihapus</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Retained" xml:space="preserve">Dipertahankan</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Skipped" xml:space="preserve">Dilewati</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Failed" xml:space="preserve">Gagal</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Restored" xml:space="preserve">Dipulihkan</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.AlreadyPresent" xml:space="preserve">Sudah ada</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Conflict" xml:space="preserve">Konflik</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.NotLoaded" xml:space="preserve">Daftar cadangan belum dimuat.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Loaded" xml:space="preserve">{0} cadangan</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.ListFailed" xml:space="preserve">Daftar cadangan tidak dapat diambil.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Count" xml:space="preserve">{0} entri</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.CountUnknown" xml:space="preserve">Jumlah entri tidak diketahui</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.HasResult" xml:space="preserve">Ada file hasil</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.NoResult" xml:space="preserve">Tidak ada file hasil</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.DeleteConfirm" xml:space="preserve">Cadangan dari {0} akan dihapus. Setelah dihapus, tidak ada yang dapat dipulihkan darinya.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Deleting" xml:space="preserve">Menghapus cadangan…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Deleted" xml:space="preserve">Cadangan telah dihapus.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.DeleteFailed" xml:space="preserve">Cadangan tidak dapat dihapus.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Restoring" xml:space="preserve">Memulihkan cadangan…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Restore.Summary" xml:space="preserve">{0} dipulihkan, {1} sudah ada, {2} konflik, {3} dilewati, {4} gagal.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Restore.Failed" xml:space="preserve">Pemulihan gagal.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.AppPaths.Name" xml:space="preserve">Pendaftaran aplikasi (App Paths)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.AppPaths.Description" xml:space="preserve">Pendaftaran peluncuran aplikasi yang file eksekusi targetnya tidak ada.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Startup.Name" xml:space="preserve">Startup</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Startup.Description" xml:space="preserve">Pendaftaran yang berjalan saat Windows dimulai dan file eksekusinya tidak ada. Pengaturan aktif/nonaktif startup ikut dihapus bersamanya.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Fonts.Name" xml:space="preserve">Font</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Fonts.Description" xml:space="preserve">Pendaftaran font yang file fontnya tidak ada.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Name" xml:space="preserve">Asosiasi file</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Description" xml:space="preserve">Asosiasi seperti "Buka dengan" yang aplikasinya sudah tidak ada. Pengaturan aplikasi default tidak diubah.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Name" xml:space="preserve">Informasi penghapusan instalasi</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">Entri penghapusan instalasi yang program pencopot instalasi dan lokasi instalasinya sama-sama tidak ada. Nonaktif secara default, dan setiap item memerlukan persetujuan Anda.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Name" xml:space="preserve">Shared DLL</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">Hitungan referensi Shared DLL yang DLL-nya tidak ada. Nonaktif secara default dan tidak termasuk dalam "Pilih semua".</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Title" xml:space="preserve">Registri</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.ExcludedFromSelectAll" xml:space="preserve">Tidak termasuk dalam "Pilih semua". Pilih satu per satu hanya item yang Anda perlukan.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.RequiresApproval" xml:space="preserve">Untuk menghapus, setiap item memerlukan persetujuan Anda di layar konfirmasi.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.NoCandidates" xml:space="preserve">Tidak ada kandidat.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.ValueName" xml:space="preserve">Nama nilai:</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Approval.Title" xml:space="preserve">Item berikut memerlukan persetujuan satu per satu. Tinjau dan centang yang boleh dihapus.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Title" xml:space="preserve">Cadangan dan pemulihan</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Refresh" xml:space="preserve">Segarkan daftar</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Empty" xml:space="preserve">Tidak ada cadangan.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Restore" xml:space="preserve">Pulihkan</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Delete" xml:space="preserve">Hapus cadangan</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">Hapus cadangan ini?</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">Hapus</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">Acara TV rekaman contoh</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">Hanya menghapus rekaman contoh yang dikenal dan disertakan dengan Windows 7. File lain di folder dibiarkan.</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Cache aplikasi Internet Explorer (AppCache)</x:String>

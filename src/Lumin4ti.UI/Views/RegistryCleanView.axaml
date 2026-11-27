@@ -1,0 +1,178 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Lumin4ti.UI.ViewModels"
+             x:Class="Lumin4ti.UI.Views.RegistryCleanView"
+             x:DataType="vm:RegistryCleanViewModel">
+
+  <!--  レジストリ (削除側): 走査 → カテゴリー別選択 → 確認 (アンインストールは項目ごとの承認) → 実行 → 結果。自動では走査も削除もしない。  -->
+  <StackPanel Margin="8,0" Spacing="8">
+    <TextBlock Classes="h1" Text="{DynamicResource Text.Cleanup.Registry.View.Title}" />
+    <!--  動作が速くなるものではなく、バックアップから戻せる旨。常に表示する。  -->
+    <TextBlock Classes="caption" TextWrapping="Wrap" Text="{Binding PurposeText}" />
+
+    <WrapPanel Orientation="Horizontal">
+      <Button Margin="0,0,8,0" Content="{Binding ScanButtonText}"
+              Command="{Binding ScanCommand}" IsEnabled="{Binding CanScan}" />
+      <Button Margin="0,0,8,0" Content="{DynamicResource Text.Cleanup.Action.CancelScan}"
+              Command="{Binding CancelCommand}"
+              IsVisible="{Binding IsRunning}" IsEnabled="{Binding CanCancel}" />
+      <Button Margin="0,0,8,0" Content="{DynamicResource Text.Cleanup.Select.All}"
+              Command="{Binding SelectAllCommand}" IsEnabled="{Binding CanEditSelection}" />
+      <Button Margin="0,0,8,0" Content="{DynamicResource Text.Cleanup.Select.None}"
+              Command="{Binding ClearSelectionCommand}" IsEnabled="{Binding CanEditSelection}" />
+    </WrapPanel>
+
+    <StackPanel Spacing="4" IsVisible="{Binding IsRunning}">
+      <ProgressBar IsIndeterminate="True" Height="4" />
+      <TextBlock Text="{Binding Label}" TextWrapping="Wrap" />
+      <TextBlock Classes="caption" Text="{Binding ProgressText}" TextWrapping="Wrap"
+                 IsVisible="{Binding ProgressText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+    </StackPanel>
+
+    <TextBlock Text="{Binding StatusText}" TextWrapping="Wrap"
+               IsVisible="{Binding StatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+    <!--  HKCU を走査できなかったときの注記。  -->
+    <TextBlock Foreground="#FFB020" TextWrapping="Wrap" Text="{Binding UserScopeNote}" IsVisible="{Binding HasUserScopeNote}" />
+
+    <!--  カテゴリー別。行が多いので、各カテゴリーの一覧は高さを抑えて仮想化する。  -->
+    <ItemsControl ItemsSource="{Binding Groups}" IsVisible="{Binding HasScan}" IsEnabled="{Binding !IsRunning}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:RegistryCleanGroupViewModel">
+          <Expander Margin="0,0,0,6" IsExpanded="True" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+            <Expander.Header>
+              <StackPanel Orientation="Horizontal" Spacing="12">
+                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <TextBlock Classes="caption" VerticalAlignment="Center">
+                  <Run Text="{Binding SelectedCount}" />
+                  <Run Text=" / " />
+                  <Run Text="{Binding Rows.Count}" />
+                </TextBlock>
+              </StackPanel>
+            </Expander.Header>
+            <StackPanel Spacing="4">
+              <TextBlock Classes="caption" Text="{Binding Description}" TextWrapping="Wrap" />
+              <TextBlock Classes="caption" TextWrapping="Wrap" IsVisible="{Binding ExcludedFromSelectAll}"
+                         Text="{DynamicResource Text.Cleanup.Registry.View.ExcludedFromSelectAll}" />
+              <TextBlock Foreground="#FFB020" TextWrapping="Wrap" IsVisible="{Binding RequiresApproval}"
+                         Text="{DynamicResource Text.Cleanup.Registry.View.RequiresApproval}" />
+              <TextBlock Classes="caption" TextWrapping="Wrap" Text="{Binding RetainedText}" IsVisible="{Binding HasRetained}" />
+              <TextBlock Classes="caption" IsVisible="{Binding !HasRows}"
+                         Text="{DynamicResource Text.Cleanup.Registry.View.NoCandidates}" />
+              <ListBox ItemsSource="{Binding Rows}" IsVisible="{Binding HasRows}" MaxHeight="320"
+                       Background="Transparent" BorderThickness="0"
+                       ScrollViewer.VerticalScrollBarVisibility="Auto"
+                       ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.Styles>
+                  <Style Selector="ListBoxItem">
+                    <Setter Property="Padding" Value="0" />
+                    <Setter Property="Margin" Value="0" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Background" Value="Transparent" />
+                  </Style>
+                  <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                    <Setter Property="Background" Value="Transparent" />
+                  </Style>
+                </ListBox.Styles>
+                <ListBox.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                  </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:RegistryCleanRowViewModel">
+                    <Border Padding="8,6" Margin="0,0,0,4" CornerRadius="8"
+                            BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1">
+                      <Grid ColumnDefinitions="Auto,*">
+                        <CheckBox Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Top"
+                                  IsChecked="{Binding IsSelected}" IsEnabled="{Binding IsCheckEnabled}"
+                                  AutomationProperties.Name="{Binding FullKeyPath}" />
+                        <StackPanel Grid.Column="1" Spacing="2">
+                          <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Classes="caption" FontWeight="SemiBold" Text="{Binding HiveText}" />
+                            <TextBlock Classes="caption" Foreground="#FFB020" Text="{Binding ViewText}" IsVisible="{Binding Is32BitView}" />
+                          </StackPanel>
+                          <TextBlock Text="{Binding KeyPath}" TextWrapping="Wrap" />
+                          <TextBlock Classes="caption" TextWrapping="Wrap" IsVisible="{Binding HasValueName}">
+                            <Run Text="{DynamicResource Text.Cleanup.Registry.View.ValueName}" />
+                            <Run Text="{Binding ValueName}" />
+                          </TextBlock>
+                          <TextBlock Classes="caption" Text="{Binding ReasonText}" TextWrapping="Wrap" />
+                        </StackPanel>
+                      </Grid>
+                    </Border>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </StackPanel>
+          </Expander>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+
+    <Button HorizontalAlignment="Left" Classes="danger"
+            Content="{DynamicResource Text.Cleanup.Action.Clean}"
+            Command="{Binding RequestRunCommand}" IsEnabled="{Binding CanRequestRun}"
+            IsVisible="{Binding HasScan}" />
+
+    <!--  確認 (復元ポイントの方針・アンインストールの個別承認)。  -->
+    <Border Padding="12,10" CornerRadius="10" IsVisible="{Binding IsConfirming}"
+            Background="#18FF3B30" BorderBrush="#66FF3B30" BorderThickness="1">
+      <StackPanel Spacing="8">
+        <TextBlock Text="{DynamicResource Text.Cleanup.Slim.Ui.Confirm.Title}" FontWeight="SemiBold" />
+        <TextBlock Text="{Binding ConfirmText}" TextWrapping="Wrap" />
+        <CheckBox Content="{DynamicResource Text.Cleanup.Slim.Ui.CreateRestorePoint}"
+                  IsChecked="{Binding CreateRestorePoint}" IsEnabled="{Binding !IsRunning}" />
+        <TextBlock Text="{Binding RestorePointNote}" TextWrapping="Wrap"
+                   IsVisible="{Binding RestorePointNote, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        <StackPanel Spacing="6" IsVisible="{Binding HasApprovalRows}">
+          <TextBlock Text="{DynamicResource Text.Cleanup.Registry.View.Approval.Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+          <ScrollViewer MaxHeight="240" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{Binding ApprovalRows}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:RegistryCleanRowViewModel">
+                  <CheckBox Margin="0,0,0,4" IsChecked="{Binding IsApproved}"
+                            AutomationProperties.Name="{Binding FullKeyPath}">
+                    <StackPanel Spacing="2">
+                      <TextBlock Text="{Binding FullKeyPath}" TextWrapping="Wrap" />
+                      <TextBlock Classes="caption" TextWrapping="Wrap" IsVisible="{Binding HasValueName}">
+                        <Run Text="{DynamicResource Text.Cleanup.Registry.View.ValueName}" />
+                        <Run Text="{Binding ValueName}" />
+                      </TextBlock>
+                      <TextBlock Classes="caption" Text="{Binding ReasonText}" TextWrapping="Wrap" />
+                    </StackPanel>
+                  </CheckBox>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </StackPanel>
+        <WrapPanel Orientation="Horizontal">
+          <Button Classes="danger" Margin="0,0,8,0" Content="{DynamicResource Text.Button.Run}"
+                  Command="{Binding ConfirmRunCommand}" IsEnabled="{Binding CanConfirm}" />
+          <Button Content="{DynamicResource Text.Button.Cancel}" Command="{Binding CancelConfirmCommand}" />
+        </WrapPanel>
+      </StackPanel>
+    </Border>
+
+    <!--  実行後: 要約・代表理由 (最大 8 行)・バックアップ・復元ポイント。  -->
+    <StackPanel Spacing="4" IsVisible="{Binding ResultSummary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+      <TextBlock Text="{Binding ResultSummary}" FontWeight="SemiBold" TextWrapping="Wrap" />
+      <ItemsControl ItemsSource="{Binding ResultReasons}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="x:String">
+            <TextBlock Classes="caption" Text="{Binding}" TextWrapping="Wrap" />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <TextBlock Classes="caption" Text="{Binding ResultMoreText}" TextWrapping="Wrap"
+                 IsVisible="{Binding ResultMoreText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      <TextBlock Text="{Binding ResultMessageText}" TextWrapping="Wrap"
+                 IsVisible="{Binding ResultMessageText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      <TextBlock Text="{Binding BackupText}" TextWrapping="Wrap"
+                 IsVisible="{Binding BackupText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      <TextBlock Text="{Binding RestorePointResultText}" TextWrapping="Wrap"
+                 IsVisible="{Binding RestorePointResultText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+    </StackPanel>
+  </StackPanel>
+</UserControl>

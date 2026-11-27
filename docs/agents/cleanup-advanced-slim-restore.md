@@ -19,5 +19,5 @@
 ## その他タブに残る項目
 
 - `cleanup-shell-cache`（アイコン・サムネイル・フォントキャッシュ）は旧カードのまま残す。`ShellCacheTargets`、項目 ID、`CleanupExclusions`、起動時再試行（[workflow.md](workflow.md)）を変えない。
-- Windows のイベントログ、Defender の検出履歴、GPU 設定、スタートアップ登録、ファイル関連付け、アプリのパッケージ登録、WinSxS の旧コンポーネントは規則データで扱わない。リンク切れスタートアップと関連付け候補だけは専用アクションで扱い、`StartupCommandParser.IsConfirmedMissing` が準備済み固定ドライブ上の欠損を確定できた登録だけを削除する。UNC、リムーバブル、未準備ドライブ、再解析点配下、アクセス不能、解決不能なコマンドは保持する。
+- Windows のイベントログ、Defender の検出履歴、GPU 設定、アプリのパッケージ登録、WinSxS の旧コンポーネントは規則データで扱わない。スタートアップ登録とファイル関連付けは旧アクション `remove-broken-startup`・`remove-dead-associations` を撤去し、レジストリタブ（[registry-cleaner-guards.md](registry-cleaner-guards.md)）が担う。`StartupCommandParser` は共有のため残す。
 - 無効なショートカット・無効なタスクは `ShellLinkReader` と同じ確定欠損の基準で扱い、PIDL のみ・広告型のショートカットと `\Microsoft\` 配下のタスクは保持する。

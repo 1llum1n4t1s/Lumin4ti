@@ -8,7 +8,7 @@
 
 - `%APPDATA%\Lumin4ti\settings.json`: 言語、自動更新確認、除外パスなどの利用者設定。クリーンアップの設定は`Cleanup`に持ち、外した規則の上書き、除外4種、カスタムフォルダー、高度なクリーンのパターン選択、安全な削除と復元ポイントの設定、累計と前回の実績を保存する。有効なものではなく外したものだけを記録するため、更新で規則が増えても選択は無効化されない。旧`CleanupExclusions`は旧版への戻しのため残し、旧設定の予約項目は無視され次の保存で消える。
 - `%LOCALAPPDATA%\Lumin4ti\logs\`: 起動、操作、例外、移行の診断ログ。旧インストール先を回収するときも保持する。
-- `%ProgramData%\Lumin4ti\backups\`: Pathなどデータ書き換えの保護バックアップと起動時再試行のキュー。AdministratorsとSYSTEMだけが変更できるACLを検証する。旧版が置いたタスク登録用XMLは旧タスクの移行で削除する。
+- `%ProgramData%\Lumin4ti\backups\`: Pathなどデータ書き換えの保護バックアップと起動時再試行のキュー。AdministratorsとSYSTEMだけが変更できるACLを検証する。レジストリタブの削除前バックアップは`registry\<UTC時刻>-<GUID>.json`（型付きJSON。版・SID・ハイブ（HKLM・利用者・利用者の Classes）・表示・キーパス・値の名前・型・元バイト列・カテゴリーを持つ）と`<id>.result.json`で、自動削除せず、一覧から復元する（[registry-cleaner.md](registry-cleaner.md)）。旧版が置いたタスク登録用XMLは旧タスクの移行で削除する。
 
 ## ログ移行と設定保存
 

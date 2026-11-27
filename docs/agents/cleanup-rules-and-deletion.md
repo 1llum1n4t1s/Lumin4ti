@@ -2,7 +2,7 @@
 
 [security.md](security.md) から分割した詳細。
 
-クリーンアップは「通常」「高度」「スリム化」「設定」「その他」の 5 タブで構成する。通常は規則データ、高度は拡張子パターン、スリム化は固定の項目表を対象にする。実装は [Cleanup/](../../src/Lumin4ti.Core/Services/Windows/Cleanup/) に置く。構造と設計判断は [DESIGN.md](../../DESIGN.md) と [設計の詳細](../design/cleanup-design.md) を参照する。
+クリーンアップは「通常」「高度」「スリム化」「レジストリ」「設定」「その他」の 6 タブで構成する。通常は規則データ、高度は拡張子パターン、スリム化は固定の項目表を対象にする。レジストリは規則データを使わず、専用の判定・バックアップ・復元を持つ（[registry-cleaner-guards.md](registry-cleaner-guards.md)）。実装は [Cleanup/](../../src/Lumin4ti.Core/Services/Windows/Cleanup/) に置く。構造と設計判断は [DESIGN.md](../../DESIGN.md) と [設計の詳細](../design/cleanup-design.md) を参照する。
 
 ## トピック別の詳細
 

@@ -14,7 +14,7 @@ Lumin4ti は Windows 10 / 11（x64）向けのメンテナンス・最適化GUI�
 
 ## 処理の流れ
 
-旧配置の移行は自己昇格より前に行い、昇格後に単一起動 mutex を取得する。操作はカタログの Action / BatchSetting / Toggle / Choice を ViewModel が lease 内で実行し、結果と実状態を画面へ返す。クリーンアップは通常・高度・スリム化・設定・その他の 5 タブで、Core が規則データ（埋め込み JSON）と固定の項目表を走査し、選ばれた項目だけを同一ハンドルで削除する。旧サインイン時クリーンアップは廃止し、残存タスクは起動時に自己移行で取り除く。流れの詳細は [workflow.md](docs/design/workflow.md) を参照する。
+旧配置の移行は自己昇格より前に行い、昇格後に単一起動 mutex を取得する。操作はカタログの Action / BatchSetting / Toggle / Choice を ViewModel が lease 内で実行し、結果と実状態を画面へ返す。クリーンアップは通常・高度・スリム化・レジストリ・設定・その他の 6 タブで、Core が規則データ（埋め込み JSON）と固定の項目表を走査し、選ばれた項目だけを同一ハンドルで削除する。旧サインイン時クリーンアップは廃止し、残存タスクは起動時に自己移行で取り除く。
 
 ## OS操作の境界
 
@@ -47,7 +47,7 @@ ON/OFF 設定は永続バックアップを持たず、直前値をメモリに�
 - [reboot-cache-retry.md](docs/design/reboot-cache-retry.md): 使用中キャッシュの次回起動での再試行。
 - [data-model.md](docs/design/data-model.md): 設定・ログ・バックアップと同一ハンドル操作。
 - [toggle-and-uwp-settings.md](docs/design/toggle-and-uwp-settings.md): ON/OFF・VBS/HVCI・UWP 一括設定と補償。
-- [cleanup-design.md](docs/design/cleanup-design.md): クリーンアップ 5 タブの構成。
+- [cleanup-design.md](docs/design/cleanup-design.md): クリーンアップのタブ構成。
 - [cleanup-rules-data.md](docs/design/cleanup-rules-data.md): 埋め込み規則と検証、基点の信頼確認。
 - [cleanup-scan-deletion.md](docs/design/cleanup-scan-deletion.md): 走査の世代と同一ハンドル削除。
 - [cleanup-guards-handlers.md](docs/design/cleanup-guards-handlers.md): 拒否ガード、SQLite、固定ハンドラー。

@@ -9,7 +9,7 @@
 - 環境変数は許可名だけを既知フォルダーで展開する。機械側: `SystemRoot` `windir` `SystemDrive` `ProgramFiles` `ProgramFiles(x86)` `ProgramW6432` `CommonProgramFiles` `CommonProgramFiles(x86)` `CommonProgramW6432` `ProgramData` `ALLUSERSPROFILE`。利用者側（HKCU の値のみ、`CleanupBaseTrust` の ProfileList 照合を通す）: `USERPROFILE` `LOCALAPPDATA` `APPDATA`。それ以外・展開後に `%` が残れば `Unknown`。
 - WOW6432Node の値は `System32` を SysWOW64 と System32、`Sysnative` を System32、`ProgramFiles` / `CommonProgramFiles` を 64 ビット版と (x86) 版の両方で確認し、全候補で欠損確定の場合だけ対象にする。
 - 保護（保持）: `%SystemRoot%` 配下（フォントだけ `%windir%\Fonts` を許可）、`Program Files*\Windows*`、`Program Files\WindowsApps`、`%LOCALAPPDATA%\Microsoft\WindowsApps`、TrustedInstaller 所有のキー。
-- キーは各階層を `REG_OPTION_OPEN_LINK` で開いてリンクを拒否し、同じハンドルで削除する。HKCU は `HKEY_USERS\<SID>` を基点にし、対話利用者と昇格利用者の SID が違えば HKCU カテゴリーを無効にして理由を出す（`InteractiveScope`）。他の利用者のハイブは対象外。
+- キーは各階層を `REG_OPTION_OPEN_LINK` で開いてリンクを拒否し、同じハンドルで削除する。HKCU は `HKEY_USERS\<SID>` を基点にし（利用者の Classes はリンクの `Software\Classes` を開かず `HKEY_USERS\<SID>_Classes` を直接開く。32 ビット表示の App Paths は 64 ビット側と共有のため走査しない）、対話利用者と昇格利用者の SID が違えば HKCU カテゴリーを無効にして理由を出す（`InteractiveScope`）。他の利用者のハイブは対象外。
 - `Unknown`・保護は選択肢に出さず、カテゴリーごとに保持件数と理由を出す。
 
 ## カテゴリー別

@@ -10,7 +10,7 @@ using Lumin4ti.UI.Services;
 namespace Lumin4ti.UI.ViewModels;
 
 /// <summary>
-/// 左の「クリーンアップ」タブ。内側に 通常／高度／スリム化／設定／その他 の 5 タブを持つ。
+/// 左の「クリーンアップ」タブ。内側に 通常／高度／スリム化／レジストリ／設定／その他 の 6 タブを持つ。
 /// 「その他」は従来の <see cref="CommandCategoryViewModel"/> (カタログに残る項目) をそのまま使う。
 /// 構築しても走査・削除は始めない (起動時・再アクティブ時に自動で走らせない)。
 /// </summary>
@@ -22,6 +22,10 @@ public sealed class CleanupViewModel : ObservableObject
 
     public SlimViewModel Slim { get; }
 
+    internal RegistryCleanViewModel Registry { get; }
+
+    internal RegistryRestoreViewModel RegistryRestore { get; }
+
     public CleanupSettingsViewModel Settings { get; }
 
     /// <summary>「その他」タブ。<see cref="CommandCategory.Cleanup"/> の項目。</summary>
@@ -30,12 +34,15 @@ public sealed class CleanupViewModel : ObservableObject
     /// <summary>実行中表示の対象にする操作 (MainWindowViewModel が購読する)。</summary>
     public IReadOnlyList<IProcessingOperation> Operations { get; }
 
-    public CleanupViewModel(
+    // レジストリ側の ViewModel は internal のため、コンストラクターも internal (App.axaml.cs が手動で組み立てる)。
+    internal CleanupViewModel(
         MaintenanceActionCatalog catalog,
         MaintenanceOperationCoordinator coordinator,
         CommonCleanViewModel common,
         AdvancedCleanViewModel advanced,
         SlimViewModel slim,
+        RegistryCleanViewModel registry,
+        RegistryRestoreViewModel registryRestore,
         CleanupSettingsViewModel settings)
     {
         ArgumentNullException.ThrowIfNull(catalog);
@@ -43,6 +50,8 @@ public sealed class CleanupViewModel : ObservableObject
         Common = common;
         Advanced = advanced;
         Slim = slim;
+        Registry = registry;
+        RegistryRestore = registryRestore;
         Settings = settings;
         Other = new CommandCategoryViewModel(
             catalog,
@@ -50,7 +59,7 @@ public sealed class CleanupViewModel : ObservableObject
             CommandCategory.Cleanup,
             "クリーンアップ",
             "ディスク領域の回収と、不要なファイル・登録情報の削除を行います。");
-        Operations = [Common, Advanced, Slim, Settings];
+        Operations = [Common, Advanced, Slim, Registry, RegistryRestore, Settings];
     }
 
     /// <summary>「その他」のトグル状態を読み込む (MainWindowViewModel の一括再読込から呼ぶ)。</summary>

@@ -106,10 +106,6 @@
   <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">shell32.dll पुनः पञ्जीकृत्य, तन्त्रसंपुटनामानि (यथा Downloads) आङ्ग्लभाषायां प्रदर्श्यन्ते इत्यादिकं प्रदर्शनभ्रष्टतां संस्करोति।</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">तन्त्रफलक-प्रतीकनिधिं प्रत्यानय</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">सूचनाक्षेत्रस्य (तन्त्रफलकस्य) प्रतीकनिधिं परिमार्ष्टि। विस्थापितानाम् अनुप्रयोगानां प्रतीकानि गुप्तप्रतीकक्षेत्रे तिष्ठन्ति इति स्थितीः निवारयति। तव फलक-प्रदर्शन/गोपन-अनुकूलनम् एकवारं प्रत्यानीयते।</x:String>
-  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">भग्नप्रारम्भप्रविष्टीः अपनय</x:String>
-  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">यासां निष्पादनसञ्चिका न अस्ति ताः प्रारम्भप्रविष्टीः (वर्तमानप्रयोक्तुः) तत्संबद्धानाथप्रविष्टिभिः सह अपनयति।</x:String>
-  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">Open-with-तः अविद्यमानान् अनुप्रयोगान् अपनय</x:String>
-  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">यासां निष्पादनसञ्चिका न अस्ति तान् अनुप्रयोगान् Open-with-प्रत्याशिसूचीतः Applications-पञ्जीकरणाच्च अपनयति।</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Label" xml:space="preserve">अन्वेषणम् आदानं विजेट् च संस्कुरुताम् (शेल-प्रणाल्यनुप्रयोगस्य पुनःपञ्जीकरणम्)</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Desc" xml:space="preserve">Windows-अन्वेषणम् (SearchHost), पाठादानम् एमोजिफलकं च (TextInputHost), विजेट् (WebExperienceHost) इति सर्वं यः प्रणाल्यनुप्रयोगः प्रयच्छति तं MicrosoftWindows.Client.CBS पुनः पञ्जीकरोति। सञ्चिकाः सुस्थिताः सन्ति परं पञ्जीकरणमेव भग्नम् अस्ति इति स्थितौ उपयुज्यते: अन्वेषणपेटिका स्तब्धा भवति, आदानसूचनाः न दृश्यन्ते, विजेट् रिक्तानि दृश्यन्ते। किमपि न अपनीयते, न च विन्यासः इतिहासो वा नश्यति। पुनःपञ्जीकरणकाले स्थायिनः प्रक्रियाः समाप्यन्ते, आवश्यकतायां Windows ताः पुनः आरभते।</x:String>
   <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">Microsoft Store-निधिं परिमार्ष्टु</x:String>
@@ -217,6 +213,7 @@
   <x:String x:Key="Text.Cleanup.Tab.Slim" xml:space="preserve">लघूकरणम्</x:String>
   <x:String x:Key="Text.Cleanup.Tab.Settings" xml:space="preserve">विन्यासाः</x:String>
   <x:String x:Key="Text.Cleanup.Tab.Other" xml:space="preserve">अन्यत्</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Registry" xml:space="preserve">registry</x:String>
   <x:String x:Key="Text.Cleanup.Action.Scan" xml:space="preserve">अन्वीक्षस्व</x:String>
   <x:String x:Key="Text.Cleanup.Action.Rescan" xml:space="preserve">पुनरन्वीक्षस्व</x:String>
   <x:String x:Key="Text.Cleanup.Action.CancelScan" xml:space="preserve">अन्वीक्षणं स्थगय</x:String>
@@ -723,6 +720,112 @@
   <x:String x:Key="Text.Cleanup.Msg.LanguageSettingsUnreadable" xml:space="preserve">उपयोक्तॄणां भाषासेटिङ्ग्स् पूर्णतया पठितुं न शक्तास्ततः त्यक्तम्: {0}</x:String>
   <x:String x:Key="Text.Cleanup.Msg.LanguageListUnavailable" xml:space="preserve">भाषाप्रवेशसुविधानां सूचीं प्राप्तुं व्याख्यातुं वा न शक्तम् (निर्गमसङ्केतः {0})।</x:String>
   <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderNotScannable" xml:space="preserve">सम्बन्धात् रक्षणात् वा एषः सञ्चिकाकोशः सुरक्षितं परीक्षितुं न शक्तः।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanMissingFile" xml:space="preserve">निर्दिष्टा सञ्चिका नास्ति: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanProgIdMissing" xml:space="preserve">सम्बद्धं app (ProgID) पञ्जीकृतं नास्ति: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUnknownPath" xml:space="preserve">लक्ष्यं सत्यापयितुं न शक्तम्, अतः रक्षितम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUnresolvedCommand" xml:space="preserve">आदेशात् executable ज्ञातुं न शक्तम्, अतः रक्षितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUnsupportedType" xml:space="preserve">मानप्रकारः ({0}) असमर्थितः, अतः रक्षितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanProtectedPath" xml:space="preserve">रक्षितं स्थानं निर्दिशति, अतः रक्षितम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanTrustedInstaller" xml:space="preserve">TrustedInstaller इत्यस्य स्वामित्वे अस्ति, अतः न परिवर्तितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanAccessDenied" xml:space="preserve">प्रवेशः निषिद्धः, अतः परीक्षितुं न शक्तम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanDelegatedCommand" xml:space="preserve">पञ्जीकरणं संचालनम् अन्यस्यां व्यवस्थायां समर्पयति, अतः निर्णेतुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanNoCommand" xml:space="preserve">चालनीयः आदेशः न लब्धः, अतः निर्णेतुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanEmptyValue" xml:space="preserve">मानं रिक्तम् अस्ति, अतः निर्णेतुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanNoRegistration" xml:space="preserve">app-पञ्जीकरणं न लब्धम्, अतः निर्णेतुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanMsiIndeterminate" xml:space="preserve">Windows Installer पञ्जीकरणस्य स्थितिः निश्चेतुं न शक्ता, अतः रक्षितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanProgIdUnverifiable" xml:space="preserve">सम्बद्धस्य app (ProgID) पञ्जीकरणं सत्यापयितुं न शक्तम्, अतः रक्षितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanSubtreeTooLarge" xml:space="preserve">key-अन्तर्गतम् अतिविशालम् अतिगभीरं वा अस्ति, अतः रक्षितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUserScopeUnavailable" xml:space="preserve">उपयोक्तुः registry अन्वीक्षितुं न शक्यते ({0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanStale" xml:space="preserve">अन्वीक्षणफलं जीर्णम् आसीत्, अतः किमपि न चालितम्। पुनरन्वीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanNothingSelected" xml:space="preserve">चालनीयः मदः चितः नास्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanRestorePointUnavailable" xml:space="preserve">restore point उपलब्धं नास्ति, अतः किमपि न चालितम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanCanceledNotRun" xml:space="preserve">निरस्तत्वात् न चालितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanNotInScan" xml:space="preserve">मदः अन्वीक्षणफले नास्ति, अतः न चालितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanPathNotAllowed" xml:space="preserve">स्थानं लोपार्थम् अननुमतम्, अतः न चालितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanGone" xml:space="preserve">अन्वीक्षणात् परं नास्ति, अतः रक्षितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanChanged" xml:space="preserve">अन्वीक्षणात् परं परिवर्तितम्, अतः रक्षितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanAccessDenied" xml:space="preserve">प्रवेशः निषिद्धः, अतः न लोपितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanTrustedInstaller" xml:space="preserve">TrustedInstaller इत्यस्य स्वामित्वे अस्ति, अतः न परिवर्तितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanItemFailed" xml:space="preserve">लोपितुं न शक्तम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanBackupItemFailed" xml:space="preserve">प्रतिलिपिः रक्षितुं न शक्ता, अतः न लोपितम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanBackupFailed" xml:space="preserve">प्रतिलिपिः रक्षितुं न शक्ता, अतः किमपि न लोपितम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanCoveredByOther" xml:space="preserve">जनकमदेन सह लोपितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanCompanionFailed" xml:space="preserve">सम्बद्धः मदः लोपितुं न शक्तः: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanResultNotWritten" xml:space="preserve">फलसञ्चिका रक्षितुं न शक्ता: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreNotFound" xml:space="preserve">प्रतिलिपिः न लब्धा।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreLoadFailed" xml:space="preserve">प्रतिलिपिम् आरोपयितुं न शक्तम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreRejected" xml:space="preserve">प्रतिलिपेः अन्तर्गतं प्रमाणयितुं न शक्तम्, अतः न पुनःस्थापितम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreSidMismatch" xml:space="preserve">प्रतिलिपिः अन्यस्य उपयोक्तुः अस्ति, अतः न पुनःस्थापिता।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreConflict" xml:space="preserve">भिन्नं मानम् अस्ति, अतः अधिलिखितं न कृतम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreFailed" xml:space="preserve">पुनःस्थापयितुं न शक्तम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreVerifyFailed" xml:space="preserve">पुनःस्थापनानन्तरं सत्यापनं विफलम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Purpose" xml:space="preserve">registry cleaner भवतः PC वेगवान् न करोति। किमपि लोपनात् पूर्वं प्रतिलिपिः रक्ष्यते, अतः पश्चात् पुनःस्थापयितुं शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.NotScanned" xml:space="preserve">अद्यापि न अन्वीक्षितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Scanning" xml:space="preserve">registry अन्वीक्ष्यते…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ScanDone" xml:space="preserve">अन्वीक्षणं समाप्तम्। लोपनार्थिनः {0}, रक्षिताः {1}।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ScanFailed" xml:space="preserve">अन्वीक्षणं विफलम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Stale" xml:space="preserve">अन्वीक्षणफलं जीर्णम् आसीत्, अतः किमपि न चालितम्। पुनरन्वीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ScanInvalidated" xml:space="preserve">प्रतिलिपिः पुनःस्थापिता, अतः अन्वीक्षणफलं त्यक्तम्। पुनरन्वीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body" xml:space="preserve">चिताः {0} registry-प्रविष्टयः लोपयिष्यन्ते। प्रथमं प्रतिलिपिः रक्ष्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithRestorePoint" xml:space="preserve">चालनात् पूर्वं restore point निर्मीयते।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">restore point न निर्मीयते।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Running" xml:space="preserve">{0} प्रविष्टयः लोप्यन्ते…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.RunFailed" xml:space="preserve">चालनं विफलम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success" xml:space="preserve">{0} प्रविष्टयः लोपिताः।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Partial" xml:space="preserve">{0} प्रविष्टयः लोपिताः; {1} न लोपिताः।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Failed" xml:space="preserve">किमपि लोपितुं न शक्तम् ({0} लोपिताः, {1} न लोपिताः)।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Canceled" xml:space="preserve">निरस्तम् ({0} लोपिताः, {1} न लोपिताः)।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonLine" xml:space="preserve">{0}: {1} ({2} मदाः)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonMore" xml:space="preserve">अपरे {0} कारणप्रकाराः सन्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.BackupSaved" xml:space="preserve">प्रतिलिपिः रक्षिता: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.View32" xml:space="preserve">32-bit दृश्यम्</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Retained" xml:space="preserve">{0} प्रविष्टयः निर्णेतुम् अशक्याः रक्षिताः वा सन्ति, अतः रक्षिताः: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Deleted" xml:space="preserve">लोपितम्</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Retained" xml:space="preserve">रक्षितम्</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Skipped" xml:space="preserve">त्यक्तम्</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Failed" xml:space="preserve">विफलम्</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Restored" xml:space="preserve">पुनःस्थापितम्</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.AlreadyPresent" xml:space="preserve">पूर्वमेव विद्यते</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Conflict" xml:space="preserve">विरोधः</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.NotLoaded" xml:space="preserve">प्रतिलिपिसूची न आरोपिता।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Loaded" xml:space="preserve">{0} प्रतिलिपयः</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.ListFailed" xml:space="preserve">प्रतिलिपिसूची प्राप्तुं न शक्ता।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Count" xml:space="preserve">{0} प्रविष्टयः</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.CountUnknown" xml:space="preserve">प्रविष्टिसङ्ख्या अज्ञाता</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.HasResult" xml:space="preserve">फलसञ्चिका अस्ति</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.NoResult" xml:space="preserve">फलसञ्चिका नास्ति</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.DeleteConfirm" xml:space="preserve">{0} इत्यस्य प्रतिलिपिः लोपयिष्यते। लोपानन्तरं ततः किमपि पुनःस्थापयितुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Deleting" xml:space="preserve">प्रतिलिपिः लोप्यते…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Deleted" xml:space="preserve">प्रतिलिपिः लोपिता।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.DeleteFailed" xml:space="preserve">प्रतिलिपिं लोपितुं न शक्तम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Restoring" xml:space="preserve">प्रतिलिपिः पुनःस्थाप्यते…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Restore.Summary" xml:space="preserve">{0} पुनःस्थापिताः, {1} पूर्वमेव विद्यन्ते, {2} विरोधाः, {3} त्यक्ताः, {4} विफलाः।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Restore.Failed" xml:space="preserve">पुनःस्थापनं विफलम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.AppPaths.Name" xml:space="preserve">app-पञ्जीकरणानि (App Paths)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.AppPaths.Description" xml:space="preserve">app-प्रारम्भपञ्जीकरणानि येषां लक्ष्य-executable नास्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Startup.Name" xml:space="preserve">Startup</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Startup.Description" xml:space="preserve">Windows-प्रारम्भे चालनीयानि पञ्जीकरणानि येषाम् executable नास्ति। startup-सक्षम/अक्षम-विन्यासः अपि तैः सह लोप्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Fonts.Name" xml:space="preserve">अक्षरशैल्यः (Fonts)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Fonts.Description" xml:space="preserve">अक्षरशैली-पञ्जीकरणानि येषां font-सञ्चिका नास्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Name" xml:space="preserve">सञ्चिका-सम्बन्धाः</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Description" xml:space="preserve">"Open with" इत्यादयः सम्बन्धाः येषां app इदानीं नास्ति। default app-विन्यासाः न परिवर्त्यन्ते।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Name" xml:space="preserve">uninstall-सूचना</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">uninstall-प्रविष्टयः येषाम् uninstaller स्थापनस्थानं च उभे नास्ति। प्रारम्भतः निष्क्रियम्, प्रत्येकं मदः भवतः अनुमतिम् अपेक्षते।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Name" xml:space="preserve">Shared DLL</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">Shared DLL-सन्दर्भगणनाः येषां DLL नास्ति। प्रारम्भतः निष्क्रियम् "सर्वाणि चिनुत" इत्यस्मिन् च न अन्तर्भवति।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Title" xml:space="preserve">registry</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.ExcludedFromSelectAll" xml:space="preserve">"सर्वाणि चिनुत" इत्यस्मिन् न अन्तर्भवति। आवश्यकान् मदान् एव एकैकं चिनुत।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.RequiresApproval" xml:space="preserve">लोपनार्थं प्रत्येकं मदः पुष्टिपटले भवतः अनुमतिम् अपेक्षते।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.NoCandidates" xml:space="preserve">अर्थिनः न सन्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.ValueName" xml:space="preserve">मान-नाम:</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Approval.Title" xml:space="preserve">एते मदाः पृथक् अनुमतिम् अपेक्षन्ते। तान् परीक्ष्य लोपनयोग्यान् चिह्नयत।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Title" xml:space="preserve">प्रतिलिपयः पुनःस्थापनं च</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Refresh" xml:space="preserve">सूचीं नवीकुरु</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Empty" xml:space="preserve">प्रतिलिपयः न सन्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Restore" xml:space="preserve">पुनःस्थापय</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Delete" xml:space="preserve">प्रतिलिपिं लोपय</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">इमां प्रतिलिपिं लोपयेत्?</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">लोपय</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">नमूना-अभिलिखितदूरदर्शनम्</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">Windows 7-सहितम् ज्ञातं नमूनाभिलेखनम् एव लोपयति। सञ्चिकाकोशे अन्याः सञ्चिकाः अस्पृष्टाः।</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Internet Explorer-अनुप्रयोगसंग्रहः (AppCache)</x:String>

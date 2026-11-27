@@ -106,10 +106,6 @@
   <x:String x:Key="Text.Action.repair-shell-folder-names.Desc" xml:space="preserve">Répare les corruptions d'affichage telles que les noms de dossiers système (p. ex. Téléchargements) affichés en anglais, en réenregistrant shell32.dll.</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Label" xml:space="preserve">Réinitialiser le cache des icônes de la zone de notification</x:String>
   <x:String x:Key="Text.Action.tray-icon-reset.Desc" xml:space="preserve">Efface le cache des icônes de la zone de notification (barre d'état système). Résout les cas où les icônes d'applications désinstallées persistent dans la zone des icônes masquées. Votre personnalisation d'affichage/masquage des icônes est réinitialisée une fois.</x:String>
-  <x:String x:Key="Text.Action.remove-broken-startup.Label" xml:space="preserve">Supprimer les entrées de démarrage défectueuses</x:String>
-  <x:String x:Key="Text.Action.remove-broken-startup.Desc" xml:space="preserve">Supprime les entrées de démarrage (utilisateur actuel) dont l'exécutable n'existe plus, ainsi que les entrées orphelines correspondantes.</x:String>
-  <x:String x:Key="Text.Action.remove-dead-associations.Label" xml:space="preserve">Supprimer les applications inexistantes de « Ouvrir avec »</x:String>
-  <x:String x:Key="Text.Action.remove-dead-associations.Desc" xml:space="preserve">Supprime les applications dont l'exécutable n'existe plus de la liste de candidats « Ouvrir avec » et de l'enregistrement Applications.</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Label" xml:space="preserve">Réparer la recherche, la saisie et les widgets (réenregistrer l'application système du shell)</x:String>
   <x:String x:Key="Text.Action.repair-shell-client-cbs.Desc" xml:space="preserve">Réenregistre MicrosoftWindows.Client.CBS, l'application système qui fournit la recherche Windows (SearchHost), la saisie de texte et le panneau d'émojis (TextInputHost) ainsi que les widgets (WebExperienceHost). Utile quand les fichiers sont intacts mais l'enregistrement est cassé : la zone de recherche se fige, les suggestions de saisie n'apparaissent plus ou les widgets restent blancs. Rien n'est désinstallé et aucun réglage ni historique n'est perdu. Les processus résidents sont arrêtés pendant le réenregistrement et Windows les relance dès qu'ils sont nécessaires.</x:String>
   <x:String x:Key="Text.Action.store-cache-reset.Label" xml:space="preserve">Vider le cache du Microsoft Store</x:String>
@@ -221,6 +217,7 @@
   <x:String x:Key="Text.Cleanup.Tab.Slim" xml:space="preserve">Allègement</x:String>
   <x:String x:Key="Text.Cleanup.Tab.Settings" xml:space="preserve">Paramètres</x:String>
   <x:String x:Key="Text.Cleanup.Tab.Other" xml:space="preserve">Autres</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Registry" xml:space="preserve">Registre</x:String>
 
   <!-- 共通の操作・列見出し -->
   <x:String x:Key="Text.Cleanup.Action.Scan" xml:space="preserve">Analyser</x:String>
@@ -759,6 +756,112 @@
   <x:String x:Key="Text.Cleanup.Msg.LanguageSettingsUnreadable" xml:space="preserve">Ignoré car les paramètres de langue des utilisateurs n'ont pas pu être lus entièrement : {0}</x:String>
   <x:String x:Key="Text.Cleanup.Msg.LanguageListUnavailable" xml:space="preserve">Impossible d'obtenir ou d'interpréter la liste des fonctionnalités de saisie de langue (code de sortie {0}).</x:String>
   <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderNotScannable" xml:space="preserve">Ce dossier n'a pas pu être analysé en toute sécurité à cause d'un lien ou d'une protection.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanMissingFile" xml:space="preserve">Le fichier référencé n'existe pas : {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanProgIdMissing" xml:space="preserve">L'application associée (ProgID) n'est pas enregistrée : {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUnknownPath" xml:space="preserve">Conservé car la cible n'a pas pu être vérifiée : {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUnresolvedCommand" xml:space="preserve">Conservé car l'exécutable n'a pas pu être identifié à partir de la commande.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUnsupportedType" xml:space="preserve">Conservé car le type de valeur ({0}) n'est pas pris en charge.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanProtectedPath" xml:space="preserve">Conservé car il pointe vers un emplacement protégé : {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanTrustedInstaller" xml:space="preserve">Non modifié car il appartient à TrustedInstaller.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanAccessDenied" xml:space="preserve">N'a pas pu être vérifié car l'accès a été refusé.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanDelegatedCommand" xml:space="preserve">Ne peut pas être évalué car l'enregistrement délègue le traitement à un autre mécanisme.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanNoCommand" xml:space="preserve">Ne peut pas être évalué car aucune commande à exécuter n'a été trouvée.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanEmptyValue" xml:space="preserve">Ne peut pas être évalué car la valeur est vide.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanNoRegistration" xml:space="preserve">Ne peut pas être évalué car aucun enregistrement d'application n'a été trouvé.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanMsiIndeterminate" xml:space="preserve">Conservé car l'état d'enregistrement de Windows Installer n'a pas pu être déterminé.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanProgIdUnverifiable" xml:space="preserve">Conservé car l'enregistrement de l'application associée (ProgID) n'a pas pu être vérifié.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanSubtreeTooLarge" xml:space="preserve">Conservé car le contenu de la clé est trop volumineux ou trop profond.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryScanUserScopeUnavailable" xml:space="preserve">Le Registre de l'utilisateur ne peut pas être analysé ({0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanStale" xml:space="preserve">Rien n'a été exécuté car le résultat de l'analyse était obsolète. Analysez à nouveau.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanNothingSelected" xml:space="preserve">Aucun élément exécutable n'est sélectionné.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanRestorePointUnavailable" xml:space="preserve">Rien n'a été exécuté car aucun point de restauration n'est disponible : {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanCanceledNotRun" xml:space="preserve">Non exécuté car l'opération a été annulée.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanNotInScan" xml:space="preserve">Non exécuté car l'élément ne figure pas dans le résultat de l'analyse.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanPathNotAllowed" xml:space="preserve">Non exécuté car la suppression n'est pas autorisée à cet emplacement.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanGone" xml:space="preserve">Conservé car il n'existe plus depuis l'analyse.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanChanged" xml:space="preserve">Conservé car il a changé après l'analyse.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanAccessDenied" xml:space="preserve">Non supprimé car l'accès a été refusé.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanTrustedInstaller" xml:space="preserve">Non modifié car il appartient à TrustedInstaller.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanItemFailed" xml:space="preserve">N'a pas pu être supprimé : {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanBackupItemFailed" xml:space="preserve">Non supprimé car la sauvegarde n'a pas pu être enregistrée : {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanBackupFailed" xml:space="preserve">Rien n'a été supprimé car la sauvegarde n'a pas pu être enregistrée : {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanCoveredByOther" xml:space="preserve">Supprimé avec un élément parent.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanCompanionFailed" xml:space="preserve">Un élément associé n'a pas pu être supprimé : {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryCleanResultNotWritten" xml:space="preserve">Le fichier de résultat n'a pas pu être enregistré : {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreNotFound" xml:space="preserve">La sauvegarde est introuvable.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreLoadFailed" xml:space="preserve">La sauvegarde n'a pas pu être chargée : {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreRejected" xml:space="preserve">Non restauré car le contenu de la sauvegarde n'a pas pu être validé : {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreSidMismatch" xml:space="preserve">Non restauré car la sauvegarde appartient à un autre utilisateur.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreConflict" xml:space="preserve">Non écrasé car une valeur différente existe.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreFailed" xml:space="preserve">N'a pas pu être restauré : {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryRestoreVerifyFailed" xml:space="preserve">La vérification après la restauration a échoué.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Purpose" xml:space="preserve">Le nettoyeur de Registre n'accélère pas votre PC. Une sauvegarde est enregistrée avant toute suppression, ce qui vous permet de restaurer les éléments plus tard.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.NotScanned" xml:space="preserve">Pas encore analysé.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Scanning" xml:space="preserve">Analyse du Registre en cours…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ScanDone" xml:space="preserve">Analyse terminée. {0} candidats à la suppression, {1} conservés.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ScanFailed" xml:space="preserve">L'analyse a échoué.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Stale" xml:space="preserve">Rien n'a été exécuté car le résultat de l'analyse était obsolète. Analysez à nouveau.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ScanInvalidated" xml:space="preserve">Le résultat de l'analyse a été abandonné car une sauvegarde a été restaurée. Analysez à nouveau.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body" xml:space="preserve">Les {0} entrées de Registre sélectionnées vont être supprimées. Une sauvegarde est enregistrée au préalable.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithRestorePoint" xml:space="preserve">Un point de restauration est créé avant l'exécution.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">Aucun point de restauration n'est créé.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Running" xml:space="preserve">Suppression de {0} entrées…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.RunFailed" xml:space="preserve">L'exécution a échoué.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success" xml:space="preserve">{0} entrées supprimées.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Partial" xml:space="preserve">{0} entrées supprimées ; {1} n'ont pas été supprimées.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Failed" xml:space="preserve">Aucune suppression n'a pu être effectuée ({0} supprimées, {1} non supprimées).</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Canceled" xml:space="preserve">Annulé ({0} supprimées, {1} non supprimées).</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonLine" xml:space="preserve">{0} : {1} ({2} éléments)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonMore" xml:space="preserve">Il y a {0} autres types de motifs.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.BackupSaved" xml:space="preserve">Sauvegarde enregistrée : {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.View32" xml:space="preserve">Vue 32 bits</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Retained" xml:space="preserve">{0} entrées sont conservées car elles ne peuvent pas être évaluées ou sont protégées : {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Deleted" xml:space="preserve">Supprimé</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Retained" xml:space="preserve">Conservé</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Skipped" xml:space="preserve">Ignoré</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Failed" xml:space="preserve">Échec</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Restored" xml:space="preserve">Restauré</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.AlreadyPresent" xml:space="preserve">Déjà présent</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.State.Conflict" xml:space="preserve">Conflit</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.NotLoaded" xml:space="preserve">La liste des sauvegardes n'a pas été chargée.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Loaded" xml:space="preserve">{0} sauvegardes</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.ListFailed" xml:space="preserve">La liste des sauvegardes n'a pas pu être récupérée.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Count" xml:space="preserve">{0} entrées</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.CountUnknown" xml:space="preserve">Nombre d'entrées inconnu</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.HasResult" xml:space="preserve">Avec fichier de résultat</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.NoResult" xml:space="preserve">Sans fichier de résultat</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.DeleteConfirm" xml:space="preserve">La sauvegarde du {0} va être supprimée. Une fois supprimée, plus rien ne pourra en être restauré.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Deleting" xml:space="preserve">Suppression de la sauvegarde…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Deleted" xml:space="preserve">La sauvegarde a été supprimée.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.DeleteFailed" xml:space="preserve">La sauvegarde n'a pas pu être supprimée.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Restoring" xml:space="preserve">Restauration de la sauvegarde…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Restore.Summary" xml:space="preserve">{0} restaurées, {1} déjà présentes, {2} conflits, {3} ignorées, {4} en échec.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Restore.Failed" xml:space="preserve">La restauration a échoué.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.AppPaths.Name" xml:space="preserve">Enregistrements d'applications (App Paths)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.AppPaths.Description" xml:space="preserve">Enregistrements de lancement d'applications dont l'exécutable cible n'existe pas.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Startup.Name" xml:space="preserve">Démarrage</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Startup.Description" xml:space="preserve">Enregistrements exécutés au démarrage de Windows dont l'exécutable n'existe pas. Le paramètre d'activation/désactivation du démarrage est supprimé avec eux.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Fonts.Name" xml:space="preserve">Polices</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Fonts.Description" xml:space="preserve">Enregistrements de polices dont le fichier de police n'existe pas.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Name" xml:space="preserve">Associations de fichiers</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Description" xml:space="preserve">Associations telles que « Ouvrir avec » dont l'application n'existe plus. Les paramètres des applications par défaut ne sont pas modifiés.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Name" xml:space="preserve">Informations de désinstallation</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">Entrées de désinstallation dont le programme de désinstallation et l'emplacement d'installation n'existent plus. Désactivé par défaut, et chaque élément nécessite votre approbation.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Name" xml:space="preserve">DLL partagées</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">Compteurs de références de DLL partagées dont la DLL n'existe pas. Désactivé par défaut et non inclus dans « Tout sélectionner ».</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Title" xml:space="preserve">Registre</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.ExcludedFromSelectAll" xml:space="preserve">Non inclus dans « Tout sélectionner ». Sélectionnez un par un uniquement les éléments dont vous avez besoin.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.RequiresApproval" xml:space="preserve">Pour supprimer, chaque élément nécessite votre approbation sur l'écran de confirmation.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.NoCandidates" xml:space="preserve">Aucun candidat.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.ValueName" xml:space="preserve">Nom de la valeur :</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Approval.Title" xml:space="preserve">Les éléments suivants nécessitent une approbation individuelle. Examinez-les et cochez ceux qui peuvent être supprimés.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Title" xml:space="preserve">Sauvegardes et restauration</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Refresh" xml:space="preserve">Actualiser la liste</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Empty" xml:space="preserve">Il n'y a aucune sauvegarde.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Restore" xml:space="preserve">Restaurer</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Delete" xml:space="preserve">Supprimer la sauvegarde</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">Supprimer cette sauvegarde ?</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">Supprimer</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">Exemple d'enregistrement TV</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">Supprime uniquement l'enregistrement d'exemple connu livré avec Windows 7. Les autres fichiers du dossier sont laissés intacts.</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Cache d'applications d'Internet Explorer (AppCache)</x:String>

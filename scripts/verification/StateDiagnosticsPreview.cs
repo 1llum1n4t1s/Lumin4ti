@@ -7,6 +7,7 @@ using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services.Windows;
 using Lumin4ti.Core.Services.Windows.Actions;
 using Lumin4ti.Core.Services.Windows.Cleanup;
+using Lumin4ti.Core.Services.Windows.Cleanup.RegistryClean;
 using Lumin4ti.Core.Services.Windows.Cleanup.Slim;
 using Lumin4ti.UI;
 using Lumin4ti.UI.Services;
@@ -162,15 +163,43 @@ internal static class StateDiagnosticsPreview
             var scan = new CleanupScanService(store, executor);
             var ledger = new AdvancedScanLedger();
             var slim = new SlimService(executor);
+            // プレビューは実機のレジストリとバックアップを読まず、変更もしない偽の境界を使う。
+            var registry = new RegistryCleanViewModel(new PreviewRegistryCleanBackend(), coordinator);
             return new CleanupViewModel(
                 catalog,
                 coordinator,
                 new CommonCleanViewModel(scan, new CleanupRunService(scan, executor), store, executor, coordinator),
                 new AdvancedCleanViewModel(new AdvancedCleanScanner(ledger), new AdvancedCleaner(ledger), ledger, store, executor, coordinator),
                 new SlimViewModel(slim, store, coordinator),
+                registry,
+                new RegistryRestoreViewModel(new PreviewRegistryRestoreBackend(), registry, coordinator),
                 new CleanupSettingsViewModel(
                     store, scan, ledger, slim, executor, coordinator));
         }
+    }
+
+    private sealed class PreviewRegistryCleanBackend : IRegistryCleanBackend
+    {
+        public Task<RegistryScanResult> ScanAsync(CancellationToken ct) =>
+            throw new InvalidOperationException("preview does not scan the registry");
+
+        public Task<RegistryCleanRunResult> CleanAsync(RegistryCleanRequest request, CancellationToken ct) =>
+            throw new InvalidOperationException("preview does not change the registry");
+
+        public void Invalidate()
+        {
+        }
+    }
+
+    private sealed class PreviewRegistryRestoreBackend : IRegistryRestoreBackend
+    {
+        public IReadOnlyList<RegistryBackupSummary> List() => [];
+
+        public RegistryRestoreResult Restore(string id, CancellationToken ct) =>
+            throw new InvalidOperationException("preview does not restore the registry");
+
+        public void Delete(string id) =>
+            throw new InvalidOperationException("preview does not delete backups");
     }
 
     private sealed class PreviewShellCacheDescription : IMaintenanceAction

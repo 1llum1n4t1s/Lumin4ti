@@ -6,14 +6,14 @@
 
 | カテゴリー | 対象 | 削除単位 | 既定選択 |
 |---|---|---|---|
-| App Paths | HKU・HKLM（WOW6432Node 含む）の `App Paths\*` | サブキー | 選ぶ |
-| スタートアップ | HKCU・HKLM（同）の `Run` | 値と `StartupApproved\Run`（`Run32`）の値 | 選ぶ |
+| App Paths | HKU・HKLM の `App Paths\*`（32 ビット表示は 64 ビット側と共有のため走査しない） | サブキー | 選ぶ |
+| スタートアップ | HKCU・HKLM（WOW6432Node 含む）の `Run` | 値と `StartupApproved\Run`（`Run32`）の値 | 選ぶ |
 | フォント | HKLM（64 ビット側）・HKU の `Fonts` | 値 | 選ぶ |
-| 関連付け | `OpenWithList`、`Classes\Applications\*`、`OpenWithProgids` の値 | ProgID と `UserChoice` は触れない | 選ぶ |
+| 関連付け | `OpenWithList`、`Classes\Applications\*`、`OpenWithProgids` の値（利用者分はリンクを通らず `HKEY_USERS\<SID>_Classes` を開く） | ProgID と `UserChoice` は触れない | 選ぶ |
 | アンインストール | HKLM（同）・HKU の `Uninstall\*` | サブキー | 選ばない（個別承認） |
 | 共有 DLL | `SharedDLLs`（同） | 値 | 選ばない。「すべて選択」にも含めない |
 
-ActiveX/COM・ヘルプ・サウンド・ファイアウォール・タスクなど、無効と断定できないか推測に頼るものは収録しない。履歴・MRU は「痕跡」規則が担う。旧項目 `remove-broken-startup` と `remove-dead-associations` はバックアップなしで消すため、判定をこのタブへ移してカタログから外す。
+ActiveX/COM・ヘルプ・サウンド・ファイアウォール・タスクなど、無効と断定できないか推測に頼るものは収録しない。履歴・MRU は「痕跡」規則が担う。旧項目 `remove-broken-startup` と `remove-dead-associations` はバックアップなしで消していたため、判定をこのタブへ移し、カタログと実装から撤去した（`StartupCommandParser` は他でも使うため残す）。
 
 ## 根拠
 
@@ -21,7 +21,7 @@ ActiveX/COM・ヘルプ・サウンド・ファイアウォール・タスクな
 
 ## 判定と削除
 
-欠損を確定できた値だけを候補にし、不明・OS 所有の場所は保持して件数と理由を表示する。削除は世代照合・復元ポイント・再照合・型付き JSON バックアップの検証を経て同じハンドルで行い、バックアップを書けなければ 1 件も消さない。復元は上書きせず衝突を `Conflict` で返す。詳細は [registry-cleaner-guards.md](../agents/registry-cleaner-guards.md)。
+欠損を確定できた値だけを候補にし、不明・OS 所有の場所は保持して件数と理由を表示する。削除は世代照合・復元ポイント・再照合・型付き JSON バックアップの検証を経て同じハンドルで行い、バックアップを書けなければ 1 件も消さない。バックアップは `%ProgramData%\Lumin4ti\backups\registry\` に型付き JSON（`<UTC時刻>-<GUID>.json`）と結果ファイル（`<id>.result.json`）で置き、自動では消さない。復元は上書きせず、`Restored`・`AlreadyPresent`・`Conflict`（全体 `Partial`）で返し、SID 不一致と検証違反は拒否する。復元後は走査結果を失効させる。詳細は [registry-cleaner-guards.md](../agents/registry-cleaner-guards.md)。
 
 ## 画面
 

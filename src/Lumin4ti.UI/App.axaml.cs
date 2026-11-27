@@ -99,6 +99,9 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
+    /// <summary>レジストリクリーナーの削除側と復元側の境界 (同じ世代を共有するため 1 組で作る)。</summary>
+    private sealed record RegistryBackends(IRegistryCleanBackend Clean, IRegistryRestoreBackend Restore);
+
     private static void ConfigureServices(ServiceCollection services)
     {
         services.AddSingleton<ISettingsService, SettingsService>();
@@ -129,7 +132,29 @@ public partial class App : Application
         services.AddSingleton<AdvancedCleanViewModel>();
         services.AddSingleton<SlimViewModel>();
         services.AddSingleton<CleanupSettingsViewModel>();
-        services.AddSingleton<CleanupViewModel>();
+
+        // レジストリ (削除側と復元側は同じ世代を共有する境界から作る)。構築しても走査・削除・復元は始めない。
+        services.AddSingleton(sp =>
+        {
+            var (clean, restore) = RegistryCleanBackends.CreateDefault(sp.GetRequiredService<ICommandExecutor>());
+            return new RegistryBackends(clean, restore);
+        });
+        services.AddSingleton(sp => new RegistryCleanViewModel(
+            sp.GetRequiredService<RegistryBackends>().Clean,
+            sp.GetRequiredService<MaintenanceOperationCoordinator>()));
+        services.AddSingleton(sp => new RegistryRestoreViewModel(
+            sp.GetRequiredService<RegistryBackends>().Restore,
+            sp.GetRequiredService<RegistryCleanViewModel>(),
+            sp.GetRequiredService<MaintenanceOperationCoordinator>()));
+        services.AddSingleton(sp => new CleanupViewModel(
+            sp.GetRequiredService<MaintenanceActionCatalog>(),
+            sp.GetRequiredService<MaintenanceOperationCoordinator>(),
+            sp.GetRequiredService<CommonCleanViewModel>(),
+            sp.GetRequiredService<AdvancedCleanViewModel>(),
+            sp.GetRequiredService<SlimViewModel>(),
+            sp.GetRequiredService<RegistryCleanViewModel>(),
+            sp.GetRequiredService<RegistryRestoreViewModel>(),
+            sp.GetRequiredService<CleanupSettingsViewModel>()));
         services.AddSingleton<MainWindowViewModel>();
     }
 }
