@@ -32,6 +32,7 @@ Lumin4ti は Windows 10/11 向けのメンテナンス・最適化 GUI ツール
 - クリーンアップの規則・走査・削除・高度・スリム化を変える前に [cleanup-rules-and-deletion.md](docs/agents/cleanup-rules-and-deletion.md) を読む。規則データの根拠・影響度・既定選択と、世代失効・lease・補償の契約を定める。
 - クリーンアップの詳細は、変更内容に応じて [cleanup-rule-data.md](docs/agents/cleanup-rule-data.md)、[cleanup-deletion-guards.md](docs/agents/cleanup-deletion-guards.md)、[cleanup-path-trust.md](docs/agents/cleanup-path-trust.md)、[cleanup-running-products-sqlite.md](docs/agents/cleanup-running-products-sqlite.md)、[cleanup-advanced-slim-restore.md](docs/agents/cleanup-advanced-slim-restore.md) も読む。
 - レジストリクリーナーを変える前に [registry-cleaner-guards.md](docs/agents/registry-cleaner-guards.md) と [registry-cleaner-restore.md](docs/agents/registry-cleaner-restore.md) を読む。
+- レジストリクリーナーのバックアップ削除を変える前に [registry-cleaner-backup-deletion.md](docs/agents/registry-cleaner-backup-deletion.md) を読む。
 - 未接続 PnP デバイスの削除を変える前に [disconnected-pnp-devices.md](docs/agents/disconnected-pnp-devices.md) を読む。
 - 起動時再試行・終了・タスク実行を変える前に [workflow.md](docs/agents/workflow.md) を読む。
 - コードレビューの前に [code-review-pitfalls.md](docs/agents/code-review-pitfalls.md) を読む。
