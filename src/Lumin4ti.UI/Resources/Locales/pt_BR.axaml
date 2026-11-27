@@ -803,8 +803,6 @@
   <x:String x:Key="Text.Cleanup.Registry.Ui.Stale" xml:space="preserve">Nada foi executado porque o resultado da verificação estava desatualizado. Verifique novamente.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.ScanInvalidated" xml:space="preserve">O resultado da verificação foi descartado porque um backup foi restaurado. Verifique novamente.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body" xml:space="preserve">As {0} entradas de registro selecionadas serão excluídas. Um backup é salvo antes.</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithRestorePoint" xml:space="preserve">Um ponto de restauração é criado antes da execução.</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">Nenhum ponto de restauração é criado.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Running" xml:space="preserve">Excluindo {0} entradas…</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.RunFailed" xml:space="preserve">A execução falhou.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success" xml:space="preserve">{0} entradas excluídas.</x:String>
@@ -846,9 +844,9 @@
   <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Name" xml:space="preserve">Associações de arquivo</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Description" xml:space="preserve">Associações como “Abrir com” cujo aplicativo não existe mais. As configurações de aplicativos padrão não são alteradas.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Name" xml:space="preserve">Informações de desinstalação</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">Entradas de desinstalação cujo desinstalador e local de instalação não existem. Desativado por padrão, e cada item precisa da sua aprovação.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">Entradas de desinstalação cujo desinstalador e local de instalação não existem. Desativado por padrão.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Name" xml:space="preserve">DLLs compartilhadas</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">Contadores de referência de DLLs compartilhadas cuja DLL não existe. Desativado por padrão e não incluído em “Selecionar tudo”.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">Contadores de referência de DLLs compartilhadas cuja DLL não existe. Desativado por padrão.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Title" xml:space="preserve">Registro</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.ExcludedFromSelectAll" xml:space="preserve">Não incluído em “Selecionar tudo”. Selecione um por um apenas os itens de que precisa.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.RequiresApproval" xml:space="preserve">Para excluir, cada item precisa da sua aprovação na tela de confirmação.</x:String>
@@ -862,6 +860,18 @@
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Delete" xml:space="preserve">Excluir backup</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">Excluir este backup?</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">Excluir</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Confirm.Title" xml:space="preserve">Confirmar a exclusão do registro</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.CancelRun" xml:space="preserve">Parar exclusão</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Cancel" xml:space="preserve">Cancelar</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ValueDefault" xml:space="preserve">(Padrão)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonLine.One" xml:space="preserve">{0}: {1} ({2} item)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonMore.One" xml:space="preserve">Há mais {0} tipo de motivo.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Retained.One" xml:space="preserve">{0} entrada foi mantida porque não pode ser avaliada ou está protegida: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Count.One" xml:space="preserve">{0} entrada</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Loaded.One" xml:space="preserve">{0} backup</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Running.One" xml:space="preserve">Excluindo {0} entrada…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body.One" xml:space="preserve">A entrada de registro selecionada ({0}) será excluída. Um backup é salvo antes.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success.One" xml:space="preserve">{0} entrada excluída.</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">Gravações de TV de exemplo</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">Exclui apenas a gravação de exemplo conhecida que acompanhava o Windows 7. Os demais arquivos da pasta são deixados em paz.</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Cache de aplicativos do Internet Explorer (AppCache)</x:String>

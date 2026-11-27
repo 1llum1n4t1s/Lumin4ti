@@ -29,13 +29,14 @@ internal static class RegistryResultFormat
             .ToList();
         var lines = groups
             .Take(MaxReasons)
-            .Select(group => CleanupText.Get("Cleanup.Registry.Ui.ReasonLine", CleanupText.Get($"Cleanup.Registry.Ui.State.{group.Key.State}"), group.Key.Reason, group.Count()))
+            .Select(group => CleanupText.GetCounted("Cleanup.Registry.Ui.ReasonLine", group.Count(), CleanupText.Get($"Cleanup.Registry.Ui.State.{group.Key.State}"), group.Key.Reason, group.Count()))
             .ToList();
         return (lines, Math.Max(0, groups.Count - MaxReasons));
     }
 
-    public static string OverallText(RegistryOverallState overall, int done, int notDone) =>
-        CleanupText.Get($"Cleanup.Registry.Ui.Result.{overall}", done, notDone);
+    public static string OverallText(RegistryOverallState overall, int done, int notDone) => overall == RegistryOverallState.Success
+        ? CleanupText.GetCounted("Cleanup.Registry.Ui.Result.Success", done, done, notDone)
+        : CleanupText.Get($"Cleanup.Registry.Ui.Result.{overall}", done, notDone);
 }
 
 /// <summary>
@@ -94,8 +95,9 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
     [ObservableProperty]
     private string confirmText = string.Empty;
 
+    /// <summary>実行中の操作が削除か (走査と中断ボタンの文言を分ける)。</summary>
     [ObservableProperty]
-    private string restorePointNote = string.Empty;
+    private bool isDeleting;
 
     /// <summary>HKCU 系を走査できなかった理由 (走査できたときは空)。</summary>
     [ObservableProperty]
@@ -141,6 +143,18 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
     public bool CanConfirm => IsConfirming && !IsRunning && IsApprovalComplete;
 
     public bool HasApprovalRows => ApprovalRows.Count > 0;
+
+    public bool IsScanning => IsRunning && !IsDeleting;
+
+    public bool IsDeletingRunning => IsRunning && IsDeleting;
+
+    partial void OnIsDeletingChanged(bool value) => RefreshRunKind();
+
+    private void RefreshRunKind()
+    {
+        OnPropertyChanged(nameof(IsScanning));
+        OnPropertyChanged(nameof(IsDeletingRunning));
+    }
 
     public string ScanButtonText => CleanupText.Get(HasScan ? "Cleanup.Action.Rescan" : "Cleanup.Action.Scan");
 
@@ -269,8 +283,7 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
     private void RefreshConfirmTexts()
     {
         var selected = SelectedRows();
-        ConfirmText = CleanupText.Get("Cleanup.Registry.Ui.Confirm.Body", selected.Count);
-        RestorePointNote = CleanupText.Get(CreateRestorePoint ? "Cleanup.Registry.Ui.Confirm.WithRestorePoint" : "Cleanup.Registry.Ui.Confirm.WithoutRestorePoint");
+        ConfirmText = CleanupText.GetCounted("Cleanup.Registry.Ui.Confirm.Body", selected.Count, selected.Count);
         OnPropertyChanged(nameof(HasApprovalRows));
     }
 
@@ -288,10 +301,21 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
         ApprovalRows.Clear();
         ClearOutcome();
 
-        var (ended, result) = await RunLeasedAsync(
-            true,
-            CleanupText.Get("Cleanup.Registry.Ui.Running", selected.Count),
-            ct => _backend.CleanAsync(request, ct));
+        IsDeleting = true;
+        (Ended Ended, RegistryCleanRunResult? Value) outcome;
+        try
+        {
+            outcome = await RunLeasedAsync(
+                true,
+                CleanupText.GetCounted("Cleanup.Registry.Ui.Running", selected.Count, selected.Count),
+                ct => _backend.CleanAsync(request, ct));
+        }
+        finally
+        {
+            IsDeleting = false;
+        }
+
+        var (ended, result) = outcome;
         if (ended == Ended.Busy)
         {
             SetStatus(() => CleanupText.Get("Status.Busy"));
@@ -332,7 +356,9 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
 
         _lastResult = result;
         RefreshResultTexts();
-        SetStatus(() => ResultSummary);
+
+        // 結果の要約は結果欄に出す。状態表示にも同じ文を出さない。
+        SetStatus(() => string.Empty);
     }
 
     private void RefreshResultTexts()
@@ -351,7 +377,7 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
             ResultReasons.Add(line);
         }
 
-        ResultMoreText = more > 0 ? CleanupText.Get("Cleanup.Registry.Ui.ReasonMore", more) : string.Empty;
+        ResultMoreText = more > 0 ? CleanupText.GetCounted("Cleanup.Registry.Ui.ReasonMore", more, more) : string.Empty;
         ResultMessageText = CleanupText.Detail(result.Message);
         BackupText = result.BackupId is null ? string.Empty : CleanupText.Get("Cleanup.Registry.Ui.BackupSaved", result.BackupId);
         RestorePointResultText = DescribeRestorePoint(result.RestorePoint);
@@ -476,6 +502,7 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
         }
 
         OnPropertyChanged(nameof(SelectedCount));
+        RefreshRunKind();
         OnPropertyChanged(nameof(CanScan));
         OnPropertyChanged(nameof(CanRequestRun));
         OnPropertyChanged(nameof(CanConfirm));

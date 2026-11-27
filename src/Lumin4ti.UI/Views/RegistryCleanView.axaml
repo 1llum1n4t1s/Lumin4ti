@@ -15,7 +15,10 @@
               Command="{Binding ScanCommand}" IsEnabled="{Binding CanScan}" />
       <Button Margin="0,0,8,0" Content="{DynamicResource Text.Cleanup.Action.CancelScan}"
               Command="{Binding CancelCommand}"
-              IsVisible="{Binding IsRunning}" IsEnabled="{Binding CanCancel}" />
+              IsVisible="{Binding IsScanning}" IsEnabled="{Binding CanCancel}" />
+      <Button Margin="0,0,8,0" Content="{DynamicResource Text.Cleanup.Registry.View.CancelRun}"
+              Command="{Binding CancelCommand}"
+              IsVisible="{Binding IsDeletingRunning}" IsEnabled="{Binding CanCancel}" />
       <Button Margin="0,0,8,0" Content="{DynamicResource Text.Cleanup.Select.All}"
               Command="{Binding SelectAllCommand}" IsEnabled="{Binding CanEditSelection}" />
       <Button Margin="0,0,8,0" Content="{DynamicResource Text.Cleanup.Select.None}"
@@ -119,12 +122,10 @@
     <Border Padding="12,10" CornerRadius="10" IsVisible="{Binding IsConfirming}"
             Background="#18FF3B30" BorderBrush="#66FF3B30" BorderThickness="1">
       <StackPanel Spacing="8">
-        <TextBlock Text="{DynamicResource Text.Cleanup.Slim.Ui.Confirm.Title}" FontWeight="SemiBold" />
+        <TextBlock Text="{DynamicResource Text.Cleanup.Registry.View.Confirm.Title}" FontWeight="SemiBold" />
         <TextBlock Text="{Binding ConfirmText}" TextWrapping="Wrap" />
         <CheckBox Content="{DynamicResource Text.Cleanup.Slim.Ui.CreateRestorePoint}"
                   IsChecked="{Binding CreateRestorePoint}" IsEnabled="{Binding !IsRunning}" />
-        <TextBlock Text="{Binding RestorePointNote}" TextWrapping="Wrap"
-                   IsVisible="{Binding RestorePointNote, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
         <StackPanel Spacing="6" IsVisible="{Binding HasApprovalRows}">
           <TextBlock Text="{DynamicResource Text.Cleanup.Registry.View.Approval.Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
           <ScrollViewer MaxHeight="240" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -150,7 +151,7 @@
         <WrapPanel Orientation="Horizontal">
           <Button Classes="danger" Margin="0,0,8,0" Content="{DynamicResource Text.Button.Run}"
                   Command="{Binding ConfirmRunCommand}" IsEnabled="{Binding CanConfirm}" />
-          <Button Content="{DynamicResource Text.Button.Cancel}" Command="{Binding CancelConfirmCommand}" />
+          <Button Content="{DynamicResource Text.Cleanup.Registry.View.Cancel}" Command="{Binding CancelConfirmCommand}" />
         </WrapPanel>
       </StackPanel>
     </Border>

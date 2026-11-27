@@ -770,8 +770,6 @@
   <x:String x:Key="Text.Cleanup.Registry.Ui.Stale" xml:space="preserve">因掃描結果已過期，未執行任何操作。請重新掃描。</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.ScanInvalidated" xml:space="preserve">因已還原備份，掃描結果已被捨棄。請重新掃描。</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body" xml:space="preserve">將刪除所選的 {0} 個登錄項目。會先儲存備份。</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithRestorePoint" xml:space="preserve">執行前會建立還原點。</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">不會建立還原點。</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Running" xml:space="preserve">正在刪除 {0} 項…</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.RunFailed" xml:space="preserve">執行失敗。</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success" xml:space="preserve">已刪除 {0} 項。</x:String>
@@ -813,9 +811,9 @@
   <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Name" xml:space="preserve">檔案關聯</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Description" xml:space="preserve">「開啟檔案」等所指向的應用程式已不存在的關聯。預設應用程式設定不會變更。</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Name" xml:space="preserve">解除安裝資訊</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">解除安裝程式和安裝位置都不存在的解除安裝項目。預設為關閉，且每個項目都需要你的確認。</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">解除安裝程式和安裝位置都不存在的解除安裝項目。預設為關閉。</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Name" xml:space="preserve">共用 DLL</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">DLL 本身不存在的共用 DLL 參照計數。預設為關閉，且不包含在「全選」中。</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">DLL 本身不存在的共用 DLL 參照計數。預設為關閉。</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Title" xml:space="preserve">登錄</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.ExcludedFromSelectAll" xml:space="preserve">不包含在「全選」中。請只逐一選取需要的項目。</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.RequiresApproval" xml:space="preserve">若要刪除，需要在確認畫面中逐項核准。</x:String>
@@ -829,6 +827,18 @@
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Delete" xml:space="preserve">刪除備份</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">要刪除此備份嗎？</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">刪除</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Confirm.Title" xml:space="preserve">確認刪除登錄項目</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.CancelRun" xml:space="preserve">停止刪除</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Cancel" xml:space="preserve">取消</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ValueDefault" xml:space="preserve">（預設）</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonLine.One" xml:space="preserve">{0}：{1}（{2} 項）</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonMore.One" xml:space="preserve">另有 {0} 種原因。</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Retained.One" xml:space="preserve">有 {0} 項因無法判斷或受保護而保留：{1}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Count.One" xml:space="preserve">{0} 項</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Loaded.One" xml:space="preserve">{0} 個備份</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Running.One" xml:space="preserve">正在刪除 {0} 項…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body.One" xml:space="preserve">將刪除所選的 {0} 個登錄項目。會先儲存備份。</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success.One" xml:space="preserve">已刪除 {0} 項。</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">範例錄製的電視節目</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">僅刪除 Windows 7 隨附的已知範例錄製節目。資料夾中的其他檔案將維持不動。</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Internet Explorer 應用程式快取 (AppCache)</x:String>

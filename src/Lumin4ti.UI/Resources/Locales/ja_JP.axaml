@@ -116,6 +116,9 @@
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Delete" xml:space="preserve">バックアップを削除</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">バックアップを削除しますか</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">削除</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Confirm.Title" xml:space="preserve">レジストリの削除の確認</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.CancelRun" xml:space="preserve">削除を中断</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Cancel" xml:space="preserve">キャンセル</x:String>
 
   <!-- 共通の操作・列見出し -->
   <x:String x:Key="Text.Cleanup.Action.Scan" xml:space="preserve">走査</x:String>

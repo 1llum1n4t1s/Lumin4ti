@@ -767,8 +767,6 @@
   <x:String x:Key="Text.Cleanup.Registry.Ui.Stale" xml:space="preserve">अन्वीक्षणफलं जीर्णम् आसीत्, अतः किमपि न चालितम्। पुनरन्वीक्षताम्।</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.ScanInvalidated" xml:space="preserve">प्रतिलिपिः पुनःस्थापिता, अतः अन्वीक्षणफलं त्यक्तम्। पुनरन्वीक्षताम्।</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body" xml:space="preserve">चिताः {0} registry-प्रविष्टयः लोपयिष्यन्ते। प्रथमं प्रतिलिपिः रक्ष्यते।</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithRestorePoint" xml:space="preserve">चालनात् पूर्वं restore point निर्मीयते।</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">restore point न निर्मीयते।</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Running" xml:space="preserve">{0} प्रविष्टयः लोप्यन्ते…</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.RunFailed" xml:space="preserve">चालनं विफलम्।</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success" xml:space="preserve">{0} प्रविष्टयः लोपिताः।</x:String>
@@ -810,9 +808,9 @@
   <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Name" xml:space="preserve">सञ्चिका-सम्बन्धाः</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Description" xml:space="preserve">"Open with" इत्यादयः सम्बन्धाः येषां app इदानीं नास्ति। default app-विन्यासाः न परिवर्त्यन्ते।</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Name" xml:space="preserve">uninstall-सूचना</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">uninstall-प्रविष्टयः येषाम् uninstaller स्थापनस्थानं च उभे नास्ति। प्रारम्भतः निष्क्रियम्, प्रत्येकं मदः भवतः अनुमतिम् अपेक्षते।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">uninstall-प्रविष्टयः येषाम् uninstaller स्थापनस्थानं च उभे नास्ति। प्रारम्भतः निष्क्रियम्।</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Name" xml:space="preserve">Shared DLL</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">Shared DLL-सन्दर्भगणनाः येषां DLL नास्ति। प्रारम्भतः निष्क्रियम् "सर्वाणि चिनुत" इत्यस्मिन् च न अन्तर्भवति।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">Shared DLL-सन्दर्भगणनाः येषां DLL नास्ति। प्रारम्भतः निष्क्रियम्।</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Title" xml:space="preserve">registry</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.ExcludedFromSelectAll" xml:space="preserve">"सर्वाणि चिनुत" इत्यस्मिन् न अन्तर्भवति। आवश्यकान् मदान् एव एकैकं चिनुत।</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.RequiresApproval" xml:space="preserve">लोपनार्थं प्रत्येकं मदः पुष्टिपटले भवतः अनुमतिम् अपेक्षते।</x:String>
@@ -826,6 +824,18 @@
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Delete" xml:space="preserve">प्रतिलिपिं लोपय</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">इमां प्रतिलिपिं लोपयेत्?</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">लोपय</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Confirm.Title" xml:space="preserve">registry-लोपनं पुष्टीकुरुत</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.CancelRun" xml:space="preserve">लोपनं स्थगय</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Cancel" xml:space="preserve">निरस्तं कुरु</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ValueDefault" xml:space="preserve">(पूर्वनिर्धारितम्)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonLine.One" xml:space="preserve">{0}: {1} ({2} मदः)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonMore.One" xml:space="preserve">अपरः {0} कारणप्रकारः अस्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Retained.One" xml:space="preserve">{0} प्रविष्टिः निर्णेतुम् अशक्या रक्षिता वा अस्ति, अतः रक्षिता: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Count.One" xml:space="preserve">{0} प्रविष्टिः</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Loaded.One" xml:space="preserve">{0} प्रतिलिपिः</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Running.One" xml:space="preserve">{0} प्रविष्टिः लोप्यते…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body.One" xml:space="preserve">चिता {0} registry-प्रविष्टिः लोपयिष्यते। प्रथमं प्रतिलिपिः रक्ष्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success.One" xml:space="preserve">{0} प्रविष्टिः लोपिता।</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">नमूना-अभिलिखितदूरदर्शनम्</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">Windows 7-सहितम् ज्ञातं नमूनाभिलेखनम् एव लोपयति। सञ्चिकाकोशे अन्याः सञ्चिकाः अस्पृष्टाः।</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Internet Explorer-अनुप्रयोगसंग्रहः (AppCache)</x:String>

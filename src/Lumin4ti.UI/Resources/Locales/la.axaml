@@ -803,8 +803,6 @@
   <x:String x:Key="Text.Cleanup.Registry.Ui.Stale" xml:space="preserve">Nihil exsecutum est quia eventus perscrutationis obsoletus erat. Iterum perscrutare.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.ScanInvalidated" xml:space="preserve">Eventus perscrutationis abiectus est quia exemplar tutum restitutum est. Iterum perscrutare.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body" xml:space="preserve">Ingressus registri selecti {0} delebuntur. Prius exemplar tutum servatur.</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithRestorePoint" xml:space="preserve">Punctum restitutionis ante exsecutionem creatur.</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">Nullum punctum restitutionis creatur.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Running" xml:space="preserve">Ingressus {0} delentur…</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.RunFailed" xml:space="preserve">Exsecutio defecit.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success" xml:space="preserve">Ingressus {0} deleti sunt.</x:String>
@@ -846,9 +844,9 @@
   <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Name" xml:space="preserve">Associationes fasciculorum</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Description" xml:space="preserve">Associationes ut "Aperire cum" quarum applicatio iam non exstat. Optiones applicationis praefinitae non mutantur.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Name" xml:space="preserve">Informationes deinstallationis</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">Ingressus deinstallationis quorum deinstallator et locus installationis ambo non exstant. Praefinite inactivum est, et quodque elementum approbationem tuam requirit.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">Ingressus deinstallationis quorum deinstallator et locus installationis ambo non exstant. Praefinite inactivum est.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Name" xml:space="preserve">DLL communes</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">Numeri referentiarum DLL communium quarum DLL non exstat. Praefinite inactivum est et in "Omnia selige" non includitur.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">Numeri referentiarum DLL communium quarum DLL non exstat. Praefinite inactivum est.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Title" xml:space="preserve">Registrum</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.ExcludedFromSelectAll" xml:space="preserve">In "Omnia selige" non includitur. Elementa necessaria tantum singillatim selige.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.RequiresApproval" xml:space="preserve">Ad delendum, quodque elementum approbationem tuam in tabula confirmationis requirit.</x:String>
@@ -862,6 +860,18 @@
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Delete" xml:space="preserve">Exemplar tutum dele</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">Hocne exemplar tutum delere?</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">Dele</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Confirm.Title" xml:space="preserve">Deletionem registri confirma</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.CancelRun" xml:space="preserve">Deletionem siste</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Cancel" xml:space="preserve">Cancella</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ValueDefault" xml:space="preserve">(Praefinitum)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonLine.One" xml:space="preserve">{0}: {1} ({2} elementum)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonMore.One" xml:space="preserve">Adhuc {0} genus causarum superest.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Retained.One" xml:space="preserve">Ingressus {0} servatus est quia diiudicari non potest vel tutus est: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Count.One" xml:space="preserve">Ingressus {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Loaded.One" xml:space="preserve">Exemplar tutum {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Running.One" xml:space="preserve">Ingressus {0} deletur…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body.One" xml:space="preserve">Ingressus registri selectus ({0}) delebitur. Prius exemplar tutum servatur.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success.One" xml:space="preserve">Ingressus {0} deletus est.</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">Registra televisifica exempli gratia</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">Registrum exempli gratia notum tantum delet quod cum Windows 7 veniebat. Reliqui fasciculi in directorio intacti relinquuntur.</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Cella applicationum Internet Explorer (AppCache)</x:String>

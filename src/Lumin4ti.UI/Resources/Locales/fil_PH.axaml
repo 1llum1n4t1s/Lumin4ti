@@ -767,8 +767,6 @@
   <x:String x:Key="Text.Cleanup.Registry.Ui.Stale" xml:space="preserve">Walang pinatakbo dahil luma na ang resulta ng scan. I-scan muli.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.ScanInvalidated" xml:space="preserve">Itinapon ang resulta ng scan dahil may naibalik na backup. I-scan muli.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body" xml:space="preserve">Buburahin ang {0} napiling registry entry. Magse-save muna ng backup.</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithRestorePoint" xml:space="preserve">Gagawa ng restore point bago patakbuhin.</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">Walang gagawing restore point.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Running" xml:space="preserve">Binubura ang {0} entry…</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.RunFailed" xml:space="preserve">Nabigo ang pagpapatakbo.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success" xml:space="preserve">Nabura ang {0} entry.</x:String>
@@ -810,9 +808,9 @@
   <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Name" xml:space="preserve">Mga file association</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Description" xml:space="preserve">Mga association gaya ng "Open with" na wala na ang app. Hindi binabago ang mga setting ng default na app.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Name" xml:space="preserve">Impormasyon sa pag-uninstall</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">Mga uninstall entry na parehong wala ang uninstaller at ang install location. Naka-off bilang default, at kailangan ng iyong pag-apruba ang bawat item.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">Mga uninstall entry na parehong wala ang uninstaller at ang install location. Naka-off bilang default.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Name" xml:space="preserve">Mga Shared DLL</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">Mga reference count ng Shared DLL na wala ang DLL. Naka-off bilang default at hindi kasama sa "Piliin lahat".</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">Mga reference count ng Shared DLL na wala ang DLL. Naka-off bilang default.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Title" xml:space="preserve">Registry</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.ExcludedFromSelectAll" xml:space="preserve">Hindi kasama sa "Piliin lahat". Piliin nang isa-isa ang mga kailangan mo lang.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.RequiresApproval" xml:space="preserve">Para magbura, kailangan ng iyong pag-apruba ang bawat item sa screen ng kumpirmasyon.</x:String>
@@ -826,6 +824,18 @@
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Delete" xml:space="preserve">Burahin ang backup</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">Burahin ang backup na ito?</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">Burahin</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Confirm.Title" xml:space="preserve">Kumpirmahin ang pagbura sa registry</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.CancelRun" xml:space="preserve">Ihinto ang pagbura</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Cancel" xml:space="preserve">Kanselahin</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ValueDefault" xml:space="preserve">(Default)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonLine.One" xml:space="preserve">{0}: {1} ({2} item)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonMore.One" xml:space="preserve">May {0} pang uri ng dahilan.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Retained.One" xml:space="preserve">Pinanatili ang {0} entry dahil hindi mahuhusgahan o protektado ang mga ito: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Count.One" xml:space="preserve">{0} entry</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Loaded.One" xml:space="preserve">{0} backup</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Running.One" xml:space="preserve">Binubura ang {0} entry…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body.One" xml:space="preserve">Buburahin ang {0} napiling registry entry. Magse-save muna ng backup.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success.One" xml:space="preserve">Nabura ang {0} entry.</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">Sample na recorded TV</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">Binubura lamang ang kilalang sample na recording na kasama sa Windows 7. Hindi ginagalaw ang iba pang file sa folder.</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Application cache ng Internet Explorer (AppCache)</x:String>

@@ -769,8 +769,6 @@
   <x:String x:Key="Text.Cleanup.Registry.Ui.Stale" xml:space="preserve">Нічого не виконано, бо результат сканування застарів. Виконайте сканування ще раз.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.ScanInvalidated" xml:space="preserve">Результат сканування відхилено, бо було відновлено резервну копію. Виконайте сканування ще раз.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body" xml:space="preserve">Вибрані записи реєстру ({0}) буде видалено. Спочатку буде збережено резервну копію.</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithRestorePoint" xml:space="preserve">Перед виконанням буде створено точку відновлення.</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">Точку відновлення створено не буде.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Running" xml:space="preserve">Видалення записів: {0}…</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.RunFailed" xml:space="preserve">Не вдалося виконати операцію.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success" xml:space="preserve">Видалено записів: {0}.</x:String>
@@ -812,9 +810,9 @@
   <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Name" xml:space="preserve">Зіставлення файлів</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Description" xml:space="preserve">Зіставлення, наприклад «Відкрити за допомогою», для застосунків, яких більше немає. Параметри застосунків за замовчуванням не змінюються.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Name" xml:space="preserve">Відомості про видалення</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">Записи про видалення, у яких немає ні програми видалення, ні папки встановлення. За замовчуванням вимкнено, і кожен елемент потребує вашого підтвердження.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">Записи про видалення, у яких немає ні програми видалення, ні папки встановлення. За замовчуванням вимкнено.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Name" xml:space="preserve">Спільні DLL</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">Лічильники посилань на спільні DLL, у яких самої DLL не існує. За замовчуванням вимкнено й не входить до «Вибрати все».</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">Лічильники посилань на спільні DLL, у яких самої DLL не існує. За замовчуванням вимкнено.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Title" xml:space="preserve">Реєстр</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.ExcludedFromSelectAll" xml:space="preserve">Не входить до «Вибрати все». Вибирайте лише потрібні елементи по одному.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.RequiresApproval" xml:space="preserve">Для видалення кожен елемент потрібно підтвердити на екрані підтвердження.</x:String>
@@ -828,6 +826,18 @@
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Delete" xml:space="preserve">Видалити резервну копію</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">Видалити цю резервну копію?</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">Видалити</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Confirm.Title" xml:space="preserve">Підтвердження видалення з реєстру</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.CancelRun" xml:space="preserve">Зупинити видалення</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Cancel" xml:space="preserve">Скасувати</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ValueDefault" xml:space="preserve">(За замовчуванням)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonLine.One" xml:space="preserve">{0}: {1} (елементів: {2})</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonMore.One" xml:space="preserve">Є ще причин іншого виду: {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Retained.One" xml:space="preserve">Залишено записів: {0}, бо їх неможливо оцінити або вони захищені: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Count.One" xml:space="preserve">Записів: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Loaded.One" xml:space="preserve">Резервних копій: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Running.One" xml:space="preserve">Видалення записів: {0}…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body.One" xml:space="preserve">Вибрані записи реєстру ({0}) буде видалено. Спочатку буде збережено резервну копію.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success.One" xml:space="preserve">Видалено записів: {0}.</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">Зразки записаних передач</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">Видаляє лише відомий зразок запису, що входив до складу Windows 7. Інші файли в папці не зачіпаються.</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Кеш програм Internet Explorer (AppCache)</x:String>

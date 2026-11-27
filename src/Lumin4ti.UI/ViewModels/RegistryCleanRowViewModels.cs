@@ -70,8 +70,13 @@ internal sealed class RegistryCleanRowViewModel : ObservableObject
 
     public string FullKeyPath => $"{HiveText}\\{KeyPath}";
 
-    /// <summary>値名 (キー単位の項目は空、既定値は空文字)。</summary>
-    public string ValueName => Item.ValueName ?? string.Empty;
+    /// <summary>値名 (キー単位の項目は空)。既定値 (空の値名) は「(既定)」と表示する。</summary>
+    public string ValueName => Item.ValueName switch
+    {
+        null => string.Empty,
+        { Length: 0 } => CleanupText.Get("Cleanup.Registry.Ui.ValueDefault"),
+        var name => name,
+    };
 
     public bool HasValueName => Item.ValueName is not null;
 
@@ -87,6 +92,7 @@ internal sealed class RegistryCleanRowViewModel : ObservableObject
     internal void RefreshLocale()
     {
         OnPropertyChanged(nameof(ViewText));
+        OnPropertyChanged(nameof(ValueName));
         OnPropertyChanged(nameof(ReasonText));
     }
 }
@@ -139,7 +145,7 @@ internal sealed class RegistryCleanGroupViewModel : ObservableObject
                 .OrderByDescending(group => group.Count())
                 .Take(MaxRetainedReasons)
                 .Select(group => $"{group.Key} ({group.Count()})");
-            return CleanupText.Get("Cleanup.Registry.Ui.Retained", _retained.Count, string.Join(" / ", reasons));
+            return CleanupText.GetCounted("Cleanup.Registry.Ui.Retained", _retained.Count, _retained.Count, string.Join(" / ", reasons));
         }
     }
 
@@ -189,7 +195,7 @@ internal sealed class RegistryBackupRowViewModel(RegistryBackupSummary summary) 
 
     /// <summary>対象件数 (結果ファイルが無いときは「不明」)。</summary>
     public string ItemCountText => Summary.ItemCount is { } count
-        ? CleanupText.Get("Cleanup.Registry.Ui.Backup.Count", count)
+        ? CleanupText.GetCounted("Cleanup.Registry.Ui.Backup.Count", count, count)
         : CleanupText.Get("Cleanup.Registry.Ui.Backup.CountUnknown");
 
     public bool HasResultFile => Summary.HasResultFile;

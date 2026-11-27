@@ -803,8 +803,6 @@
   <x:String x:Key="Text.Cleanup.Registry.Ui.Stale" xml:space="preserve">Es wurde nichts ausgeführt, weil das Prüfergebnis veraltet war. Prüfen Sie erneut.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.ScanInvalidated" xml:space="preserve">Das Prüfergebnis wurde verworfen, weil eine Sicherung wiederhergestellt wurde. Prüfen Sie erneut.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body" xml:space="preserve">Die {0} ausgewählten Registrierungseinträge werden gelöscht. Zuvor wird eine Sicherung gespeichert.</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithRestorePoint" xml:space="preserve">Vor der Ausführung wird ein Wiederherstellungspunkt erstellt.</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">Es wird kein Wiederherstellungspunkt erstellt.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Running" xml:space="preserve">{0} Einträge werden gelöscht…</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.RunFailed" xml:space="preserve">Die Ausführung ist fehlgeschlagen.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success" xml:space="preserve">{0} Einträge wurden gelöscht.</x:String>
@@ -846,9 +844,9 @@
   <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Name" xml:space="preserve">Dateizuordnungen</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.FileAssociations.Description" xml:space="preserve">Zuordnungen wie „Öffnen mit“, deren App nicht mehr existiert. Die Einstellungen für Standard-Apps werden nicht geändert.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Name" xml:space="preserve">Deinstallationsinformationen</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">Deinstallationseinträge, deren Deinstallationsprogramm und Installationsort beide nicht existieren. Standardmäßig deaktiviert; jeder Eintrag erfordert Ihre Bestätigung.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.Uninstall.Description" xml:space="preserve">Deinstallationseinträge, deren Deinstallationsprogramm und Installationsort beide nicht existieren. Standardmäßig deaktiviert.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Name" xml:space="preserve">Freigegebene DLLs</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">Referenzzähler freigegebener DLLs, deren DLL nicht existiert. Standardmäßig deaktiviert und nicht in „Alle auswählen“ enthalten.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Category.SharedDlls.Description" xml:space="preserve">Referenzzähler freigegebener DLLs, deren DLL nicht existiert. Standardmäßig deaktiviert.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Title" xml:space="preserve">Registrierung</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.ExcludedFromSelectAll" xml:space="preserve">Nicht in „Alle auswählen“ enthalten. Wählen Sie nur die benötigten Einträge einzeln aus.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.RequiresApproval" xml:space="preserve">Zum Löschen muss jeder Eintrag im Bestätigungsdialog von Ihnen genehmigt werden.</x:String>
@@ -862,6 +860,18 @@
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Delete" xml:space="preserve">Sicherung löschen</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">Diese Sicherung löschen?</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">Löschen</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Confirm.Title" xml:space="preserve">Löschen der Registrierungseinträge bestätigen</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.CancelRun" xml:space="preserve">Löschen abbrechen</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Cancel" xml:space="preserve">Abbrechen</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ValueDefault" xml:space="preserve">(Standard)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonLine.One" xml:space="preserve">{0}: {1} ({2} Eintrag)</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonMore.One" xml:space="preserve">Es gibt {0} weitere Art von Gründen.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Retained.One" xml:space="preserve">{0} Eintrag wurde beibehalten, weil er nicht beurteilt werden kann oder geschützt ist: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Count.One" xml:space="preserve">{0} Eintrag</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.Loaded.One" xml:space="preserve">{0} Sicherung</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Running.One" xml:space="preserve">{0} Eintrag wird gelöscht…</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Confirm.Body.One" xml:space="preserve">Der ausgewählte Registrierungseintrag ({0}) wird gelöscht. Zuvor wird eine Sicherung gespeichert.</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Result.Success.One" xml:space="preserve">{0} Eintrag wurde gelöscht.</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">Beispiel für aufgezeichnetes Fernsehen</x:String>
   <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">Löscht nur die bekannte Beispielaufnahme, die mit Windows 7 geliefert wurde. Andere Dateien im Ordner bleiben unberührt.</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Internet-Explorer-Anwendungscache (AppCache)</x:String>

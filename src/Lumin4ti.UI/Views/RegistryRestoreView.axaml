@@ -63,7 +63,7 @@
         <WrapPanel Orientation="Horizontal">
           <Button Classes="danger" Margin="0,0,8,0" Content="{DynamicResource Text.Cleanup.Registry.View.Backups.DeleteRun}"
                   Command="{Binding ConfirmDeleteCommand}" IsEnabled="{Binding CanOperate}" />
-          <Button Content="{DynamicResource Text.Button.Cancel}" Command="{Binding CancelDeleteCommand}" />
+          <Button Content="{DynamicResource Text.Cleanup.Registry.View.Cancel}" Command="{Binding CancelDeleteCommand}" />
         </WrapPanel>
       </StackPanel>
     </Border>

@@ -7,6 +7,36 @@
 
   <!--  内側 6 タブ: 通常／高度／スリム化／レジストリ／設定／その他 (その他は従来のカテゴリ画面)  -->
   <TabControl>
+    <!--  見出しは折り返さず 1 行に保ち、幅が足りない言語では見出し列だけを横スクロールにする (このタブ列に閉じる)  -->
+    <TabControl.Styles>
+      <Style Selector="TabItem">
+        <Setter Property="Padding" Value="8,0" />
+      </Style>
+    </TabControl.Styles>
+    <TabControl.Template>
+      <ControlTemplate TargetType="TabControl">
+        <DockPanel>
+          <ScrollViewer
+              DockPanel.Dock="Top"
+              HorizontalScrollBarVisibility="Auto"
+              VerticalScrollBarVisibility="Disabled">
+            <ItemsPresenter Name="PART_ItemsPresenter">
+              <ItemsPresenter.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+              </ItemsPresenter.ItemsPanel>
+            </ItemsPresenter>
+          </ScrollViewer>
+          <ContentPresenter
+              Name="PART_SelectedContentHost"
+              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+              Content="{TemplateBinding SelectedContent}"
+              ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
+        </DockPanel>
+      </ControlTemplate>
+    </TabControl.Template>
     <TabItem Header="{DynamicResource Text.Cleanup.Tab.Common}">
       <views:CommonCleanView DataContext="{Binding Common}" />
     </TabItem>

@@ -40,6 +40,15 @@ internal sealed partial class RegistryRestoreViewModel : RegistryOperationViewMo
                 OnPropertyChanged(nameof(CanOperate));
             }
         };
+        // 削除側の実行中・他の操作の lease 中も、復元・バックアップ削除を無効にする。
+        clean.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(IsRunning))
+            {
+                PostToUi(() => OnPropertyChanged(nameof(CanOperate)));
+            }
+        };
+        coordinator.StateChanged += (_, _) => PostToUi(() => OnPropertyChanged(nameof(CanOperate)));
     }
 
     public ObservableCollection<RegistryBackupRowViewModel> Backups { get; } = [];
@@ -69,7 +78,7 @@ internal sealed partial class RegistryRestoreViewModel : RegistryOperationViewMo
 
     public bool HasBackups => Backups.Count > 0;
 
-    public bool CanOperate => !IsRunning;
+    public bool CanOperate => !IsRunning && !_clean.IsRunning && Coordinator.ActiveCount == 0;
 
     partial void OnPendingDeleteChanged(RegistryBackupRowViewModel? value) => OnPropertyChanged(nameof(IsConfirmingDelete));
 
@@ -86,7 +95,7 @@ internal sealed partial class RegistryRestoreViewModel : RegistryOperationViewMo
                 Backups.Add(new RegistryBackupRowViewModel(summary));
             }
 
-            SetStatus(() => CleanupText.Get("Cleanup.Registry.Ui.Backup.Loaded", Backups.Count));
+            SetStatus(() => CleanupText.GetCounted("Cleanup.Registry.Ui.Backup.Loaded", Backups.Count, Backups.Count));
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -128,7 +137,9 @@ internal sealed partial class RegistryRestoreViewModel : RegistryOperationViewMo
         {
             _lastResult = result;
             RefreshResultTexts();
-            SetStatus(() => ResultSummary);
+
+            // 結果の要約は理由つきの結果欄に出す。状態表示には一覧の件数だけを残し、要約を重ねて出さない。
+            SetStatus(() => CleanupText.GetCounted("Cleanup.Registry.Ui.Backup.Loaded", Backups.Count, Backups.Count));
             return;
         }
 
@@ -162,7 +173,7 @@ internal sealed partial class RegistryRestoreViewModel : RegistryOperationViewMo
             ResultReasons.Add(line);
         }
 
-        ResultMoreText = more > 0 ? CleanupText.Get("Cleanup.Registry.Ui.ReasonMore", more) : string.Empty;
+        ResultMoreText = more > 0 ? CleanupText.GetCounted("Cleanup.Registry.Ui.ReasonMore", more, more) : string.Empty;
         ResultMessageText = CleanupText.Detail(result.Message);
     }
 

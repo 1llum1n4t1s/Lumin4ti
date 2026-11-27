@@ -15,6 +15,9 @@ internal static partial class CleanupText
     /// <summary>キーの文言を返す。<paramref name="args"/> があれば string.Format する。</summary>
     public static string Get(string key, params object[] args) => App.Text(key, JapaneseOf(key), args);
 
+    /// <summary>件数が 1 のときは <c>{key}.One</c> の文言を使う (単数形のある言語用)。<paramref name="args"/> の先頭以外に件数があるときは <paramref name="count"/> で指定する。</summary>
+    public static string GetCounted(string key, int count, params object[] args) => Get(count == 1 ? key + ".One" : key, args);
+
     /// <summary>
     /// Core が返す辞書キー (<c>Text.Cleanup.Rule.…</c>・<c>Text.Cleanup.Slim.…</c>・<c>Text.Cleanup.Warning.…</c>) の文言を返す。
     /// </summary>
