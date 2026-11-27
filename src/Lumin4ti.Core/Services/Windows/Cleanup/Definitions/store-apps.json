@@ -1,0 +1,293 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "store.bing-maps",
+      "name": "Windows Maps",
+      "nameKey": null,
+      "kind": "temp",
+      "category": "storeApps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Packages\\Microsoft.WindowsMaps_8wekyb3d8bbwe" },
+        { "package": "Microsoft.WindowsMaps_8wekyb3d8bbwe" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\Microsoft.WindowsMaps_8wekyb3d8bbwe\\TempState" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\Microsoft.WindowsMaps_8wekyb3d8bbwe\\AC\\Temp" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/application-management/remove-provisioned-apps-during-update", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/uwp/get-started/fileio-learning-track", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/win32/secauthz/implementing-an-appcontainer", "checked": "2026-11-27" }
+      ]
+    },
+    {
+      "id": "store.bing-weather",
+      "name": "MSN Weather",
+      "nameKey": null,
+      "kind": "temp",
+      "category": "storeApps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Packages\\Microsoft.BingWeather_8wekyb3d8bbwe" },
+        { "package": "Microsoft.BingWeather_8wekyb3d8bbwe" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\Microsoft.BingWeather_8wekyb3d8bbwe\\TempState" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\Microsoft.BingWeather_8wekyb3d8bbwe\\AC\\Temp" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/application-management/remove-provisioned-apps-during-update", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/uwp/get-started/fileio-learning-track", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/win32/secauthz/implementing-an-appcontainer", "checked": "2026-11-27" }
+      ]
+    },
+    {
+      "id": "store.groove-music",
+      "name": "Groove Music",
+      "nameKey": null,
+      "kind": "temp",
+      "category": "storeApps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Packages\\Microsoft.ZuneMusic_8wekyb3d8bbwe" },
+        { "package": "Microsoft.ZuneMusic_8wekyb3d8bbwe" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\Microsoft.ZuneMusic_8wekyb3d8bbwe\\TempState" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\Microsoft.ZuneMusic_8wekyb3d8bbwe\\AC\\Temp" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/application-management/remove-provisioned-apps-during-update", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/uwp/get-started/fileio-learning-track", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/win32/secauthz/implementing-an-appcontainer", "checked": "2026-11-27" }
+      ]
+    },
+    {
+      "id": "store.movies-tv",
+      "name": "Movies & TV",
+      "nameKey": null,
+      "kind": "temp",
+      "category": "storeApps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Packages\\Microsoft.ZuneVideo_8wekyb3d8bbwe" },
+        { "package": "Microsoft.ZuneVideo_8wekyb3d8bbwe" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\Microsoft.ZuneVideo_8wekyb3d8bbwe\\TempState" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\Microsoft.ZuneVideo_8wekyb3d8bbwe\\AC\\Temp" }
+      ],
+      "processes": ["Video.UI"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/application-management/remove-provisioned-apps-during-update", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/uwp/get-started/fileio-learning-track", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/win32/secauthz/implementing-an-appcontainer", "checked": "2026-11-27" },
+        { "tier": "B", "url": "https://www.minitool.com/news/video-ui-exe.html", "checked": "2026-11-27" },
+        { "tier": "B", "url": "https://www.freefixer.com/library/file/Video.UI.exe-196777/", "checked": "2026-11-27" }
+      ]
+    },
+    {
+      "id": "store.skype",
+      "name": "Skype",
+      "nameKey": null,
+      "kind": "temp",
+      "category": "storeApps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Packages\\Microsoft.SkypeApp_kzf8qxf38zg5c" },
+        { "package": "Microsoft.SkypeApp_kzf8qxf38zg5c" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\Microsoft.SkypeApp_kzf8qxf38zg5c\\TempState" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\Microsoft.SkypeApp_kzf8qxf38zg5c\\AC\\Temp" }
+      ],
+      "processes": ["SkypeApp"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/application-management/remove-provisioned-apps-during-update", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/uwp/get-started/fileio-learning-track", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/win32/secauthz/implementing-an-appcontainer", "checked": "2026-11-27" },
+        { "tier": "B", "url": "https://www.freefixer.com/library/file/SkypeApp.exe-249417/", "checked": "2026-11-27" },
+        { "tier": "B", "url": "https://learn.microsoft.com/en-us/answers/questions/3159894/windows-10-crashing-application-freezing-reboot-fr", "checked": "2026-11-27" }
+      ]
+    },
+    {
+      "id": "store.3d-viewer",
+      "name": "3D Viewer",
+      "nameKey": null,
+      "kind": "temp",
+      "category": "storeApps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Packages\\Microsoft.Microsoft3DViewer_8wekyb3d8bbwe" },
+        { "package": "Microsoft.Microsoft3DViewer_8wekyb3d8bbwe" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\Microsoft.Microsoft3DViewer_8wekyb3d8bbwe\\TempState" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\Microsoft.Microsoft3DViewer_8wekyb3d8bbwe\\AC\\Temp" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/application-management/remove-provisioned-apps-during-update", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/uwp/get-started/fileio-learning-track", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/win32/secauthz/implementing-an-appcontainer", "checked": "2026-11-27" }
+      ]
+    },
+    {
+      "id": "store.feedback-hub",
+      "name": "Windows Feedback Hub",
+      "nameKey": null,
+      "kind": "temp",
+      "category": "storeApps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Packages\\Microsoft.WindowsFeedbackHub_8wekyb3d8bbwe" },
+        { "package": "Microsoft.WindowsFeedbackHub_8wekyb3d8bbwe" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\Microsoft.WindowsFeedbackHub_8wekyb3d8bbwe\\TempState" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\Microsoft.WindowsFeedbackHub_8wekyb3d8bbwe\\AC\\Temp" }
+      ],
+      "processes": ["PilotshubApp"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/application-management/remove-provisioned-apps-during-update", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/uwp/get-started/fileio-learning-track", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/win32/secauthz/implementing-an-appcontainer", "checked": "2026-11-27" },
+        { "tier": "B", "url": "https://www.freefixer.com/library/file/PilotshubApp.exe-248433/", "checked": "2026-11-27" },
+        { "tier": "B", "url": "https://learn.microsoft.com/en-us/answers/questions/3269421/uwp-apps-crashing", "checked": "2026-11-27" }
+      ]
+    },
+    {
+      "id": "store.sound-recorder",
+      "name": "Windows Sound Recorder",
+      "nameKey": null,
+      "kind": "temp",
+      "category": "storeApps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Packages\\Microsoft.WindowsSoundRecorder_8wekyb3d8bbwe" },
+        { "package": "Microsoft.WindowsSoundRecorder_8wekyb3d8bbwe" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\Microsoft.WindowsSoundRecorder_8wekyb3d8bbwe\\TempState" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\Microsoft.WindowsSoundRecorder_8wekyb3d8bbwe\\AC\\Temp" }
+      ],
+      "processes": ["SoundRec"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/application-management/remove-provisioned-apps-during-update", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/uwp/get-started/fileio-learning-track", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/win32/secauthz/implementing-an-appcontainer", "checked": "2026-11-27" },
+        { "tier": "B", "url": "https://www.freefixer.com/library/file/SoundRec.exe-217369/", "checked": "2026-11-27" },
+        { "tier": "B", "url": "https://learn.microsoft.com/en-us/answers/questions/2f04c0eb-e220-423a-9022-12e163f53b10/voice-recorder-crashing?forum=windows-all", "checked": "2026-11-27" }
+      ]
+    },
+    {
+      "id": "store.teams-new-logs",
+      "name": "Microsoft Teams",
+      "nameKey": null,
+      "kind": "log",
+      "category": "storeApps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Packages\\MSTeams_8wekyb3d8bbwe" },
+        { "package": "MSTeams_8wekyb3d8bbwe" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\MSTeams_8wekyb3d8bbwe\\LocalCache\\Microsoft\\MSTeams\\Logs" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\MSTeams_8wekyb3d8bbwe\\LocalCache\\Microsoft\\MSTeams\\PerfLog" }
+      ],
+      "processes": ["ms-teams"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/microsoftteams/teams-client-vdi-requirements-deploy", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/troubleshoot/microsoftteams/teams-administration/clear-teams-cache", "checked": "2026-11-27" }
+      ]
+    },
+    {
+      "id": "store.teams-new-cache",
+      "name": "Microsoft Teams",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "storeApps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "rebuild",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Packages\\MSTeams_8wekyb3d8bbwe" },
+        { "package": "MSTeams_8wekyb3d8bbwe" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\MSTeams_8wekyb3d8bbwe\\LocalCache\\Microsoft\\MSTeams\\EBWebView\\WV2Profile_tfw\\GPUCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\MSTeams_8wekyb3d8bbwe\\LocalCache\\Microsoft\\MSTeams\\EBWebView\\WV2Profile_tfw\\Cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\MSTeams_8wekyb3d8bbwe\\LocalCache\\Microsoft\\MSTeams\\EBWebView\\WV2Profile_tfw\\Code Cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Packages\\MSTeams_8wekyb3d8bbwe\\LocalCache\\Microsoft\\MSTeams\\EBWebView\\WV2Profile_tfw\\Service Worker\\CacheStorage" }
+      ],
+      "processes": ["ms-teams"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/microsoftteams/teams-client-vdi-requirements-deploy", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/troubleshoot/microsoftteams/teams-administration/clear-teams-cache", "checked": "2026-11-27" }
+      ]
+    }
+  ]
+}

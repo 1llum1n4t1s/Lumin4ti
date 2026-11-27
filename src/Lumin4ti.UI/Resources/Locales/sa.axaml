@@ -90,8 +90,6 @@
   <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">स्वनिर्धारितम्</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">DISM इत्यस्य निर्गमे Recall इत्यस्य स्थितिः न दृश्यते। विवरणार्थं वृत्तान्तं पश्यन्तु।</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">DISM द्वारा दत्तां Recall इत्यस्य स्थितिं निर्णेतुं न शक्यते। विवरणार्थं वृत्तान्तं पश्यन्तु।</x:String>
-  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">एतत् कार्यम् अन्येन Windows उपयोक्त्रा पञ्जीकृतम्, अतः परिवर्तयितुं न शक्यते।</x:String>
-  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">पञ्जीकृतकार्यस्य स्वामिनं प्रमाणयितुं न शक्यते, अतः कार्यं परिवर्तयितुं न शक्यते।</x:String>
 
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">स्थापितान् अनुप्रयोगान् समूहशः नवीकुरु (winget)</x:String>
@@ -118,24 +116,10 @@
   <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">WSReset-द्वारा Microsoft Store-निधिं प्रत्यानयति। Store न उद्घाट्यते, अवचयनानि न प्रगच्छन्ति, अथवा पुनः पुनः “try again” दोषाः इति प्रामाणिकसमाधानम्। अनुप्रयोगाः खातासूचना च न अपनीयन्ते। समाप्तौ Store-अनुप्रयोगः स्वयमेव उद्घाटेत्।</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">SSD TRIM रिक्तस्थानसंहतिश्च</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">SSD-लेखनकार्यक्षमतां पालयितुं रिक्तस्थानं च संहन्तुं सर्वेषु खण्डेषु SSD-प्रति TRIM-सूचनां (/L) रिक्तस्थानसंहतिं (/X) च चालयति। चालकसंरचनानुसारं निमेषाः यावत् दशकनिमेषाः यावत् कालं गृह्णीयात्। चालने PC निरन्तरं प्रयोक्तुं शक्नोषि।</x:String>
-  <x:String x:Key="Text.Action.cleanup-user-temp.Label" xml:space="preserve">प्रयोक्तुः अस्थायिसञ्चिकाः संग्रहाश्च लोपयतु</x:String>
-  <x:String x:Key="Text.Action.cleanup-user-temp.Desc" xml:space="preserve">Deletes temporary files, crash dumps, shader and internet caches, and regenerable IME, Office, and Outlook caches. Browsing history, recent-file history, and app settings are not deleted. Files in use are skipped.</x:String>
-  <x:String x:Key="Text.Action.cleanup-system-temp.Label" xml:space="preserve">तन्त्रस्य अस्थायिसञ्चिकाः लेखांश्च लोपयतु</x:String>
-  <x:String x:Key="Text.Action.cleanup-system-temp.Desc" xml:space="preserve">Deletes Windows temporary folders, ETL trace logs in known Windows log locations, setup and service logs, the Delivery Optimization cache, and Microsoft Defender diagnostic logs. Defender detection and remediation history is preserved. ETL files are limited to *.etl under Windows Logs, LogFiles, Panther, and Diagnosis; the whole drive is never searched. The Delivery Optimization service is stopped temporarily and restored afterward. Avoid running this while investigating a problem.</x:String>
-  <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">अनुप्रयोगसंग्रहान् लेखांश्च लोपयतु</x:String>
-  <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">Deletes app caches, GPU shader caches, crash reports, and tool logs. WebStorage, virtual-machine bundles, settings, and sign-in state are not deleted.</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">विकाससाधनानां संपुटसंग्रहान् लोपयतु</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Deletes only re-downloadable caches for npm, pnpm, NuGet, pip, Yarn, Gradle, Bun, uv, and Cargo. uv-managed Python, Maven local artifacts, credentials, settings, and the general .cache directory are not deleted.</x:String>
-  <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">विचरकसंग्रहान् लोपयतु</x:String>
-  <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Deletes Chromium web and shader caches, Service Worker cache storage, crash reports, and extension temporary data. Service Worker registrations, DRM components, bookmarks, passwords, and sign-in state are not deleted.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">प्रतीक-लघुचित्र-अक्षरसंग्रहान् पुनः रचयतु</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">अन्वेषकस्य प्रतीकसंग्रहं, लघुचित्रसंग्रहं, अक्षररूपसंग्रहं च लोपयति येन Windows तान् पुनः रचयति।रिक्ताः भ्रान्ता वा प्रतीकाः, कदापि अनवीकृतानि लघुचित्राणि, दुष्टतया प्रदर्शितः पाठः — एतेषां प्रमाणिकं संस्करणम्।अन्वेषकः बलात् न समाप्यते। उपयुज्यमानाः चयनितसंग्रहाः Windows इत्यस्य अग्रिमारम्भे विश्वस्तस्थापनात् पुनर्गण्यन्ते, ततः लोपनं प्रयत्यते। सप्तदिनाभ्यन्तरे अधिकतमं त्रिवारं निष्पाद्यते; अवरुद्धानि लक्ष्याणि रक्ष्यन्ते, फलितानि वृत्तान्ते लिख्यन्ते।संग्रहपुनर्रचनाकाले प्रदर्शनं क्षणं मन्दतरं भवति।</x:String>
-  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">Windows Update इत्यस्य अवतरणसंग्रहं लोपयतु</x:String>
-  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">Deletes only re-downloadable files from SoftwareDistribution\Download. Update history and catroot2 are not deleted. Related services are restored after cleanup.</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">पूर्वपठनदत्तांशम् अन्वेषणसूचीं च लोपयित्वा पुनः रचयतु</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">अनुप्रयोगारम्भं शीघ्रं कुर्वन्तं पूर्वपठनदत्तांशं (Prefetch) अन्वेषकस्य अन्वेषणसूचीं च लोपयति, येन Windows उभे पुनः रचयति। अन्वेषणे किमपि न लभ्यते पुरातनसञ्चिकाः एव लभ्यन्ते वा तदा एतत् प्रयोक्तव्यम्। पुनर्रचनाकाले, दशनिमेषेभ्यः कतिपयघण्टान् यावत्, अनुप्रयोगारम्भः अन्वेषणं च मन्दतरं भवति, पृष्ठभूमौ च संसाधकव्ययः वर्धते।</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">प्रवेशकाले स्वयमेव शोधनं चालयितुं कार्यं पञ्जीकुरु</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Runs the selected cache and log cleanup items at sign-in with the highest available privileges, so items requiring administrator rights or stopping services can run. It uses the same checklists as the Run buttons and starts without a UAC prompt. Files in use are skipped. Turning this OFF removes the task.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Memory Compression</x:String>
@@ -200,7 +184,6 @@
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Edge-पृष्ठभूमिप्रक्रियाः निष्क्रियाः कुरु (100–300 MB रक्षा)</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">नीत्या Edge-पृष्ठभूमिविधिं Startup Boost च निष्क्रियं करोति। यदि Edge दुर्लभतया उपयुज्यते तर्हि प्रायः 100–300 MB स्मृतिः मुक्ताऽस्ति। Edge आरम्भः किञ्चित् मन्दः भवेत् विस्तारसूचनाश्च न आगच्छेयुः। नीतयः निष्कास्य Edge-पूर्वनिर्धारितमूल्यानि पुनः स्थापयितुं OFF कुरु।</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">किं लोपनीयम् इति चिनु</x:String>
-  <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">प्रवेशकाले किं चालनीयम् इति चिनु</x:String>
   <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">अस्य चयनस्य पूर्वसंरक्षणप्रयत्नः विफलः (वृत्तान्तं पश्यतु)।</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">अद्यतनीकरणम्</x:String>
@@ -223,10 +206,545 @@
   <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">विकाससंस्करणम्</x:String>
   <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">संस्करणं नोपलभ्यते</x:String>
   <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">भाषा-अद्यतनविन्यासयोः पूर्वसंरक्षणप्रयत्नः विफलः (वृत्तान्तं पश्यतु)।</x:String>
-  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">विन्यासाः पठितुं न शक्यन्ते। मूलसञ्चिकारक्षणार्थं संरक्षणं स्थगितम्, प्रवेशसमये स्वच्छतापि न निष्पाद्यते। परिवर्तनानि अस्मिन्नेव सत्रे प्रभावीणि।</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">विन्यासाः पठितुं न शक्यन्ते। मूलसञ्चिकारक्षणार्थं संरक्षणं स्थगितम्। परिवर्तनानि अस्मिन्नेव सत्रे प्रभावीणि।</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">पूर्वपरीक्षणे लक्ष्याणि न प्राप्तानि।</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">सूचीं पुनरुद्घाट्य नवीकरोतु। निष्पादनसमये अवर्जितानि नूतनलक्ष्याण्यपि समाविश्यन्ते।</x:String>
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">कार्यं प्रचलति</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">कार्यसमाप्तिपर्यन्तं प्रतीक्षताम्।</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">निरसनस्य शोधनस्य च समाप्तिपर्यन्तं प्रतीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Common" xml:space="preserve">सामान्यम्</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Advanced" xml:space="preserve">उन्नतम्</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Slim" xml:space="preserve">लघूकरणम्</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Settings" xml:space="preserve">विन्यासाः</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Other" xml:space="preserve">अन्यत्</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Scan" xml:space="preserve">अन्वीक्षस्व</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Rescan" xml:space="preserve">पुनरन्वीक्षस्व</x:String>
+  <x:String x:Key="Text.Cleanup.Action.CancelScan" xml:space="preserve">अन्वीक्षणं स्थगय</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Clean" xml:space="preserve">चयनितानि लोपय</x:String>
+  <x:String x:Key="Text.Cleanup.Action.ExportText" xml:space="preserve">पाठरूपेण निर्यातय</x:String>
+  <x:String x:Key="Text.Cleanup.Action.OpenLocation" xml:space="preserve">स्थानं विवृणु</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Ignore" xml:space="preserve">उपेक्षस्व (भाविषु अन्वीक्षणेषु वर्जय)</x:String>
+  <x:String x:Key="Text.Cleanup.Select.Recommended" xml:space="preserve">अनुशंसितम्</x:String>
+  <x:String x:Key="Text.Cleanup.Select.All" xml:space="preserve">सर्वाणि चिनुत</x:String>
+  <x:String x:Key="Text.Cleanup.Select.None" xml:space="preserve">सर्वं चयनं निरस्यतु</x:String>
+  <x:String x:Key="Text.Cleanup.Select.Invert" xml:space="preserve">चयनं विपरीतं कुरु</x:String>
+  <x:String x:Key="Text.Cleanup.Filter.Placeholder" xml:space="preserve">मदान् छानय</x:String>
+  <x:String x:Key="Text.Cleanup.Filter.HideEmpty" xml:space="preserve">लोपयोग्यं नास्ति तान् मदान् गोपय</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Name" xml:space="preserve">मदः</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Category" xml:space="preserve">वर्गः</x:String>
+  <x:String x:Key="Text.Cleanup.Column.State" xml:space="preserve">स्थितिः</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Files" xml:space="preserve">सञ्चिकाः</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Size" xml:space="preserve">परिमाणम्</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Impact" xml:space="preserve">प्रभावः</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Folder" xml:space="preserve">सञ्चिकाकोशः</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Modified" xml:space="preserve">परिवर्तितम्</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Rule" xml:space="preserve">नियमः</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Safety" xml:space="preserve">सुरक्षा</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Results" xml:space="preserve">अन्वीक्षणफलानि</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Progress" xml:space="preserve">अन्वीक्षणस्य प्रगतिः</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.SelectRow" xml:space="preserve">{0} चिनुत</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Row" xml:space="preserve">{0}, {1}, {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Windows" xml:space="preserve">Windows-तन्त्रम्</x:String>
+  <x:String x:Key="Text.Cleanup.Category.StoreApps" xml:space="preserve">Store-अनुप्रयोगाः</x:String>
+  <x:String x:Key="Text.Cleanup.Category.BrowserCache" xml:space="preserve">अन्वेषकसंग्रहः</x:String>
+  <x:String x:Key="Text.Cleanup.Category.BrowserTrace" xml:space="preserve">अन्वेषकस्य इतिहासः चिह्नानि च</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Cookies" xml:space="preserve">Cookies</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Traces" xml:space="preserve">उपयोगचिह्नानि</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Components" xml:space="preserve">Windows-घटकाः</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Apps" xml:space="preserve">अन्ये अनुप्रयोगाः</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Custom" xml:space="preserve">स्वनिर्मिताः सञ्चिकाकोशाः</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Cache" xml:space="preserve">{0}-संग्रहः</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Log" xml:space="preserve">{0}-अभिलेखाः</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Temp" xml:space="preserve">{0}-अस्थायिसञ्चिकाः</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Dump" xml:space="preserve">{0}-dumps</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Thumbnail" xml:space="preserve">{0}-लघुचित्राणि</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Shader" xml:space="preserve">{0}-shader-संग्रहः</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Report" xml:space="preserve">{0}-प्रतिवेदनानि</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.History" xml:space="preserve">{0}-इतिहासः</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Form" xml:space="preserve">{0}-प्रपत्रदत्तांशः</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Session" xml:space="preserve">{0}-सत्रदत्तांशः</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Cookies" xml:space="preserve">{0}-cookies</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Recent" xml:space="preserve">{0}-अधुनातनमदाः</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Backup" xml:space="preserve">{0}-प्रतिलिपयः</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Downloads" xml:space="preserve">{0}-अवारोपितसञ्चिकाः</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Other" xml:space="preserve">{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Junk" xml:space="preserve">अनुपयोगिसञ्चिकाः</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Trace" xml:space="preserve">उपयोगचिह्नानि</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Signout" xml:space="preserve">भवन्तं बहिः करोति</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Rebuild" xml:space="preserve">पुनर्निर्माणम् आवश्यकम्</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.UserFiles" xml:space="preserve">भवतः सञ्चिकाः</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Trace.Warning" xml:space="preserve">भवतः उपयोगेतिहासः नश्यति।</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Signout.Warning" xml:space="preserve">Cookies-लोपनं जालस्थानेभ्यः भवन्तं बहिः कर्तुमर्हति।</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Rebuild.Warning" xml:space="preserve">लोपनानन्तरं प्रथमः उपयोगः मन्दः भवितुमर्हति, यतः दत्तांशः पुनर्निर्मीयते।</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.UserFiles.Warning" xml:space="preserve">अस्मिन् भवतः ताः सञ्चिकाः सन्ति याः पुनः अवारोपयितुं न शक्यन्ते। ताः एकैकशः चिनुत; लोपनात् पूर्वं पुनः पुष्टिः पृच्छ्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Warning.NotRecommended" xml:space="preserve">अयं मदः स्वतः अनुशंसितः नास्ति। चयनात् पूर्वम् अयं किं निष्कासयति इति परीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Warning.JumpListPins" xml:space="preserve">Jump Lists-लोपनेन taskbar-Start-सूच्यां च कीलिताः मदाः अपि निष्कास्यन्ते।</x:String>
+  <x:String x:Key="Text.Cleanup.State.Found" xml:space="preserve">लोपयोग्यम्</x:String>
+  <x:String x:Key="Text.Cleanup.State.Empty" xml:space="preserve">लोपयोग्यं नास्ति</x:String>
+  <x:String x:Key="Text.Cleanup.State.Unmeasurable" xml:space="preserve">सङ्ख्या अज्ञाता</x:String>
+  <x:String x:Key="Text.Cleanup.State.Unavailable" xml:space="preserve">अनुपलब्धम्</x:String>
+  <x:String x:Key="Text.Cleanup.State.NotDetected" xml:space="preserve">न ज्ञातम्</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.UserScopeDifferentUser" xml:space="preserve">प्रविष्टः उपयोक्ता उन्नतः उपयोक्ता च भिन्नौ, अतः उपयोक्तुः विन्यासान् दत्तांशं च लक्षयन्तः मदाः निष्क्रियाः।</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.UserScopeUnknown" xml:space="preserve">प्रविष्टः उपयोक्ता सत्यापयितुं न शक्तः, अतः उपयोक्तुः विन्यासान् दत्तांशं च लक्षयन्तः मदाः निष्क्रियाः।</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.TargetRejected" xml:space="preserve">सुरक्षार्थं लक्ष्यं निराकृतम् (रक्षितं स्थानम्, परिचयपत्रम्, सम्बन्धः इत्यादि)।</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.ScanFailed" xml:space="preserve">अन्वीक्षणं विफलम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.HandlerUnavailable" xml:space="preserve">एतत् अस्मिन् पर्यावरणे चालयितुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.CustomFolderRejected" xml:space="preserve">इदं स्थानं स्वनिर्मितसञ्चिकाकोशरूपेण अनुमतं नास्ति, अतः त्यक्तम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Title" xml:space="preserve">सामान्यं परिष्करणम्</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Description" xml:space="preserve">प्रथमम् अन्वीक्षस्व यत् किं निष्कासयितुं शक्यते, ततः भवता चितान् मदान् एव लोपय। अन्वीक्षणं किमपि न परिवर्तयति।</x:String>
+  <x:String x:Key="Text.Cleanup.Common.NotScanned" xml:space="preserve">अद्यापि किमपि नान्वीक्षितम्। लोपयोग्यं द्रष्टुम् अन्वीक्षस्व इति नुदत।</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Scanning" xml:space="preserve">{1}-मध्ये {0} अन्वीक्ष्यते: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanDone" xml:space="preserve">अन्वीक्षणं समाप्तम्: {0} मदाः, {1} सञ्चिकाः, {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanCanceled" xml:space="preserve">अन्वीक्षणं स्थगितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanFailed" xml:space="preserve">अन्वीक्षणं विफलम्। अभिलेखं परीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Stale" xml:space="preserve">विन्यासपरिवर्तनात् अन्यक्रियायाः वा कारणात् अन्वीक्षणफलं जीर्णम्। पुनरन्वीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Common.NothingFound" xml:space="preserve">लोपयोग्यं किमपि न लब्धम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Selection" xml:space="preserve">{1}-मध्ये {0} मदाः चिताः (प्रायः {2})</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Retained" xml:space="preserve">भवतः अपवर्जनानां कारणात् {0} मदाः रक्षिताः।</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Unreadable" xml:space="preserve">{0} मदाः परीक्षितुं न शक्ताः।</x:String>
+  <x:String x:Key="Text.Cleanup.Common.SkippedLinks" xml:space="preserve">{0} मदाः सम्बन्धाः सन्ति, अतः अस्पृष्टाः।</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Unmeasurable" xml:space="preserve">एतत् चालयितुं शक्यते, किन्तु अस्य सङ्ख्या परिमाणं च पूर्वं मातुं न शक्येते।</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Representatives" xml:space="preserve">उदाहरणम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.RunningProcesses" xml:space="preserve">चलति: {0} (लोपनात् पूर्वं तत् पिधातव्यं वा इति पृच्छ्यते)</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ServiceNote" xml:space="preserve">लोपनकाले अस्थायिरूपेण स्थगिताः सेवाः: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Title" xml:space="preserve">लोपनं पुष्टीकुरुत</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Run" xml:space="preserve">लोपय</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Back" xml:space="preserve">पृष्ठतः गच्छ</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Common.Body" xml:space="preserve">चिताः {0} मदाः ({1} सञ्चिकाः, प्रायः {2}) स्थायिरूपेण लोपयिष्यन्ते। ते Recycle Bin-मध्ये न नीयन्ते, पुनः प्रत्यानेतुं च न शक्यन्ते।</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.NotRecommended" xml:space="preserve">{0} अननुशंसिताः मदाः अन्तर्भूताः। प्रथमं तान् परीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Signout" xml:space="preserve">{0} मदाः अन्तर्भूताः ये भवन्तं बहिः कर्तुमर्हन्ति (यथा cookies)।</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.UserFiles" xml:space="preserve">{0} मदेषु भवतः ताः सञ्चिकाः सन्ति याः पुनः अवारोपयितुं न शक्यन्ते। पुनः एकवारं पुष्टिः पृच्छ्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.UserFiles.Check" xml:space="preserve">मम सञ्चिकाः स्थायिरूपेण लोपयिष्यन्ते इति अहं जानामि</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.SecureDelete" xml:space="preserve">सुरक्षितलोपनं सक्रियम्। सञ्चिकाः लोपनात् पूर्वम् एकवारं पुनर्लिख्यन्ते (SSD-मध्ये एतत् आश्वासितुं न शक्यते)।</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.RunningProcess" xml:space="preserve">केचन उत्पादाः चलन्ति। लोपनकाले तान् पिधातव्यान् वा इति पृच्छ्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Body" xml:space="preserve">"{0}" चलति ({1})। तस्य दत्तांशलोपनात् पूर्वं तत् पिधातव्यम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Close" xml:space="preserve">तत् पिधेहि</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Skip" xml:space="preserve">इमं मदं त्यज</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Abort" xml:space="preserve">स्थगय</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceBody" xml:space="preserve">"{0}" सामान्यरूपेण पिधातुं न शक्तम् ({1})। बलात् निर्गमने अरक्षितं सर्वं निवेशनं नश्यति।</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceYes" xml:space="preserve">बलात् निर्गच्छतु</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceNo" xml:space="preserve">बलात् मा निर्गच्छतु</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Running" xml:space="preserve">{1}-मध्ये {0} लोप्यते: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Done" xml:space="preserve">{0} सञ्चिकाः लोपिताः, {1} च रिक्तं कृतम्</x:String>
+  <x:String x:Key="Text.Cleanup.Run.DonePartial" xml:space="preserve">अंशतः पूर्णम्: {0} सञ्चिकाः लोपिताः, {1} च रिक्तं कृतम्। केचन मदाः विफलाः त्यक्ताः वा।</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Canceled" xml:space="preserve">स्थगितम्। {0} सञ्चिकाः ({1}) पूर्वमेव लोपिताः।</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Stale" xml:space="preserve">अन्वीक्षणफलं जीर्णम् आसीत्, अतः किमपि न लोपितम्। पुनरन्वीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Retained" xml:space="preserve">अपवर्जनात् अन्वीक्षणानन्तरपरिवर्तनाद् वा {0} मदाः रक्षिताः।</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Blocked" xml:space="preserve">{0} मदाः लोपयितुं न शक्ताः (प्रयुक्ताः, अनुमतिः नास्ति इत्यादि)।</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Wiped" xml:space="preserve">{0} मदाः लोपनात् पूर्वं पुनर्लिखिताः ({1} पुनर्लेखनं विना लोपिताः)।</x:String>
+  <x:String x:Key="Text.Cleanup.Run.ServiceResumeFailed" xml:space="preserve">अस्थायिरूपेण स्थगिता एका सेवा पुनः आरब्धुं न शक्ता। सेवास्थितिं परीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Succeeded" xml:space="preserve">सफलम्</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.NothingToDo" xml:space="preserve">कर्तव्यं नास्ति</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Partial" xml:space="preserve">अंशतः पूर्णम्</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Failed" xml:space="preserve">विफलम्</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Skipped" xml:space="preserve">त्यक्तम्</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Canceled" xml:space="preserve">स्थगितम्</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.NotRun" xml:space="preserve">न चालितम्</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.NotScanned" xml:space="preserve">न अन्वीक्षितम्, अतः न लोपितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.NothingFound" xml:space="preserve">लोपयोग्यं किमपि नासीत्।</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.Unavailable" xml:space="preserve">एतत् अस्मिन् पर्यावरणे चालयितुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.UserFilesNotConfirmed" xml:space="preserve">भवतः सञ्चिकानां पुष्टिः न दत्ता, अतः न लोपितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessRunningDeclined" xml:space="preserve">उत्पादः चलति इति कारणात् त्यक्तम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessUnverifiable" xml:space="preserve">चलतः प्रक्रमस्य स्वामी सत्यापयितुं न शक्तः, अतः त्यक्तम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessStillRunning" xml:space="preserve">उत्पादः न पिहितः, अतः त्यक्तम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ForceTerminationDeclined" xml:space="preserve">बलात् निर्गमनम् अननुमोदितं, अतः त्यक्तम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessIdentityMismatch" xml:space="preserve">प्रक्रमः न मेलितः, अतः न पिहितः; अतः त्यक्तम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.TerminateFailed" xml:space="preserve">उत्पादः पिधातुं न शक्तः, अतः त्यक्तम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Totals.Last" xml:space="preserve">अन्तिमं चालनम्: {0} सञ्चिकाः, {1} ({2})</x:String>
+  <x:String x:Key="Text.Cleanup.Totals.Total" xml:space="preserve">योगः: {0} सञ्चिकाः, {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Title" xml:space="preserve">अन्वीक्षणफलानि निर्यातय</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Done" xml:space="preserve">{0}-मध्ये निर्यातितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Failed" xml:space="preserve">निर्यातयितुं न शक्तम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.OpenLocation.Failed" xml:space="preserve">स्थानं विवर्तितुं न शक्तम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Name" xml:space="preserve">नाम</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Category" xml:space="preserve">वर्गः</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.State" xml:space="preserve">स्थितिः</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Files" xml:space="preserve">सञ्चिकाः</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Items" xml:space="preserve">मदाः</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Bytes" xml:space="preserve">Bytes</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Retained" xml:space="preserve">रक्षितम्</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Status" xml:space="preserve">अवस्था</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Details" xml:space="preserve">विवरणानि</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Total" xml:space="preserve">योगः</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Title" xml:space="preserve">उन्नतं परिष्करणम्</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Description" xml:space="preserve">चितेषु drives-मध्ये प्रतिरूपेण ताः सञ्चिकाः अन्विष्यन्ते याः प्रायः निर्भयं निष्कास्याः। अन्वीक्षणं किमपि न परिवर्तयति। फलानि परीक्ष्य भवता चितानि एव लोपयतु।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drives" xml:space="preserve">अन्वीक्षणीयाः drives</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drive.Removable" xml:space="preserve">निष्कासनीयः</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drive.Fixed" xml:space="preserve">स्थिरः</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.ZeroByte" xml:space="preserve">शून्यबाइट-सञ्चिकाः अन्तर्भावय</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.InvalidShortcuts" xml:space="preserve">लक्ष्यहीनान् shortcuts अन्तर्भावय</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.OlderThan" xml:space="preserve">निर्दिष्टदिनसङ्ख्यायाः पुरातनीः सञ्चिकाः अन्तर्भावय</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.Days" xml:space="preserve">दिनानि</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.SelectSafe" xml:space="preserve">निर्भयान् मदान् एव चिनुत</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.Default" xml:space="preserve">पूर्वनिर्धारितम्</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.Additional" xml:space="preserve">अतिरिक्तम्</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.UserDefined" xml:space="preserve">उपयोक्तृनिर्दिष्टम्</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.Safe" xml:space="preserve">निर्भयम्</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.Undeterminable" xml:space="preserve">निर्णेतुं न शक्यते</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.UserDefined" xml:space="preserve">उपयोक्तृनिर्दिष्टम्</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.CheckpointOutsideFound" xml:space="preserve">FOUND-सञ्चिकाकोशात् बहिः .chk सञ्चिका अस्ति। एषा ESE checkpoint भवितुमर्हति, अतः परीक्षणात् पूर्वम् अचिता तिष्ठति।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.RecentlyModified" xml:space="preserve">गतेषु २४ होरासु परिवर्तिता, अतः स्वतः न चिता।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.ZeroByte" xml:space="preserve">शून्यबाइट-सञ्चिका, अतः स्वतः न चिता।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.OldFile" xml:space="preserve">केवलं पुरातनत्वात् मेलिता, अतः स्वतः न चिता।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.UserPattern" xml:space="preserve">भवता निर्दिष्टेन प्रतिरूपेण मेलिता, अतः स्वतः न चिता।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.NamePattern" xml:space="preserve">नामप्रतिरूपम्</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.ZeroByte" xml:space="preserve">शून्यबाइट्</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.InvalidShortcut" xml:space="preserve">अमान्यः shortcut</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.OldFile" xml:space="preserve">पुरातना सञ्चिका</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Progress" xml:space="preserve">{0} सञ्चिकाकोशाः {1} सञ्चिकाः च परीक्षिताः; {2} मेलिताः ({3}): {4}</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.ScanDone" xml:space="preserve">अन्वीक्षणं समाप्तम्: परीक्षितासु {2} सञ्चिकासु {0} मेलिताः ({1})।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Truncated" xml:space="preserve">मेलनानि अतिबहूनि, अतः प्रथमाः {0} एव दर्श्यन्ते। अन्ये {1} ({2}) न दर्श्यन्ते न च लोप्यन्ते।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RootFailure" xml:space="preserve">अन्वीक्षितुं न शक्तम्: {0} ({1})</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Pruned" xml:space="preserve">{0} सञ्चिकाकोशाः रक्षिताः वर्जिताः वा इति कारणात् न परीक्षिताः।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Empty" xml:space="preserve">काचिदपि सञ्चिका न मेलिता।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Selection" xml:space="preserve">{1}-मध्ये {0} सञ्चिकाः चिताः ({2})</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolders" xml:space="preserve">स्वनिर्मिताः सञ्चिकाकोशाः</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Note" xml:space="preserve">सञ्चिकाकोशस्य अन्तर्गतं केवलं रिक्तीक्रियते। सञ्चिकाकोशः स्वयं तिष्ठति।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Missing" xml:space="preserve">न लब्धम्</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Summary" xml:space="preserve">{0} सञ्चिकाः, {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Body" xml:space="preserve">चिताः {0} सञ्चिकाः ({1}) {2} स्वनिर्मितसञ्चिकाकोशानाम् अन्तर्गतं च स्थायिरूपेण लोपयिष्यन्ते। ते Recycle Bin-मध्ये न नीयन्ते, पुनः प्रत्यानेतुं च न शक्यन्ते।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Undeterminable" xml:space="preserve">"निर्णेतुं न शक्यते" इति चिह्निताः {0} सञ्चिकाः अन्तर्भूताः। यान् न परीक्षितवान् तान् चयनात् निष्कासयतु।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Recent" xml:space="preserve">गतेषु २४ होरासु परिवर्तिताः {0} सञ्चिकाः अन्तर्भूताः।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Done" xml:space="preserve">{0} सञ्चिकाः {1} सञ्चिकाकोशाश्च लोपिताः, {2} रिक्तं कृतम्</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Partial" xml:space="preserve">अंशतः पूर्णम्: {0} सञ्चिकाः {1} सञ्चिकाकोशाश्च लोपिताः, {2} रिक्तं कृतम्। केचन मदाः रक्षिताः लोपयितुं न शक्ताः वा।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Expired" xml:space="preserve">अन्वीक्षणफलं जीर्णम् आसीत्, अतः किमपि न लोपितम्। पुनरन्वीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Cancelled" xml:space="preserve">स्थगितम्। {0} सञ्चिकाः ({1}) पूर्वमेव लोपिताः।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Blocked" xml:space="preserve">{0} सञ्चिकाः लोपयितुं न शक्ताः (प्रयुक्ताः, अनुमतिः नास्ति इत्यादि)।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Retained" xml:space="preserve">अपवर्जनात् अन्वीक्षणानन्तरपरिवर्तनाद् वा {0} सञ्चिकाः रक्षिताः।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Gone" xml:space="preserve">{0} सञ्चिकाः अधुना न सन्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Covered" xml:space="preserve">{0} सञ्चिकाः चितस्य स्वनिर्मितसञ्चिकाकोशस्य अन्तः सन्ति, अतः पृथक् न संसाधिताः।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Rejected" xml:space="preserve">{0} मदाः सुरक्षापरीक्षया निराकृताः।</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Invalid" xml:space="preserve">अयं पथः सञ्चिकाकोशरूपेण प्रयोक्तुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.DriveRoot" xml:space="preserve">drive-मूलं प्रयोक्तुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Windows" xml:space="preserve">Windows-सञ्चिकाकोशः तस्य जनकाः अपत्यानि च प्रयोक्तुं न शक्यन्ते।</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProgramFiles" xml:space="preserve">Program Files तस्य जनकाः अपत्यानि च प्रयोक्तुं न शक्यन्ते।</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProgramData" xml:space="preserve">ProgramData तस्य जनकाः अपत्यानि च प्रयोक्तुं न शक्यन्ते।</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.OtherUserProfile" xml:space="preserve">अन्यस्य उपयोक्तुः प्रोफाइलं प्रयोक्तुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProfileRoot" xml:space="preserve">भवतः प्रोफाइल-सञ्चिकाकोशः AppData च प्रयोक्तुं न शक्येते, यतः तयोः रिक्तीकरणे भवतः सर्वः दत्तांशः नश्येत्।</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Credential" xml:space="preserve">परिचयपत्राणि कुञ्जिकाः वा यत्र सन्ति तानि स्थानानि प्रयोक्तुं न शक्यन्ते।</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Added" xml:space="preserve">स्वनिर्मितः सञ्चिकाकोशः योजितः।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Title" xml:space="preserve">लघूकरणम्</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Description" xml:space="preserve">Windows-मध्ये अनावश्यकं दत्तांशं निष्कास्य डिस्क्-स्थानं रिक्तीकरोति। केचन मदाः प्रत्यावर्तयितुं न शक्यन्ते वा भाविमरम्मतं प्रभावयितुम् अर्हन्ति, अतः स्वतः किमपि न चितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Run" xml:space="preserve">चितानि चालय</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.CreateRestorePoint" xml:space="preserve">चालनात् पूर्वं restore point निर्मिणुत</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Item" xml:space="preserve">मदः</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Status" xml:space="preserve">अवस्था</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Size" xml:space="preserve">अनुमानितं स्थानम्</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Estimate" xml:space="preserve">प्रायः {0} (अनुमानम्)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.SizeUnknown" xml:space="preserve">अज्ञातम्</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.NotScanned" xml:space="preserve">अद्यापि किमपि नान्वीक्षितम्। प्रत्येकं मदः कियत् स्थानं रिक्तीकर्तुं शक्नोति इति द्रष्टुम् अन्वीक्षस्व इति नुदत।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Scanning" xml:space="preserve">लघूकरणमदाः परीक्ष्यन्ते…</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.ScanDone" xml:space="preserve">अन्वीक्षणं समाप्तम्। {0} मदाः चालयितुं शक्यन्ते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.ScanFailed" xml:space="preserve">अन्वीक्षणं विफलम्। अभिलेखं परीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Stale" xml:space="preserve">अन्वीक्षणफलं जीर्णम् आसीत्, अतः किमपि न चालितम्। पुनरन्वीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.LongRunning" xml:space="preserve">DISM-उपयोगिनः मदाः कतिपयनिमेषान् अधिकं वा समयं गृह्णन्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.Available" xml:space="preserve">सज्जम्</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.NothingToClean" xml:space="preserve">परिष्करणीयं नास्ति</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.Unavailable" xml:space="preserve">अनुपलब्धम्</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Notice" xml:space="preserve">सूचना</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Caution" xml:space="preserve">सावधानता</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Irreversible" xml:space="preserve">प्रत्यावर्तयितुं न शक्यम्</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.EnumerationFailed" xml:space="preserve">पञ्जीकरणदत्तांशः पूर्णतया पठितुं न शक्तः, अतः निर्भयतया निर्णेतुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.ProtectedByWindows" xml:space="preserve">Windows एतानि सञ्चिकाः रक्षति, अतः निष्कासनीयं किमपि नास्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.LanguageInUse" xml:space="preserve">प्रदर्शनभाषया, भाषासूच्या, कुञ्जीपटविन्यासेन वा उपयुज्यते, अतः निष्कासयितुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.UserHiveNotLoaded" xml:space="preserve">केषाञ्चित् उपयोक्तॄणां दत्तांशः न आरोपितः, अतः उपयोगः सत्यापयितुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.NotPresent" xml:space="preserve">लक्ष्यं न स्थापितं न लब्धं वा।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.ToolFailed" xml:space="preserve">DISM-फलं पठितुं बोद्धुं वा न शक्तम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.Rejected" xml:space="preserve">सुरक्षापरीक्षया लक्ष्यं निराकृतम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Succeeded" xml:space="preserve">सफलम्</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Partial" xml:space="preserve">अंशतः पूर्णम्</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Failed" xml:space="preserve">विफलम्</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Skipped" xml:space="preserve">त्यक्तम्</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Cancelled" xml:space="preserve">स्थगितम्</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Title" xml:space="preserve">लघूकरणं पुष्टीकुरुत</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Body" xml:space="preserve">चिताः {0} मदाः (अनुमानितं स्थानम्: {1}) चालयिष्यन्ते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.WithRestorePoint" xml:space="preserve">चालनात् पूर्वं restore point निर्मीयते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">restore point न निर्मीयते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Title" xml:space="preserve">प्रत्यावर्तयितुम् अशक्यां क्रियां पुष्टीकुरुत</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Body" xml:space="preserve">update-प्रत्यावर्तनदत्तांशस्य निष्कासनानन्तरं स्थापिताः updates पुनः अनिस्थापयितुं न शक्यन्ते। एतत् प्रत्यावर्तयितुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Check" xml:space="preserve">स्थापिताः updates पुनः अनिस्थापयितुं न शक्यन्ते इति अहं जानामि</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Created" xml:space="preserve">restore point निर्मितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Reused" xml:space="preserve">{0} काले निर्मितं विद्यमानं restore point प्रयुज्यते (२४ होरासु नूतनं न निर्मीयते)।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Unavailable.Title" xml:space="preserve">restore point उपलब्धं नास्ति</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Unavailable.Body" xml:space="preserve">restore point निर्मातुं न शक्तम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Disabled.Body" xml:space="preserve">तन्त्रसुरक्षा निष्क्रिया, अतः restore point निर्मातुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.ContinueWithout" xml:space="preserve">तं विना अनुवर्तस्व</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Abort" xml:space="preserve">स्थगय</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.EnableAndRetry" xml:space="preserve">तन्त्रसुरक्षां सक्रियां कृत्वा पुनः प्रयतस्व</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Running" xml:space="preserve">{1}-मध्ये {0} चल्यते: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Done" xml:space="preserve">समाप्तम्। रिक्तीकृतं स्थानम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.DonePartial" xml:space="preserve">केचन मदाः न समाप्ताः। प्रत्येकस्य मदस्य फलं परीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RebootRequired" xml:space="preserve">परिवर्तनानां प्रभावार्थं पुनरारम्भः आवश्यकः।</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Title" xml:space="preserve">परिष्करणविन्यासाः</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Saved" xml:space="preserve">विन्यासाः रक्षिताः।</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SaveFailed" xml:space="preserve">विन्यासाः रक्षितुं न शक्ताः। अभिलेखं परीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Exclusions" xml:space="preserve">अपवर्जनानि</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Exclusions.Description" xml:space="preserve">अपवर्जिताः मदाः अस्पृष्टाः तिष्ठन्ति: न अन्वीक्ष्यन्ते न लोप्यन्ते।</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add" xml:space="preserve">योजय</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Remove" xml:space="preserve">सूचितः निष्कासय</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import" xml:space="preserve">आयातय</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export" xml:space="preserve">निर्यातय</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Title" xml:space="preserve">अपवर्जनानि आयातय</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Title" xml:space="preserve">अपवर्जनानि निर्यातय</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.File" xml:space="preserve">सञ्चिकाः</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.File" xml:space="preserve">उदाहरणम्: C:\Users\me\notes.txt</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.Folder" xml:space="preserve">सञ्चिकाकोशाः</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.Folder" xml:space="preserve">उदाहरणम्: C:\Users\me\Projects (उपसञ्चिकाकोशाः अपि)</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.Name" xml:space="preserve">विस्तारणानि सञ्चिकानामानि च</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.Name" xml:space="preserve">उदाहरणम्: *.log अथवा cache.db</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.CookieDomain" xml:space="preserve">Cookie-डोमेन्स्</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.CookieDomain" xml:space="preserve">उदाहरणम्: example.com (उपडोमेन्स् अपि)</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Added" xml:space="preserve">योजितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Duplicate" xml:space="preserve">पूर्वमेव सूच्याम् अस्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Invalid" xml:space="preserve">प्रारूपं मान्यं नास्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.LimitReached" xml:space="preserve">{0} प्रविष्टीनां सीमा प्राप्ता।</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.TooLarge" xml:space="preserve">सञ्चिका अतिबृहती।</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.Unreadable" xml:space="preserve">सञ्चिका पठितुं न शक्ता।</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.InvalidFormat" xml:space="preserve">सञ्चिकाप्रारूपं मान्यं नास्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.UnsupportedSchema" xml:space="preserve">इदं संस्करणं तत् प्रारूपं पठितुं न शक्नोति।</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.TooManyEntries" xml:space="preserve">प्रविष्टयः अतिबहूः, अतः किमपि नायातितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Done" xml:space="preserve">{0} योजितानि (द्विरुक्तानि: {1}, निराकृतानि: {2})।</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Done" xml:space="preserve">{0}-मध्ये निर्यातितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Failed" xml:space="preserve">निर्यातयितुं न शक्तम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Options" xml:space="preserve">सञ्चिकानां लोपनप्रकारः</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SecureDelete" xml:space="preserve">सुरक्षितलोपनम् (एकवारं पुनर्लिख्य लोपय)</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SecureDelete.Note" xml:space="preserve">सञ्चिकायाः अन्तर्गतं लोपनात् पूर्वम् एकवारं पुनर्लिख्यते। SSD-मध्ये उच्छेदः आश्वासितुं न शक्यते। hard link-युक्ताः सञ्चिकाः सम्पीडिताः विरलाः गूढीकृताः वा सञ्चिकाः पुनर्लेखनं विना लोप्यन्ते।</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CreateRestorePoint" xml:space="preserve">लघूकरणात् पूर्वं restore point निर्मिणुत</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CreateRestorePoint.Note" xml:space="preserve">गतेषु २४ होरासु निर्मितं विद्यमानं restore point पुनः प्रयुज्यते। तन्त्रसुरक्षा निष्क्रिया चेत्, पुष्टेः अनन्तरं तां सक्रियां कर्तुं शक्नोति।</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.OpenSystemRestore" xml:space="preserve">System Restore विवृणु</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders" xml:space="preserve">स्वनिर्मिताः सञ्चिकाकोशाः</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Description" xml:space="preserve">यासां सञ्चिकाकोशानाम् अन्तर्गतम् उन्नतं परिष्करणं रिक्तीकर्तुं शक्नोति। Windows, Program Files, ProgramData, अन्येषाम् उपयोक्तॄणां प्रोफाइलानि, drive-मूलानि, परिचयपत्रयुक्तानि स्थानानि च अनुमतानि न सन्ति। योजिताः सञ्चिकाकोशाः सदा अचिताः आरभन्ते।</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Add" xml:space="preserve">सञ्चिकाकोशं योजय…</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Pick" xml:space="preserve">स्वनिर्मितं सञ्चिकाकोशं चिनुत</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns" xml:space="preserve">उपयोक्तृनिर्दिष्टानि विस्तारणानि सञ्चिकानामानि च</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.Description" xml:space="preserve">उन्नतपरिष्करणस्य अन्वेषणे योज्यन्ते। मेलनानि सदा अचितानि आरभन्ते।</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.Hint" xml:space="preserve">उदाहरणम्: *.xyz</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.BuiltIn" xml:space="preserve">अन्तर्निहितानि प्रतिरूपाणि</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules" xml:space="preserve">मदं प्रति पूर्वचयनम्</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules.Description" xml:space="preserve">सामान्यपरिष्करणे मदस्य अनुशंसितं पूर्वनिर्धारितं चयनं प्रतिस्थापयति।</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules.Reset" xml:space="preserve">पूर्वनिर्धारितं प्रत्यानय</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.Default" xml:space="preserve">अनुशंसां पालय</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.On" xml:space="preserve">सदा चिनुत</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.Off" xml:space="preserve">कदापि मा चिनुत</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Totals" xml:space="preserve">अद्यावधि फलानि</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Totals.None" xml:space="preserve">अद्यापि किमपि न चालितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.run-history" xml:space="preserve">Run-संवादस्य इतिहासः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.recent-items" xml:space="preserve">अधुनातनमदाः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.rdp-history" xml:space="preserve">Remote Desktop-सम्बन्धेतिहासः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.explorer-mru" xml:space="preserve">Open तथा Save संवादानाम् इतिहासः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.search-history" xml:space="preserve">File Explorer-अन्वेषणेतिहासः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.network-drive-history" xml:space="preserve">Map network drive-इतिहासः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.jump-lists" xml:space="preserve">Jump Lists</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.ie-history" xml:space="preserve">Internet Explorer-इतिहासः टङ्कितानि पत्तनानि च</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.userassist" xml:space="preserve">प्रचालितकार्यक्रमाणाम् इतिहासः (UserAssist)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.user-error-reports" xml:space="preserve">वर्तमानप्रयोक्तुः Windows-दोषप्रतिवेदनानि</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.user-temp" xml:space="preserve">उपयोक्तुः अस्थायिसञ्चिकाः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.system-temp" xml:space="preserve">तन्त्रस्य अस्थायिसञ्चिकाः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.crash-dumps" xml:space="preserve">उपयोक्तृ-स्तरीय crash dumps</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.memory-dumps" xml:space="preserve">तन्त्रस्मृति-dumps</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.error-reports" xml:space="preserve">Windows Error Reporting-प्रतिवेदनानि</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.update-logs" xml:space="preserve">Windows Update orchestrator-अभिलेखाः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.etl-trace-logs" xml:space="preserve">ETL trace-अभिलेखाः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.defender-support-logs" xml:space="preserve">Microsoft Defender-निदानाभिलेखाः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.thumbnail-cache" xml:space="preserve">लघुचित्रसंग्रहः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.icon-cache" xml:space="preserve">प्रतीकसंग्रहः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.font-cache" xml:space="preserve">Windows-अक्षरसंग्रहः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.remote-desktop-cache" xml:space="preserve">Remote Desktop bitmap-संग्रहः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.directx-shader-cache" xml:space="preserve">DirectX shader-संग्रहः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.prefetch" xml:space="preserve">पुरातनः Prefetch-दत्तांशः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.recycle-bin" xml:space="preserve">Recycle Bin</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.dns-cache" xml:space="preserve">DNS-resolver-संग्रहः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.network-usage" xml:space="preserve">जालोपयोगेतिहासः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.invalid-shortcuts" xml:space="preserve">अमान्याः shortcuts Start-सूचिप्रविष्टयश्च</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.invalid-scheduled-tasks" xml:space="preserve">अमान्यानि निर्धारितकार्याणि</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.internet-cache" xml:space="preserve">Internet-संग्रहः (WinINet)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.office-addin-cache" xml:space="preserve">Office add-in-संग्रहः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.cryptnet-url-cache" xml:space="preserve">प्रमाणपत्र-URL-संग्रहः (CryptnetUrlCache)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Name" xml:space="preserve">अनाथानि Windows Installer-सञ्चिकाः</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Description" xml:space="preserve">Windows Installer-सञ्चिकाकोशे ये .msi .msp च सञ्चिके कस्यचित् उत्पादस्य patch-स्य वा कृते पञ्जीकृते न स्तः, ३० दिनेभ्यः पुरातने च, ते लोपयति।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Warning" xml:space="preserve">पञ्जीकरणदत्तांशः पूर्णतया पठितुं न शक्तः चेत् अयं मदः अनुपलब्धः। लोपनात् अव्यवहितं पूर्वं पञ्जीकरणानि पुनः परीक्ष्यन्ते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Name" xml:space="preserve">update-प्रत्यावर्तनदत्तांशः</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Description" xml:space="preserve">स्थापितानाम् updates-नां प्रत्यावर्तनार्थम् आवश्यकं दत्तांशं निष्कासयितुं DISM /StartComponentCleanup /ResetBase प्रयुनक्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Warning" xml:space="preserve">एतस्य चालनानन्तरं स्थापिताः updates पुनः अनिस्थापयितुं न शक्यन्ते। एतत् प्रत्यावर्तयितुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Name" xml:space="preserve">update-प्रतिलिपयः (component store)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Description" xml:space="preserve">प्रतिस्थापितान् घटकान् परिष्कर्तुं DISM /StartComponentCleanup प्रयुनक्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Warning" xml:space="preserve">दर्शितं स्थानं DISM-इत्यस्य अनुमानम्, वस्तुतः रिक्तीकृतात् भिन्नं भवितुमर्हति। एतत् कतिपयनिमेषान् गृह्णीयात्।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateCache.Name" xml:space="preserve">Windows Update-अवारोपणसंग्रहः</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateCache.Description" xml:space="preserve">SoftwareDistribution\Download-इत्यस्य अन्तर्गतं लोपयति। चालनकाले Windows Update BITS च सेवे स्थगिते, पश्चात् पुनःस्थापिते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Name" xml:space="preserve">अवशिष्टः patch-संग्रहः</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Description" xml:space="preserve">Windows Installer-सेवां स्थगयित्वा Installer\$PatchCache$-इत्यस्य अन्तर्गतं लोपयति।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Warning" xml:space="preserve">भाविमरम्मतम् अनिस्थापनं वा मूलस्थापनमाध्यमं याचितुमर्हति।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Name" xml:space="preserve">भाषादानसुविधाः (जापानी)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Description" xml:space="preserve">DISM Remove-Capability प्रयुज्य जापानी Language.Basic सुविधाः (वर्णविन्यासः, पाठानुमानम् इत्यादि) निष्कासयति। एषा IME स्वयं न। भाषा प्रदर्शनभाषया, भाषासूच्या, कुञ्जीपटविन्यासेन वा अप्रयुक्ता चेदेव एतत् चालयितुं शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Warning" xml:space="preserve">एताः भाषासुविधाः पुनः प्रयोक्तुं ताः पुनः योजनीयाः।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Name" xml:space="preserve">भाषादानसुविधाः (कोरियन्)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Description" xml:space="preserve">DISM Remove-Capability प्रयुज्य कोरियन् Language.Basic सुविधाः (वर्णविन्यासः, पाठानुमानम् इत्यादि) निष्कासयति। एषा IME स्वयं न। भाषा प्रदर्शनभाषया, भाषासूच्या, कुञ्जीपटविन्यासेन वा अप्रयुक्ता चेदेव एतत् चालयितुं शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Warning" xml:space="preserve">एताः भाषासुविधाः पुनः प्रयोक्तुं ताः पुनः योजनीयाः।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Name" xml:space="preserve">भाषादानसुविधाः (चीनी, पारम्परिकी)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Description" xml:space="preserve">DISM Remove-Capability प्रयुज्य पारम्परिक-चीनी Language.Basic सुविधाः (वर्णविन्यासः, पाठानुमानम् इत्यादि) निष्कासयति। एषा IME स्वयं न। भाषा प्रदर्शनभाषया, भाषासूच्या, कुञ्जीपटविन्यासेन वा अप्रयुक्ता चेदेव एतत् चालयितुं शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Warning" xml:space="preserve">एताः भाषासुविधाः पुनः प्रयोक्तुं ताः पुनः योजनीयाः।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Name" xml:space="preserve">भाषादानसुविधाः (चीनी, सरलीकृता)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Description" xml:space="preserve">DISM Remove-Capability प्रयुज्य सरलीकृत-चीनी Language.Basic सुविधाः (वर्णविन्यासः, पाठानुमानम् इत्यादि) निष्कासयति। एषा IME स्वयं न। भाषा प्रदर्शनभाषया, भाषासूच्या, कुञ्जीपटविन्यासेन वा अप्रयुक्ता चेदेव एतत् चालयितुं शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Warning" xml:space="preserve">एताः भाषासुविधाः पुनः प्रयोक्तुं ताः पुनः योजनीयाः।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Name" xml:space="preserve">Windows-साहाय्यसञ्चिकाः</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Description" xml:space="preserve">Windows-साहाय्यसञ्चिकाः लोपयति। Windows 10/11-मध्ये ताः Windows Resource Protection-द्वारा रक्षिताः, अतः प्रायः लोपयोग्यं नास्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Warning" xml:space="preserve">Windows-द्वारा रक्षिताः TrustedInstaller-स्वामिकाः वा सञ्चिकाः अस्पृष्टाः। स्वामित्वं कदापि न गृह्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Name" xml:space="preserve">पूर्वनिर्धारितानि भित्तिचित्राणि</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Description" xml:space="preserve">Windows-इत्यस्य पूर्वनिर्धारितानि भित्तिचित्राणि लोपयति। Windows 10/11-मध्ये तानि Windows Resource Protection-द्वारा रक्षितानि, अतः प्रायः लोपयोग्यं नास्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Warning" xml:space="preserve">Windows-द्वारा रक्षिताः TrustedInstaller-स्वामिकाः वा सञ्चिकाः अस्पृष्टाः। स्वामित्वं कदापि न गृह्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleMusic.Name" xml:space="preserve">नमूनासङ्गीतम्</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleMusic.Description" xml:space="preserve">Windows 7-सहितानि ज्ञातानि नमूनागीतानि एव लोपयति। सञ्चिकाकोशे अन्याः सञ्चिकाः अस्पृष्टाः।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SamplePictures.Name" xml:space="preserve">नमूनाचित्राणि</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SamplePictures.Description" xml:space="preserve">Windows 7-सहितानि ज्ञातानि नमूनाचित्राणि एव लोपयति। सञ्चिकाकोशे अन्याः सञ्चिकाः अस्पृष्टाः।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleVideos.Name" xml:space="preserve">नमूनाचलचित्राणि</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleVideos.Description" xml:space="preserve">Windows 7-सहितं ज्ञातं नमूनाचलचित्रम् एव लोपयति। सञ्चिकाकोशे अन्याः सञ्चिकाः अस्पृष्टाः।</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Expand" xml:space="preserve">{0} विस्तारय सङ्कोचय वा</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Error" xml:space="preserve">लोपनं पूर्णं कर्तुं न शक्तम्। अभिलेखं परीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SaveSuppressed" xml:space="preserve">विन्यासाः पठितुं न शक्ताः, अतः मूलसञ्चिकायाः रक्षणार्थं रक्षणं निष्क्रियम्। परिवर्तनानि अस्मिन् सत्रे एव प्रवर्तन्ते।</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SystemRestore.Failed" xml:space="preserve">System Restore विवर्तितुं न शक्तम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Done" xml:space="preserve">{0} अपवर्जनेषु योजितम्। विन्यासाः परिवर्तिताः, अतः पुनरन्वीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Duplicate" xml:space="preserve">{0} पूर्वमेव अपवर्जितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Failed" xml:space="preserve">{0} अपवर्जनेषु योजयितुं न शक्तम् (प्रारूपम् अमान्यं सीमा वा प्राप्ता)।</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.SaveFailed" xml:space="preserve">{0} अपवर्जनेषु योजितम्, किन्तु रक्षितुं न शक्तम्। एतत् अनुप्रयोगस्य पिधानपर्यन्तम् एव प्रवर्तते।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.NoTarget" xml:space="preserve">अन्वीक्षितुं drive स्वनिर्मितं सञ्चिकाकोशं वा चिनुत।</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Filter.All" xml:space="preserve">सर्वान् प्रकारान् दर्शय</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Action.IgnoreFolder" xml:space="preserve">एतं सञ्चिकाकोशम् उपेक्षस्व</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Kinds" xml:space="preserve">प्रकारानुसारं फलानि</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Failed" xml:space="preserve">लोपनकाले दोषः जातः। अभिलेखं परीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.UserScopeUnavailable" xml:space="preserve">उपयोक्तृ-परिधिनियमाः प्रयोक्तुं न शक्यन्ते (संवादी उपयोक्ता उन्नतः उपयोक्ता च भिन्नौ, अथवा पुष्टिः न जाता)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.CustomFolderRejectedAtRun" xml:space="preserve">स्वनिर्मितः सञ्चिकाकोशः चालनकाले परीक्षया निराकृतः</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseOutsideProfile" xml:space="preserve">पर्यावरणचरः %{0}% वर्तमानप्रयोक्तुः प्रोफाइलात् बहिः सूचयति (अथवा प्रोफाइलं सत्यापयितुं न शक्तम्), अतः एतत् लक्ष्यं न प्रयुज्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseProtectedLocation" xml:space="preserve">पर्यावरणचरः %{0}% संरक्षितस्थानं सूचयति (ड्राइव्-मूलम्, Windows, Program Files, ProgramData, अन्यप्रयोक्तुः प्रोफाइलं वा), अतः एतत् लक्ष्यं न प्रयुज्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseMachineMismatch" xml:space="preserve">पर्यावरणचरः %{0}% तन्त्रस्य पूर्वनिर्धारितस्थानात् भिन्नः अस्ति, अतः एतत् लक्ष्यं न प्रयुज्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.CustomFolderRejected" xml:space="preserve">स्वनिर्मितः सञ्चिकाकोशः निराकृतः ({0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceStopFailed" xml:space="preserve">सेवा स्थगयितुं न शक्ता, अतः किमपि न लोपितम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DeleteFailed" xml:space="preserve">लोपनं पूर्णं कर्तुं न शक्तम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceResumeFailedList" xml:space="preserve">एका सेवा मूलस्थितौ प्रत्यानेतुं न शक्ता ({0}): {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceResumeFailed" xml:space="preserve">एका सेवा मूलस्थितौ प्रत्यानेतुं न शक्ता: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.UserRegistryOpenFailed" xml:space="preserve">उपयोक्तुः registry विवर्तितुं न शक्तम्</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.HandlerUnavailable" xml:space="preserve">handler {0} अनुपलब्धः</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.PathReason" xml:space="preserve">{0}: {1}{2}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniContentUnverified" xml:space="preserve"> (सञ्चिकाया अन्तर्गतं सत्यापयितुं न शक्तम्)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ExpansionTruncated" xml:space="preserve">विस्तारितानि लक्ष्याणि सीमां प्राप्तानि ({0}); शेषाणि न अन्तर्भूतानि</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbOpenFailed" xml:space="preserve">database विवर्तितुं न शक्तम् (SQLite {0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbConfigFailed" xml:space="preserve">सुरक्षाविन्यासः प्रयोक्तुं न शक्तः, अतः स्थगितम् ({0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbSqliteError" xml:space="preserve">SQLite दोषः {0}: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbPinFailed" xml:space="preserve">database निर्भयतया कीलयितुं न शक्तम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbHardLinked" xml:space="preserve">hard link-युक्तं database लक्ष्यं न</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbTooLarge" xml:space="preserve">database लक्ष्यत्वाय अतिबृहत्</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbIdentityUnverified" xml:space="preserve">database-सञ्चिका सत्यापयितुं न शक्ता</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbJournalPending" xml:space="preserve">अप्रक्रियमाणं journal अस्ति (प्रयुक्तं पुनःप्राप्तं वा न), अतः त्यक्तम्</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbIntegrityFailed" xml:space="preserve">database-इत्यस्य अखण्डतापरीक्षा विफला</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbVirtualTable" xml:space="preserve">virtual table-युक्तं database लक्ष्यं न</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbUnknownTable" xml:space="preserve">अपेक्षितं table {0} नास्ति (अज्ञातं schema)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbUnknownColumn" xml:space="preserve">table {0}-मध्ये अपेक्षितः column {1} नास्ति (अज्ञातं schema)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniUnconvertible" xml:space="preserve">सञ्चिका UTF-8, UTF-16 वा तन्त्रस्य ANSI code page-रूपेण निर्हानिः परिवर्तयितुं न शक्यते, अतः त्यक्ता</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniTooLarge" xml:space="preserve">सञ्चिका 1 MB-तः बृहती, अतः त्यक्ता</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniAmbiguousSection" xml:space="preserve">बहूनां sections-नां समानं नाम अस्ति लक्ष्यं च ज्ञातुं न शक्यते, अतः न परिवर्तितम्</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniRestored" xml:space="preserve">{0} (मूलपाठः पुनःस्थापितः)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniNotRestored" xml:space="preserve">{0} (मूलपाठः पुनःस्थापयितुं न शक्तः, अन्तर्गतम् अनिश्चितम्)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniChangedWhileReading" xml:space="preserve">पठनकाले अन्तर्गतं परिवर्तितम्</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniLengthChangedWhileReading" xml:space="preserve">पठनकाले दैर्घ्यं परिवर्तितम्</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniLengthChangedBeforeWrite" xml:space="preserve">लेखनात् पूर्वं दैर्घ्यं परिवर्तितम्</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniVerifyMismatch" xml:space="preserve">लेखनानन्तरं पुनःपठनं न मिलति</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistrySymlink" xml:space="preserve">registry symbolic link इति कारणात् वर्जितम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryDepthLimit" xml:space="preserve">सुरक्षितायाः पुनरावर्तनगभीरतायाः सीमा अतिक्रान्ता</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DnsFlushFailed" xml:space="preserve">ipconfig /flushdns विफलम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DnsFlushError" xml:space="preserve">ipconfig /flushdns चालयितुं न शक्तम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeQueryFailed" xml:space="preserve">{0} पृष्टुं न शक्तम् (Win32={1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeUrlHistoryFailed" xml:space="preserve">URL-इतिहासः मार्जयितुं न शक्तः (HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeClearFailed" xml:space="preserve">{0} मार्जयितुं न शक्तम् (Win32={1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleQueryFailed" xml:space="preserve">Recycle Bin पृष्टुं न शक्तम् (HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleVerifyFailed" xml:space="preserve">रिक्तीकरणानन्तरं Recycle Bin परीक्षितुं न शक्तम् (HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleRemaining" xml:space="preserve">Recycle Bin-मध्ये {0} मदाः अवशिष्टाः (HRESULT=0x{1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDpsResumeFailed" xml:space="preserve">DPS-सेवा मूलस्थितौ प्रत्यानेतुं न शक्ता: {0}। Windows Services-मध्ये Diagnostic Policy Service आरभताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDeleteFailed" xml:space="preserve">जालोपयोगदत्तांशः लोपयितुं न शक्तः: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDpsStopUnverified" xml:space="preserve">DPS-सेवा स्थगिता इति पुष्टिः न जाता, अतः जालोपयोगदत्तांशः न लोपितः</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutLocationOpenFailed" xml:space="preserve">shortcut-स्थानं निर्भयतया विवर्तितुं न शक्तम्</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutsUnreadable" xml:space="preserve">{0} shortcuts पठितुं न शक्ताः, वर्जिताश्च</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutDeleteFailed" xml:space="preserve">अमान्याः shortcuts लोपयितुं न शक्ताः: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TasksUnreadable" xml:space="preserve">{0} कार्याणि पठितुं न शक्तानि, वर्जितानि च</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TaskSchedulerQueryFailed" xml:space="preserve">Task Scheduler पृष्टुं न शक्तः: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TaskSchedulerOperateFailed" xml:space="preserve">Task Scheduler-मध्ये क्रिया कर्तुं न शक्ता: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEmptyDescription" xml:space="preserve">restore point-इत्यस्य वर्णनं रिक्तम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointStateUnknown" xml:space="preserve">restore point-इत्यस्य स्थितिः परीक्षितुं न शक्ता: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointProtectionDisabled" xml:space="preserve">तन्त्रसुरक्षा निष्क्रिया अस्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreateUninterpretable" xml:space="preserve">restore point-निर्माणस्य फलं बोद्धुं न शक्तम् (exit code {0})।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreateFailed" xml:space="preserve">restore point-निर्माणं विफलम् (प्रत्यागतमानम् {0})।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointVerifyFailed" xml:space="preserve">निर्माणानन्तरं restore point परीक्षितुं न शक्तम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCancelled" xml:space="preserve">restore point-निर्माणं निरस्तम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableFailed" xml:space="preserve">तन्त्रसुरक्षा सक्रियां कर्तुं न शक्ता (exit code {0})।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableVerifyFailed" xml:space="preserve">सक्रियीकरणानन्तरं स्थितिः परीक्षितुं न शक्ता: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnabled" xml:space="preserve">तन्त्रसुरक्षा सक्रिया कृता।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableNotEffective" xml:space="preserve">तन्त्रसुरक्षा सक्रिया न जाता (Group Policy-द्वारा निष्क्रिया भवितुमर्हति)।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableCancelled" xml:space="preserve">तन्त्रसुरक्षायाः सक्रियीकरणं निरस्तम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreated" xml:space="preserve">restore point निर्मितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointReused" xml:space="preserve">गतेषु २४ होरासु निर्मितं restore point ({0}) प्रयुज्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointNoneAvailable" xml:space="preserve">restore point न निर्मितं, गतेषु २४ होरासु किमपि नास्ति च।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointExitCode" xml:space="preserve">Exit code {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointProtectionOutputInvalid" xml:space="preserve">सुरक्षास्थितेः output अमान्यम्</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputInvalid" xml:space="preserve">restore point-इत्यस्य output अमान्यम्</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputUnknownLine" xml:space="preserve">output-मध्ये अज्ञाता पङ्क्तिः अस्ति</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputIncomplete" xml:space="preserve">output अपूर्णम्</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimStale" xml:space="preserve">अन्वीक्षणफलं जीर्णम् आसीत्, अतः किमपि न चालितम्। पुनरन्वीक्षताम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimNothingSelected" xml:space="preserve">चालनीयः मदः चितः नास्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimCanceledNotRun" xml:space="preserve">निरस्तत्वात् न चालितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimRestorePointUnavailable" xml:space="preserve">restore point उपलब्धं नास्ति, अतः न चालितम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimItemUnavailable" xml:space="preserve">मदः अनुपलब्धः, अतः न चालितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimNeedsTwoStep" xml:space="preserve">एतत् प्रत्यावर्तयितुं न शक्यं द्विचरणपुष्टिश्च नास्ति, अतः न चालितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimCanceledPartial" xml:space="preserve">निरस्तम्। अंशतः संसाधितं स्यात्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimFailed" xml:space="preserve">विफलम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimRecheckFailed" xml:space="preserve">चालनात् अव्यवहितं पूर्वं पुनःपरीक्षा विफला, अतः किमपि न लोपितम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimServiceResumeFailed" xml:space="preserve">एका सेवा मूलस्थितौ प्रत्यानेतुं न शक्ता: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimBackupIncluded" xml:space="preserve">update-प्रत्यावर्तनपरिष्कारस्य अङ्गरूपेण सम्पन्नम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimBackupSkipped" xml:space="preserve">update-प्रत्यावर्तनपरिष्कारः सफलः न जातः, अतः न चालितम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimOutcome" xml:space="preserve">{0} सञ्चिकाः लोपिताः ({1} bytes)। रक्षिताः {2}, विफलाः {3}, निराकृताः {4}।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimOutcomeExample" xml:space="preserve">{0} सञ्चिकाः लोपिताः ({1} bytes)। रक्षिताः {2}, विफलाः {3}, निराकृताः {4}। उदाहरणम्: {5}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ComponentStoreCleanup" xml:space="preserve">component store परिष्क्रियते</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageRemoval" xml:space="preserve">{0}-कृते भाषादानसुविधाः निष्कास्यन्ते</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationFailed" xml:space="preserve">{0} विफलम् (exit code {1})। {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationUninterpretable" xml:space="preserve">{0}-इत्यस्य फलं बोद्धुं न शक्तम् (exit code {1}, किन्तु सफलतायाः output नास्ति)।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationDone" xml:space="preserve">{0} समाप्तम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationDoneReboot" xml:space="preserve">{0} समाप्तम् (पुनरारम्भः आवश्यकः)।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotTarget" xml:space="preserve">{0} निष्कासनीया भाषा नास्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotRemovable" xml:space="preserve">{0}-कृते भाषादानसुविधाः अधुना निष्कासयितुं न शक्यन्ते: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotInstalled" xml:space="preserve">न स्थापितम्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageInUse" xml:space="preserve">UI-भाषया, भाषासूच्या, कुञ्जीपटविन्यासेन वा उपयुज्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotUsed" xml:space="preserve">कस्यापि उपयोक्तुः भाषाविन्यासैः न उपयुज्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderProtected" xml:space="preserve">अस्मिन् Lumin4ti रक्षितं स्थानं वा अस्ति</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedRootNotLocal" xml:space="preserve">एषः स्थानीयसञ्चिकाकोशस्य निरपेक्षः पथः नास्ति</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedRootProtected" xml:space="preserve">रक्षितं स्थानम्, अतः न अन्वीक्षितम्</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ExportLinkRefused" xml:space="preserve">सम्बन्धे निर्यातयितुं न शक्यते</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerNotEnumerated" xml:space="preserve">परीक्षणकाले पञ्जीकरणानि गणितानि न आसन्।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerNoSource" xml:space="preserve">पञ्जीकरणानि गणयितुं स्रोतः नास्ति।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerEnumerationException" xml:space="preserve">पञ्जीकरणानि गणयन् अपवादः उत्पन्नः: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerEnumerationFailed" xml:space="preserve">Windows Installer-पञ्जीकरणानि गणयितुं न शक्तम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerFolderUnresolved" xml:space="preserve">Installer-सञ्चिकाकोशः सुरक्षितं निर्णेतुं न शक्यते।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageSettingsUnreadable" xml:space="preserve">उपयोक्तॄणां भाषासेटिङ्ग्स् पूर्णतया पठितुं न शक्तास्ततः त्यक्तम्: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageListUnavailable" xml:space="preserve">भाषाप्रवेशसुविधानां सूचीं प्राप्तुं व्याख्यातुं वा न शक्तम् (निर्गमसङ्केतः {0})।</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderNotScannable" xml:space="preserve">सम्बन्धात् रक्षणात् वा एषः सञ्चिकाकोशः सुरक्षितं परीक्षितुं न शक्तः।</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">नमूना-अभिलिखितदूरदर्शनम्</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">Windows 7-सहितम् ज्ञातं नमूनाभिलेखनम् एव लोपयति। सञ्चिकाकोशे अन्याः सञ्चिकाः अस्पृष्टाः।</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Internet Explorer-अनुप्रयोगसंग्रहः (AppCache)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-ime-cache" xml:space="preserve">Microsoft IME-संग्रहः त्रुटिवृत्तान्ताश्च</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-office-solution-packages" xml:space="preserve">Office-समाधानपुटानां संग्रहः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-delivery-optimization-cache" xml:space="preserve">Delivery Optimization-संग्रहः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-etl-logs" xml:space="preserve">ETL trace-अभिलेखाः (Logs LogFiles च सञ्चिकाकोशौ)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-system-temp" xml:space="preserve">Windows-व्यवस्थासेवानाम् अस्थायिसञ्चिकाः (SystemTemp)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-icon-cache-root" xml:space="preserve">प्राचीना चिह्नकोशसञ्चिका (IconCache.db)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.app-cursor-cached-data" xml:space="preserve">Cursor-संगृहीतदत्तांशः (CachedData)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.package-npm-cache" xml:space="preserve">npm-संग्रहः (उपयोक्तुः कोशे .npm)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-shared" xml:space="preserve">Google Chrome-साधारणसंग्रहाः अस्थायिसञ्चिकाश्च</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-edge-shared" xml:space="preserve">Microsoft Edge-साधारणसंग्रहाः अस्थायिसञ्चिकाश्च</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-vivaldi-shared" xml:space="preserve">Vivaldi-साधारणसंग्रहाः अस्थायिसञ्चिकाश्च</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-brave-shared" xml:space="preserve">Brave-साधारणसंग्रहाः अस्थायिसञ्चिकाश्च</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-shared" xml:space="preserve">Google Chrome Beta-साधारणसंग्रहाः अस्थायिसञ्चिकाश्च</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-shared" xml:space="preserve">Google Chrome Dev-साधारणसंग्रहाः अस्थायिसञ्चिकाश्च</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-rebuild" xml:space="preserve">Google Chrome-Safe Browsing-प्रतिरूपदत्तांशः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-edge-rebuild" xml:space="preserve">Microsoft Edge-Safe Browsing-प्रतिरूपदत्तांशः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-vivaldi-rebuild" xml:space="preserve">Vivaldi-Safe Browsing-प्रतिरूपदत्तांशः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-brave-rebuild" xml:space="preserve">Brave-Safe Browsing-प्रतिरूपदत्तांशः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-rebuild" xml:space="preserve">Google Chrome Beta-Safe Browsing-प्रतिरूपदत्तांशः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-rebuild" xml:space="preserve">Google Chrome Dev-Safe Browsing-प्रतिरूपदत्तांशः</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-comet-rebuild" xml:space="preserve">Comet-Safe Browsing-प्रतिरूपदत्तांशः</x:String>
 </ResourceDictionary>

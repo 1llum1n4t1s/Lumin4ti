@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.thunderbird-cache",
+      "name": "Thunderbird",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Thunderbird\\Profiles" },
+        { "path": "%LOCALAPPDATA%\\Thunderbird\\Profiles" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Thunderbird\\Profiles\\*\\cache2", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Thunderbird\\Profiles\\*\\startupCache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["thunderbird"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/startupcache/StartupCache.cpp", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://raw.githubusercontent.com/thunderbird/thunderbird-desktop/main/mail/moz.configure", "checked": "2026-11-26" },
+        { "tier": "A", "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/toolkit/xre/nsXREDirProvider.cpp", "checked": "2026-11-26" },
+        { "tier": "A", "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/netwerk/cache2/CacheFileIOManager.cpp", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.thunderbird-crash-reports",
+      "name": "Thunderbird",
+      "nameKey": null,
+      "kind": "report",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Thunderbird\\Crash Reports\\pending" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Thunderbird\\Crash Reports\\pending", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["thunderbird"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/toolkit/crashreporter/nsExceptionHandler.cpp", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://raw.githubusercontent.com/thunderbird/thunderbird-desktop/main/mail/moz.configure", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/toolkit/xre/nsXREDirProvider.cpp", "checked": "2026-11-27" }
+      ]
+    }
+  ]
+}

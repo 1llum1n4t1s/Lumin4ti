@@ -43,7 +43,6 @@ public sealed class MaintenanceActionCatalog
             new TrimOptimizeAction(executor),
             // 一時ファイル・キャッシュの削除は用途ごとのグループに分けて、消したいものだけ選べるようにする
             .. FileCleanupGroups.CreateAll(executor, preferences, rebootScheduler),
-            new ScheduledTempCleanupToggle(executor, preferences),
 
             // ═══ 修復 ═══
             new ShellFolderRepairAction(executor),

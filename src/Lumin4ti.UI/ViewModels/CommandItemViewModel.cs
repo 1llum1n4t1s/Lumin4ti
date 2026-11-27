@@ -17,7 +17,7 @@ namespace Lumin4ti.UI.ViewModels;
 /// メンテナンス項目 1 行分。実行ボタン型 (IMaintenanceAction) と
 /// ON/OFF トグル型 (IMaintenanceToggle) の両方をこの VM で扱う。
 /// </summary>
-public partial class CommandItemViewModel : ObservableObject
+public partial class CommandItemViewModel : ObservableObject, IProcessingOperation
 {
     private readonly Func<CommandItemViewModel, Task> _run;
     private readonly Func<CommandItemViewModel, bool, Task> _setToggle;

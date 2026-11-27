@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.kaspersky-install-logs",
+      "name": "Kaspersky",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%TEMP%\\kl-install-*.log" },
+        { "path": "%TEMP%\\kl-setup-*.log" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%TEMP%", "pattern": "kl-install-*.log", "olderThanDays": null },
+        { "type": "files", "path": "%TEMP%", "pattern": "kl-setup-*.log", "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://support.kaspersky.com/2042", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.mullvad-vpn-old-log",
+      "name": "Mullvad VPN",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "machine",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%PROGRAMDATA%\\Mullvad VPN\\daemon.old.log" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%PROGRAMDATA%\\Mullvad VPN", "pattern": "daemon.old.log", "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://mullvad.net/en/help?Topic=mullvad-app", "checked": "2026-11-26" }
+      ]
+    }
+  ]
+}

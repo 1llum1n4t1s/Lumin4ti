@@ -1,0 +1,204 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.vscode-cache",
+      "name": "Visual Studio Code",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Code\\CachedData" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Code\\CachedData", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["Code"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://raw.githubusercontent.com/microsoft/vscode/main/src/mainImpl.ts", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://code.visualstudio.com/docs/configure/settings", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.vscode-logs",
+      "name": "Visual Studio Code",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Code\\logs" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Code\\logs", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["Code"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/platform/environment/common/environmentService.ts", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/code/electron-utility/sharedProcess/contrib/logsDataCleaner.ts", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://code.visualstudio.com/docs/configure/settings", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.vscodium-cache",
+      "name": "VSCodium",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\VSCodium\\CachedData" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\VSCodium\\CachedData", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["VSCodium"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://raw.githubusercontent.com/microsoft/vscode/main/src/mainImpl.ts", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://raw.githubusercontent.com/VSCodium/vscodium/master/docs/migration.md", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.vscodium-logs",
+      "name": "VSCodium",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\VSCodium\\logs" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\VSCodium\\logs", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["VSCodium"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/platform/environment/common/environmentService.ts", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://raw.githubusercontent.com/VSCodium/vscodium/master/docs/migration.md", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.netbeans-cache",
+      "name": "Apache NetBeans",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "rebuild",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\NetBeans\\Cache" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\NetBeans\\Cache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["netbeans64", "netbeans"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://raw.githubusercontent.com/apache/netbeans/master/nb/ide.launcher/netbeans.conf", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.virtualbox-vm-logs",
+      "name": "Oracle VirtualBox",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%USERPROFILE%\\VirtualBox VMs" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%USERPROFILE%\\VirtualBox VMs\\*\\Logs", "pattern": "VBox.log*", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": ["VirtualBoxVM"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://docs.oracle.com/en/virtualization/virtualbox/7.1/user/Troubleshooting.html", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.matlab-crash-reports",
+      "name": "MATLAB",
+      "nameKey": null,
+      "kind": "dump",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\MathWorks" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\MathWorks\\*\\crash_reports", "pattern": null, "olderThanDays": null },
+        { "type": "files", "path": "%TEMP%", "pattern": "matlab_crash_dump.*", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://www.mathworks.com/matlabcentral/answers/100816-how-do-i-locate-the-crash-dump-files-generated-by-matlab", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.visual-studio-component-cache",
+      "name": "Visual Studio",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "rebuild",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Microsoft\\VisualStudio\\*\\ComponentModelCache" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\VisualStudio\\*\\ComponentModelCache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["devenv"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "B", "url": "https://learn.microsoft.com/en-us/answers/questions/1221136/visual-studio-2022-clear-local-caches", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://visualgdb.com/documentation/mefcache/", "checked": "2026-11-25" }
+      ]
+    }
+  ]
+}

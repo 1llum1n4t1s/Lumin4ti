@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.box-drive-logs",
+      "name": "Box Drive",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Box\\Box\\logs" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Box\\Box\\logs", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["Box"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://support.box.com/hc/en-us/articles/360043695894-Technical-Information-for-Box-Drive-Administrators", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.google-drive-logs",
+      "name": "Google Drive",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Google\\DriveFS\\Logs" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\DriveFS\\Logs", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["GoogleDriveFS"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://knowledge.workspace.google.com/admin/drive/capture-google-drive-for-desktop-logs-for-support", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.dcplusplus-crash-log",
+      "name": "DC++",
+      "nameKey": null,
+      "kind": "report",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\DC++" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%LOCALAPPDATA%\\DC++", "pattern": "CrashLog.txt", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": ["DCPlusPlus"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://answers.launchpad.net/dcplusplus/+faq/337", "checked": "2026-11-25" }
+      ]
+    }
+  ]
+}

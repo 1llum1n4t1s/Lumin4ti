@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.evernote-logs",
+      "name": "Evernote",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Evernote" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Evernote\\logs", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["Evernote"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://help.evernote.com/hc/en-us/articles/208314078", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.adobe-creative-cloud-logs",
+      "name": "Adobe Creative Cloud",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Temp\\ACC.log" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%LOCALAPPDATA%\\Temp", "pattern": "ACC.log", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": ["Creative Cloud", "Adobe Desktop Service"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://helpx.adobe.com/creative-cloud/kb/cc-acc-log-file-consuming-huge-disk-space.html", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.adobe-premiere-pro-media-cache",
+      "name": "Adobe Premiere Pro",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "rebuild",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Adobe\\Common\\Media Cache Files" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Adobe\\Common\\Media Cache Files", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\Adobe\\Common\\Media Cache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["Adobe Premiere Pro", "Adobe Media Encoder", "AfterFX", "Adobe Audition"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://community.adobe.com/t5/premiere-pro-discussions/faq-how-to-clear-your-media-cache-in-premiere-pro/m-p/13040243", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.office-diagnostic-logs",
+      "name": "Microsoft Office",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%TEMP%\\Diagnostics\\WINWORD" },
+        { "path": "%TEMP%\\Diagnostics\\EXCEL" },
+        { "path": "%TEMP%\\Diagnostics\\POWERPNT" },
+        { "path": "%TEMP%\\Diagnostics\\UploadCache" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%TEMP%\\Diagnostics\\WINWORD", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%TEMP%\\Diagnostics\\EXCEL", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%TEMP%\\Diagnostics\\POWERPNT", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%TEMP%\\Diagnostics\\UploadCache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["WINWORD", "EXCEL", "POWERPNT"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/microsoft-365/troubleshoot/diagnostic-logs/collect-office-diagnostic-logs", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://support.microsoft.com/en-us/topic/fba86aac-70dc-4858-ae1f-ec2034346cdf", "checked": "2026-11-27" }
+      ]
+    }
+  ]
+}

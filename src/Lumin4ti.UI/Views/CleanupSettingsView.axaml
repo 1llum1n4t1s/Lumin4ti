@@ -1,0 +1,191 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Lumin4ti.UI.ViewModels"
+             xmlns:views="using:Lumin4ti.UI.Views"
+             x:Class="Lumin4ti.UI.Views.CleanupSettingsView"
+             x:DataType="vm:CleanupSettingsViewModel">
+
+  <UserControl.Styles>
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{DynamicResource Brush.Container}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="14,10" />
+      <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+  </UserControl.Styles>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="8,0" Spacing="4">
+      <TextBlock Classes="h1" Text="{DynamicResource Text.Cleanup.Settings.Title}" />
+
+      <!--  操作の実行中は変更できない。保存の結果・保存抑止はここに常に表示する。  -->
+      <TextBlock Classes="caption" TextWrapping="Wrap" Foreground="#FF9500"
+                 Text="{DynamicResource Text.Status.Busy}" IsVisible="{Binding IsBusy}" />
+      <TextBlock TextWrapping="Wrap" Foreground="#FF3B30" Text="{Binding SaveSuppressedText}"
+                 IsVisible="{Binding IsSaveSuppressed}" />
+      <TextBlock TextWrapping="Wrap" Classes="caption" Text="{Binding StatusText}"
+                 Classes.error="{Binding IsStatusError}"
+                 IsVisible="{Binding StatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+        <TextBlock.Styles>
+          <Style Selector="TextBlock.error">
+            <Setter Property="Foreground" Value="#FF3B30" />
+          </Style>
+        </TextBlock.Styles>
+      </TextBlock>
+
+      <StackPanel Spacing="4" IsEnabled="{Binding IsEditable}">
+
+        <!--  除外 4 種  -->
+        <TextBlock FontWeight="SemiBold" Margin="0,8,0,0" Text="{DynamicResource Text.Cleanup.Settings.Exclusions}" />
+        <TextBlock Classes="caption" TextWrapping="Wrap"
+                   Text="{DynamicResource Text.Cleanup.Settings.Exclusions.Description}" />
+        <ItemsControl ItemsSource="{Binding ExclusionGroups}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="vm:CleanupSettingsExclusionGroupViewModel">
+              <Border Classes="card">
+                <StackPanel Spacing="6">
+                  <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+                  <ItemsControl ItemsSource="{Binding Entries}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="vm:CleanupSettingsEntryViewModel">
+                        <Grid ColumnDefinitions="*,Auto" Margin="0,2">
+                          <SelectableTextBlock Text="{Binding Value}" VerticalAlignment="Center" TextWrapping="Wrap"
+                                               FontFamily="Cascadia Mono, Consolas, monospace" FontSize="12" />
+                          <Button Grid.Column="1" Content="{DynamicResource Text.Cleanup.Exclusion.Remove}"
+                                  Command="{Binding RemoveCommand}" Margin="8,0,0,0"
+                                  AutomationProperties.Name="{Binding RemoveAutomationName}" />
+                        </Grid>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBox Text="{Binding NewValue}" PlaceholderText="{Binding Hint}"
+                             AutomationProperties.Name="{Binding Title}" />
+                    <Button Grid.Column="1" Content="{DynamicResource Text.Cleanup.Exclusion.Add}"
+                            Command="{Binding AddCommand}" Margin="8,0,0,0" />
+                  </Grid>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Button x:Name="ImportButton" Content="{DynamicResource Text.Cleanup.Exclusion.Import}" Click="OnImportClick" />
+          <Button x:Name="ExportButton" Content="{DynamicResource Text.Cleanup.Exclusion.Export}" Click="OnExportClick" />
+        </StackPanel>
+
+        <!--  削除の方法  -->
+        <TextBlock FontWeight="SemiBold" Margin="0,12,0,0" Text="{DynamicResource Text.Cleanup.Settings.Options}" />
+        <Border Classes="card">
+          <StackPanel Spacing="6">
+            <CheckBox IsChecked="{Binding SecureDelete}" Content="{DynamicResource Text.Cleanup.Settings.SecureDelete}" />
+            <TextBlock Classes="caption" TextWrapping="Wrap"
+                       Text="{DynamicResource Text.Cleanup.Settings.SecureDelete.Note}" />
+            <CheckBox IsChecked="{Binding CreateRestorePoint}"
+                      Content="{DynamicResource Text.Cleanup.Settings.CreateRestorePoint}" />
+            <TextBlock Classes="caption" TextWrapping="Wrap"
+                       Text="{DynamicResource Text.Cleanup.Settings.CreateRestorePoint.Note}" />
+          </StackPanel>
+        </Border>
+
+        <!--  カスタムフォルダー  -->
+        <TextBlock FontWeight="SemiBold" Margin="0,12,0,0" Text="{DynamicResource Text.Cleanup.Settings.CustomFolders}" />
+        <TextBlock Classes="caption" TextWrapping="Wrap"
+                   Text="{DynamicResource Text.Cleanup.Settings.CustomFolders.Description}" />
+        <Border Classes="card">
+          <StackPanel Spacing="6">
+            <ItemsControl ItemsSource="{Binding CustomFolders}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:CleanupSettingsEntryViewModel">
+                  <Grid ColumnDefinitions="*,Auto" Margin="0,2">
+                    <StackPanel>
+                      <SelectableTextBlock Text="{Binding Value}" TextWrapping="Wrap"
+                                           FontFamily="Cascadia Mono, Consolas, monospace" FontSize="12" />
+                      <TextBlock Text="{Binding Rejection}" Foreground="#FF3B30" FontSize="12" TextWrapping="Wrap"
+                                 IsVisible="{Binding IsRejected}" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="{DynamicResource Text.Cleanup.Exclusion.Remove}"
+                            Command="{Binding RemoveCommand}" Margin="8,0,0,0" VerticalAlignment="Top"
+                            AutomationProperties.Name="{Binding RemoveAutomationName}" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Grid ColumnDefinitions="*,Auto,Auto">
+              <TextBox Text="{Binding NewCustomFolder}" AutomationProperties.Name="{DynamicResource Text.Cleanup.Settings.CustomFolders}" />
+              <Button Grid.Column="1" Content="{DynamicResource Text.Cleanup.Exclusion.Add}"
+                      Command="{Binding AddCustomFolderCommand}" Margin="8,0,0,0" />
+              <Button x:Name="PickFolderButton" Grid.Column="2" Content="{DynamicResource Text.Cleanup.Settings.CustomFolders.Add}"
+                      Click="OnPickFolderClick" Margin="8,0,0,0" />
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <!--  ユーザー定義パターンと組み込みパターン  -->
+        <TextBlock FontWeight="SemiBold" Margin="0,12,0,0" Text="{DynamicResource Text.Cleanup.Settings.Patterns}" />
+        <TextBlock Classes="caption" TextWrapping="Wrap"
+                   Text="{DynamicResource Text.Cleanup.Settings.Patterns.Description}" />
+        <Border Classes="card">
+          <StackPanel Spacing="6">
+            <ItemsControl ItemsSource="{Binding Patterns}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:CleanupSettingsPatternViewModel">
+                  <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,1">
+                    <!--  "*._mp" のように "_" を含むパターンがアクセスキー扱いで "*.mp" と表示されないよう、TextBlock で包む  -->
+                    <CheckBox IsChecked="{Binding IsEnabled}" AutomationProperties.Name="{Binding Pattern}">
+                      <TextBlock Text="{Binding Pattern}" TextWrapping="Wrap" />
+                    </CheckBox>
+                    <TextBlock Grid.Column="1" Text="{Binding GroupText}" Classes="caption"
+                               VerticalAlignment="Center" Margin="8,0" />
+                    <Button Grid.Column="2" Content="{DynamicResource Text.Cleanup.Exclusion.Remove}"
+                            Command="{Binding RemoveCommand}" IsVisible="{Binding CanRemove}"
+                            AutomationProperties.Name="{Binding RemoveAutomationName}" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox Text="{Binding NewPattern}" PlaceholderText="{Binding PatternHint}"
+                       AutomationProperties.Name="{DynamicResource Text.Cleanup.Settings.Patterns}" />
+              <Button Grid.Column="1" Content="{DynamicResource Text.Cleanup.Exclusion.Add}"
+                      Command="{Binding AddPatternCommand}" Margin="8,0,0,0" />
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <!--  項目ごとの既定の選択  -->
+        <TextBlock FontWeight="SemiBold" Margin="0,12,0,0" Text="{DynamicResource Text.Cleanup.Settings.Rules}" />
+        <TextBlock Classes="caption" TextWrapping="Wrap"
+                   Text="{DynamicResource Text.Cleanup.Settings.Rules.Description}" />
+        <Border Classes="card">
+          <StackPanel Spacing="6">
+            <ItemsControl ItemsSource="{Binding Rules}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:CleanupSettingsRuleViewModel">
+                  <Grid ColumnDefinitions="*,Auto" Margin="0,2">
+                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                    <ComboBox Grid.Column="1" MinWidth="160" SelectedIndex="{Binding SelectedIndex}"
+                              ItemsSource="{Binding Choices}"
+                              AutomationProperties.Name="{Binding Name}" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Button Content="{DynamicResource Text.Cleanup.Settings.Rules.Reset}" Command="{Binding ResetRulesCommand}"
+                    HorizontalAlignment="Left" IsVisible="{Binding HasRules}" />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+
+      <!--  システムの復元と実績。実行中でも開ける・読める。  -->
+      <Button Content="{DynamicResource Text.Cleanup.Settings.OpenSystemRestore}"
+              Command="{Binding OpenSystemRestoreCommand}" HorizontalAlignment="Left" Margin="0,4,0,0" />
+      <TextBlock FontWeight="SemiBold" Margin="0,12,0,0" Text="{DynamicResource Text.Cleanup.Settings.Totals}" />
+      <TextBlock Classes="caption" TextWrapping="Wrap" Text="{Binding TotalsText}" />
+      <TextBlock Classes="caption" TextWrapping="Wrap" Text="{Binding LastRunText}"
+                 IsVisible="{Binding LastRunText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

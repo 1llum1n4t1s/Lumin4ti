@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Lumin4ti.UI.ViewModels"
+             xmlns:views="using:Lumin4ti.UI.Views"
+             x:Class="Lumin4ti.UI.Views.CleanupView"
+             x:DataType="vm:CleanupViewModel">
+
+  <!--  内側 5 タブ: 通常／高度／スリム化／設定／その他 (その他は従来のカテゴリ画面)  -->
+  <TabControl>
+    <TabItem Header="{DynamicResource Text.Cleanup.Tab.Common}">
+      <views:CommonCleanView DataContext="{Binding Common}" />
+    </TabItem>
+    <TabItem Header="{DynamicResource Text.Cleanup.Tab.Advanced}">
+      <views:AdvancedCleanView DataContext="{Binding Advanced}" />
+    </TabItem>
+    <TabItem Header="{DynamicResource Text.Cleanup.Tab.Slim}">
+      <views:SlimView DataContext="{Binding Slim}" />
+    </TabItem>
+    <TabItem Header="{DynamicResource Text.Cleanup.Tab.Settings}">
+      <views:CleanupSettingsView DataContext="{Binding Settings}" />
+    </TabItem>
+    <TabItem Header="{DynamicResource Text.Cleanup.Tab.Other}">
+      <views:CommandCategoryView DataContext="{Binding Other}" />
+    </TabItem>
+  </TabControl>
+</UserControl>

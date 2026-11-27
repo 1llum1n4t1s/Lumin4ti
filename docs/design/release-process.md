@@ -22,7 +22,7 @@
 
 ## 旧配置からの移行
 
-旧 PerUser 版から信頼済み PerMachine 版への移行と既知の誤配置の修復は、署名と発行元を確認した MSI だけで行い、設定・ログ・保護バックアップを保持する。取得期限、再配置、回収範囲は [section-01.md](section-01.md) にまとめる。
+旧 PerUser 版から信頼済み PerMachine 版への移行と既知の誤配置の修復は、署名と発行元を確認した MSI だけで行い、設定・ログ・保護バックアップを保持する。取得期限、再配置、回収範囲は [legacy-install-migration.md](legacy-install-migration.md) にまとめる。
 
 ## 製品ページと更新ファイルの経路
 

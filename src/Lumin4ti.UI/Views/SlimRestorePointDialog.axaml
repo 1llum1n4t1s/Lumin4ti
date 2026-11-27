@@ -1,0 +1,21 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Lumin4ti.UI.Views.SlimRestorePointDialog"
+        Title="{DynamicResource Text.Cleanup.Slim.Ui.RestorePoint.Unavailable.Title}"
+        Width="460" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource Brush.Window}">
+  <StackPanel Margin="20" Spacing="16">
+    <TextBlock Text="{DynamicResource Text.Cleanup.Slim.Ui.RestorePoint.Unavailable.Title}"
+               FontSize="16" FontWeight="SemiBold" />
+    <TextBlock x:Name="BodyText" TextWrapping="Wrap" />
+    <WrapPanel Orientation="Horizontal">
+      <Button x:Name="ContinueButton" Classes="danger" Margin="0,0,8,8"
+              Content="{DynamicResource Text.Cleanup.Slim.Ui.RestorePoint.ContinueWithout}" />
+      <Button x:Name="EnableButton" Margin="0,0,8,8"
+              Content="{DynamicResource Text.Cleanup.Slim.Ui.RestorePoint.EnableAndRetry}" />
+      <Button x:Name="AbortButton" Margin="0,0,8,8"
+              Content="{DynamicResource Text.Cleanup.Slim.Ui.RestorePoint.Abort}" />
+    </WrapPanel>
+  </StackPanel>
+</Window>

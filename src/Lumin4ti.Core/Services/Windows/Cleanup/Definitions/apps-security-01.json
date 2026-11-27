@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.avast-scan-reports",
+      "name": "Avast Antivirus",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "machine",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%PROGRAMDATA%\\AVAST Software\\Avast\\report" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%PROGRAMDATA%\\AVAST Software\\Avast\\report", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["AvastUI", "AvastSvc"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://support.avast.com/en-au/article/305", "checked": "2026-11-26" }
+      ]
+    }
+  ]
+}

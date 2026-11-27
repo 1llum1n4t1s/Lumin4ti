@@ -21,3 +21,7 @@
 `IMaintenanceItem.ParentId` に前提となる項目の Id を入れると、その項目は**親カードの中へ 1 段だけ入れ子表示**され、親トグルが OFF または状態不明の間は操作不可になる (OS 側で連動して無効になる子設定に使う)。親の状態既知・ON/OFF の変化を子へ通知する。親は同じカテゴリに置くこと。
 
 新機能を足すときは Actions 配下にクラスを作り、**[MaintenanceActionCatalog.cs](../../src/Lumin4ti.Core/Services/Windows/MaintenanceActionCatalog.cs) の `Items` に登録するだけ**で UI に現れる。カタログの並び順が画面の表示順。単純なレジストリ tweak は個別クラスを作らず汎用の `RegistryToggle` にスペックを渡す。
+
+## クリーンアップは専用の流れ
+
+左の「クリーンアップ」タブは `CleanupView` で、内側に 通常／高度／スリム化／設定／その他 の 5 タブを持つ。「その他」だけが `CommandCategoryView` で、上の 4 型のカードを表示する。通常・高度・スリム化は規則データ・拡張子パターン・固定項目表を走査して選ぶ専用フローで、`MaintenanceActionCatalog` の単一項目モデルへ載せない。`MainWindowViewModel` は `CommandItemViewModel` 固定にせず `IProcessingOperation` を見る。走査・削除は起動時や再アクティブ時に自動で走らせない。規則データの契約は [cleanup-rules-and-deletion.md](cleanup-rules-and-deletion.md) を参照する。

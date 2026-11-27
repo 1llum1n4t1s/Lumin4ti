@@ -90,8 +90,6 @@
   <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">Custom</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">Walang estado ng Recall sa output ng DISM. Tingnan ang log para sa mga detalye.</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">Hindi maunawaan ang estado ng Recall na ibinalik ng DISM. Tingnan ang log para sa mga detalye.</x:String>
-  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">Ibang Windows user ang nagrehistro sa task na ito, kaya hindi ito maaaring baguhin.</x:String>
-  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">Hindi ma-verify ang may-ari ng nakarehistrong task, kaya hindi ito maaaring baguhin.</x:String>
 
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">I-update nang sabay-sabay ang mga naka-install na app (winget)</x:String>
@@ -118,24 +116,10 @@
   <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">Nire-reset ang cache ng Microsoft Store gamit ang WSReset. Isang karaniwang solusyon kapag hindi bumubukas ang Store, hindi umuusad ang mga download, o paulit-ulit ang mga error na “subukan muli”. Hindi inaalis ang mga app at impormasyon ng account. Maaaring awtomatikong bumukas ang Store app kapag tapos na.</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">SSD TRIM at pagsasama-sama ng libreng espasyo</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">Nagpapatakbo ng TRIM notification sa SSD (/L) at pagsasama-sama ng libreng espasyo (/X) sa lahat ng volume para panatilihin ang write performance ng SSD at i-defragment ang libreng espasyo. Depende sa layout ng drive, maaaring tumagal ng ilang minuto hanggang ilang sampung minuto. Maaari mong gamitin ang PC habang tumatakbo ito.</x:String>
-  <x:String x:Key="Text.Action.cleanup-user-temp.Label" xml:space="preserve">Burahin ang mga pansamantalang file at cache ng user</x:String>
-  <x:String x:Key="Text.Action.cleanup-user-temp.Desc" xml:space="preserve">Binubura ang pansamantalang file, crash dump, shader at internet cache, at mga cache ng IME, Office, at Outlook na maaaring buuing muli. Hindi binubura ang browsing history, recent-file history, o app settings. Nilalaktawan ang ginagamit na file.</x:String>
-  <x:String x:Key="Text.Action.cleanup-system-temp.Label" xml:space="preserve">Burahin ang mga pansamantalang file at log ng sistema</x:String>
-  <x:String x:Key="Text.Action.cleanup-system-temp.Desc" xml:space="preserve">Binubura ang mga pansamantalang folder ng Windows, ETL trace log sa mga kilalang lokasyon ng Windows log, mga log ng setup at serbisyo, cache ng Delivery Optimization, at mga diagnostic log ng Microsoft Defender. Pinapanatili ang kasaysayan ng pagtuklas at pag-aayos ng Defender. Ang ETL ay limitado sa *.etl sa ilalim ng Windows Logs, LogFiles, Panther, at Diagnosis; hindi hinahanap ang buong drive. Pansamantalang ihihinto at pagkatapos ay ibabalik ang Delivery Optimization service. Huwag itong patakbuhin habang nag-iimbestiga ng problema.</x:String>
-  <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">Burahin ang mga cache at log ng app</x:String>
-  <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">Binubura ang app at GPU shader cache, crash report, at tool log. Hindi binubura ang WebStorage, virtual-machine bundle, setting, o sign-in state.</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">Burahin ang mga package cache ng mga tool sa pag-develop</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Tanging mada-download-muling cache ng npm, pnpm, NuGet, pip, Yarn, Gradle, Bun, uv, at Cargo ang binubura. Hindi binubura ang uv-managed Python, lokal na Maven artifact, credential, setting, o pangkalahatang .cache folder.</x:String>
-  <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">Burahin ang mga cache ng browser</x:String>
-  <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Binubura ang Chromium web at shader cache, Service Worker cache storage, crash report, at pansamantalang extension data. Hindi binubura ang Service Worker registration, DRM component, bookmark, password, o sign-in state.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">Muling buuin ang cache ng icon, thumbnail, at font</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">Binubura ang icon cache, thumbnail cache, at font cache ng File Explorer upang muli itong buuin ng Windows. Ito ang karaniwang pag-aayos sa blangko o maling icon, thumbnail na hindi na nag-a-update, at maling pagpapakita ng teksto. Hindi sapilitang isinasara ang Explorer. Sa susunod na pagsisimula ng Windows, muling inililista mula sa isang pinagkakatiwalaang installation ang mga napiling cache na ginagamit pa, at sinusubukang burahin ang mga ito. Hanggang tatlong pagtakbo lamang sa loob ng pitong araw; pinapanatili ang mga target na naka-lock pa rin at itinatala ang mga resulta sa log. Bahagyang bumabagal ang display habang muling binubuo ang mga cache.</x:String>
-  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">Burahin ang download cache ng Windows Update</x:String>
-  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">Tanging mada-download-muling file sa SoftwareDistribution\Download ang binubura. Hindi binubura ang update history o catroot2. Ibinabalik ang mga kaugnay na serbisyo.</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">Burahin at muling buuin ang prefetch data at search index</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">Binubura ang prefetch data na nagpapabilis sa pagbukas ng mga app at ang search index ng File Explorer, at hinahayaang muling likhain ng Windows ang dalawa. Gamitin ito kapag walang ibinabalik ang paghahanap o laging luma ang mga resultang file. Sa loob ng sampu-sampung minuto hanggang ilang oras ng muling pagbuo, bumabagal ang pagbukas ng app at ang paghahanap, at tumataas ang paggamit ng CPU sa background.</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">Magrehistro ng task na awtomatikong nagpapatakbo ng paglilinis sa pag-sign in</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Sa pag-sign in, pinapatakbo ang napiling cache at log cleanup gamit ang pinakamataas na available na pribilehiyo, kaya maaari ring tumakbo ang mga item na nangangailangan ng administrator o paghinto ng serbisyo. Ginagamit nito ang kaparehong checklist ng Run button at nagsisimula nang walang UAC prompt. Nilalaktawan ang file na ginagamit. Inaalis ng OFF ang task.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Memory Compression</x:String>
@@ -200,7 +184,6 @@
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">I-disable ang mga background process ng Edge (makatipid ng 100–300 MB)</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Dini-disable sa pamamagitan ng policy ang Edge background mode at Startup Boost. Kung bihira mong gamitin ang Edge, maaari itong magpalaya ng humigit-kumulang 100–300 MB na memory. Maaaring bahagyang bumagal ang pagbukas ng Edge at mawala ang mga notification ng extension. I-OFF ito para alisin ang mga policy at ibalik ang mga default ng Edge.</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">Piliin kung ano ang buburahin</x:String>
-  <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">Piliin kung ano ang tatakbo sa pag-sign in</x:String>
   <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">Nabigo ang huling pag-save ng pagpiling ito (tingnan ang log).</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">Update</x:String>
@@ -223,10 +206,545 @@
   <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">Development build</x:String>
   <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">Hindi makuha ang bersyon</x:String>
   <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">Nabigo ang huling pag-save ng mga setting ng wika at update (tingnan ang log).</x:String>
-  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Hindi mabasa ang settings. Naka-disable ang pag-save para protektahan ang orihinal na file, at hindi tatakbo ang sign-in cleanup. Sa session na ito lang may bisa ang mga pagbabago.</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Hindi mabasa ang settings. Naka-disable ang pag-save para protektahan ang orihinal na file. Sa session na ito lang may bisa ang mga pagbabago.</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">Walang nakitang target noong huling pagsusuri.</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">Buksan muli ang listahan upang i-refresh ito. Kasama rin ang mga bagong nahanap na target na hindi ibinukod kapag pinatakbo ang aksyon.</x:String>
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">Pinoproseso</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Hintaying matapos ang operasyon.</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Hintaying matapos ang pagkansela at paglilinis.</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Common" xml:space="preserve">Karaniwan</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Advanced" xml:space="preserve">Advanced</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Slim" xml:space="preserve">Paliitin</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Settings" xml:space="preserve">Mga setting</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Other" xml:space="preserve">Iba pa</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Scan" xml:space="preserve">I-scan</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Rescan" xml:space="preserve">I-scan muli</x:String>
+  <x:String x:Key="Text.Cleanup.Action.CancelScan" xml:space="preserve">Ihinto ang pag-scan</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Clean" xml:space="preserve">Burahin ang napili</x:String>
+  <x:String x:Key="Text.Cleanup.Action.ExportText" xml:space="preserve">I-export bilang text</x:String>
+  <x:String x:Key="Text.Cleanup.Action.OpenLocation" xml:space="preserve">Buksan ang lokasyon</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Ignore" xml:space="preserve">Huwag pansinin (ibukod sa mga susunod na scan)</x:String>
+  <x:String x:Key="Text.Cleanup.Select.Recommended" xml:space="preserve">Inirerekomenda</x:String>
+  <x:String x:Key="Text.Cleanup.Select.All" xml:space="preserve">Piliin lahat</x:String>
+  <x:String x:Key="Text.Cleanup.Select.None" xml:space="preserve">Alisin ang lahat ng pagpili</x:String>
+  <x:String x:Key="Text.Cleanup.Select.Invert" xml:space="preserve">Baligtarin ang pagpili</x:String>
+  <x:String x:Key="Text.Cleanup.Filter.Placeholder" xml:space="preserve">I-filter ang mga item</x:String>
+  <x:String x:Key="Text.Cleanup.Filter.HideEmpty" xml:space="preserve">Itago ang mga item na walang buburahin</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Name" xml:space="preserve">Item</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Category" xml:space="preserve">Kategorya</x:String>
+  <x:String x:Key="Text.Cleanup.Column.State" xml:space="preserve">Estado</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Files" xml:space="preserve">Mga file</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Size" xml:space="preserve">Laki</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Impact" xml:space="preserve">Epekto</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Folder" xml:space="preserve">Folder</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Modified" xml:space="preserve">Binago</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Rule" xml:space="preserve">Panuntunan</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Safety" xml:space="preserve">Kaligtasan</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Results" xml:space="preserve">Mga resulta ng scan</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Progress" xml:space="preserve">Progreso ng scan</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.SelectRow" xml:space="preserve">Piliin ang {0}</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Row" xml:space="preserve">{0}, {1}, {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Windows" xml:space="preserve">System ng Windows</x:String>
+  <x:String x:Key="Text.Cleanup.Category.StoreApps" xml:space="preserve">Mga Store app</x:String>
+  <x:String x:Key="Text.Cleanup.Category.BrowserCache" xml:space="preserve">Cache ng browser</x:String>
+  <x:String x:Key="Text.Cleanup.Category.BrowserTrace" xml:space="preserve">Kasaysayan at bakas ng browser</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Cookies" xml:space="preserve">Cookies</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Traces" xml:space="preserve">Mga bakas ng paggamit</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Components" xml:space="preserve">Mga bahagi ng Windows</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Apps" xml:space="preserve">Iba pang app</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Custom" xml:space="preserve">Mga custom na folder</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Cache" xml:space="preserve">Cache ng {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Log" xml:space="preserve">Mga log ng {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Temp" xml:space="preserve">Mga pansamantalang file ng {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Dump" xml:space="preserve">Mga dump ng {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Thumbnail" xml:space="preserve">Mga thumbnail ng {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Shader" xml:space="preserve">Shader cache ng {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Report" xml:space="preserve">Mga ulat ng {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.History" xml:space="preserve">Kasaysayan ng {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Form" xml:space="preserve">Data ng form ng {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Session" xml:space="preserve">Data ng session ng {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Cookies" xml:space="preserve">Mga cookie ng {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Recent" xml:space="preserve">Mga kamakailang item ng {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Backup" xml:space="preserve">Mga backup ng {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Downloads" xml:space="preserve">Mga na-download na file ng {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Other" xml:space="preserve">{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Junk" xml:space="preserve">Mga junk file</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Trace" xml:space="preserve">Mga bakas ng paggamit</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Signout" xml:space="preserve">Magsa-sign out ka</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Rebuild" xml:space="preserve">Kailangang buuin muli</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.UserFiles" xml:space="preserve">Iyong mga file</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Trace.Warning" xml:space="preserve">Mawawala ang iyong kasaysayan ng paggamit.</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Signout.Warning" xml:space="preserve">Ang pagbura ng mga cookie ay maaaring mag-sign out sa iyo sa mga website.</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Rebuild.Warning" xml:space="preserve">Ang unang paggamit pagkatapos ng pagbura ay maaaring mas mabagal habang muling binubuo ang data.</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.UserFiles.Warning" xml:space="preserve">Kasama ang iyong mga file na hindi na maida-download muli. Piliin ang mga ito nang isa-isa; hihingan ka ng kumpirmasyon bago burahin.</x:String>
+  <x:String x:Key="Text.Cleanup.Warning.NotRecommended" xml:space="preserve">Hindi ito inirerekomenda bilang default. Suriin kung ano ang aalisin nito bago ito piliin.</x:String>
+  <x:String x:Key="Text.Cleanup.Warning.JumpListPins" xml:space="preserve">Ang pagbura ng mga Jump List ay nag-aalis din ng mga item na na-pin mo sa taskbar at Start menu.</x:String>
+  <x:String x:Key="Text.Cleanup.State.Found" xml:space="preserve">Maaaring burahin</x:String>
+  <x:String x:Key="Text.Cleanup.State.Empty" xml:space="preserve">Walang buburahin</x:String>
+  <x:String x:Key="Text.Cleanup.State.Unmeasurable" xml:space="preserve">Hindi alam ang bilang</x:String>
+  <x:String x:Key="Text.Cleanup.State.Unavailable" xml:space="preserve">Hindi available</x:String>
+  <x:String x:Key="Text.Cleanup.State.NotDetected" xml:space="preserve">Hindi natukoy</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.UserScopeDifferentUser" xml:space="preserve">Magkaiba ang naka-sign in na user at ang naka-elevate na user, kaya naka-disable ang mga item na tumutukoy sa mga setting at data ng isang user.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.UserScopeUnknown" xml:space="preserve">Hindi ma-verify ang naka-sign in na user, kaya naka-disable ang mga item na tumutukoy sa mga setting at data ng isang user.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.TargetRejected" xml:space="preserve">Tinanggihan ang target para sa kaligtasan (protektadong lokasyon, credential, link, at iba pa).</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.ScanFailed" xml:space="preserve">Nabigo ang pag-scan.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.HandlerUnavailable" xml:space="preserve">Hindi ito maisasagawa sa kapaligirang ito.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.CustomFolderRejected" xml:space="preserve">Hindi pinapayagan ang lokasyong ito bilang custom na folder, kaya nilaktawan ito.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Title" xml:space="preserve">Karaniwang paglilinis</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Description" xml:space="preserve">I-scan muna para makita kung ano ang maaaring alisin, pagkatapos ay burahin lamang ang mga item na pipiliin mo. Walang binabago ang pag-scan.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.NotScanned" xml:space="preserve">Wala pang na-scan. Pindutin ang I-scan para hanapin ang maaaring burahin.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Scanning" xml:space="preserve">Ini-scan ang {0} sa {1}: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanDone" xml:space="preserve">Tapos na ang scan: {0} item, {1} file, {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanCanceled" xml:space="preserve">Itinigil ang pag-scan.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanFailed" xml:space="preserve">Nabigo ang pag-scan. Tingnan ang log.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Stale" xml:space="preserve">Luma na ang resulta ng scan dahil may nagbago sa mga setting o may ibang operasyong tumakbo. I-scan muli.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.NothingFound" xml:space="preserve">Walang nakitang maaaring burahin.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Selection" xml:space="preserve">{0} sa {1} item ang napili (humigit-kumulang {2})</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Retained" xml:space="preserve">{0} item ang pinanatili dahil sa iyong mga exclusion.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Unreadable" xml:space="preserve">{0} item ang hindi masuri.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.SkippedLinks" xml:space="preserve">{0} item ay mga link at hindi ginagalaw.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Unmeasurable" xml:space="preserve">Maaari itong patakbuhin, ngunit hindi masusukat nang maaga ang bilang at laki nito.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Representatives" xml:space="preserve">Halimbawa: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.RunningProcesses" xml:space="preserve">Tumatakbo: {0} (tatanungin ka kung isasara ito bago burahin)</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ServiceNote" xml:space="preserve">Pansamantalang itinigil ang mga serbisyo habang binubura: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Title" xml:space="preserve">Kumpirmahin ang pagbura</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Run" xml:space="preserve">Burahin</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Back" xml:space="preserve">Bumalik</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Common.Body" xml:space="preserve">Ang {0} napiling item ({1} file, humigit-kumulang {2}) ay permanenteng buburahin. Hindi ito ililipat sa Recycle Bin at hindi na maibabalik.</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.NotRecommended" xml:space="preserve">Kasama ang {0} item na hindi inirerekomenda. Suriin muna ang mga ito.</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Signout" xml:space="preserve">Kasama ang {0} item na maaaring mag-sign out sa iyo (gaya ng mga cookie).</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.UserFiles" xml:space="preserve">Ang {0} item ay may kasamang mga file mo na hindi na maida-download muli. Hihingan ka pa ng isa pang kumpirmasyon.</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.UserFiles.Check" xml:space="preserve">Nauunawaan kong permanenteng buburahin ang aking mga file</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.SecureDelete" xml:space="preserve">Naka-on ang secure delete. Isang beses i-o-overwrite ang mga file bago burahin (hindi ito magagarantiya sa mga SSD).</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.RunningProcess" xml:space="preserve">May mga produktong tumatakbo. Tatanungin ka kung isasara ang mga ito habang bumubura.</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Body" xml:space="preserve">Tumatakbo ang "{0}" ({1}). Kailangan itong isara bago burahin ang data nito.</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Close" xml:space="preserve">Isara ito</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Skip" xml:space="preserve">Laktawan ang item na ito</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Abort" xml:space="preserve">Ihinto</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceBody" xml:space="preserve">Hindi maisara nang normal ang "{0}" ({1}). Mawawala ang anumang hindi pa nase-save na input kapag pinilit itong isara.</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceYes" xml:space="preserve">Pilitin isara</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceNo" xml:space="preserve">Huwag pilitin isara</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Running" xml:space="preserve">Binubura ang {0} sa {1}: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Done" xml:space="preserve">Nabura ang {0} file at nakapagbakante ng {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Run.DonePartial" xml:space="preserve">Bahagyang natapos: nabura ang {0} file at nakapagbakante ng {1}. May mga item na nabigo o nilaktawan.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Canceled" xml:space="preserve">Itinigil. {0} file ({1}) ang nabura na.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Stale" xml:space="preserve">Walang nabura dahil luma na ang resulta ng scan. I-scan muli.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Retained" xml:space="preserve">{0} item ang pinanatili dahil sa mga exclusion o pagbabago pagkatapos ng scan.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Blocked" xml:space="preserve">{0} item ang hindi nabura (ginagamit, walang pahintulot, at iba pa).</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Wiped" xml:space="preserve">{0} item ang na-overwrite bago burahin ({1} ang nabura nang walang overwrite).</x:String>
+  <x:String x:Key="Text.Cleanup.Run.ServiceResumeFailed" xml:space="preserve">Hindi na-restart ang isang serbisyong pansamantalang itinigil. Suriin ang estado ng serbisyo.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Succeeded" xml:space="preserve">Nagtagumpay</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.NothingToDo" xml:space="preserve">Walang gagawin</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Partial" xml:space="preserve">Bahagyang natapos</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Failed" xml:space="preserve">Nabigo</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Skipped" xml:space="preserve">Nilaktawan</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Canceled" xml:space="preserve">Itinigil</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.NotRun" xml:space="preserve">Hindi pinatakbo</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.NotScanned" xml:space="preserve">Hindi na-scan, kaya hindi ito binura.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.NothingFound" xml:space="preserve">Walang buburahin.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.Unavailable" xml:space="preserve">Hindi ito maisasagawa sa kapaligirang ito.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.UserFilesNotConfirmed" xml:space="preserve">Hindi binura dahil hindi nakumpirma para sa iyong mga file.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessRunningDeclined" xml:space="preserve">Nilaktawan dahil tumatakbo ang produkto.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessUnverifiable" xml:space="preserve">Nilaktawan dahil hindi ma-verify ang may-ari ng tumatakbong proseso.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessStillRunning" xml:space="preserve">Nilaktawan dahil hindi isinara ang produkto.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ForceTerminationDeclined" xml:space="preserve">Nilaktawan dahil hindi inaprubahan ang pilit na pagsara.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessIdentityMismatch" xml:space="preserve">Nilaktawan dahil hindi matukoy ang proseso, kaya hindi ito isinara.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.TerminateFailed" xml:space="preserve">Nilaktawan dahil hindi maisara ang produkto.</x:String>
+  <x:String x:Key="Text.Cleanup.Totals.Last" xml:space="preserve">Huling takbo: {0} file, {1} ({2})</x:String>
+  <x:String x:Key="Text.Cleanup.Totals.Total" xml:space="preserve">Kabuuan: {0} file, {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Title" xml:space="preserve">I-export ang mga resulta ng scan</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Done" xml:space="preserve">Na-export sa {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Failed" xml:space="preserve">Hindi ma-export: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.OpenLocation.Failed" xml:space="preserve">Hindi mabuksan ang lokasyon: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Name" xml:space="preserve">Pangalan</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Category" xml:space="preserve">Kategorya</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.State" xml:space="preserve">Estado</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Files" xml:space="preserve">Mga file</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Items" xml:space="preserve">Mga item</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Bytes" xml:space="preserve">Bytes</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Retained" xml:space="preserve">Pinanatili</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Status" xml:space="preserve">Katayuan</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Details" xml:space="preserve">Mga detalye</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Total" xml:space="preserve">Kabuuan</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Title" xml:space="preserve">Advanced na paglilinis</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Description" xml:space="preserve">Hinahanap sa mga napiling drive, ayon sa pattern, ang mga file na karaniwang ligtas alisin. Walang binabago ang pag-scan. Suriin ang mga resulta, pagkatapos ay burahin lamang ang pipiliin mo.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drives" xml:space="preserve">Mga drive na i-scan</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drive.Removable" xml:space="preserve">Removable</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drive.Fixed" xml:space="preserve">Fixed</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.ZeroByte" xml:space="preserve">Isama ang mga file na zero-byte</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.InvalidShortcuts" xml:space="preserve">Isama ang mga shortcut na nawawala ang target</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.OlderThan" xml:space="preserve">Isama ang mga file na mas matanda sa itinakdang bilang ng araw</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.Days" xml:space="preserve">Mga araw</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.SelectSafe" xml:space="preserve">Piliin lamang ang mga ligtas na item</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.Default" xml:space="preserve">Default</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.Additional" xml:space="preserve">Karagdagan</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.UserDefined" xml:space="preserve">Tinukoy ng user</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.Safe" xml:space="preserve">Ligtas</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.Undeterminable" xml:space="preserve">Hindi matukoy</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.UserDefined" xml:space="preserve">Tinukoy ng user</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.CheckpointOutsideFound" xml:space="preserve">May .chk file sa labas ng FOUND folder. Maaaring ESE checkpoint ito, kaya nananatili itong hindi napili hanggang masuri mo.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.RecentlyModified" xml:space="preserve">Binago sa nakalipas na 24 oras, kaya hindi ito napili bilang default.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.ZeroByte" xml:space="preserve">Isang zero-byte na file, kaya hindi ito napili bilang default.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.OldFile" xml:space="preserve">Tumugma lamang dahil luma na ito, kaya hindi ito napili bilang default.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.UserPattern" xml:space="preserve">Tumugma sa pattern na tinukoy mo, kaya hindi ito napili bilang default.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.NamePattern" xml:space="preserve">Pattern ng pangalan</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.ZeroByte" xml:space="preserve">Zero byte</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.InvalidShortcut" xml:space="preserve">Di-wastong shortcut</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.OldFile" xml:space="preserve">Lumang file</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Progress" xml:space="preserve">Sinuri ang {0} folder at {1} file; {2} ang tumugma ({3}): {4}</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.ScanDone" xml:space="preserve">Tapos na ang scan: {0} ang tumugma ({1}) sa {2} file na sinuri.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Truncated" xml:space="preserve">Napakarami ng tumugma, kaya ang unang {0} lamang ang ipinapakita. Ang iba pang {1} ({2}) ay hindi ipinapakita at hindi buburahin.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RootFailure" xml:space="preserve">Hindi ma-scan: {0} ({1})</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Pruned" xml:space="preserve">{0} folder ang hindi sinuri dahil protektado o nakabukod ang mga ito.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Empty" xml:space="preserve">Walang tumugmang file.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Selection" xml:space="preserve">{0} sa {1} file ang napili ({2})</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolders" xml:space="preserve">Mga custom na folder</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Note" xml:space="preserve">Ang laman lamang ng folder ang aalisan. Mananatili ang mismong folder.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Missing" xml:space="preserve">Hindi nahanap</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Summary" xml:space="preserve">{0} file, {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Body" xml:space="preserve">Ang {0} napiling file ({1}) at ang laman ng {2} custom na folder ay permanenteng buburahin. Hindi ito ililipat sa Recycle Bin at hindi na maibabalik.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Undeterminable" xml:space="preserve">Kasama ang {0} file na may markang "hindi matukoy". Alisin sa pagpili ang mga hindi mo pa nasuri.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Recent" xml:space="preserve">Kasama ang {0} file na binago sa nakalipas na 24 oras.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Done" xml:space="preserve">Nabura ang {0} file at {1} folder, nakapagbakante ng {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Partial" xml:space="preserve">Bahagyang natapos: nabura ang {0} file at {1} folder, nakapagbakante ng {2}. May mga item na pinanatili o hindi nabura.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Expired" xml:space="preserve">Walang nabura dahil luma na ang resulta ng scan. I-scan muli.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Cancelled" xml:space="preserve">Itinigil. {0} file ({1}) ang nabura na.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Blocked" xml:space="preserve">{0} file ang hindi nabura (ginagamit, walang pahintulot, at iba pa).</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Retained" xml:space="preserve">{0} file ang pinanatili dahil sa mga exclusion o pagbabago pagkatapos ng scan.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Gone" xml:space="preserve">{0} file ang wala na.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Covered" xml:space="preserve">{0} file ay nasa loob ng napiling custom na folder at hindi hiwalay na pinroseso.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Rejected" xml:space="preserve">{0} item ang tinanggihan ng safety check.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Invalid" xml:space="preserve">Hindi magagamit ang path na ito bilang folder.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.DriveRoot" xml:space="preserve">Hindi magagamit ang ugat ng drive.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Windows" xml:space="preserve">Hindi magagamit ang Windows folder at ang mga parent o child nito.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProgramFiles" xml:space="preserve">Hindi magagamit ang Program Files at ang mga parent o child nito.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProgramData" xml:space="preserve">Hindi magagamit ang ProgramData at ang mga parent o child nito.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.OtherUserProfile" xml:space="preserve">Hindi magagamit ang profile ng ibang user.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProfileRoot" xml:space="preserve">Hindi magagamit ang iyong profile folder at AppData dahil mawawala ang lahat ng iyong data kapag inalisan ang mga ito.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Credential" xml:space="preserve">Hindi magagamit ang mga lokasyong may credential o key.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Added" xml:space="preserve">Naidagdag ang custom na folder.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Title" xml:space="preserve">Paliitin</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Description" xml:space="preserve">Nagbabakante ng espasyo sa disk sa pamamagitan ng pag-alis ng data na hindi kailangan ng Windows. Ang ilang item ay hindi na maibabalik o maaaring makaapekto sa mga susunod na pag-aayos, kaya walang napili bilang default.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Run" xml:space="preserve">Patakbuhin ang napili</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.CreateRestorePoint" xml:space="preserve">Gumawa ng restore point bago patakbuhin</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Item" xml:space="preserve">Item</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Status" xml:space="preserve">Katayuan</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Size" xml:space="preserve">Tinatayang espasyo</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Estimate" xml:space="preserve">Humigit-kumulang {0} (tantiya)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.SizeUnknown" xml:space="preserve">Hindi alam</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.NotScanned" xml:space="preserve">Wala pang na-scan. Pindutin ang I-scan para makita kung gaano karaming espasyo ang mababakante ng bawat item.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Scanning" xml:space="preserve">Sinusuri ang mga item sa pagpapaliit…</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.ScanDone" xml:space="preserve">Tapos na ang scan. {0} item ang maaaring patakbuhin.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.ScanFailed" xml:space="preserve">Nabigo ang pag-scan. Tingnan ang log.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Stale" xml:space="preserve">Walang pinatakbo dahil luma na ang resulta ng scan. I-scan muli.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.LongRunning" xml:space="preserve">Ang mga item na gumagamit ng DISM ay maaaring tumagal nang ilang minuto o higit pa.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.Available" xml:space="preserve">Handa</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.NothingToClean" xml:space="preserve">Walang lilinisin</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.Unavailable" xml:space="preserve">Hindi available</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Notice" xml:space="preserve">Paalala</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Caution" xml:space="preserve">Mag-ingat</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Irreversible" xml:space="preserve">Hindi na maibabalik</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.EnumerationFailed" xml:space="preserve">Hindi ganap na nabasa ang data ng pagpaparehistro, kaya hindi ito mahuhusgahan nang ligtas.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.ProtectedByWindows" xml:space="preserve">Pinoprotektahan ng Windows ang mga file na ito, kaya walang aalisin.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.LanguageInUse" xml:space="preserve">Ginagamit ito ng display language, listahan ng wika, o keyboard layout, kaya hindi ito maaalis.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.UserHiveNotLoaded" xml:space="preserve">May data ng ilang user na hindi naka-load, kaya hindi ma-verify ang paggamit.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.NotPresent" xml:space="preserve">Hindi naka-install o hindi nahanap ang target.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.ToolFailed" xml:space="preserve">Hindi nabasa o naunawaan ang resulta ng DISM.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.Rejected" xml:space="preserve">Tinanggihan ng safety check ang target.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Succeeded" xml:space="preserve">Nagtagumpay</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Partial" xml:space="preserve">Bahagyang natapos</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Failed" xml:space="preserve">Nabigo</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Skipped" xml:space="preserve">Nilaktawan</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Cancelled" xml:space="preserve">Itinigil</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Title" xml:space="preserve">Kumpirmahin ang pagpapaliit</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Body" xml:space="preserve">Tatakbo ang {0} napiling item (tinatayang espasyo: {1}).</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.WithRestorePoint" xml:space="preserve">Gagawa ng restore point bago patakbuhin.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">Walang gagawing restore point.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Title" xml:space="preserve">Kumpirmahin ang pagkilos na hindi na maibabalik</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Body" xml:space="preserve">Kapag naalis na ang data sa pag-rollback ng update, hindi na maa-uninstall ang mga naka-install nang update. Hindi na ito maibabalik.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Check" xml:space="preserve">Nauunawaan kong hindi na maa-uninstall ang mga naka-install na update</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Created" xml:space="preserve">Nakagawa ng restore point.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Reused" xml:space="preserve">Ginagamit ang umiiral na restore point na ginawa noong {0} (hindi gagawa ng bago sa loob ng 24 oras).</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Unavailable.Title" xml:space="preserve">Walang available na restore point</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Unavailable.Body" xml:space="preserve">Hindi makagawa ng restore point: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Disabled.Body" xml:space="preserve">Naka-off ang system protection, kaya hindi makagawa ng restore point.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.ContinueWithout" xml:space="preserve">Magpatuloy nang wala nito</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Abort" xml:space="preserve">Ihinto</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.EnableAndRetry" xml:space="preserve">I-on ang system protection at subukan muli</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Running" xml:space="preserve">Pinapatakbo ang {0} sa {1}: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Done" xml:space="preserve">Tapos na. Nabakanteng espasyo: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.DonePartial" xml:space="preserve">May mga item na hindi natapos. Tingnan ang resulta ng bawat item.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RebootRequired" xml:space="preserve">Kailangan ng restart para magkabisa ang mga pagbabago.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Title" xml:space="preserve">Mga setting ng paglilinis</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Saved" xml:space="preserve">Nai-save ang mga setting.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SaveFailed" xml:space="preserve">Hindi ma-save ang mga setting. Tingnan ang log.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Exclusions" xml:space="preserve">Mga exclusion</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Exclusions.Description" xml:space="preserve">Ang mga ibinukod na item ay hindi ginagalaw: hindi ini-scan at hindi binubura.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add" xml:space="preserve">Idagdag</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Remove" xml:space="preserve">Alisin sa listahan</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import" xml:space="preserve">I-import</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export" xml:space="preserve">I-export</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Title" xml:space="preserve">I-import ang mga exclusion</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Title" xml:space="preserve">I-export ang mga exclusion</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.File" xml:space="preserve">Mga file</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.File" xml:space="preserve">Halimbawa: C:\Users\me\notes.txt</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.Folder" xml:space="preserve">Mga folder</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.Folder" xml:space="preserve">Halimbawa: C:\Users\me\Projects (pati mga subfolder)</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.Name" xml:space="preserve">Mga extension at pangalan ng file</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.Name" xml:space="preserve">Halimbawa: *.log o cache.db</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.CookieDomain" xml:space="preserve">Mga domain ng cookie</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.CookieDomain" xml:space="preserve">Halimbawa: example.com (pati mga subdomain)</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Added" xml:space="preserve">Naidagdag.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Duplicate" xml:space="preserve">Nasa listahan na.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Invalid" xml:space="preserve">Hindi wasto ang format.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.LimitReached" xml:space="preserve">Naabot na ang limitasyong {0} entry.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.TooLarge" xml:space="preserve">Masyadong malaki ang file.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.Unreadable" xml:space="preserve">Hindi mabasa ang file.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.InvalidFormat" xml:space="preserve">Hindi wasto ang format ng file.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.UnsupportedSchema" xml:space="preserve">Hindi mababasa ng bersyong ito ang format na iyon.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.TooManyEntries" xml:space="preserve">Masyadong maraming entry, kaya walang na-import.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Done" xml:space="preserve">Naidagdag ang {0} (mga duplicate: {1}, tinanggihan: {2}).</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Done" xml:space="preserve">Na-export sa {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Failed" xml:space="preserve">Hindi ma-export: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Options" xml:space="preserve">Paraan ng pagbura ng mga file</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SecureDelete" xml:space="preserve">Secure delete (i-overwrite nang isang beses, saka burahin)</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SecureDelete.Note" xml:space="preserve">Isang beses i-o-overwrite ang laman ng file bago ito burahin. Hindi nito magagarantiya ang pagbura sa mga SSD. Ang mga file na may hard link, at mga compressed, sparse, o encrypted na file ay binubura nang walang overwrite.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CreateRestorePoint" xml:space="preserve">Gumawa ng restore point bago magpaliit</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CreateRestorePoint.Note" xml:space="preserve">Gagamitin muli ang umiiral na restore point mula sa nakalipas na 24 oras. Kung naka-off ang system protection, maaari mo itong i-on pagkatapos kumpirmahin.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.OpenSystemRestore" xml:space="preserve">Buksan ang System Restore</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders" xml:space="preserve">Mga custom na folder</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Description" xml:space="preserve">Mga folder na ang laman ay maaaring alisan ng advanced na paglilinis. Hindi pinapayagan ang Windows, Program Files, ProgramData, mga profile ng ibang user, ugat ng drive, at mga lokasyong may credential. Palaging hindi napili ang mga idinagdag na folder sa simula.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Add" xml:space="preserve">Magdagdag ng folder…</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Pick" xml:space="preserve">Pumili ng custom na folder</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns" xml:space="preserve">Mga extension at pangalan ng file na tinukoy ng user</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.Description" xml:space="preserve">Idinadagdag sa paghahanap ng advanced na paglilinis. Palaging hindi napili ang mga tumutugma sa simula.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.Hint" xml:space="preserve">Halimbawa: *.xyz</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.BuiltIn" xml:space="preserve">Mga built-in na pattern</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules" xml:space="preserve">Default na pagpili bawat item</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules.Description" xml:space="preserve">Pinapalitan ang inirerekomendang default na pagpili ng isang item sa karaniwang paglilinis.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules.Reset" xml:space="preserve">I-reset sa default</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.Default" xml:space="preserve">Sundin ang rekomendasyon</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.On" xml:space="preserve">Laging piliin</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.Off" xml:space="preserve">Huwag piliin kailanman</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Totals" xml:space="preserve">Mga resulta hanggang ngayon</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Totals.None" xml:space="preserve">Wala pang napatakbo.</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.run-history" xml:space="preserve">Kasaysayan ng Run dialog</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.recent-items" xml:space="preserve">Mga kamakailang item</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.rdp-history" xml:space="preserve">Kasaysayan ng koneksyon sa Remote Desktop</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.explorer-mru" xml:space="preserve">Kasaysayan ng mga dialog na Buksan at I-save</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.search-history" xml:space="preserve">Kasaysayan ng paghahanap sa File Explorer</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.network-drive-history" xml:space="preserve">Kasaysayan ng Map network drive</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.jump-lists" xml:space="preserve">Jump Lists</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.ie-history" xml:space="preserve">Kasaysayan ng Internet Explorer at mga na-type na address</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.userassist" xml:space="preserve">Kasaysayan ng mga pinatakbong program (UserAssist)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.user-error-reports" xml:space="preserve">Mga ulat ng Windows Error Reporting ng kasalukuyang user</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.user-temp" xml:space="preserve">Mga pansamantalang file ng user</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.system-temp" xml:space="preserve">Mga pansamantalang file ng system</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.crash-dumps" xml:space="preserve">Mga user-mode crash dump</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.memory-dumps" xml:space="preserve">Mga system memory dump</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.error-reports" xml:space="preserve">Mga ulat ng Windows Error Reporting</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.update-logs" xml:space="preserve">Mga log ng Windows Update orchestrator</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.etl-trace-logs" xml:space="preserve">Mga ETL trace log</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.defender-support-logs" xml:space="preserve">Mga diagnostic log ng Microsoft Defender</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.thumbnail-cache" xml:space="preserve">Cache ng thumbnail</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.icon-cache" xml:space="preserve">Cache ng icon</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.font-cache" xml:space="preserve">Cache ng font ng Windows</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.remote-desktop-cache" xml:space="preserve">Bitmap cache ng Remote Desktop</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.directx-shader-cache" xml:space="preserve">DirectX shader cache</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.prefetch" xml:space="preserve">Lumang data ng Prefetch</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.recycle-bin" xml:space="preserve">Recycle Bin</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.dns-cache" xml:space="preserve">Cache ng DNS resolver</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.network-usage" xml:space="preserve">Kasaysayan ng paggamit ng network</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.invalid-shortcuts" xml:space="preserve">Di-wastong mga shortcut at entry sa Start menu</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.invalid-scheduled-tasks" xml:space="preserve">Di-wastong mga naka-iskedyul na gawain</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.internet-cache" xml:space="preserve">Internet cache (WinINet)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.office-addin-cache" xml:space="preserve">Cache ng Office add-in</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.cryptnet-url-cache" xml:space="preserve">Cache ng URL ng certificate (CryptnetUrlCache)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Name" xml:space="preserve">Mga naiwang file ng Windows Installer</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Description" xml:space="preserve">Binubura ang mga .msi at .msp file sa Windows Installer folder na hindi nakarehistro sa anumang produkto o patch at mas matanda sa 30 araw.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Warning" xml:space="preserve">Kung hindi ganap na mabasa ang data ng pagpaparehistro, hindi available ang item na ito. Muling sinusuri ang mga pagpaparehistro bago mismo burahin.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Name" xml:space="preserve">Data sa pag-rollback ng update</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Description" xml:space="preserve">Gumagamit ng DISM /StartComponentCleanup /ResetBase para alisin ang data na kailangan sa pag-rollback ng mga naka-install nang update.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Warning" xml:space="preserve">Kapag naisagawa ito, hindi na maa-uninstall ang mga naka-install na update. Hindi na ito maibabalik.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Name" xml:space="preserve">Mga backup ng update (component store)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Description" xml:space="preserve">Gumagamit ng DISM /StartComponentCleanup para linisin ang mga napalitan nang component.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Warning" xml:space="preserve">Ang ipinapakitang espasyo ay tantiya ng DISM at maaaring iba sa aktuwal na mababakante. Maaari itong tumagal nang ilang minuto.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateCache.Name" xml:space="preserve">Download cache ng Windows Update</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateCache.Description" xml:space="preserve">Binubura ang laman ng SoftwareDistribution\Download. Itinitigil ang mga serbisyo ng Windows Update at BITS habang tumatakbo at ibinabalik pagkatapos.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Name" xml:space="preserve">Naiwang patch cache</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Description" xml:space="preserve">Itinitigil ang serbisyo ng Windows Installer at binubura ang laman ng Installer\$PatchCache$.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Warning" xml:space="preserve">Maaaring hingin ng mga susunod na pag-aayos o pag-uninstall ang orihinal na installation media.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Name" xml:space="preserve">Mga feature ng language input (Japanese)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Description" xml:space="preserve">Gumagamit ng DISM Remove-Capability para alisin ang mga feature ng Japanese na Language.Basic (spelling, text prediction, at iba pa). Hindi ito ang mismong IME. Maisasagawa lamang ito kung ang wika ay hindi ginagamit ng display language, listahan ng wika, o keyboard layout.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Warning" xml:space="preserve">Para magamit muli ang mga feature ng wikang ito, kailangan mo silang idagdag muli.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Name" xml:space="preserve">Mga feature ng language input (Korean)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Description" xml:space="preserve">Gumagamit ng DISM Remove-Capability para alisin ang mga feature ng Korean na Language.Basic (spelling, text prediction, at iba pa). Hindi ito ang mismong IME. Maisasagawa lamang ito kung ang wika ay hindi ginagamit ng display language, listahan ng wika, o keyboard layout.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Warning" xml:space="preserve">Para magamit muli ang mga feature ng wikang ito, kailangan mo silang idagdag muli.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Name" xml:space="preserve">Mga feature ng language input (Chinese, Traditional)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Description" xml:space="preserve">Gumagamit ng DISM Remove-Capability para alisin ang mga feature ng Traditional Chinese na Language.Basic (spelling, text prediction, at iba pa). Hindi ito ang mismong IME. Maisasagawa lamang ito kung ang wika ay hindi ginagamit ng display language, listahan ng wika, o keyboard layout.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Warning" xml:space="preserve">Para magamit muli ang mga feature ng wikang ito, kailangan mo silang idagdag muli.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Name" xml:space="preserve">Mga feature ng language input (Chinese, Simplified)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Description" xml:space="preserve">Gumagamit ng DISM Remove-Capability para alisin ang mga feature ng Simplified Chinese na Language.Basic (spelling, text prediction, at iba pa). Hindi ito ang mismong IME. Maisasagawa lamang ito kung ang wika ay hindi ginagamit ng display language, listahan ng wika, o keyboard layout.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Warning" xml:space="preserve">Para magamit muli ang mga feature ng wikang ito, kailangan mo silang idagdag muli.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Name" xml:space="preserve">Mga Help file ng Windows</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Description" xml:space="preserve">Binubura ang mga Help file ng Windows. Sa Windows 10/11, protektado ang mga ito ng Windows Resource Protection, kaya karaniwang walang buburahin.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Warning" xml:space="preserve">Hindi ginagalaw ang mga file na protektado ng Windows o pag-aari ng TrustedInstaller. Hindi kailanman kinukuha ang pagmamay-ari.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Name" xml:space="preserve">Mga default na wallpaper</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Description" xml:space="preserve">Binubura ang mga default na wallpaper ng Windows. Sa Windows 10/11, protektado ang mga ito ng Windows Resource Protection, kaya karaniwang walang buburahin.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Warning" xml:space="preserve">Hindi ginagalaw ang mga file na protektado ng Windows o pag-aari ng TrustedInstaller. Hindi kailanman kinukuha ang pagmamay-ari.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleMusic.Name" xml:space="preserve">Sample na musika</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleMusic.Description" xml:space="preserve">Binubura lamang ang mga kilalang sample na kanta na kasama sa Windows 7. Hindi ginagalaw ang iba pang file sa folder.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SamplePictures.Name" xml:space="preserve">Mga sample na larawan</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SamplePictures.Description" xml:space="preserve">Binubura lamang ang mga kilalang sample na larawan na kasama sa Windows 7. Hindi ginagalaw ang iba pang file sa folder.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleVideos.Name" xml:space="preserve">Mga sample na video</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleVideos.Description" xml:space="preserve">Binubura lamang ang kilalang sample na video na kasama sa Windows 7. Hindi ginagalaw ang iba pang file sa folder.</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Expand" xml:space="preserve">I-expand o i-collapse ang {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Error" xml:space="preserve">Hindi makumpleto ang pagbura. Tingnan ang log.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SaveSuppressed" xml:space="preserve">Hindi mabasa ang mga setting, kaya naka-disable ang pag-save para protektahan ang orihinal na file. Sa session na ito lamang ilalapat ang mga pagbabago.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SystemRestore.Failed" xml:space="preserve">Hindi mabuksan ang System Restore.</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Done" xml:space="preserve">Naidagdag ang {0} sa mga exclusion. Nagbago ang mga setting, kaya i-scan muli.</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Duplicate" xml:space="preserve">Ibinukod na ang {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Failed" xml:space="preserve">Hindi maidagdag ang {0} sa mga exclusion (hindi wasto ang format o naabot na ang limitasyon).</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.SaveFailed" xml:space="preserve">Naidagdag ang {0} sa mga exclusion, ngunit hindi ito na-save. Ilalapat lamang ito hanggang isara mo ang app.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.NoTarget" xml:space="preserve">Pumili ng drive o custom na folder na i-scan.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Filter.All" xml:space="preserve">Ipakita ang lahat ng uri</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Action.IgnoreFolder" xml:space="preserve">Huwag pansinin ang folder na ito</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Kinds" xml:space="preserve">Mga resulta ayon sa uri</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Failed" xml:space="preserve">May naganap na error habang binubura. Tingnan ang log.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.UserScopeUnavailable" xml:space="preserve">Hindi magagamit ang mga panuntunang nakasaklaw sa user (magkaiba ang interactive user at ang naka-elevate na user, o hindi ito makumpirma)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.CustomFolderRejectedAtRun" xml:space="preserve">Tinanggihan ang custom na folder ng pagsusuri sa oras ng pagtakbo</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseOutsideProfile" xml:space="preserve">Ang environment variable na %{0}% ay tumuturo sa labas ng profile ng kasalukuyang user (o hindi ma-verify ang profile), kaya hindi ginagamit ang target na ito.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseProtectedLocation" xml:space="preserve">Ang environment variable na %{0}% ay tumuturo sa protektadong lokasyon (ugat ng drive, Windows, Program Files, ProgramData o profile ng ibang user), kaya hindi ginagamit ang target na ito.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseMachineMismatch" xml:space="preserve">Iba ang environment variable na %{0}% sa default na lokasyon ng system, kaya hindi ginagamit ang target na ito.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.CustomFolderRejected" xml:space="preserve">Tinanggihan ang custom na folder ({0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceStopFailed" xml:space="preserve">Walang nabura dahil hindi maitigil ang isang serbisyo: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DeleteFailed" xml:space="preserve">Hindi makumpleto ang pagbura: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceResumeFailedList" xml:space="preserve">Hindi maibalik sa dating estado ang isang serbisyo ({0}): {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceResumeFailed" xml:space="preserve">Hindi maibalik sa dating estado ang isang serbisyo: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.UserRegistryOpenFailed" xml:space="preserve">Hindi mabuksan ang registry ng user</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.HandlerUnavailable" xml:space="preserve">Hindi available ang handler na {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.PathReason" xml:space="preserve">{0}: {1}{2}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniContentUnverified" xml:space="preserve"> (hindi ma-verify ang laman ng file)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ExpansionTruncated" xml:space="preserve">Naabot ng mga pinalawak na target ang limitasyon ({0}); hindi isinama ang iba</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbOpenFailed" xml:space="preserve">Hindi mabuksan ang database (SQLite {0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbConfigFailed" xml:space="preserve">Itinigil dahil hindi mailapat ang isang setting sa kaligtasan ({0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbSqliteError" xml:space="preserve">SQLite error {0}: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbPinFailed" xml:space="preserve">Hindi mai-pin nang ligtas ang database: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbHardLinked" xml:space="preserve">Hindi target ang database na may hard link</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbTooLarge" xml:space="preserve">Masyadong malaki ang database para maging target</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbIdentityUnverified" xml:space="preserve">Hindi ma-verify ang file ng database</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbJournalPending" xml:space="preserve">Nilaktawan dahil may hindi pa naprosesong journal (ginagamit o hindi na-recover)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbIntegrityFailed" xml:space="preserve">Nabigo ang integrity check ng database</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbVirtualTable" xml:space="preserve">Hindi target ang database na may virtual table</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbUnknownTable" xml:space="preserve">Wala ang inaasahang table na {0} (hindi kilalang schema)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbUnknownColumn" xml:space="preserve">Walang inaasahang column na {1} ang table na {0} (hindi kilalang schema)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniUnconvertible" xml:space="preserve">Nilaktawan dahil hindi ma-convert ang file nang walang pagkawala bilang UTF-8, UTF-16, o system ANSI code page</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniTooLarge" xml:space="preserve">Nilaktawan dahil mas malaki sa 1 MB ang file</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniAmbiguousSection" xml:space="preserve">Hindi binago dahil maraming section ang may parehong pangalan at hindi matukoy ang target</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniRestored" xml:space="preserve">{0} (naibalik ang orihinal na text)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniNotRestored" xml:space="preserve">{0} (hindi naibalik ang orihinal na text at hindi tiyak ang laman)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniChangedWhileReading" xml:space="preserve">Nagbago ang laman habang binabasa</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniLengthChangedWhileReading" xml:space="preserve">Nagbago ang haba habang binabasa</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniLengthChangedBeforeWrite" xml:space="preserve">Nagbago ang haba bago magsulat</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniVerifyMismatch" xml:space="preserve">Hindi tugma ang muling pagbasa pagkatapos magsulat</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistrySymlink" xml:space="preserve">Hindi isinama dahil registry symbolic link ito: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryDepthLimit" xml:space="preserve">Nalampasan ang ligtas na limitasyon ng lalim ng recursion</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DnsFlushFailed" xml:space="preserve">Nabigo ang ipconfig /flushdns: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DnsFlushError" xml:space="preserve">Hindi mapatakbo ang ipconfig /flushdns: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeQueryFailed" xml:space="preserve">Hindi ma-query ang {0} (Win32={1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeUrlHistoryFailed" xml:space="preserve">Hindi nalinis ang kasaysayan ng URL (HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeClearFailed" xml:space="preserve">Hindi nalinis ang {0} (Win32={1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleQueryFailed" xml:space="preserve">Hindi ma-query ang Recycle Bin (HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleVerifyFailed" xml:space="preserve">Hindi masuri ang Recycle Bin pagkatapos itong alisan ng laman (HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleRemaining" xml:space="preserve">{0} item ang natitira sa Recycle Bin (HRESULT=0x{1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDpsResumeFailed" xml:space="preserve">Hindi maibalik sa dating estado ang serbisyo ng DPS: {0}. Simulan ang Diagnostic Policy Service sa Windows Services.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDeleteFailed" xml:space="preserve">Hindi mabura ang data ng paggamit ng network: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDpsStopUnverified" xml:space="preserve">Hindi nabura ang data ng paggamit ng network dahil hindi makumpirmang huminto ang serbisyo ng DPS</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutLocationOpenFailed" xml:space="preserve">Hindi mabuksan nang ligtas ang lokasyon ng shortcut</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutsUnreadable" xml:space="preserve">{0} shortcut ang hindi mabasa at hindi isinama</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutDeleteFailed" xml:space="preserve">Hindi mabura ang mga di-wastong shortcut: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TasksUnreadable" xml:space="preserve">{0} gawain ang hindi mabasa at hindi isinama</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TaskSchedulerQueryFailed" xml:space="preserve">Hindi ma-query ang Task Scheduler: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TaskSchedulerOperateFailed" xml:space="preserve">Hindi mapatakbo ang operasyon sa Task Scheduler: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEmptyDescription" xml:space="preserve">Walang laman ang paglalarawan ng restore point.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointStateUnknown" xml:space="preserve">Hindi masuri ang estado ng restore point: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointProtectionDisabled" xml:space="preserve">Naka-off ang system protection.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreateUninterpretable" xml:space="preserve">Hindi maunawaan ang resulta ng paggawa ng restore point (exit code {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreateFailed" xml:space="preserve">Nabigo ang paggawa ng restore point (return value {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointVerifyFailed" xml:space="preserve">Hindi masuri ang restore point pagkatapos itong gawin: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCancelled" xml:space="preserve">Kinansela ang paggawa ng restore point.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableFailed" xml:space="preserve">Hindi ma-on ang system protection (exit code {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableVerifyFailed" xml:space="preserve">Hindi masuri ang estado pagkatapos i-on ang protection: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnabled" xml:space="preserve">Na-on ang system protection.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableNotEffective" xml:space="preserve">Hindi na-on ang system protection (maaaring naka-disable ito ng Group Policy).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableCancelled" xml:space="preserve">Kinansela ang pag-on ng system protection.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreated" xml:space="preserve">Nakagawa ng restore point.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointReused" xml:space="preserve">Ginagamit ang restore point ({0}) na ginawa sa nakalipas na 24 oras.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointNoneAvailable" xml:space="preserve">Walang nagawang restore point at walang mula sa nakalipas na 24 oras.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointExitCode" xml:space="preserve">Exit code {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointProtectionOutputInvalid" xml:space="preserve">Hindi wasto ang output ng estado ng protection</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputInvalid" xml:space="preserve">Hindi wasto ang output ng restore point</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputUnknownLine" xml:space="preserve">May hindi kilalang linya ang output</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputIncomplete" xml:space="preserve">Hindi kumpleto ang output</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimStale" xml:space="preserve">Walang pinatakbo dahil luma na ang resulta ng scan. I-scan muli.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimNothingSelected" xml:space="preserve">Walang napiling maaaring patakbuhin.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimCanceledNotRun" xml:space="preserve">Hindi pinatakbo dahil kinansela.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimRestorePointUnavailable" xml:space="preserve">Hindi pinatakbo dahil walang available na restore point: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimItemUnavailable" xml:space="preserve">Hindi pinatakbo dahil hindi available ang item.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimNeedsTwoStep" xml:space="preserve">Hindi pinatakbo dahil hindi na ito maibabalik at kulang ang dalawang-hakbang na kumpirmasyon.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimCanceledPartial" xml:space="preserve">Kinansela. Maaaring bahagya itong naproseso.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimFailed" xml:space="preserve">Nabigo: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimRecheckFailed" xml:space="preserve">Walang nabura dahil nabigo ang muling pagsusuri bago mismo patakbuhin: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimServiceResumeFailed" xml:space="preserve">Hindi maibalik sa dating estado ang isang serbisyo: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimBackupIncluded" xml:space="preserve">Natapos bilang bahagi ng paglilinis ng mga update rollback.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimBackupSkipped" xml:space="preserve">Hindi pinatakbo dahil hindi nagtagumpay ang paglilinis ng mga update rollback: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimOutcome" xml:space="preserve">Nabura ang {0} file ({1} byte). Pinanatili ang {2}, nabigo ang {3}, tinanggihan ang {4}.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimOutcomeExample" xml:space="preserve">Nabura ang {0} file ({1} byte). Pinanatili ang {2}, nabigo ang {3}, tinanggihan ang {4}. Halimbawa: {5}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ComponentStoreCleanup" xml:space="preserve">Nilalinis ang component store</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageRemoval" xml:space="preserve">Inaalis ang mga feature ng language input para sa {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationFailed" xml:space="preserve">Nabigo ang {0} (exit code {1}). {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationUninterpretable" xml:space="preserve">Hindi maunawaan ang resulta ng {0} (exit code {1} ngunit walang success output).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationDone" xml:space="preserve">Natapos ang {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationDoneReboot" xml:space="preserve">Natapos ang {0} (kailangan ng restart).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotTarget" xml:space="preserve">Ang {0} ay hindi wikang maaaring alisin.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotRemovable" xml:space="preserve">Hindi maaalis ngayon ang mga feature ng language input para sa {0}: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotInstalled" xml:space="preserve">Hindi naka-install.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageInUse" xml:space="preserve">Ginagamit ito ng UI language, listahan ng wika, o keyboard layout.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotUsed" xml:space="preserve">Hindi ito ginagamit ng mga setting ng wika ng sinumang user.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderProtected" xml:space="preserve">May Lumin4ti o protektadong lokasyon ito</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedRootNotLocal" xml:space="preserve">Hindi ito absolute path papunta sa lokal na folder</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedRootProtected" xml:space="preserve">Hindi na-scan dahil protektadong lokasyon ito</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ExportLinkRefused" xml:space="preserve">Hindi makapag-export sa isang link</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerNotEnumerated" xml:space="preserve">Hindi nailista ang mga rehistrasyon noong pag-scan.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerNoSource" xml:space="preserve">Walang pinagkukunan para ilista ang mga rehistrasyon.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerEnumerationException" xml:space="preserve">May naganap na exception habang inililista ang mga rehistrasyon: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerEnumerationFailed" xml:space="preserve">Hindi mailista ang mga rehistrasyon ng Windows Installer: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerFolderUnresolved" xml:space="preserve">Hindi ligtas na ma-resolve ang Installer folder.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageSettingsUnreadable" xml:space="preserve">Nilaktawan dahil hindi ganap na nabasa ang mga setting ng wika ng mga user: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageListUnavailable" xml:space="preserve">Hindi makuha o maunawaan ang listahan ng mga language input feature (exit code {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderNotScannable" xml:space="preserve">Hindi ligtas na na-scan ang folder na ito dahil sa link o proteksyon.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">Sample na recorded TV</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">Binubura lamang ang kilalang sample na recording na kasama sa Windows 7. Hindi ginagalaw ang iba pang file sa folder.</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Application cache ng Internet Explorer (AppCache)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-ime-cache" xml:space="preserve">Cache ng Microsoft IME at mga ulat ng error</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-office-solution-packages" xml:space="preserve">Cache ng mga solution package ng Office</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-delivery-optimization-cache" xml:space="preserve">Cache ng Delivery Optimization</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-etl-logs" xml:space="preserve">Mga ETL trace log (mga folder na Logs at LogFiles)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-system-temp" xml:space="preserve">Mga pansamantalang file ng mga system service ng Windows (SystemTemp)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-icon-cache-root" xml:space="preserve">Lumang file ng icon cache (IconCache.db)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.app-cursor-cached-data" xml:space="preserve">Naka-cache na data ng Cursor (CachedData)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.package-npm-cache" xml:space="preserve">Cache ng npm (.npm sa folder ng user)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-shared" xml:space="preserve">Mga shared cache at pansamantalang file ng Google Chrome</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-edge-shared" xml:space="preserve">Mga shared cache at pansamantalang file ng Microsoft Edge</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-vivaldi-shared" xml:space="preserve">Mga shared cache at pansamantalang file ng Vivaldi</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-brave-shared" xml:space="preserve">Mga shared cache at pansamantalang file ng Brave</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-shared" xml:space="preserve">Mga shared cache at pansamantalang file ng Google Chrome Beta</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-shared" xml:space="preserve">Mga shared cache at pansamantalang file ng Google Chrome Dev</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-rebuild" xml:space="preserve">Data ng Safe Browsing at model ng Google Chrome</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-edge-rebuild" xml:space="preserve">Data ng Safe Browsing at model ng Microsoft Edge</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-vivaldi-rebuild" xml:space="preserve">Data ng Safe Browsing at model ng Vivaldi</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-brave-rebuild" xml:space="preserve">Data ng Safe Browsing at model ng Brave</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-rebuild" xml:space="preserve">Data ng Safe Browsing at model ng Google Chrome Beta</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-rebuild" xml:space="preserve">Data ng Safe Browsing at model ng Google Chrome Dev</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-comet-rebuild" xml:space="preserve">Data ng Safe Browsing at model ng Comet</x:String>
 </ResourceDictionary>

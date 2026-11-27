@@ -1,0 +1,229 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.mixxx-logs",
+      "name": "Mixxx",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Mixxx" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%LOCALAPPDATA%\\Mixxx", "pattern": "mixxx.log*", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": ["mixxx"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://manual.mixxx.org/2.7/en/chapters/appendix/settings_directory", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.mkvtoolnix-gui-cache",
+      "name": "MKVToolNix GUI",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\bunkus.org\\mkvtoolnix-gui" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\bunkus.org\\mkvtoolnix-gui\\cache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["mkvtoolnix-gui"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://codeberg.org/mbunkus/mkvtoolnix/wiki/Location-of-settings,-job-queue,-cache-folder", "checked": "2026-11-26" },
+        { "tier": "A", "url": "https://help.mkvtoolnix.download/t/clearing-the-cache/1411", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.obs-studio-logs",
+      "name": "OBS Studio",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\obs-studio\\logs" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\obs-studio\\logs", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["obs64"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://raw.githubusercontent.com/obsproject/obs-studio/master/frontend/OBSApp.cpp", "checked": "2026-11-26" },
+        { "tier": "A", "url": "https://raw.githubusercontent.com/obsproject/obs-studio/master/libobs/util/platform-windows.c", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.obs-studio-crashes",
+      "name": "OBS Studio",
+      "nameKey": null,
+      "kind": "report",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\obs-studio\\crashes" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\obs-studio\\crashes", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["obs64"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://raw.githubusercontent.com/obsproject/obs-studio/master/frontend/OBSApp.cpp", "checked": "2026-11-26" },
+        { "tier": "A", "url": "https://raw.githubusercontent.com/obsproject/obs-studio/master/libobs/util/platform-windows.c", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.openshot-logs",
+      "name": "OpenShot Video Editor",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%USERPROFILE%\\.openshot_qt" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%USERPROFILE%\\.openshot_qt", "pattern": "openshot-qt.log*", "recurse": false, "olderThanDays": null },
+        { "type": "files", "path": "%USERPROFILE%\\.openshot_qt", "pattern": "libopenshot.log*", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://en.openshot.org/files/user-guide/troubleshoot.html", "checked": "2026-11-26" },
+        { "tier": "A", "url": "https://raw.githubusercontent.com/OpenShot/openshot-qt/develop/src/classes/logger.py", "checked": "2026-11-26" },
+        { "tier": "A", "url": "https://raw.githubusercontent.com/OpenShot/openshot-qt/develop/src/classes/info.py", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.openshot-cache",
+      "name": "OpenShot Video Editor",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%USERPROFILE%\\.openshot_qt\\cache" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%USERPROFILE%\\.openshot_qt\\cache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://raw.githubusercontent.com/OpenShot/openshot-qt/develop/src/classes/info.py", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.mpv-cache",
+      "name": "mpv",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\mpv\\cache" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\mpv\\cache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["mpv"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://raw.githubusercontent.com/mpv-player/mpv/master/osdep/path-win.c", "checked": "2026-11-26" },
+        { "tier": "A", "url": "https://raw.githubusercontent.com/mpv-player/mpv/master/DOCS/man/options.rst", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.mixed-in-key-error-logs",
+      "name": "Mixed In Key",
+      "nameKey": null,
+      "kind": "report",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Mixed In Key\\Mixed In Key" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%LOCALAPPDATA%\\Mixed In Key\\Mixed In Key", "pattern": "MixedInKeyErrorLog.xml", "recurse": true, "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://web.archive.org/web/20150409053913/http://community.mixedinkey.com/Topics/14774/audio-file-could-not-be-decoded", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.movavi-logs",
+      "name": "Movavi",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Movavi\\Logs" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Movavi\\Logs", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://img.movavi.com/online-help/srecorder/9/support_logs.htm", "checked": "2026-11-26" },
+        { "tier": "A", "url": "https://img.movavi.com/online-help/gamecapture/1/support_logs.htm", "checked": "2026-11-26" }
+      ]
+    }
+  ]
+}

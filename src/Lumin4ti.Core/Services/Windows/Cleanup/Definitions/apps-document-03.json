@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.notion-cache",
+      "name": "Notion",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Notion\\Cache" },
+        { "path": "%APPDATA%\\Notion\\GPUCache" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Notion\\Cache", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\Notion\\Code Cache", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\Notion\\GPUCache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["Notion"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://www.notion.com/help/reset-notion", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://github.com/electron/website/blob/main/src/util/featured-apps.ts", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://github.com/electron/electron/blob/main/docs/api/app.md", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://github.com/chromium/chromium/blob/main/content/browser/storage_partition_impl.cc", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.pdfcreator-log",
+      "name": "PDFCreator",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\pdfforge\\PDFCreator" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%LOCALAPPDATA%\\pdfforge\\PDFCreator", "pattern": "PDFCreator.log", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": ["PDFCreator"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://support.pdfforge.org/how-to-create-a-pdfcreator-trace-log", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.sumatrapdf-thumbnails",
+      "name": "SumatraPDF",
+      "nameKey": null,
+      "kind": "thumbnail",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\SumatraPDF\\sumatrapdfcache" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\SumatraPDF\\sumatrapdfcache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["SumatraPDF"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://github.com/sumatrapdfreader/sumatrapdf/blob/master/src/shared/FileThumbnailsCommon.cpp", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://sumatrapdfreader.org/docs/How-we-store-settings", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.pdfelement-logs",
+      "name": "Wondershare PDFelement",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Wondershare\\PDFelement*\\Log" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Wondershare\\PDFelement*\\Log", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["PDFelement"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://support.wondershare.com/how-tos/pdfelement/get-pdfelement-log-files-windows.html", "checked": "2026-11-25" }
+      ]
+    }
+  ]
+}

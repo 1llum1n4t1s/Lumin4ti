@@ -1,0 +1,218 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.vscode-chromium-cache",
+      "name": "Visual Studio Code (Chromium)",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Code\\Code Cache" },
+        { "path": "%APPDATA%\\Code\\GPUCache" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Code\\Cache", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\Code\\Code Cache", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\Code\\GPUCache", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\Code\\Partitions\\*\\Code Cache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["Code"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://code.visualstudio.com/docs/configure/settings", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://github.com/electron/website/blob/main/src/util/featured-apps.ts", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://github.com/electron/electron/blob/main/docs/api/app.md", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://github.com/chromium/chromium/blob/main/content/browser/storage_partition_impl.cc", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://github.com/electron/electron/blob/main/shell/browser/electron_browser_context.cc", "checked": "2026-11-27" }
+      ]
+    },
+    {
+      "id": "app.vscodium-chromium-cache",
+      "name": "VSCodium (Chromium)",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\VSCodium\\Code Cache" },
+        { "path": "%APPDATA%\\VSCodium\\GPUCache" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\VSCodium\\Cache", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\VSCodium\\Code Cache", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\VSCodium\\GPUCache", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\VSCodium\\Partitions\\*\\Code Cache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["VSCodium"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://raw.githubusercontent.com/VSCodium/vscodium/master/docs/migration.md", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://github.com/electron/website/blob/main/src/util/featured-apps.ts", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://github.com/electron/electron/blob/main/docs/api/app.md", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://github.com/chromium/chromium/blob/main/content/browser/storage_partition_impl.cc", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://github.com/electron/electron/blob/main/shell/browser/electron_browser_context.cc", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://raw.githubusercontent.com/VSCodium/vscodium/master/README.md", "checked": "2026-11-27" }
+      ]
+    },
+    {
+      "id": "app.android-studio-temp",
+      "name": "Android Studio",
+      "nameKey": null,
+      "kind": "temp",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Google\\AndroidStudio*\\tmp" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\AndroidStudio*\\tmp", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["studio64"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://developer.android.com/studio/intro/studio-config", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://github.com/JetBrains/intellij-community/blob/master/platform/util/src/com/intellij/openapi/application/PathManager.java", "checked": "2026-11-27" }
+      ]
+    },
+    {
+      "id": "app.android-studio-index",
+      "name": "Android Studio",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "rebuild",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Google\\AndroidStudio*\\index" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\AndroidStudio*\\index", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["studio64"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://developer.android.com/studio/intro/studio-config", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://github.com/JetBrains/intellij-community/blob/master/platform/util/src/com/intellij/openapi/application/PathManager.java", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://www.jetbrains.com/help/idea/invalidate-caches.html", "checked": "2026-11-27" }
+      ]
+    },
+    {
+      "id": "app.docker-desktop-host-logs",
+      "name": "Docker Desktop (host)",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Docker\\log\\host" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Docker\\log\\host", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["Docker Desktop", "com.docker.backend"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://docs.docker.com/desktop/troubleshoot-and-support/faqs/general/", "checked": "2026-11-27" }
+      ]
+    },
+    {
+      "id": "app.python-history",
+      "name": "Python",
+      "nameKey": null,
+      "kind": "history",
+      "category": "apps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "trace",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%USERPROFILE%\\.python_history" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%USERPROFILE%", "pattern": ".python_history", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": ["python", "pythonw", "py"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://docs.python.org/3/tutorial/interactive.html", "checked": "2026-11-27" }
+      ]
+    },
+    {
+      "id": "app.claude-code-cache",
+      "name": "Claude Code",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%USERPROFILE%\\.claude\\cache" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%USERPROFILE%\\.claude\\cache", "pattern": "changelog.md", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://code.claude.com/docs/en/claude-directory", "checked": "2026-11-27" }
+      ]
+    },
+    {
+      "id": "app.gimp-temp",
+      "name": "GIMP",
+      "nameKey": null,
+      "kind": "temp",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\GIMP\\*\\tmp" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\GIMP\\*\\tmp", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["gimp-2.10", "gimp-3.0", "gimp-3", "gimp"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://docs.gimp.org/3.0/en/gimp-fire-up.html", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://docs.gimp.org/3.0/en/gimp-prefs-folders.html", "checked": "2026-11-27" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,266 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "browser.avast-secure",
+      "name": "Avast Secure Browser",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "chromium",
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\AVAST Software\\Browser\\User Data"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\AVAST Software\\Browser\\User Data\\*\\Cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": ["AvastBrowser"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "B",
+          "url": "https://community.avast.com/t/avast-secure-browser-profile/756261",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "B",
+          "url": "https://xenarmor.com/?p=27587",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_constants.h",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/history_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/sessions/core/session_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/bookmarks/browser/bookmark_storage.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/profiles/profile_manager.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/storage_partition_impl.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/blob_storage/chrome_blob_storage_context.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/omnibox/browser/shortcuts_constants.cc",
+          "checked": "2026-11-26"
+        },
+        { "tier": "B", "url": "https://www.freefixer.com/library/file/AvastBrowser.exe-291877/", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "browser.torch",
+      "name": "Torch",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "chromium",
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\Torch\\User Data"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Torch\\User Data\\*\\Cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": ["torch"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "B",
+          "url": "https://xenarmor.com/?p=14850",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "B",
+          "url": "https://raw.githubusercontent.com/AlessandroZ/LaZagne/master/Windows/lazagne/softwares/browsers/chromium_browsers.py",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_constants.h",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/history_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/sessions/core/session_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/bookmarks/browser/bookmark_storage.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/profiles/profile_manager.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/storage_partition_impl.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/blob_storage/chrome_blob_storage_context.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/omnibox/browser/shortcuts_constants.cc",
+          "checked": "2026-11-26"
+        },
+        { "tier": "B", "url": "https://www.freefixer.com/library/file/torch.exe-297363/", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "browser.coccoc",
+      "name": "Coc Coc",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "chromium",
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\CocCoc\\Browser\\User Data"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\CocCoc\\Browser\\User Data\\*\\Cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": ["browser"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "B",
+          "url": "https://xenarmor.com/?p=15756",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "B",
+          "url": "https://raw.githubusercontent.com/AlessandroZ/LaZagne/master/Windows/lazagne/softwares/browsers/chromium_browsers.py",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_constants.h",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/history_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/sessions/core/session_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/bookmarks/browser/bookmark_storage.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/profiles/profile_manager.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/storage_partition_impl.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/blob_storage/chrome_blob_storage_context.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/omnibox/browser/shortcuts_constants.cc",
+          "checked": "2026-11-26"
+        },
+        { "tier": "B", "url": "https://www.file.net/process/browser.exe.html", "checked": "2026-11-26" }
+      ]
+    }
+  ]
+}

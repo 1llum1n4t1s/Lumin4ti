@@ -302,5 +302,5 @@ private void SetUpdateStatus(string? key = null, string fallback = "", params ob
     }
 
     private void ShowSuppressedSaveStatus() => SetSettingsSaveStatus("Settings.SaveSuppressed",
-        "設定を読み込めないため、原本を保護して保存を停止し、サインイン時クリーンアップも実行しません。変更はこの起動中だけ有効です。");
+        "設定を読み込めないため、原本を保護して保存を停止します。変更はこの起動中だけ有効です。");
 }

@@ -29,9 +29,10 @@
 辞書の構造とフォールバックは [DESIGN.md のローカライズ](../design/architecture.md#ローカライズ) を参照する。UI 文言を直書きせず、XAML は `{DynamicResource Text.Xxx}`、C# は `App.Text("key", 日本語フォールバック, args)` で解決する。
 
 - Core は翻訳キーと日本語フォールバックを持ち、翻訳解決は UI 側で行う。`IMaintenanceItem.LabelKey` は `Action.{Id}.Label`、`DescriptionKey` は `Action.{Id}.Desc`。共通 UI 文字列を追加したら 17 言語すべてに同じ `x:Key` を足す。非 ja 辞書のキー集合は `en_US.axaml` と一致させ、ja の Action・カテゴリ・ステータスはコード内日本語フォールバックを維持する。
+- クリーンアップの文言は `Text.Cleanup.*` で持つ。製品名は翻訳せず、種別は `Cleanup.Kind.*` の書式キー（「{0} のキャッシュ」など）で組み立て、Windows 項目は `Text.Cleanup.Rule.{id}` を使う。Core が画面へ返す理由・結果は `CleanupMessage` の符号（`Cleanup.Msg.*` のキー＋引数）で運び、翻訳は UI で行う。ログ・書き出しは `ToJapanese` で日本語へ戻し、新しい理由は日本語のマスターと 17 言語を同時に足す。
 - `App.SetLocale()` が辞書を差し替え、`App.LocaleChanged` を購読する VM プロパティが再評価される。既定言語は `App.DetectDefaultLocale()` が OS ロケールから判定、選択は settings.json の `Locale` に保存。
 - アクションの実行結果ログ行 (`  - ...しました`) は技術的詳細なので日本語のまま。
 
 ## コードレビュー時の注意点 (このコードベース特有)
 
-トグルの操作可否、状態表示と診断、部分失敗、NTP・MMAgent、配布契約テストの注意点は [section-02.md](section-02.md) にある。該当箇所の変更時とコードレビュー前に必ず読む。
+トグルの操作可否、状態表示と診断、部分失敗、NTP・MMAgent、配布契約テストの注意点は [code-review-pitfalls.md](code-review-pitfalls.md) にある。該当箇所の変更時とコードレビュー前に必ず読む。

@@ -9,6 +9,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- クリーンアップ規則の定義。外部ファイルは読まず、埋め込みだけを正本にする。 -->
+    <EmbeddedResource Include="Services\Windows\Cleanup\Definitions\*.json"
+                      LogicalName="Lumin4ti.Cleanup.Definitions.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <InternalsVisibleTo Include="Lumin4ti.Tests" />
     <InternalsVisibleTo Include="Lumin4ti.Verification" />
   </ItemGroup>

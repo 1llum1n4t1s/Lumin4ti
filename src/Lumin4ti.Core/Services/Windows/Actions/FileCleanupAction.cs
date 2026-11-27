@@ -6,7 +6,7 @@ using Lumin4ti.Core.Models;
 namespace Lumin4ti.Core.Services.Windows.Actions;
 
 /// <summary>
-/// 一時ファイル・キャッシュをグループ単位でまとめて削除する実行型項目。
+/// 固定のキャッシュ・インデックスをグループ単位でまとめて削除し作り直させる実行型項目 (旧画面に残す再構築カード用)。
 /// 対象一覧 (<see cref="FileCleanupGroups"/>) を差し替えるだけでボタンが増やせるよう、
 /// 削除ロジックは <see cref="FileCleanupEngine"/> に集約している。
 /// </summary>
@@ -20,7 +20,6 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
     private readonly IRebootCacheCleanupScheduler? _rebootScheduler;
     private readonly ICleanupPreferences? _preferences;
     private readonly Func<CleanupTarget, string> _checkListKeySelector;
-    private readonly Func<CleanupTarget, string> _checkListLabelSelector;
     private readonly Func<ICommandExecutor, IReadOnlyList<string>, IProgress<string>?, CancellationToken, Task<ServiceSuspension>> _suspendServices;
 
     /// <param name="id">項目 Id (ローカライズキーの基点)。</param>
@@ -34,12 +33,7 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
     /// <param name="scheduleBlockedForReboot">使用中のファイルを再起動時削除として予約するか。</param>
     /// <param name="preferences">利用者が外した対象を除くための設定 (null なら全対象を消す)。</param>
     /// <param name="checkListKeySelector">
-    /// チェックリストの粒度。既定は対象 1 件 = 1 チェックだが、対象が数百〜数千件になるグループ
-    /// (ブラウザのプロファイル別キャッシュ等) は上位のまとまりを返して件数を畳む。
-    /// </param>
-    /// <param name="checkListLabelSelector">
-    /// チェックリストへ表示する名前。保存キーと表示を分けたい場合に指定する
-    /// (ブラウザは未展開のルートを保存し、製品名を表示する)。
+    /// チェックリストの粒度。既定は対象 1 件 = 1 チェックだが、上位のまとまりを返して件数を畳める。
     /// </param>
     public FileCleanupAction(
         string id,
@@ -53,7 +47,6 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
         bool scheduleBlockedForReboot = false,
         ICleanupPreferences? preferences = null,
         Func<CleanupTarget, string>? checkListKeySelector = null,
-        Func<CleanupTarget, string>? checkListLabelSelector = null,
         Func<ICommandExecutor, IReadOnlyList<string>, IProgress<string>?, CancellationToken, Task<ServiceSuspension>>? suspendServices = null,
         IRebootCacheCleanupScheduler? rebootScheduler = null)
     {
@@ -79,7 +72,6 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
         _rebootScheduler = rebootScheduler;
         _preferences = preferences;
         _checkListKeySelector = checkListKeySelector ?? DescribeTarget;
-        _checkListLabelSelector = checkListLabelSelector ?? _checkListKeySelector;
         _suspendServices = suspendServices ?? WindowsServiceControl.SuspendAsync;
     }
 
@@ -154,7 +146,7 @@ public class FileCleanupAction : IMaintenanceAction, IMaintenanceCheckList
             .Where(group => group.Any(FileCleanupEngine.HasCleanupCandidates))
             .Select(group => new MaintenanceCheckListEntry(
                 group.Key,
-                _checkListLabelSelector(group.First()),
+                group.Key,
                 group.All(IsTargetSelected))),
     ];
 

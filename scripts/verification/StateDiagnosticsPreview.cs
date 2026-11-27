@@ -6,6 +6,8 @@ using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services.Windows;
 using Lumin4ti.Core.Services.Windows.Actions;
+using Lumin4ti.Core.Services.Windows.Cleanup;
+using Lumin4ti.Core.Services.Windows.Cleanup.Slim;
 using Lumin4ti.UI;
 using Lumin4ti.UI.Services;
 using Lumin4ti.UI.ViewModels;
@@ -72,9 +74,6 @@ internal static class StateDiagnosticsPreview
                 new PreviewChoice(),
                 new PreviewToggle("recall-off", "Recall を無効化", null,
                     new MaintenanceStateDiagnostic("Toggle.RecallStateMissing", "Recall の状態が返されませんでした。")),
-                new PreviewToggle("scheduled-temp-cleanup", "サインイン時に一時ファイルを掃除", null,
-                    new MaintenanceStateDiagnostic("Toggle.ScheduledTaskOwnershipUnknown",
-                        "登録済みタスクの所有者を確認できないため操作できません。")),
             });
             var coordinator = new MaintenanceOperationCoordinator(() => new PreviewLease());
             var viewModel = new CommandCategoryViewModel(
@@ -149,8 +148,28 @@ internal static class StateDiagnosticsPreview
             new MainWindow(coordinator)
             {
                 Title = "Lumin4ti — Settings preview (fake state only)",
-                DataContext = new MainWindowViewModel(catalog, devices, version, coordinator),
+                DataContext = new MainWindowViewModel(
+                    catalog, CreateCleanupPreview(catalog, settings, coordinator), devices, version, coordinator),
             }.Show();
+        }
+
+        /// <summary>クリーンアップ画面の器。偽の実行境界と偽の設定を使い、構築しても走査・削除は始まらない。</summary>
+        private static CleanupViewModel CreateCleanupPreview(
+            MaintenanceActionCatalog catalog, ISettingsService settings, MaintenanceOperationCoordinator coordinator)
+        {
+            var executor = new MockExecutor((_, _, _) => throw new InvalidOperationException("preview does not run processes"));
+            var store = new CleanupSettingsStore(settings);
+            var scan = new CleanupScanService(store, executor);
+            var ledger = new AdvancedScanLedger();
+            var slim = new SlimService(executor);
+            return new CleanupViewModel(
+                catalog,
+                coordinator,
+                new CommonCleanViewModel(scan, new CleanupRunService(scan, executor), store, executor, coordinator),
+                new AdvancedCleanViewModel(new AdvancedCleanScanner(ledger), new AdvancedCleaner(ledger), ledger, store, executor, coordinator),
+                new SlimViewModel(slim, store, coordinator),
+                new CleanupSettingsViewModel(
+                    store, scan, ledger, slim, executor, coordinator));
         }
     }
 

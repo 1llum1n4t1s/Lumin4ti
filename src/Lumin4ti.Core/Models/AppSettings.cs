@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Lumin4ti.Core.Services.Windows.Cleanup;
 
 namespace Lumin4ti.Core.Models;
 
@@ -23,10 +24,10 @@ public sealed class AppSettings
     public Dictionary<string, List<string>> CleanupExclusions { get; set; } = [];
 
     /// <summary>
-    /// サインイン時のクリーンアップで実行する項目 Id。null = 未設定 (既定セットを使う)。
-    /// 空リストは「1 つも実行しない」という利用者の選択なので、null と区別する。
+    /// 新クリーンアップの設定。旧版が読むと未知キーとして無視され、<see cref="CleanupExclusions"/> は別に残る。
+    /// 初回読込時に旧除外から移行する (<see cref="CleanupSettingsMigration"/>)。
     /// </summary>
-    public List<string>? ScheduledCleanupGroupIds { get; set; }
+    public CleanupSettings Cleanup { get; set; } = new();
 
     /// <summary>
     /// Velopack 自動更新の配信元。Cloudflare R2 (カスタムドメイン) をハードコード固定する。

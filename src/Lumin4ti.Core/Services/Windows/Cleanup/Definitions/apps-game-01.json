@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.epic-games-launcher-webcache",
+      "name": "Epic Games Launcher",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "rebuild",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\EpicGamesLauncher\\Saved" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\EpicGamesLauncher\\Saved\\webcache", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\EpicGamesLauncher\\Saved\\webcache_4147", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\EpicGamesLauncher\\Saved\\webcache_4430", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["EpicGamesLauncher", "EpicWebHelper"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "B", "url": "https://remedy.helpshift.com/hc/en/3-fbc-firebreak/faq/17-how-to-clear-the-epic-games-launcher-cache", "checked": "2026-11-26" },
+        { "tier": "B", "url": "https://stealthygaming.com/epic-games-launcher-not-opening-fixes/", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.heroic-games-launcher-logs",
+      "name": "Heroic Games Launcher",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Heroic\\logs" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Heroic\\logs", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["Heroic"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://raw.githubusercontent.com/Heroic-Games-Launcher/HeroicGamesLauncher/main/src/backend/logger/paths.ts", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.hedgewars-logs",
+      "name": "Hedgewars",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%USERPROFILE%\\Hedgewars\\Logs" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%USERPROFILE%\\Hedgewars\\Logs", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["hedgewars"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://hedgewars.org/wiki/user%20directory", "checked": "2026-11-26" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,207 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.anydesk-trace",
+      "name": "AnyDesk",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\AnyDesk\\ad.trace" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%APPDATA%\\AnyDesk", "pattern": "ad.trace", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": ["AnyDesk"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://support.anydesk.com/docs/what-are-trace-files.md", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.citrix-receiver-logs",
+      "name": "Citrix Receiver",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Citrix\\Receiver" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%LOCALAPPDATA%\\Citrix\\Receiver", "pattern": "Receiver_*.log", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://support.citrix.com/external/article/CTX132883/how-to-enable-logging-on-receiver-for-wi.html", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.teams-classic-cache",
+      "name": "Microsoft Teams (classic)",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Microsoft\\Teams" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Microsoft\\Teams\\Cache", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\Microsoft\\Teams\\GPUCache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["Teams"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/troubleshoot/microsoftteams/teams-administration/clear-teams-cache", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://techcommunity.microsoft.com/blog/microsoftteamsblog/microsoft-teams-advantages-of-the-new-architecture/3775704", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://www.electronjs.org/docs/latest/api/app", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.caprine-cache",
+      "name": "Caprine",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Caprine" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Caprine\\Cache", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\Caprine\\GPUCache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://github.com/sindresorhus/caprine/blob/main/package.json", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://www.electronjs.org/docs/latest/api/app", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.jitsi-meet-cache",
+      "name": "Jitsi Meet",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Jitsi Meet" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Jitsi Meet\\Cache", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\Jitsi Meet\\GPUCache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://github.com/jitsi/jitsi-meet-electron/blob/master/package.json", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://github.com/jitsi/jitsi-meet-electron/", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://www.electronjs.org/docs/latest/api/app", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.manycam-logs",
+      "name": "ManyCam",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\ManyCam\\Logs" },
+        { "path": "%APPDATA%\\ManyCam Lite\\Logs" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\ManyCam\\Logs", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\ManyCam Lite\\Logs", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://help.manycam.com/knowledge-base/log-files-windows/", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.webex-meetings-cache",
+      "name": "Cisco Webex Meetings",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\WebEx\\wbxcache" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\WebEx\\wbxcache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["atmgr", "webexmta", "ptoneclk"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://help.webex.com/en-us/article/WBX9000035301/How-to-Clear-the-Webex-Meetings-Cache-on-Microsoft-Windows", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.imvu-logs",
+      "name": "IMVU",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\IMVU" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%APPDATA%\\IMVU", "pattern": "IMVULog.log*", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://support.imvu.com/support/solutions/articles/154000196701-how-to-send-log-files-to-imvu", "checked": "2026-11-25" }
+      ]
+    }
+  ]
+}

@@ -54,17 +54,35 @@ public sealed class SettingsServiceTests
     public void CleanupExclusionsがnullなら空の除外として読み込む()
     {
         var settingsPath = Path.Combine(_directory, "settings.json");
-        File.WriteAllText(
-            settingsPath,
-            "{\"CleanupExclusions\":null,\"ScheduledCleanupGroupIds\":null}");
+        File.WriteAllText(settingsPath, "{\"CleanupExclusions\":null}");
 
         var service = new SettingsService(_directory, settingsPath);
         var preferences = new CleanupPreferences(service);
 
         Assert.HasCount(0, service.Current.CleanupExclusions);
-        Assert.IsNull(service.Current.ScheduledCleanupGroupIds);
         Assert.IsTrue(preferences.IsTargetEnabled("cleanup-user-temp", @"%LOCALAPPDATA%\Temp"));
         Assert.AreEqual(SettingsLoadStatus.Loaded, service.LoadStatus);
+    }
+
+    [TestMethod]
+    public async Task 旧版の予約実行キーを含む設定ファイルを読め次の保存で消える()
+    {
+        var settingsPath = Path.Combine(_directory, "settings.json");
+        await File.WriteAllTextAsync(
+            settingsPath,
+            "{\"Locale\":\"en_US\",\"ScheduledCleanupGroupIds\":[\"cleanup-user-temp\"]}");
+
+        var service = new SettingsService(_directory, settingsPath);
+
+        Assert.AreEqual(SettingsLoadStatus.Loaded, service.LoadStatus);
+        Assert.AreEqual("en_US", service.Current.Locale);
+
+        await service.SaveAsync();
+        await service.FlushAsync();
+
+        var saved = await File.ReadAllTextAsync(settingsPath);
+        Assert.DoesNotContain("ScheduledCleanupGroupIds", saved);
+        Assert.Contains("en_US", saved);
     }
 
     [TestMethod]
@@ -133,9 +151,7 @@ public sealed class SettingsServiceTests
         var preferences = new CleanupPreferences(service);
 
         preferences.SetTargetEnabled("cleanup-test", "cache", enabled: false);
-        preferences.SetScheduledGroupEnabled("cleanup-user-temp", enabled: false);
         Assert.IsFalse(preferences.IsTargetEnabled("cleanup-test", "cache"));
-        Assert.IsFalse(preferences.ScheduledGroupIds.Contains("cleanup-user-temp"));
         await Assert.ThrowsAsync<InvalidOperationException>(() => preferences.SaveAsync());
 
         // SettingsService 自体の保存抑止契約も維持する。

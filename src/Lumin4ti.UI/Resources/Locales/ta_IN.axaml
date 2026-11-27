@@ -90,8 +90,6 @@
   <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">தனிப்பயன்</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">DISM வெளியீட்டில் Recall நிலை இல்லை. விவரங்களுக்குப் பதிவைப் பார்க்கவும்.</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">DISM வழங்கிய Recall நிலையைப் புரிந்துகொள்ள முடியவில்லை. விவரங்களுக்குப் பதிவைப் பார்க்கவும்.</x:String>
-  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">இந்தப் பணியை மற்றொரு Windows பயனர் பதிவு செய்துள்ளதால் மாற்ற முடியாது.</x:String>
-  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">பதிவுசெய்யப்பட்ட பணியின் உரிமையாளரைச் சரிபார்க்க முடியாததால் பணியை மாற்ற முடியாது.</x:String>
 
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">நிறுவப்பட்ட பயன்பாடுகளை மொத்தமாகப் புதுப்பி (winget)</x:String>
@@ -118,24 +116,10 @@
   <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">WSReset மூலம் Microsoft Store தேக்ககத்தை மீட்டமைக்கிறது. Store திறக்காமல் இருப்பது, பதிவிறக்கங்கள் முன்னேறாதது அல்லது மீண்டும் மீண்டும் “try again” பிழைகளுக்கான வழக்கமான தீர்வு. பயன்பாடுகளும் கணக்குத் தகவலும் நீக்கப்படாது. முடிந்ததும் Store பயன்பாடு தானாகவே திறக்கலாம்.</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">SSD TRIM மற்றும் காலி இட ஒருங்கிணைப்பு</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">SSD எழுதும் செயல்திறனைப் பராமரிக்கவும் காலி இடத்தைத் துண்டழிக்கவும் அனைத்து தொகுதிகளிலும் SSD-க்கு TRIM அறிவிப்பையும் (/L) காலி இட ஒருங்கிணைப்பையும் (/X) இயக்குகிறது. இயக்கி அமைப்பைப் பொறுத்து சில நிமிடங்கள் முதல் பல்லாயிரம் நிமிடங்கள் வரை எடுக்கலாம். இயங்கும்போது PC-ஐத் தொடர்ந்து பயன்படுத்தலாம்.</x:String>
-  <x:String x:Key="Text.Action.cleanup-user-temp.Label" xml:space="preserve">பயனரின் தற்காலிகக் கோப்புகளையும் தேக்ககங்களையும் நீக்கு</x:String>
-  <x:String x:Key="Text.Action.cleanup-user-temp.Desc" xml:space="preserve">Deletes temporary files, crash dumps, shader and internet caches, and regenerable IME, Office, and Outlook caches. Browsing history, recent-file history, and app settings are not deleted. Files in use are skipped.</x:String>
-  <x:String x:Key="Text.Action.cleanup-system-temp.Label" xml:space="preserve">கணினியின் தற்காலிகக் கோப்புகளையும் பதிவேடுகளையும் நீக்கு</x:String>
-  <x:String x:Key="Text.Action.cleanup-system-temp.Desc" xml:space="preserve">Windows தற்காலிகக் கோப்புறைகள், அறியப்பட்ட Windows பதிவு இடங்களிலுள்ள ETL தடப் பதிவுகள், அமைப்பு மற்றும் சேவைப் பதிவுகள், Delivery Optimization தற்காலிகச் சேமிப்பு மற்றும் Microsoft Defender கண்டறிதல் பதிவுகளை நீக்குகிறது. Defender கண்டறிதல் மற்றும் சரிசெய்தல் வரலாறு பாதுகாக்கப்படும். ETL இலக்குகள் Windows Logs, LogFiles, Panther மற்றும் Diagnosis கீழுள்ள *.etl கோப்புகளுக்கு மட்டும் வரையறுக்கப்பட்டுள்ளன; முழு இயக்ககமும் தேடப்படாது. Delivery Optimization சேவை தற்காலிகமாக நிறுத்தப்பட்டு பின்னர் மீட்டமைக்கப்படும். சிக்கலை ஆராயும் போது இதை இயக்க வேண்டாம்.</x:String>
-  <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">செயலிகளின் தேக்ககங்களையும் பதிவுகளையும் நீக்கு</x:String>
-  <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">Deletes app caches, GPU shader caches, crash reports, and tool logs. WebStorage, virtual-machine bundles, settings, and sign-in state are not deleted.</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">மேம்பாட்டுக் கருவிகளின் தொகுப்புத் தேக்ககங்களை நீக்கு</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Deletes only re-downloadable caches for npm, pnpm, NuGet, pip, Yarn, Gradle, Bun, uv, and Cargo. uv-managed Python, Maven local artifacts, credentials, settings, and the general .cache directory are not deleted.</x:String>
-  <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">உலாவித் தேக்ககங்களை நீக்கு</x:String>
-  <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Deletes Chromium web and shader caches, Service Worker cache storage, crash reports, and extension temporary data. Service Worker registrations, DRM components, bookmarks, passwords, and sign-in state are not deleted.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">சின்னம், சிறுபடம், எழுத்துரு தேக்ககங்களை மீண்டும் உருவாக்கு</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">File Explorer-இன் சின்னத் தேக்ககம், சிறுபடத் தேக்ககம், எழுத்துரு தேக்ககம் ஆகியவற்றை நீக்கி Windows அவற்றை மீண்டும் உருவாக்கச் செய்கிறது. வெற்று அல்லது தவறான சின்னங்கள், புதுப்பிக்கப்படாத சிறுபடங்கள், சரியாகக் காட்டப்படாத எழுத்துகள் ஆகியவற்றுக்கான வழக்கமான சரிசெய்தல் இது. Explorer கட்டாயமாக மூடப்படாது. அடுத்த Windows தொடக்கத்தில், பயன்பாட்டில் உள்ள தேர்ந்தெடுக்கப்பட்ட தேக்ககங்கள் நம்பகமான நிறுவலிலிருந்து மீண்டும் பட்டியலிடப்பட்டு நீக்க முயற்சிக்கப்படும். ஏழு நாட்களுக்குள் அதிகபட்சம் மூன்று முறை இயக்கப்படும்; தொடர்ந்து பூட்டப்பட்ட இலக்குகள் வைத்திருக்கப்பட்டு முடிவுகள் பதிவில் எழுதப்படும். தேக்ககங்கள் மீண்டும் உருவாகும் வரை காட்சி சற்று மெதுவாக இருக்கும்.</x:String>
-  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">Windows Update-இன் பதிவிறக்கத் தேக்ககத்தை நீக்கு</x:String>
-  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">Deletes only re-downloadable files from SoftwareDistribution\Download. Update history and catroot2 are not deleted. Related services are restored after cleanup.</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">முன்பதிவுத் தரவையும் தேடல் அட்டவணையையும் நீக்கி மீண்டும் உருவாக்கு</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">செயலிகள் விரைவாகத் தொடங்க உதவும் முன்பதிவுத் தரவையும் (Prefetch) File Explorer-இன் தேடல் அட்டவணையையும் நீக்கி, Windows அவற்றை மீண்டும் உருவாக்கச் செய்கிறது. தேடலில் எதுவும் கிடைக்காதபோது அல்லது பழைய கோப்புகளே வரும்போது இதைப் பயன்படுத்தவும். மீண்டும் உருவாக்கும் பல்லாயிரம் நிமிடங்கள் முதல் சில மணிநேரம் வரை செயலிகளின் தொடக்கமும் தேடலும் மெதுவாக இருக்கும், பின்னணியில் CPU பயன்பாடும் அதிகரிக்கும்.</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">உள்நுழையும்போது தானாக சுத்தம் செய்யும் பணியைப் பதிவு செய்</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">உள்நுழையும்போது தேர்ந்தெடுக்கப்பட்ட தற்காலிகச் சேமிப்பு மற்றும் பதிவு சுத்தம் செய்யும் உருப்படிகளை கிடைக்கும் மிக உயர்ந்த உரிமைகளுடன் இயக்குகிறது; எனவே நிர்வாகி உரிமைகள் அல்லது சேவைகளை நிறுத்த வேண்டிய உருப்படிகளும் இயங்கும். இயக்குக பொத்தான்களின் அதே பட்டியல்களைப் பயன்படுத்தி UAC அறிவிப்பு இல்லாமல் தொடங்குகிறது. பயன்பாட்டில் உள்ள கோப்புகள் தவிர்க்கப்படும். OFF பணியை நீக்கும்.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Memory Compression</x:String>
@@ -200,7 +184,6 @@
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Edge பின்னணி செயல்களை முடக்கு (100–300 MB சேமிக்கும்)</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">கொள்கை மூலம் Edge பின்னணி முறை மற்றும் Startup Boost ஆகியவற்றை முடக்குகிறது. Edge-ஐ அரிதாகப் பயன்படுத்தினால் சுமார் 100–300 MB நினைவகத்தை விடுவிக்கலாம். Edge தொடக்கம் சற்று மெதுவாகலாம்; நீட்டிப்பு அறிவிப்புகள் வராமல் போகலாம். கொள்கைகளை நீக்கி Edge இயல்புநிலைகளை மீட்டமைக்க இதை OFF செய்யவும்.</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">நீக்க வேண்டியவற்றைத் தேர்ந்தெடுக்கவும்</x:String>
-  <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">உள்நுழையும்போது இயங்க வேண்டியவற்றைத் தேர்ந்தெடுக்கவும்</x:String>
   <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">இந்தத் தேர்வைக் கடைசியாகச் சேமிக்க முயன்றது தோல்வியடைந்தது (பதிவைப் பார்க்கவும்).</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">புதுப்பிப்பு</x:String>
@@ -223,10 +206,545 @@
   <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">மேம்பாட்டுப் பதிப்பு</x:String>
   <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">பதிப்பு கிடைக்கவில்லை</x:String>
   <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">மொழி மற்றும் புதுப்பிப்பு அமைப்புகளைக் கடைசியாகச் சேமிக்க முயன்றது தோல்வியடைந்தது (பதிவைப் பார்க்கவும்).</x:String>
-  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">அமைப்புகளைப் படிக்க முடியவில்லை. அசல் கோப்பைப் பாதுகாக்க சேமிப்பு நிறுத்தப்பட்டுள்ளது; உள்நுழைவு நேரத் துப்புரவும் இயங்காது. மாற்றங்கள் இந்த அமர்வில் மட்டுமே பொருந்தும்.</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">அமைப்புகளைப் படிக்க முடியவில்லை. அசல் கோப்பைப் பாதுகாக்க சேமிப்பு நிறுத்தப்பட்டுள்ளது. மாற்றங்கள் இந்த அமர்வில் மட்டுமே பொருந்தும்.</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">கடைசிச் சரிபார்ப்பில் இலக்குகள் எதுவும் கிடைக்கவில்லை.</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">பட்டியலைப் புதுப்பிக்க மீண்டும் திறக்கவும். செயலை இயக்கும்போது விலக்கப்படாத புதிய இலக்குகளும் சேர்க்கப்படும்.</x:String>
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">செயலாக்கத்தில் உள்ளது</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">செயல்பாடு முடியும் வரை காத்திருக்கவும்.</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">ரத்துசெய்தலும் சுத்தம் செய்தலும் முடியும் வரை காத்திருக்கவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Common" xml:space="preserve">வழக்கமானது</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Advanced" xml:space="preserve">மேம்பட்டது</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Slim" xml:space="preserve">எடை குறைத்தல்</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Settings" xml:space="preserve">அமைப்புகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Other" xml:space="preserve">பிற</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Scan" xml:space="preserve">ஸ்கேன் செய்</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Rescan" xml:space="preserve">மீண்டும் ஸ்கேன் செய்</x:String>
+  <x:String x:Key="Text.Cleanup.Action.CancelScan" xml:space="preserve">ஸ்கேனை நிறுத்து</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Clean" xml:space="preserve">தேர்ந்தவற்றை நீக்கு</x:String>
+  <x:String x:Key="Text.Cleanup.Action.ExportText" xml:space="preserve">உரையாக ஏற்றுமதி செய்</x:String>
+  <x:String x:Key="Text.Cleanup.Action.OpenLocation" xml:space="preserve">இடத்தைத் திற</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Ignore" xml:space="preserve">புறக்கணி (எதிர்கால ஸ்கேன்களிலிருந்து விலக்கு)</x:String>
+  <x:String x:Key="Text.Cleanup.Select.Recommended" xml:space="preserve">பரிந்துரைக்கப்பட்டவை</x:String>
+  <x:String x:Key="Text.Cleanup.Select.All" xml:space="preserve">அனைத்தையும் தேர்ந்தெடு</x:String>
+  <x:String x:Key="Text.Cleanup.Select.None" xml:space="preserve">அனைத்துத் தேர்வையும் நீக்கு</x:String>
+  <x:String x:Key="Text.Cleanup.Select.Invert" xml:space="preserve">தேர்வைத் தலைகீழாக்கு</x:String>
+  <x:String x:Key="Text.Cleanup.Filter.Placeholder" xml:space="preserve">உருப்படிகளை வடிகட்டு</x:String>
+  <x:String x:Key="Text.Cleanup.Filter.HideEmpty" xml:space="preserve">நீக்குவதற்கு எதுவும் இல்லாத உருப்படிகளை மறை</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Name" xml:space="preserve">உருப்படி</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Category" xml:space="preserve">வகை</x:String>
+  <x:String x:Key="Text.Cleanup.Column.State" xml:space="preserve">நிலை</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Files" xml:space="preserve">கோப்புகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Size" xml:space="preserve">அளவு</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Impact" xml:space="preserve">விளைவு</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Folder" xml:space="preserve">கோப்புறை</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Modified" xml:space="preserve">மாற்றப்பட்டது</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Rule" xml:space="preserve">விதி</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Safety" xml:space="preserve">பாதுகாப்பு</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Results" xml:space="preserve">ஸ்கேன் முடிவுகள்</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Progress" xml:space="preserve">ஸ்கேன் முன்னேற்றம்</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.SelectRow" xml:space="preserve">{0}-ஐத் தேர்ந்தெடு</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Row" xml:space="preserve">{0}, {1}, {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Windows" xml:space="preserve">Windows அமைப்பு</x:String>
+  <x:String x:Key="Text.Cleanup.Category.StoreApps" xml:space="preserve">Store பயன்பாடுகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Category.BrowserCache" xml:space="preserve">உலாவித் தேக்ககம்</x:String>
+  <x:String x:Key="Text.Cleanup.Category.BrowserTrace" xml:space="preserve">உலாவி வரலாறும் தடயங்களும்</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Cookies" xml:space="preserve">Cookies</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Traces" xml:space="preserve">பயன்பாட்டுத் தடயங்கள்</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Components" xml:space="preserve">Windows கூறுகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Apps" xml:space="preserve">பிற பயன்பாடுகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Custom" xml:space="preserve">தனிப்பயன் கோப்புறைகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Cache" xml:space="preserve">{0} தேக்ககம்</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Log" xml:space="preserve">{0} பதிவுகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Temp" xml:space="preserve">{0} தற்காலிகக் கோப்புகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Dump" xml:space="preserve">{0} dumps</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Thumbnail" xml:space="preserve">{0} சிறுபடங்கள்</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Shader" xml:space="preserve">{0} shader தேக்ககம்</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Report" xml:space="preserve">{0} அறிக்கைகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.History" xml:space="preserve">{0} வரலாறு</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Form" xml:space="preserve">{0} படிவத் தரவு</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Session" xml:space="preserve">{0} அமர்வுத் தரவு</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Cookies" xml:space="preserve">{0} cookies</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Recent" xml:space="preserve">{0} சமீபத்திய உருப்படிகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Backup" xml:space="preserve">{0} காப்புப் பிரதிகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Downloads" xml:space="preserve">{0} பதிவிறக்கிய கோப்புகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Other" xml:space="preserve">{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Junk" xml:space="preserve">குப்பைக் கோப்புகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Trace" xml:space="preserve">பயன்பாட்டுத் தடயங்கள்</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Signout" xml:space="preserve">உங்களை வெளியேற்றும்</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Rebuild" xml:space="preserve">மீண்டும் உருவாக்க வேண்டும்</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.UserFiles" xml:space="preserve">உங்கள் கோப்புகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Trace.Warning" xml:space="preserve">உங்கள் பயன்பாட்டு வரலாறு இழக்கப்படும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Signout.Warning" xml:space="preserve">Cookies-ஐ நீக்குவது இணையதளங்களிலிருந்து உங்களை வெளியேற்றலாம்.</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Rebuild.Warning" xml:space="preserve">நீக்கிய பிறகு முதல் பயன்பாடு, தரவு மீண்டும் உருவாக்கப்படுவதால் மெதுவாக இருக்கலாம்.</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.UserFiles.Warning" xml:space="preserve">மீண்டும் பதிவிறக்க முடியாத உங்கள் கோப்புகளும் இதில் அடங்கும். அவற்றைத் தனித்தனியாகத் தேர்ந்தெடுக்கவும்; நீக்கும் முன் மீண்டும் உறுதிப்படுத்தக் கேட்கப்படும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Warning.NotRecommended" xml:space="preserve">இந்த உருப்படி இயல்பாகப் பரிந்துரைக்கப்படவில்லை. தேர்ந்தெடுக்கும் முன் இது எதை அகற்றும் என்பதைச் சரிபார்க்கவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Warning.JumpListPins" xml:space="preserve">Jump Lists-ஐ நீக்கினால் taskbar மற்றும் Start மெனுவில் நீங்கள் பொருத்திய உருப்படிகளும் அகற்றப்படும்.</x:String>
+  <x:String x:Key="Text.Cleanup.State.Found" xml:space="preserve">நீக்கலாம்</x:String>
+  <x:String x:Key="Text.Cleanup.State.Empty" xml:space="preserve">நீக்க எதுவும் இல்லை</x:String>
+  <x:String x:Key="Text.Cleanup.State.Unmeasurable" xml:space="preserve">எண்ணிக்கை தெரியவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.State.Unavailable" xml:space="preserve">கிடைக்கவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.State.NotDetected" xml:space="preserve">கண்டறியப்படவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.UserScopeDifferentUser" xml:space="preserve">உள்நுழைந்த பயனரும் உயர்த்தப்பட்ட பயனரும் வேறுபடுவதால், ஒரு பயனரின் அமைப்புகளையும் தரவையும் குறிவைக்கும் உருப்படிகள் முடக்கப்பட்டுள்ளன.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.UserScopeUnknown" xml:space="preserve">உள்நுழைந்த பயனரைச் சரிபார்க்க முடியாததால், ஒரு பயனரின் அமைப்புகளையும் தரவையும் குறிவைக்கும் உருப்படிகள் முடக்கப்பட்டுள்ளன.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.TargetRejected" xml:space="preserve">பாதுகாப்புக்காக இலக்கு நிராகரிக்கப்பட்டது (பாதுகாக்கப்பட்ட இடம், நற்சான்றிதழ்கள், இணைப்பு போன்றவை).</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.ScanFailed" xml:space="preserve">ஸ்கேன் தோல்வியடைந்தது.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.HandlerUnavailable" xml:space="preserve">இந்தச் சூழலில் இதை இயக்க முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.CustomFolderRejected" xml:space="preserve">இந்த இடம் தனிப்பயன் கோப்புறையாக அனுமதிக்கப்படவில்லை, எனவே தவிர்க்கப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Title" xml:space="preserve">நிலையான சுத்தம்</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Description" xml:space="preserve">முதலில் ஸ்கேன் செய்து எதை அகற்றலாம் என்று பாருங்கள், பிறகு நீங்கள் தேர்ந்தெடுத்தவற்றை மட்டும் நீக்குங்கள். ஸ்கேன் எதையும் மாற்றாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.NotScanned" xml:space="preserve">இன்னும் எதுவும் ஸ்கேன் செய்யப்படவில்லை. நீக்கக்கூடியவற்றைக் காண ஸ்கேன் செய் என்பதை அழுத்தவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Scanning" xml:space="preserve">{1}-இல் {0} ஸ்கேன் செய்யப்படுகிறது: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanDone" xml:space="preserve">ஸ்கேன் முடிந்தது: {0} உருப்படிகள், {1} கோப்புகள், {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanCanceled" xml:space="preserve">ஸ்கேன் நிறுத்தப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanFailed" xml:space="preserve">ஸ்கேன் தோல்வியடைந்தது. பதிவைச் சரிபார்க்கவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Stale" xml:space="preserve">அமைப்புகள் மாறியதால் அல்லது வேறொரு செயல் நடந்ததால் ஸ்கேன் முடிவு காலாவதியானது. மீண்டும் ஸ்கேன் செய்யவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.NothingFound" xml:space="preserve">நீக்கக்கூடியது எதுவும் கிடைக்கவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Selection" xml:space="preserve">{1} உருப்படிகளில் {0} தேர்ந்தெடுக்கப்பட்டன (சுமார் {2})</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Retained" xml:space="preserve">உங்கள் விலக்குகளால் {0} உருப்படிகள் வைத்திருக்கப்பட்டன.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Unreadable" xml:space="preserve">{0} உருப்படிகளைச் சரிபார்க்க முடியவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.SkippedLinks" xml:space="preserve">{0} உருப்படிகள் இணைப்புகள், அவை தொடப்படாமல் விடப்பட்டன.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Unmeasurable" xml:space="preserve">இதை இயக்கலாம், ஆனால் இதன் எண்ணிக்கையையும் அளவையும் முன்கூட்டியே அளக்க முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Representatives" xml:space="preserve">எடுத்துக்காட்டு: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.RunningProcesses" xml:space="preserve">இயங்குகிறது: {0} (நீக்கும் முன் அதை மூடலாமா என்று கேட்கப்படும்)</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ServiceNote" xml:space="preserve">நீக்கும்போது தற்காலிகமாக நிறுத்தப்பட்ட சேவைகள்: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Title" xml:space="preserve">நீக்குவதை உறுதிப்படுத்து</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Run" xml:space="preserve">நீக்கு</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Back" xml:space="preserve">திரும்பிச் செல்</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Common.Body" xml:space="preserve">தேர்ந்தெடுத்த {0} உருப்படிகள் ({1} கோப்புகள், சுமார் {2}) நிரந்தரமாக நீக்கப்படும். அவை Recycle Bin-க்கு நகர்த்தப்படாது, மீட்டெடுக்கவும் முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.NotRecommended" xml:space="preserve">பரிந்துரைக்கப்படாத {0} உருப்படிகள் உள்ளன. முதலில் அவற்றைச் சரிபாருங்கள்.</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Signout" xml:space="preserve">உங்களை வெளியேற்றக்கூடிய {0} உருப்படிகள் உள்ளன (cookies போன்றவை).</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.UserFiles" xml:space="preserve">{0} உருப்படிகளில் மீண்டும் பதிவிறக்க முடியாத உங்கள் கோப்புகள் உள்ளன. மேலும் ஒருமுறை உறுதிப்படுத்தக் கேட்கப்படும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.UserFiles.Check" xml:space="preserve">எனது கோப்புகள் நிரந்தரமாக நீக்கப்படும் என்பதைப் புரிந்துகொள்கிறேன்</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.SecureDelete" xml:space="preserve">பாதுகாப்பான நீக்கம் இயக்கத்தில் உள்ளது. நீக்கும் முன் கோப்புகள் ஒருமுறை மேலெழுதப்படும் (SSD-களில் இதற்கு உத்தரவாதம் இல்லை).</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.RunningProcess" xml:space="preserve">சில தயாரிப்புகள் இயங்குகின்றன. நீக்கும்போது அவற்றை மூடலாமா என்று கேட்கப்படும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Body" xml:space="preserve">"{0}" இயங்குகிறது ({1}). அதன் தரவை நீக்கும் முன் அதை மூட வேண்டும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Close" xml:space="preserve">அதை மூடு</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Skip" xml:space="preserve">இந்த உருப்படியைத் தவிர்</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Abort" xml:space="preserve">நிறுத்து</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceBody" xml:space="preserve">"{0}"-ஐ இயல்பாக மூட முடியவில்லை ({1}). வலுக்கட்டாயமாக மூடினால் சேமிக்காத உள்ளீடுகள் இழக்கப்படும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceYes" xml:space="preserve">வலுக்கட்டாயமாக மூடு</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceNo" xml:space="preserve">வலுக்கட்டாயமாக மூடாதே</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Running" xml:space="preserve">{1}-இல் {0} நீக்கப்படுகிறது: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Done" xml:space="preserve">{0} கோப்புகள் நீக்கப்பட்டு {1} விடுவிக்கப்பட்டது</x:String>
+  <x:String x:Key="Text.Cleanup.Run.DonePartial" xml:space="preserve">பகுதியளவு முடிந்தது: {0} கோப்புகள் நீக்கப்பட்டு {1} விடுவிக்கப்பட்டது. சில உருப்படிகள் தோல்வியடைந்தன அல்லது தவிர்க்கப்பட்டன.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Canceled" xml:space="preserve">நிறுத்தப்பட்டது. {0} கோப்புகள் ({1}) ஏற்கனவே நீக்கப்பட்டுவிட்டன.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Stale" xml:space="preserve">ஸ்கேன் முடிவு காலாவதியானதால் எதுவும் நீக்கப்படவில்லை. மீண்டும் ஸ்கேன் செய்யவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Retained" xml:space="preserve">விலக்குகள் அல்லது ஸ்கேனுக்குப் பிந்தைய மாற்றங்களால் {0} உருப்படிகள் வைத்திருக்கப்பட்டன.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Blocked" xml:space="preserve">{0} உருப்படிகளை நீக்க முடியவில்லை (பயன்பாட்டில் உள்ளன, அனுமதி இல்லை, போன்றவை).</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Wiped" xml:space="preserve">நீக்கும் முன் {0} உருப்படிகள் மேலெழுதப்பட்டன ({1} மேலெழுதாமல் நீக்கப்பட்டன).</x:String>
+  <x:String x:Key="Text.Cleanup.Run.ServiceResumeFailed" xml:space="preserve">தற்காலிகமாக நிறுத்தப்பட்ட ஒரு சேவையை மீண்டும் தொடங்க முடியவில்லை. சேவையின் நிலையைச் சரிபார்க்கவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Succeeded" xml:space="preserve">வெற்றி</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.NothingToDo" xml:space="preserve">செய்ய எதுவும் இல்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Partial" xml:space="preserve">பகுதியளவு முடிந்தது</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Failed" xml:space="preserve">தோல்வி</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Skipped" xml:space="preserve">தவிர்க்கப்பட்டது</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Canceled" xml:space="preserve">நிறுத்தப்பட்டது</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.NotRun" xml:space="preserve">இயக்கப்படவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.NotScanned" xml:space="preserve">ஸ்கேன் செய்யப்படவில்லை, எனவே நீக்கப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.NothingFound" xml:space="preserve">நீக்க எதுவும் இல்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.Unavailable" xml:space="preserve">இந்தச் சூழலில் இதை இயக்க முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.UserFilesNotConfirmed" xml:space="preserve">உங்கள் கோப்புகளுக்கான உறுதிப்படுத்தல் வழங்கப்படாததால் நீக்கப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessRunningDeclined" xml:space="preserve">தயாரிப்பு இயங்குவதால் தவிர்க்கப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessUnverifiable" xml:space="preserve">இயங்கும் செயல்முறையின் உரிமையாளரைச் சரிபார்க்க முடியாததால் தவிர்க்கப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessStillRunning" xml:space="preserve">தயாரிப்பு மூடப்படாததால் தவிர்க்கப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ForceTerminationDeclined" xml:space="preserve">வலுக்கட்டாய மூடல் அங்கீகரிக்கப்படாததால் தவிர்க்கப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessIdentityMismatch" xml:space="preserve">செயல்முறையைப் பொருத்த முடியாததால் அது மூடப்படவில்லை; எனவே தவிர்க்கப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.TerminateFailed" xml:space="preserve">தயாரிப்பை மூட முடியாததால் தவிர்க்கப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Totals.Last" xml:space="preserve">கடைசி இயக்கம்: {0} கோப்புகள், {1} ({2})</x:String>
+  <x:String x:Key="Text.Cleanup.Totals.Total" xml:space="preserve">மொத்தம்: {0} கோப்புகள், {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Title" xml:space="preserve">ஸ்கேன் முடிவுகளை ஏற்றுமதி செய்</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Done" xml:space="preserve">{0}-க்கு ஏற்றுமதி செய்யப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Failed" xml:space="preserve">ஏற்றுமதி செய்ய முடியவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.OpenLocation.Failed" xml:space="preserve">இடத்தைத் திறக்க முடியவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Name" xml:space="preserve">பெயர்</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Category" xml:space="preserve">வகை</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.State" xml:space="preserve">நிலை</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Files" xml:space="preserve">கோப்புகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Items" xml:space="preserve">உருப்படிகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Bytes" xml:space="preserve">Bytes</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Retained" xml:space="preserve">வைத்திருந்தவை</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Status" xml:space="preserve">நிலை</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Details" xml:space="preserve">விவரங்கள்</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Total" xml:space="preserve">மொத்தம்</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Title" xml:space="preserve">மேம்பட்ட சுத்தம்</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Description" xml:space="preserve">தேர்ந்தெடுத்த drives-இல் பொதுவாகப் பாதுகாப்பாக அகற்றக்கூடிய கோப்புகளை வடிவத்தின் மூலம் தேடுகிறது. ஸ்கேன் எதையும் மாற்றாது. முடிவுகளைப் பார்த்து, நீங்கள் தேர்ந்தெடுத்தவற்றை மட்டும் நீக்கவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drives" xml:space="preserve">ஸ்கேன் செய்ய வேண்டிய drives</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drive.Removable" xml:space="preserve">நீக்கக்கூடியது</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drive.Fixed" xml:space="preserve">நிலையானது</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.ZeroByte" xml:space="preserve">பூஜ்ஜிய-பைட் கோப்புகளைச் சேர்</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.InvalidShortcuts" xml:space="preserve">இலக்கு இல்லாத shortcuts-ஐச் சேர்</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.OlderThan" xml:space="preserve">குறிப்பிட்ட நாட்களுக்கு மேல் பழைய கோப்புகளைச் சேர்</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.Days" xml:space="preserve">நாட்கள்</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.SelectSafe" xml:space="preserve">பாதுகாப்பான உருப்படிகளை மட்டும் தேர்ந்தெடு</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.Default" xml:space="preserve">இயல்பு</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.Additional" xml:space="preserve">கூடுதல்</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.UserDefined" xml:space="preserve">பயனர் வரையறுத்தது</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.Safe" xml:space="preserve">பாதுகாப்பானது</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.Undeterminable" xml:space="preserve">தீர்மானிக்க இயலாது</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.UserDefined" xml:space="preserve">பயனர் வரையறுத்தது</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.CheckpointOutsideFound" xml:space="preserve">FOUND கோப்புறைக்கு வெளியே .chk கோப்பு உள்ளது. இது ESE checkpoint ஆக இருக்கலாம், எனவே நீங்கள் சரிபார்க்கும் வரை தேர்ந்தெடுக்கப்படாமல் இருக்கும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.RecentlyModified" xml:space="preserve">கடந்த 24 மணிநேரத்தில் மாற்றப்பட்டது, எனவே இயல்பாகத் தேர்ந்தெடுக்கப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.ZeroByte" xml:space="preserve">பூஜ்ஜிய-பைட் கோப்பு, எனவே இயல்பாகத் தேர்ந்தெடுக்கப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.OldFile" xml:space="preserve">பழையது என்பதால் மட்டுமே பொருந்தியது, எனவே இயல்பாகத் தேர்ந்தெடுக்கப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.UserPattern" xml:space="preserve">நீங்கள் வரையறுத்த வடிவத்துடன் பொருந்தியது, எனவே இயல்பாகத் தேர்ந்தெடுக்கப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.NamePattern" xml:space="preserve">பெயர் வடிவம்</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.ZeroByte" xml:space="preserve">பூஜ்ஜிய பைட்</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.InvalidShortcut" xml:space="preserve">தவறான shortcut</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.OldFile" xml:space="preserve">பழைய கோப்பு</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Progress" xml:space="preserve">{0} கோப்புறைகளும் {1} கோப்புகளும் சரிபார்க்கப்பட்டன; {2} பொருத்தங்கள் ({3}): {4}</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.ScanDone" xml:space="preserve">ஸ்கேன் முடிந்தது: சரிபார்த்த {2} கோப்புகளில் {0} பொருத்தங்கள் ({1}).</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Truncated" xml:space="preserve">பொருத்தங்கள் மிக அதிகம், எனவே முதல் {0} மட்டுமே காட்டப்படுகின்றன. மற்ற {1} ({2}) காட்டப்படவும் மாட்டா, நீக்கப்படவும் மாட்டா.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RootFailure" xml:space="preserve">ஸ்கேன் செய்ய முடியவில்லை: {0} ({1})</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Pruned" xml:space="preserve">பாதுகாக்கப்பட்டவை அல்லது விலக்கப்பட்டவை என்பதால் {0} கோப்புறைகள் சரிபார்க்கப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Empty" xml:space="preserve">பொருந்தும் கோப்புகள் இல்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Selection" xml:space="preserve">{1} கோப்புகளில் {0} தேர்ந்தெடுக்கப்பட்டன ({2})</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolders" xml:space="preserve">தனிப்பயன் கோப்புறைகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Note" xml:space="preserve">கோப்புறையின் உள்ளடக்கம் மட்டும் காலி செய்யப்படும். கோப்புறை அப்படியே இருக்கும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Missing" xml:space="preserve">கிடைக்கவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Summary" xml:space="preserve">{0} கோப்புகள், {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Body" xml:space="preserve">தேர்ந்தெடுத்த {0} கோப்புகளும் ({1}) {2} தனிப்பயன் கோப்புறைகளின் உள்ளடக்கமும் நிரந்தரமாக நீக்கப்படும். அவை Recycle Bin-க்கு நகர்த்தப்படாது, மீட்டெடுக்கவும் முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Undeterminable" xml:space="preserve">"தீர்மானிக்க இயலாது" எனக் குறிக்கப்பட்ட {0} கோப்புகள் உள்ளன. நீங்கள் சரிபார்க்காதவற்றின் தேர்வை நீக்கவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Recent" xml:space="preserve">கடந்த 24 மணிநேரத்தில் மாற்றப்பட்ட {0} கோப்புகள் உள்ளன.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Done" xml:space="preserve">{0} கோப்புகளும் {1} கோப்புறைகளும் நீக்கப்பட்டு {2} விடுவிக்கப்பட்டது</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Partial" xml:space="preserve">பகுதியளவு முடிந்தது: {0} கோப்புகளும் {1} கோப்புறைகளும் நீக்கப்பட்டு {2} விடுவிக்கப்பட்டது. சில உருப்படிகள் வைத்திருக்கப்பட்டன அல்லது நீக்க முடியவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Expired" xml:space="preserve">ஸ்கேன் முடிவு காலாவதியானதால் எதுவும் நீக்கப்படவில்லை. மீண்டும் ஸ்கேன் செய்யவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Cancelled" xml:space="preserve">நிறுத்தப்பட்டது. {0} கோப்புகள் ({1}) ஏற்கனவே நீக்கப்பட்டுவிட்டன.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Blocked" xml:space="preserve">{0} கோப்புகளை நீக்க முடியவில்லை (பயன்பாட்டில் உள்ளன, அனுமதி இல்லை, போன்றவை).</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Retained" xml:space="preserve">விலக்குகள் அல்லது ஸ்கேனுக்குப் பிந்தைய மாற்றங்களால் {0} கோப்புகள் வைத்திருக்கப்பட்டன.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Gone" xml:space="preserve">{0} கோப்புகள் இனி இல்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Covered" xml:space="preserve">{0} கோப்புகள் தேர்ந்தெடுத்த தனிப்பயன் கோப்புறைக்குள் உள்ளன, அவை தனியாகக் கையாளப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Rejected" xml:space="preserve">{0} உருப்படிகள் பாதுகாப்புச் சோதனையால் நிராகரிக்கப்பட்டன.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Invalid" xml:space="preserve">இந்தப் பாதையைக் கோப்புறையாகப் பயன்படுத்த முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.DriveRoot" xml:space="preserve">drive-இன் வேரைப் பயன்படுத்த முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Windows" xml:space="preserve">Windows கோப்புறையையும் அதன் பெற்றோர், குழந்தை கோப்புறைகளையும் பயன்படுத்த முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProgramFiles" xml:space="preserve">Program Files-ஐயும் அதன் பெற்றோர், குழந்தை கோப்புறைகளையும் பயன்படுத்த முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProgramData" xml:space="preserve">ProgramData-வையும் அதன் பெற்றோர், குழந்தை கோப்புறைகளையும் பயன்படுத்த முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.OtherUserProfile" xml:space="preserve">வேறொரு பயனரின் சுயவிவரத்தைப் பயன்படுத்த முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProfileRoot" xml:space="preserve">உங்கள் சுயவிவரக் கோப்புறையையும் AppData-வையும் காலி செய்தால் உங்கள் தரவு முழுவதும் இழக்கப்படும் என்பதால் அவற்றைப் பயன்படுத்த முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Credential" xml:space="preserve">நற்சான்றிதழ்கள் அல்லது விசைகள் உள்ள இடங்களைப் பயன்படுத்த முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Added" xml:space="preserve">தனிப்பயன் கோப்புறை சேர்க்கப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Title" xml:space="preserve">எடை குறைத்தல்</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Description" xml:space="preserve">Windows-க்குத் தேவையில்லாத தரவை அகற்றி வட்டு இடத்தை விடுவிக்கிறது. சில உருப்படிகளை மீட்க முடியாது அல்லது பின்னர் செய்யும் பழுதுபார்ப்பைப் பாதிக்கலாம், எனவே இயல்பாக எதுவும் தேர்ந்தெடுக்கப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Run" xml:space="preserve">தேர்ந்தவற்றை இயக்கு</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.CreateRestorePoint" xml:space="preserve">இயக்கும் முன் மீட்டெடுப்புப் புள்ளியை உருவாக்கு</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Item" xml:space="preserve">உருப்படி</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Status" xml:space="preserve">நிலை</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Size" xml:space="preserve">மதிப்பிடப்பட்ட இடம்</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Estimate" xml:space="preserve">சுமார் {0} (மதிப்பீடு)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.SizeUnknown" xml:space="preserve">தெரியவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.NotScanned" xml:space="preserve">இன்னும் எதுவும் ஸ்கேன் செய்யப்படவில்லை. ஒவ்வொரு உருப்படியும் எவ்வளவு இடத்தை விடுவிக்கும் என்பதைக் காண ஸ்கேன் செய் என்பதை அழுத்தவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Scanning" xml:space="preserve">எடை குறைக்கும் உருப்படிகள் சரிபார்க்கப்படுகின்றன…</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.ScanDone" xml:space="preserve">ஸ்கேன் முடிந்தது. {0} உருப்படிகளை இயக்கலாம்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.ScanFailed" xml:space="preserve">ஸ்கேன் தோல்வியடைந்தது. பதிவைச் சரிபார்க்கவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Stale" xml:space="preserve">ஸ்கேன் முடிவு காலாவதியானதால் எதுவும் இயக்கப்படவில்லை. மீண்டும் ஸ்கேன் செய்யவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.LongRunning" xml:space="preserve">DISM பயன்படுத்தும் உருப்படிகள் பல நிமிடங்கள் அல்லது அதற்கும் மேல் ஆகலாம்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.Available" xml:space="preserve">தயார்</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.NothingToClean" xml:space="preserve">சுத்தம் செய்ய எதுவும் இல்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.Unavailable" xml:space="preserve">கிடைக்கவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Notice" xml:space="preserve">குறிப்பு</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Caution" xml:space="preserve">எச்சரிக்கை</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Irreversible" xml:space="preserve">மீட்க இயலாது</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.EnumerationFailed" xml:space="preserve">பதிவுத் தரவை முழுமையாகப் படிக்க முடியவில்லை, எனவே இதைப் பாதுகாப்பாக மதிப்பிட முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.ProtectedByWindows" xml:space="preserve">இந்தக் கோப்புகளை Windows பாதுகாக்கிறது, எனவே அகற்ற எதுவும் இல்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.LanguageInUse" xml:space="preserve">இது காட்சி மொழி, மொழிப் பட்டியல் அல்லது விசைப்பலகை அமைப்பால் பயன்படுத்தப்படுவதால் அகற்ற முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.UserHiveNotLoaded" xml:space="preserve">சில பயனர்களின் தரவு ஏற்றப்படவில்லை, எனவே பயன்பாட்டைச் சரிபார்க்க முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.NotPresent" xml:space="preserve">இலக்கு நிறுவப்படவில்லை அல்லது கண்டறியப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.ToolFailed" xml:space="preserve">DISM முடிவைப் படிக்கவோ புரிந்துகொள்ளவோ முடியவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.Rejected" xml:space="preserve">பாதுகாப்புச் சோதனை இலக்கை நிராகரித்தது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Succeeded" xml:space="preserve">வெற்றி</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Partial" xml:space="preserve">பகுதியளவு முடிந்தது</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Failed" xml:space="preserve">தோல்வி</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Skipped" xml:space="preserve">தவிர்க்கப்பட்டது</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Cancelled" xml:space="preserve">நிறுத்தப்பட்டது</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Title" xml:space="preserve">எடை குறைப்பை உறுதிப்படுத்து</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Body" xml:space="preserve">தேர்ந்தெடுத்த {0} உருப்படிகள் (மதிப்பிடப்பட்ட இடம்: {1}) இயக்கப்படும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.WithRestorePoint" xml:space="preserve">இயக்கும் முன் மீட்டெடுப்புப் புள்ளி உருவாக்கப்படும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">மீட்டெடுப்புப் புள்ளி உருவாக்கப்படாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Title" xml:space="preserve">மீட்க இயலாத செயலை உறுதிப்படுத்து</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Body" xml:space="preserve">புதுப்பிப்பு திரும்பப்பெறும் தரவு அகற்றப்பட்ட பிறகு, ஏற்கனவே நிறுவிய புதுப்பிப்புகளை இனி நிறுவல் நீக்க முடியாது. இதை மீட்க முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Check" xml:space="preserve">நிறுவிய புதுப்பிப்புகளை இனி நிறுவல் நீக்க முடியாது என்பதைப் புரிந்துகொள்கிறேன்</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Created" xml:space="preserve">மீட்டெடுப்புப் புள்ளி உருவாக்கப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Reused" xml:space="preserve">{0} அன்று உருவாக்கிய தற்போதைய மீட்டெடுப்புப் புள்ளி பயன்படுத்தப்படுகிறது (24 மணிநேரத்துக்குள் புதியது உருவாக்கப்படாது).</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Unavailable.Title" xml:space="preserve">மீட்டெடுப்புப் புள்ளி கிடைக்கவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Unavailable.Body" xml:space="preserve">மீட்டெடுப்புப் புள்ளியை உருவாக்க முடியவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Disabled.Body" xml:space="preserve">கணினிப் பாதுகாப்பு முடக்கத்தில் உள்ளது, எனவே மீட்டெடுப்புப் புள்ளியை உருவாக்க முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.ContinueWithout" xml:space="preserve">அது இல்லாமல் தொடர்</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Abort" xml:space="preserve">நிறுத்து</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.EnableAndRetry" xml:space="preserve">கணினிப் பாதுகாப்பை இயக்கி மீண்டும் முயற்சி</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Running" xml:space="preserve">{1}-இல் {0} இயக்கப்படுகிறது: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Done" xml:space="preserve">முடிந்தது. விடுவிக்கப்பட்ட இடம்: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.DonePartial" xml:space="preserve">சில உருப்படிகள் முடியவில்லை. ஒவ்வொரு உருப்படியின் முடிவையும் சரிபார்க்கவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RebootRequired" xml:space="preserve">மாற்றங்கள் செயல்பட மறுதொடக்கம் தேவை.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Title" xml:space="preserve">சுத்தம் செய்யும் அமைப்புகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Saved" xml:space="preserve">அமைப்புகள் சேமிக்கப்பட்டன.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SaveFailed" xml:space="preserve">அமைப்புகளைச் சேமிக்க முடியவில்லை. பதிவைச் சரிபார்க்கவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Exclusions" xml:space="preserve">விலக்குகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Exclusions.Description" xml:space="preserve">விலக்கிய உருப்படிகள் தொடப்படாமல் விடப்படும்: அவை ஸ்கேன் செய்யப்படாது, நீக்கப்படாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add" xml:space="preserve">சேர்</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Remove" xml:space="preserve">பட்டியலிலிருந்து அகற்று</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import" xml:space="preserve">இறக்குமதி செய்</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export" xml:space="preserve">ஏற்றுமதி செய்</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Title" xml:space="preserve">விலக்குகளை இறக்குமதி செய்</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Title" xml:space="preserve">விலக்குகளை ஏற்றுமதி செய்</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.File" xml:space="preserve">கோப்புகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.File" xml:space="preserve">எடுத்துக்காட்டு: C:\Users\me\notes.txt</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.Folder" xml:space="preserve">கோப்புறைகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.Folder" xml:space="preserve">எடுத்துக்காட்டு: C:\Users\me\Projects (துணைக் கோப்புறைகளும்)</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.Name" xml:space="preserve">நீட்டிப்புகளும் கோப்புப் பெயர்களும்</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.Name" xml:space="preserve">எடுத்துக்காட்டு: *.log அல்லது cache.db</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.CookieDomain" xml:space="preserve">Cookie டொமைன்கள்</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.CookieDomain" xml:space="preserve">எடுத்துக்காட்டு: example.com (துணை டொமைன்களும்)</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Added" xml:space="preserve">சேர்க்கப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Duplicate" xml:space="preserve">ஏற்கனவே பட்டியலில் உள்ளது.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Invalid" xml:space="preserve">வடிவம் செல்லுபடியாகாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.LimitReached" xml:space="preserve">{0} உள்ளீடுகள் என்ற வரம்பு எட்டப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.TooLarge" xml:space="preserve">கோப்பு மிகப் பெரியது.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.Unreadable" xml:space="preserve">கோப்பைப் படிக்க முடியவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.InvalidFormat" xml:space="preserve">கோப்பு வடிவம் செல்லுபடியாகாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.UnsupportedSchema" xml:space="preserve">இந்தப் பதிப்பால் அந்த வடிவத்தைப் படிக்க முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.TooManyEntries" xml:space="preserve">உள்ளீடுகள் மிக அதிகம், எனவே எதுவும் இறக்குமதி செய்யப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Done" xml:space="preserve">{0} சேர்க்கப்பட்டன (நகல்கள்: {1}, நிராகரிக்கப்பட்டவை: {2}).</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Done" xml:space="preserve">{0}-க்கு ஏற்றுமதி செய்யப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Failed" xml:space="preserve">ஏற்றுமதி செய்ய முடியவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Options" xml:space="preserve">கோப்புகள் நீக்கப்படும் முறை</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SecureDelete" xml:space="preserve">பாதுகாப்பான நீக்கம் (ஒருமுறை மேலெழுதி, பிறகு நீக்கு)</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SecureDelete.Note" xml:space="preserve">நீக்கும் முன் கோப்பின் உள்ளடக்கத்தை ஒருமுறை மேலெழுதுகிறது. SSD-களில் முழுமையான அழிப்புக்கு உத்தரவாதம் இல்லை. hard link உள்ள கோப்புகள், சுருக்கப்பட்ட, sparse அல்லது குறியாக்கம் செய்யப்பட்ட கோப்புகள் மேலெழுதாமலே நீக்கப்படும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CreateRestorePoint" xml:space="preserve">எடை குறைக்கும் முன் மீட்டெடுப்புப் புள்ளியை உருவாக்கு</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CreateRestorePoint.Note" xml:space="preserve">கடந்த 24 மணிநேரத்தில் உருவாக்கிய தற்போதைய மீட்டெடுப்புப் புள்ளி மீண்டும் பயன்படுத்தப்படும். கணினிப் பாதுகாப்பு முடக்கத்தில் இருந்தால், உறுதிப்படுத்திய பிறகு அதை இயக்கலாம்.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.OpenSystemRestore" xml:space="preserve">System Restore-ஐத் திற</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders" xml:space="preserve">தனிப்பயன் கோப்புறைகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Description" xml:space="preserve">மேம்பட்ட சுத்தம் உள்ளடக்கத்தைக் காலி செய்யக்கூடிய கோப்புறைகள். Windows, Program Files, ProgramData, பிற பயனர்களின் சுயவிவரங்கள், drive வேர்கள், நற்சான்றிதழ்கள் உள்ள இடங்கள் அனுமதிக்கப்படாது. சேர்த்த கோப்புறைகள் எப்போதும் தேர்ந்தெடுக்கப்படாமல் தொடங்கும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Add" xml:space="preserve">கோப்புறையைச் சேர்…</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Pick" xml:space="preserve">தனிப்பயன் கோப்புறையைத் தேர்ந்தெடு</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns" xml:space="preserve">பயனர் வரையறுத்த நீட்டிப்புகளும் கோப்புப் பெயர்களும்</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.Description" xml:space="preserve">மேம்பட்ட சுத்தத்தின் தேடலில் சேர்க்கப்படும். பொருத்தங்கள் எப்போதும் தேர்ந்தெடுக்கப்படாமல் தொடங்கும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.Hint" xml:space="preserve">எடுத்துக்காட்டு: *.xyz</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.BuiltIn" xml:space="preserve">உள்ளமைந்த வடிவங்கள்</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules" xml:space="preserve">உருப்படிக்கு இயல்புத் தேர்வு</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules.Description" xml:space="preserve">நிலையான சுத்தத்தில் ஒரு உருப்படியின் பரிந்துரைக்கப்பட்ட இயல்புத் தேர்வை மாற்றியமைக்கிறது.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules.Reset" xml:space="preserve">இயல்புக்கு மீட்டமை</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.Default" xml:space="preserve">பரிந்துரையைப் பின்பற்று</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.On" xml:space="preserve">எப்போதும் தேர்ந்தெடு</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.Off" xml:space="preserve">ஒருபோதும் தேர்ந்தெடுக்காதே</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Totals" xml:space="preserve">இதுவரையிலான முடிவுகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Totals.None" xml:space="preserve">இன்னும் எதுவும் இயக்கப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.run-history" xml:space="preserve">Run உரையாடல் வரலாறு</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.recent-items" xml:space="preserve">சமீபத்திய உருப்படிகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.rdp-history" xml:space="preserve">Remote Desktop இணைப்பு வரலாறு</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.explorer-mru" xml:space="preserve">Open மற்றும் Save உரையாடல் வரலாறு</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.search-history" xml:space="preserve">File Explorer தேடல் வரலாறு</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.network-drive-history" xml:space="preserve">Map network drive வரலாறு</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.jump-lists" xml:space="preserve">Jump Lists</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.ie-history" xml:space="preserve">Internet Explorer வரலாறும் தட்டச்சிட்ட முகவரிகளும்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.userassist" xml:space="preserve">இயக்கிய நிரல்களின் வரலாறு (UserAssist)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.user-error-reports" xml:space="preserve">தற்போதைய பயனரின் Windows பிழை அறிக்கைகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.user-temp" xml:space="preserve">பயனரின் தற்காலிகக் கோப்புகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.system-temp" xml:space="preserve">கணினியின் தற்காலிகக் கோப்புகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.crash-dumps" xml:space="preserve">பயனர்-பயன்முறை crash dumps</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.memory-dumps" xml:space="preserve">கணினி நினைவக dumps</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.error-reports" xml:space="preserve">Windows Error Reporting அறிக்கைகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.update-logs" xml:space="preserve">Windows Update orchestrator பதிவுகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.etl-trace-logs" xml:space="preserve">ETL trace பதிவுகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.defender-support-logs" xml:space="preserve">Microsoft Defender கண்டறிதல் பதிவுகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.thumbnail-cache" xml:space="preserve">சிறுபடத் தேக்ககம்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.icon-cache" xml:space="preserve">சின்னத் தேக்ககம்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.font-cache" xml:space="preserve">Windows எழுத்துருத் தேக்ககம்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.remote-desktop-cache" xml:space="preserve">Remote Desktop bitmap தேக்ககம்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.directx-shader-cache" xml:space="preserve">DirectX shader தேக்ககம்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.prefetch" xml:space="preserve">பழைய Prefetch தரவு</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.recycle-bin" xml:space="preserve">Recycle Bin</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.dns-cache" xml:space="preserve">DNS resolver தேக்ககம்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.network-usage" xml:space="preserve">நெட்வொர்க் பயன்பாட்டு வரலாறு</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.invalid-shortcuts" xml:space="preserve">தவறான shortcuts மற்றும் Start மெனு உள்ளீடுகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.invalid-scheduled-tasks" xml:space="preserve">தவறான திட்டமிடப்பட்ட பணிகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.internet-cache" xml:space="preserve">இணையத் தேக்ககம் (WinINet)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.office-addin-cache" xml:space="preserve">Office add-in தேக்ககம்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.cryptnet-url-cache" xml:space="preserve">சான்றிதழ் URL தேக்ககம் (CryptnetUrlCache)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Name" xml:space="preserve">அனாதையான Windows Installer கோப்புகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Description" xml:space="preserve">எந்தத் தயாரிப்பிலும் patch-இலும் பதிவு செய்யப்படாத, 30 நாட்களுக்கு மேல் பழைய, Windows Installer கோப்புறையிலுள்ள .msi மற்றும் .msp கோப்புகளை நீக்குகிறது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Warning" xml:space="preserve">பதிவுத் தரவை முழுமையாகப் படிக்க முடியவில்லை என்றால் இந்த உருப்படி கிடைக்காது. நீக்குவதற்கு சற்று முன் பதிவுகள் மீண்டும் சரிபார்க்கப்படும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Name" xml:space="preserve">புதுப்பிப்பு திரும்பப்பெறும் தரவு</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Description" xml:space="preserve">ஏற்கனவே நிறுவிய புதுப்பிப்புகளைத் திரும்பப்பெறத் தேவையான தரவை அகற்ற DISM /StartComponentCleanup /ResetBase-ஐப் பயன்படுத்துகிறது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Warning" xml:space="preserve">இது இயங்கிய பிறகு, நிறுவிய புதுப்பிப்புகளை இனி நிறுவல் நீக்க முடியாது. இதை மீட்க முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Name" xml:space="preserve">புதுப்பிப்புக் காப்புப் பிரதிகள் (component store)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Description" xml:space="preserve">மாற்றப்பட்ட கூறுகளைச் சுத்தம் செய்ய DISM /StartComponentCleanup-ஐப் பயன்படுத்துகிறது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Warning" xml:space="preserve">காட்டப்படும் இடம் DISM-இன் மதிப்பீடு, உண்மையில் விடுவிக்கப்படுவதிலிருந்து வேறுபடலாம். இதற்குப் பல நிமிடங்கள் ஆகலாம்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateCache.Name" xml:space="preserve">Windows Update பதிவிறக்கத் தேக்ககம்</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateCache.Description" xml:space="preserve">SoftwareDistribution\Download-இன் உள்ளடக்கத்தை நீக்குகிறது. இயங்கும்போது Windows Update மற்றும் BITS சேவைகள் நிறுத்தப்பட்டு, பின்னர் மீட்டமைக்கப்படும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Name" xml:space="preserve">எஞ்சிய patch தேக்ககம்</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Description" xml:space="preserve">Windows Installer சேவையை நிறுத்தி, Installer\$PatchCache$-இன் உள்ளடக்கத்தை நீக்குகிறது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Warning" xml:space="preserve">பிந்தைய பழுதுபார்ப்புகள் அல்லது நிறுவல் நீக்கங்கள் அசல் நிறுவல் ஊடகத்தைக் கேட்கலாம்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Name" xml:space="preserve">மொழி உள்ளீட்டு அம்சங்கள் (ஜப்பானியம்)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Description" xml:space="preserve">DISM Remove-Capability மூலம் ஜப்பானிய Language.Basic அம்சங்களை (எழுத்துப்பிழை, உரைக் கணிப்பு போன்றவை) அகற்றுகிறது. இது IME அல்ல. காட்சி மொழி, மொழிப் பட்டியல் அல்லது விசைப்பலகை அமைப்பால் அந்த மொழி பயன்படுத்தப்படாதபோது மட்டுமே இதை இயக்க முடியும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Warning" xml:space="preserve">இந்த மொழி அம்சங்களை மீண்டும் பயன்படுத்த, அவற்றை மீண்டும் சேர்க்க வேண்டும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Name" xml:space="preserve">மொழி உள்ளீட்டு அம்சங்கள் (கொரியம்)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Description" xml:space="preserve">DISM Remove-Capability மூலம் கொரிய Language.Basic அம்சங்களை (எழுத்துப்பிழை, உரைக் கணிப்பு போன்றவை) அகற்றுகிறது. இது IME அல்ல. காட்சி மொழி, மொழிப் பட்டியல் அல்லது விசைப்பலகை அமைப்பால் அந்த மொழி பயன்படுத்தப்படாதபோது மட்டுமே இதை இயக்க முடியும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Warning" xml:space="preserve">இந்த மொழி அம்சங்களை மீண்டும் பயன்படுத்த, அவற்றை மீண்டும் சேர்க்க வேண்டும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Name" xml:space="preserve">மொழி உள்ளீட்டு அம்சங்கள் (சீனம், பாரம்பரியம்)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Description" xml:space="preserve">DISM Remove-Capability மூலம் பாரம்பரிய சீன Language.Basic அம்சங்களை (எழுத்துப்பிழை, உரைக் கணிப்பு போன்றவை) அகற்றுகிறது. இது IME அல்ல. காட்சி மொழி, மொழிப் பட்டியல் அல்லது விசைப்பலகை அமைப்பால் அந்த மொழி பயன்படுத்தப்படாதபோது மட்டுமே இதை இயக்க முடியும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Warning" xml:space="preserve">இந்த மொழி அம்சங்களை மீண்டும் பயன்படுத்த, அவற்றை மீண்டும் சேர்க்க வேண்டும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Name" xml:space="preserve">மொழி உள்ளீட்டு அம்சங்கள் (சீனம், எளிமையாக்கப்பட்டது)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Description" xml:space="preserve">DISM Remove-Capability மூலம் எளிமையாக்கப்பட்ட சீன Language.Basic அம்சங்களை (எழுத்துப்பிழை, உரைக் கணிப்பு போன்றவை) அகற்றுகிறது. இது IME அல்ல. காட்சி மொழி, மொழிப் பட்டியல் அல்லது விசைப்பலகை அமைப்பால் அந்த மொழி பயன்படுத்தப்படாதபோது மட்டுமே இதை இயக்க முடியும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Warning" xml:space="preserve">இந்த மொழி அம்சங்களை மீண்டும் பயன்படுத்த, அவற்றை மீண்டும் சேர்க்க வேண்டும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Name" xml:space="preserve">Windows உதவிக் கோப்புகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Description" xml:space="preserve">Windows உதவிக் கோப்புகளை நீக்குகிறது. Windows 10/11-இல் இவை Windows Resource Protection-ஆல் பாதுகாக்கப்படுவதால், பொதுவாக நீக்க எதுவும் இருக்காது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Warning" xml:space="preserve">Windows பாதுகாக்கும் அல்லது TrustedInstaller உரிமையாளராகக் கொண்ட கோப்புகள் தொடப்படாமல் விடப்படும். உரிமை ஒருபோதும் எடுத்துக்கொள்ளப்படாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Name" xml:space="preserve">இயல்புச் சுவர்ப்படங்கள்</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Description" xml:space="preserve">Windows-இன் இயல்புச் சுவர்ப்படங்களை நீக்குகிறது. Windows 10/11-இல் இவை Windows Resource Protection-ஆல் பாதுகாக்கப்படுவதால், பொதுவாக நீக்க எதுவும் இருக்காது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Warning" xml:space="preserve">Windows பாதுகாக்கும் அல்லது TrustedInstaller உரிமையாளராகக் கொண்ட கோப்புகள் தொடப்படாமல் விடப்படும். உரிமை ஒருபோதும் எடுத்துக்கொள்ளப்படாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleMusic.Name" xml:space="preserve">மாதிரி இசை</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleMusic.Description" xml:space="preserve">Windows 7-உடன் வந்த அறியப்பட்ட மாதிரிப் பாடல்களை மட்டும் நீக்குகிறது. கோப்புறையிலுள்ள பிற கோப்புகள் தொடப்படாமல் விடப்படும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SamplePictures.Name" xml:space="preserve">மாதிரிப் படங்கள்</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SamplePictures.Description" xml:space="preserve">Windows 7-உடன் வந்த அறியப்பட்ட மாதிரிப் படங்களை மட்டும் நீக்குகிறது. கோப்புறையிலுள்ள பிற கோப்புகள் தொடப்படாமல் விடப்படும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleVideos.Name" xml:space="preserve">மாதிரி வீடியோக்கள்</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleVideos.Description" xml:space="preserve">Windows 7-உடன் வந்த அறியப்பட்ட மாதிரி வீடியோவை மட்டும் நீக்குகிறது. கோப்புறையிலுள்ள பிற கோப்புகள் தொடப்படாமல் விடப்படும்.</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Expand" xml:space="preserve">{0}-ஐ விரி அல்லது சுருக்கு</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Error" xml:space="preserve">நீக்குவதை முடிக்க இயலவில்லை. பதிவைச் சரிபார்க்கவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SaveSuppressed" xml:space="preserve">அமைப்புகளைப் படிக்க முடியவில்லை, எனவே அசல் கோப்பைப் பாதுகாக்க சேமிப்பு முடக்கப்பட்டுள்ளது. மாற்றங்கள் இந்த அமர்வில் மட்டுமே பொருந்தும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SystemRestore.Failed" xml:space="preserve">System Restore-ஐத் திறக்க முடியவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Done" xml:space="preserve">{0} விலக்குகளில் சேர்க்கப்பட்டது. அமைப்புகள் மாறியுள்ளன, எனவே மீண்டும் ஸ்கேன் செய்யவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Duplicate" xml:space="preserve">{0} ஏற்கனவே விலக்கப்பட்டுள்ளது.</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Failed" xml:space="preserve">{0}-ஐ விலக்குகளில் சேர்க்க முடியவில்லை (வடிவம் செல்லாது அல்லது வரம்பு எட்டப்பட்டது).</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.SaveFailed" xml:space="preserve">{0} விலக்குகளில் சேர்க்கப்பட்டது, ஆனால் சேமிக்க முடியவில்லை. பயன்பாட்டை மூடும் வரை மட்டுமே இது பொருந்தும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.NoTarget" xml:space="preserve">ஸ்கேன் செய்ய ஒரு drive அல்லது தனிப்பயன் கோப்புறையைத் தேர்ந்தெடுக்கவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Filter.All" xml:space="preserve">அனைத்து வகைகளையும் காட்டு</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Action.IgnoreFolder" xml:space="preserve">இந்தக் கோப்புறையைப் புறக்கணி</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Kinds" xml:space="preserve">வகை வாரியான முடிவுகள்</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Failed" xml:space="preserve">நீக்கும்போது பிழை ஏற்பட்டது. பதிவைச் சரிபார்க்கவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.UserScopeUnavailable" xml:space="preserve">பயனர் வரம்புக்குட்பட்ட விதிகளைப் பயன்படுத்த முடியாது (ஊடாடும் பயனரும் உயர்த்தப்பட்ட பயனரும் வேறுபடுகின்றனர், அல்லது உறுதிப்படுத்த முடியவில்லை)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.CustomFolderRejectedAtRun" xml:space="preserve">இயக்க நேரச் சோதனையில் தனிப்பயன் கோப்புறை நிராகரிக்கப்பட்டது</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseOutsideProfile" xml:space="preserve">சூழல் மாறி %{0}% தற்போதைய பயனரின் சுயவிவரத்துக்கு வெளியே சுட்டுகிறது (அல்லது சுயவிவரத்தைச் சரிபார்க்க முடியவில்லை), எனவே இந்த இலக்கு பயன்படுத்தப்படாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseProtectedLocation" xml:space="preserve">சூழல் மாறி %{0}% பாதுகாக்கப்பட்ட இடத்தைச் சுட்டுகிறது (இயக்கி வேர், Windows, Program Files, ProgramData அல்லது வேறொரு பயனரின் சுயவிவரம்), எனவே இந்த இலக்கு பயன்படுத்தப்படாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseMachineMismatch" xml:space="preserve">சூழல் மாறி %{0}% கணினியின் இயல்புநிலை இடத்திலிருந்து வேறுபடுகிறது, எனவே இந்த இலக்கு பயன்படுத்தப்படாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.CustomFolderRejected" xml:space="preserve">தனிப்பயன் கோப்புறை நிராகரிக்கப்பட்டது ({0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceStopFailed" xml:space="preserve">ஒரு சேவையை நிறுத்த முடியாததால் எதுவும் நீக்கப்படவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DeleteFailed" xml:space="preserve">நீக்குவதை முடிக்க இயலவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceResumeFailedList" xml:space="preserve">ஒரு சேவையை அதன் அசல் நிலைக்குத் திருப்ப முடியவில்லை ({0}): {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceResumeFailed" xml:space="preserve">ஒரு சேவையை அதன் அசல் நிலைக்குத் திருப்ப முடியவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.UserRegistryOpenFailed" xml:space="preserve">பயனரின் registry-ஐத் திறக்க முடியவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.HandlerUnavailable" xml:space="preserve">handler {0} கிடைக்கவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.PathReason" xml:space="preserve">{0}: {1}{2}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniContentUnverified" xml:space="preserve"> (கோப்பின் உள்ளடக்கத்தைச் சரிபார்க்க முடியவில்லை)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ExpansionTruncated" xml:space="preserve">விரிவாக்கிய இலக்குகள் வரம்பை எட்டின ({0}); மீதமுள்ளவை சேர்க்கப்படவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbOpenFailed" xml:space="preserve">database-ஐத் திறக்க முடியவில்லை (SQLite {0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbConfigFailed" xml:space="preserve">பாதுகாப்பு அமைப்பைப் பயன்படுத்த முடியாததால் நிறுத்தப்பட்டது ({0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbSqliteError" xml:space="preserve">SQLite பிழை {0}: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbPinFailed" xml:space="preserve">database-ஐப் பாதுகாப்பாகப் பிணைக்க முடியவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbHardLinked" xml:space="preserve">hard link உள்ள database இலக்கு அல்ல</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbTooLarge" xml:space="preserve">database இலக்காக இருக்க மிகப் பெரியது</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbIdentityUnverified" xml:space="preserve">database கோப்பைச் சரிபார்க்க முடியவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbJournalPending" xml:space="preserve">செயலாக்கப்படாத journal இருப்பதால் தவிர்க்கப்பட்டது (பயன்பாட்டில் உள்ளது அல்லது மீட்கப்படவில்லை)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbIntegrityFailed" xml:space="preserve">database ஒருமைப்பாட்டுச் சோதனை தோல்வியடைந்தது</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbVirtualTable" xml:space="preserve">virtual table உள்ள database இலக்கு அல்ல</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbUnknownTable" xml:space="preserve">எதிர்பார்த்த table {0} இல்லை (அறியப்படாத schema)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbUnknownColumn" xml:space="preserve">table {0}-இல் எதிர்பார்த்த column {1} இல்லை (அறியப்படாத schema)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniUnconvertible" xml:space="preserve">கோப்பை UTF-8, UTF-16 அல்லது கணினியின் ANSI code page ஆக இழப்பின்றி மாற்ற முடியாததால் தவிர்க்கப்பட்டது</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniTooLarge" xml:space="preserve">கோப்பு 1 MB-ஐ விடப் பெரியதால் தவிர்க்கப்பட்டது</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniAmbiguousSection" xml:space="preserve">பல sections ஒரே பெயரைக் கொண்டிருப்பதால் இலக்கை அடையாளம் காண முடியாது, எனவே மாற்றப்படவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniRestored" xml:space="preserve">{0} (அசல் உரை மீட்டமைக்கப்பட்டது)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniNotRestored" xml:space="preserve">{0} (அசல் உரையை மீட்டமைக்க முடியவில்லை, உள்ளடக்கம் நிச்சயமற்றது)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniChangedWhileReading" xml:space="preserve">படிக்கும்போது உள்ளடக்கம் மாறியது</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniLengthChangedWhileReading" xml:space="preserve">படிக்கும்போது நீளம் மாறியது</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniLengthChangedBeforeWrite" xml:space="preserve">எழுதுவதற்கு முன் நீளம் மாறியது</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniVerifyMismatch" xml:space="preserve">எழுதிய பிறகு மீண்டும் படித்தது பொருந்தவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistrySymlink" xml:space="preserve">registry symbolic link என்பதால் விலக்கப்பட்டது: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryDepthLimit" xml:space="preserve">பாதுகாப்பான மறுநிகழ்வு ஆழ வரம்பு மீறப்பட்டது</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DnsFlushFailed" xml:space="preserve">ipconfig /flushdns தோல்வியடைந்தது: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DnsFlushError" xml:space="preserve">ipconfig /flushdns-ஐ இயக்க முடியவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeQueryFailed" xml:space="preserve">{0}-ஐக் கேட்க முடியவில்லை (Win32={1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeUrlHistoryFailed" xml:space="preserve">URL வரலாற்றை அழிக்க முடியவில்லை (HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeClearFailed" xml:space="preserve">{0}-ஐ அழிக்க முடியவில்லை (Win32={1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleQueryFailed" xml:space="preserve">Recycle Bin-ஐக் கேட்க முடியவில்லை (HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleVerifyFailed" xml:space="preserve">காலி செய்த பிறகு Recycle Bin-ஐச் சரிபார்க்க முடியவில்லை (HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleRemaining" xml:space="preserve">Recycle Bin-இல் {0} உருப்படிகள் மீதமுள்ளன (HRESULT=0x{1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDpsResumeFailed" xml:space="preserve">DPS சேவையை அதன் அசல் நிலைக்குத் திருப்ப முடியவில்லை: {0}. Windows Services-இல் Diagnostic Policy Service-ஐத் தொடங்கவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDeleteFailed" xml:space="preserve">நெட்வொர்க் பயன்பாட்டுத் தரவை நீக்க முடியவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDpsStopUnverified" xml:space="preserve">DPS சேவை நிறுத்தப்பட்டதை உறுதிப்படுத்த முடியாததால் நெட்வொர்க் பயன்பாட்டுத் தரவு நீக்கப்படவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutLocationOpenFailed" xml:space="preserve">shortcut இடத்தைப் பாதுகாப்பாகத் திறக்க முடியவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutsUnreadable" xml:space="preserve">{0} shortcuts-ஐப் படிக்க முடியவில்லை, அவை சேர்க்கப்படவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutDeleteFailed" xml:space="preserve">தவறான shortcuts-ஐ நீக்க முடியவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TasksUnreadable" xml:space="preserve">{0} பணிகளைப் படிக்க முடியவில்லை, அவை சேர்க்கப்படவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TaskSchedulerQueryFailed" xml:space="preserve">Task Scheduler-ஐக் கேட்க முடியவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TaskSchedulerOperateFailed" xml:space="preserve">Task Scheduler-இல் செயல்பட முடியவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEmptyDescription" xml:space="preserve">மீட்டெடுப்புப் புள்ளியின் விளக்கம் காலியாக உள்ளது.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointStateUnknown" xml:space="preserve">மீட்டெடுப்புப் புள்ளியின் நிலையைச் சரிபார்க்க முடியவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointProtectionDisabled" xml:space="preserve">கணினிப் பாதுகாப்பு முடக்கத்தில் உள்ளது.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreateUninterpretable" xml:space="preserve">மீட்டெடுப்புப் புள்ளியை உருவாக்கிய முடிவைப் புரிந்துகொள்ள முடியவில்லை (exit code {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreateFailed" xml:space="preserve">மீட்டெடுப்புப் புள்ளியை உருவாக்குவது தோல்வியடைந்தது (return value {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointVerifyFailed" xml:space="preserve">உருவாக்கிய பிறகு மீட்டெடுப்புப் புள்ளியைச் சரிபார்க்க முடியவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCancelled" xml:space="preserve">மீட்டெடுப்புப் புள்ளியை உருவாக்குவது ரத்து செய்யப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableFailed" xml:space="preserve">கணினிப் பாதுகாப்பை இயக்க முடியவில்லை (exit code {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableVerifyFailed" xml:space="preserve">பாதுகாப்பை இயக்கிய பிறகான நிலையைச் சரிபார்க்க முடியவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnabled" xml:space="preserve">கணினிப் பாதுகாப்பு இயக்கப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableNotEffective" xml:space="preserve">கணினிப் பாதுகாப்பு இயக்கப்படவில்லை (Group Policy-ஆல் முடக்கப்பட்டிருக்கலாம்).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableCancelled" xml:space="preserve">கணினிப் பாதுகாப்பை இயக்குவது ரத்து செய்யப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreated" xml:space="preserve">மீட்டெடுப்புப் புள்ளி உருவாக்கப்பட்டது.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointReused" xml:space="preserve">கடந்த 24 மணிநேரத்தில் உருவாக்கிய மீட்டெடுப்புப் புள்ளி ({0}) பயன்படுத்தப்படுகிறது.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointNoneAvailable" xml:space="preserve">மீட்டெடுப்புப் புள்ளி உருவாக்கப்படவில்லை, கடந்த 24 மணிநேரத்தில் எதுவும் இல்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointExitCode" xml:space="preserve">Exit code {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointProtectionOutputInvalid" xml:space="preserve">பாதுகாப்பு நிலை output செல்லாதது</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputInvalid" xml:space="preserve">மீட்டெடுப்புப் புள்ளி output செல்லாதது</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputUnknownLine" xml:space="preserve">output-இல் அறியப்படாத வரி உள்ளது</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputIncomplete" xml:space="preserve">output முழுமையடையவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimStale" xml:space="preserve">ஸ்கேன் முடிவு காலாவதியானதால் எதுவும் இயக்கப்படவில்லை. மீண்டும் ஸ்கேன் செய்யவும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimNothingSelected" xml:space="preserve">இயக்கக்கூடிய உருப்படி எதுவும் தேர்ந்தெடுக்கப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimCanceledNotRun" xml:space="preserve">ரத்து செய்யப்பட்டதால் இயக்கப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimRestorePointUnavailable" xml:space="preserve">மீட்டெடுப்புப் புள்ளி கிடைக்காததால் இயக்கப்படவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimItemUnavailable" xml:space="preserve">உருப்படி கிடைக்காததால் இயக்கப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimNeedsTwoStep" xml:space="preserve">இதை மீட்க இயலாது, இரண்டு-படி உறுதிப்படுத்தலும் இல்லை, எனவே இயக்கப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimCanceledPartial" xml:space="preserve">ரத்து செய்யப்பட்டது. பகுதியளவு செயலாக்கப்பட்டிருக்கலாம்.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimFailed" xml:space="preserve">தோல்வி: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimRecheckFailed" xml:space="preserve">இயக்குவதற்கு சற்று முன் செய்த மறுசோதனை தோல்வியடைந்ததால் எதுவும் நீக்கப்படவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimServiceResumeFailed" xml:space="preserve">ஒரு சேவையை அதன் அசல் நிலைக்குத் திருப்ப முடியவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimBackupIncluded" xml:space="preserve">புதுப்பிப்பு திரும்பப்பெறல் சுத்தத்தின் ஒரு பகுதியாக முடிந்தது.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimBackupSkipped" xml:space="preserve">புதுப்பிப்பு திரும்பப்பெறல் சுத்தம் வெற்றிபெறாததால் இயக்கப்படவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimOutcome" xml:space="preserve">{0} கோப்புகள் நீக்கப்பட்டன ({1} bytes). வைத்திருந்தவை {2}, தோல்வி {3}, நிராகரிக்கப்பட்டவை {4}.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimOutcomeExample" xml:space="preserve">{0} கோப்புகள் நீக்கப்பட்டன ({1} bytes). வைத்திருந்தவை {2}, தோல்வி {3}, நிராகரிக்கப்பட்டவை {4}. எடுத்துக்காட்டு: {5}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ComponentStoreCleanup" xml:space="preserve">component store சுத்தம் செய்யப்படுகிறது</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageRemoval" xml:space="preserve">{0}-க்கான மொழி உள்ளீட்டு அம்சங்கள் அகற்றப்படுகின்றன</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationFailed" xml:space="preserve">{0} தோல்வியடைந்தது (exit code {1}). {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationUninterpretable" xml:space="preserve">{0}-இன் முடிவைப் புரிந்துகொள்ள முடியவில்லை (exit code {1}, ஆனால் வெற்றி output இல்லை).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationDone" xml:space="preserve">{0} முடிந்தது.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationDoneReboot" xml:space="preserve">{0} முடிந்தது (மறுதொடக்கம் தேவை).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotTarget" xml:space="preserve">{0} அகற்றக்கூடிய மொழி அல்ல.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotRemovable" xml:space="preserve">{0}-க்கான மொழி உள்ளீட்டு அம்சங்களை இப்போது அகற்ற முடியாது: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotInstalled" xml:space="preserve">நிறுவப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageInUse" xml:space="preserve">இது UI மொழி, மொழிப் பட்டியல் அல்லது விசைப்பலகை அமைப்பால் பயன்படுத்தப்படுகிறது.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotUsed" xml:space="preserve">எந்தப் பயனரின் மொழி அமைப்புகளாலும் இது பயன்படுத்தப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderProtected" xml:space="preserve">இதில் Lumin4ti அல்லது பாதுகாக்கப்பட்ட இடம் உள்ளது</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedRootNotLocal" xml:space="preserve">இது உள்ளூர் கோப்புறைக்கான முழுப் பாதை அல்ல</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedRootProtected" xml:space="preserve">பாதுகாக்கப்பட்ட இடம் என்பதால் ஸ்கேன் செய்யப்படவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ExportLinkRefused" xml:space="preserve">இணைப்புக்கு ஏற்றுமதி செய்ய முடியாது</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerNotEnumerated" xml:space="preserve">ஸ்கேன் செய்தபோது பதிவுகள் பட்டியலிடப்படவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerNoSource" xml:space="preserve">பதிவுகளைப் பட்டியலிட மூலம் எதுவும் இல்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerEnumerationException" xml:space="preserve">பதிவுகளைப் பட்டியலிடும்போது விதிவிலக்கு ஏற்பட்டது: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerEnumerationFailed" xml:space="preserve">Windows Installer பதிவுகளைப் பட்டியலிட முடியவில்லை: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerFolderUnresolved" xml:space="preserve">Installer கோப்புறையைப் பாதுகாப்பாகத் தீர்மானிக்க முடியாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageSettingsUnreadable" xml:space="preserve">பயனர்களின் மொழி அமைப்புகளை முழுமையாகப் படிக்க முடியாததால் தவிர்க்கப்பட்டது: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageListUnavailable" xml:space="preserve">மொழி உள்ளீட்டு அம்சங்களின் பட்டியலைப் பெறவோ புரிந்துகொள்ளவோ முடியவில்லை (வெளியேறும் குறியீடு {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderNotScannable" xml:space="preserve">இணைப்பு அல்லது பாதுகாப்பு காரணமாக இந்தக் கோப்புறையைப் பாதுகாப்பாக ஸ்கேன் செய்ய முடியவில்லை.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">மாதிரிப் பதிவுசெய்த தொலைக்காட்சி</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">Windows 7-உடன் வந்த அறியப்பட்ட மாதிரிப் பதிவை மட்டும் நீக்குகிறது. கோப்புறையிலுள்ள பிற கோப்புகள் தொடப்படாமல் விடப்படும்.</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Internet Explorer பயன்பாட்டுத் தேக்ககம் (AppCache)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-ime-cache" xml:space="preserve">Microsoft IME தேக்ககமும் பிழை அறிக்கைகளும்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-office-solution-packages" xml:space="preserve">Office தீர்வுத் தொகுப்புகளின் தேக்ககம்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-delivery-optimization-cache" xml:space="preserve">Delivery Optimization தேக்ககம்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-etl-logs" xml:space="preserve">ETL trace பதிவுகள் (Logs, LogFiles கோப்புறைகள்)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-system-temp" xml:space="preserve">Windows கணினி சேவைகளின் தற்காலிக கோப்புகள் (SystemTemp)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-icon-cache-root" xml:space="preserve">பழைய ஐகான் தற்காலிக சேமிப்புக் கோப்பு (IconCache.db)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.app-cursor-cached-data" xml:space="preserve">Cursor தேக்கிய தரவு (CachedData)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.package-npm-cache" xml:space="preserve">npm தேக்ககம் (பயனர் கோப்புறையிலுள்ள .npm)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-shared" xml:space="preserve">Google Chrome பகிரப்பட்ட தேக்ககங்களும் தற்காலிகக் கோப்புகளும்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-edge-shared" xml:space="preserve">Microsoft Edge பகிரப்பட்ட தேக்ககங்களும் தற்காலிகக் கோப்புகளும்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-vivaldi-shared" xml:space="preserve">Vivaldi பகிரப்பட்ட தேக்ககங்களும் தற்காலிகக் கோப்புகளும்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-brave-shared" xml:space="preserve">Brave பகிரப்பட்ட தேக்ககங்களும் தற்காலிகக் கோப்புகளும்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-shared" xml:space="preserve">Google Chrome Beta பகிரப்பட்ட தேக்ககங்களும் தற்காலிகக் கோப்புகளும்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-shared" xml:space="preserve">Google Chrome Dev பகிரப்பட்ட தேக்ககங்களும் தற்காலிகக் கோப்புகளும்</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-rebuild" xml:space="preserve">Google Chrome Safe Browsing மற்றும் மாதிரித் தரவு</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-edge-rebuild" xml:space="preserve">Microsoft Edge Safe Browsing மற்றும் மாதிரித் தரவு</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-vivaldi-rebuild" xml:space="preserve">Vivaldi Safe Browsing மற்றும் மாதிரித் தரவு</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-brave-rebuild" xml:space="preserve">Brave Safe Browsing மற்றும் மாதிரித் தரவு</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-rebuild" xml:space="preserve">Google Chrome Beta Safe Browsing மற்றும் மாதிரித் தரவு</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-rebuild" xml:space="preserve">Google Chrome Dev Safe Browsing மற்றும் மாதிரித் தரவு</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-comet-rebuild" xml:space="preserve">Comet Safe Browsing மற்றும் மாதிரித் தரவு</x:String>
 </ResourceDictionary>

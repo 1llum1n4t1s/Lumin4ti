@@ -90,8 +90,6 @@
   <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">自定义</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">DISM 输出中未找到 Recall 状态。请查看日志了解详情。</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">无法解析 DISM 返回的 Recall 状态。请查看日志了解详情。</x:String>
-  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">此任务由另一位 Windows 用户注册，无法修改。</x:String>
-  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">无法验证已注册任务的所有者，因此无法修改。</x:String>
 
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">批量更新已安装的应用（winget）</x:String>
@@ -118,24 +116,10 @@
   <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">使用 WSReset 重置 Microsoft Store 缓存。用于 Store 无法打开、下载无进展或反复出现“重试”错误的标准修复方法。应用和账户信息不会被删除。完成后 Store 应用可能会自动打开。</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">SSD TRIM 与可用空间整合</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">对所有卷执行向 SSD 发送 TRIM 通知（/L）和可用空间整合（/X），以保持 SSD 写入性能并整理可用空间碎片。视驱动器布局而定，可能需要几分钟到几十分钟。运行期间可继续使用电脑。</x:String>
-  <x:String x:Key="Text.Action.cleanup-user-temp.Label" xml:space="preserve">删除用户临时文件和缓存</x:String>
-  <x:String x:Key="Text.Action.cleanup-user-temp.Desc" xml:space="preserve">删除临时文件、崩溃转储、着色器和网络缓存，以及可重新生成的 IME、Office 和 Outlook 缓存。不会删除浏览记录、最近文件记录或应用设置。正在使用的文件会被跳过。</x:String>
-  <x:String x:Key="Text.Action.cleanup-system-temp.Label" xml:space="preserve">删除系统临时文件和日志</x:String>
-  <x:String x:Key="Text.Action.cleanup-system-temp.Desc" xml:space="preserve">删除 Windows 临时文件夹、已知 Windows 日志位置中的 ETL 跟踪日志、安装和服务日志、传递优化缓存以及 Microsoft Defender 诊断日志。Defender 的检测与处置历史会保留。ETL 仅限 Windows Logs、LogFiles、Panther 和 Diagnosis 下的 *.etl，不会扫描整个驱动器。传递优化服务会暂时停止并在完成后恢复。请勿在调查问题时运行。</x:String>
-  <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">删除应用缓存和日志</x:String>
-  <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">删除应用缓存、GPU 着色器缓存、崩溃报告和工具日志。不会删除 WebStorage、虚拟机包、设置或登录状态。</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">删除开发工具的包缓存</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">仅删除 npm、pnpm、NuGet、pip、Yarn、Gradle、Bun、uv 和 Cargo 可重新下载的缓存。不会删除 uv 管理的 Python、Maven 本地产物、凭据、设置或通用 .cache 目录。</x:String>
-  <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">删除浏览器缓存</x:String>
-  <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">删除 Chromium 网页和着色器缓存、Service Worker 缓存存储、崩溃报告及扩展临时数据。不会删除 Service Worker 注册、DRM 组件、书签、密码或登录状态。</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">重建图标、缩略图和字体缓存</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">删除文件资源管理器的图标缓存、缩略图缓存和字体缓存，让 Windows 重新生成。这是图标空白或错乱、缩略图不更新、文字显示异常时的常规修复手段。不会强制关闭资源管理器。对于选定且仍在使用的缓存，将在下次Windows启动时从可信安装重新枚举并尝试删除。最多在7天内执行3次；仍被锁定的目标会保留，结果会写入日志。缓存重建期间显示会暂时变慢。</x:String>
-  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">删除 Windows 更新的下载缓存</x:String>
-  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">仅删除 SoftwareDistribution\Download 中可重新下载的文件。不会删除更新历史或 catroot2。相关服务会在之后恢复。</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">删除并重建预读数据和搜索索引</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">删除用于加快应用启动的预读数据（Prefetch）和文件资源管理器的搜索索引，让 Windows 重新生成。适用于搜索不出结果或总是命中过期文件的情况。在重建完成前的数十分钟至数小时内，应用启动和搜索都会变慢，后台 CPU 占用也会升高。</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">注册登录时自动执行清理的任务</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">登录时以可用的最高权限执行所选缓存和日志清理，因此也能运行需要管理员权限或停止服务的项目。它使用与“运行”按钮相同的清单，并且启动时不会显示 UAC 提示。正在使用的文件会被跳过。关闭后会删除任务。</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">内存压缩</x:String>
@@ -200,7 +184,6 @@
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">禁用 Edge 后台进程（节省 100–300 MB）</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">通过策略禁用 Edge 后台模式和 Startup Boost。如果很少使用 Edge，可释放约 100–300 MB 内存。Edge 启动可能稍慢，扩展通知也可能停止。将此项设为 OFF 可删除策略并恢复 Edge 默认设置。</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">选择要删除的对象</x:String>
-  <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">选择登录时运行的项目</x:String>
   <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">上次保存此选择失败（请查看日志）。</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">更新</x:String>
@@ -223,10 +206,548 @@
   <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">开发版本</x:String>
   <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">无法获取版本</x:String>
   <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">上次保存语言和更新设置失败（请查看日志）。</x:String>
-  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">无法读取设置。为保护原文件，已停止保存，也不会执行登录时清理。更改仅在本次运行期间有效。</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">无法读取设置。为保护原文件，已停止保存。更改仅在本次运行期间有效。</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">上次检查时未找到目标。</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">重新打开列表即可更新。执行时也会包含未被排除的新目标。</x:String>
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">正在处理</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">请等待操作完成。</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">请等待取消和清理完成。</x:String>
+
+  <!-- ===== Cleanup (standard / advanced / slim / settings) ===== -->
+
+  <x:String x:Key="Text.Cleanup.Tab.Common" xml:space="preserve">标准</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Advanced" xml:space="preserve">高级</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Slim" xml:space="preserve">瘦身</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Settings" xml:space="preserve">设置</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Other" xml:space="preserve">其他</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Scan" xml:space="preserve">扫描</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Rescan" xml:space="preserve">重新扫描</x:String>
+  <x:String x:Key="Text.Cleanup.Action.CancelScan" xml:space="preserve">停止扫描</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Clean" xml:space="preserve">删除所选项目</x:String>
+  <x:String x:Key="Text.Cleanup.Action.ExportText" xml:space="preserve">导出为文本</x:String>
+  <x:String x:Key="Text.Cleanup.Action.OpenLocation" xml:space="preserve">打开位置</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Ignore" xml:space="preserve">忽略（从今后的扫描中排除）</x:String>
+  <x:String x:Key="Text.Cleanup.Select.Recommended" xml:space="preserve">推荐</x:String>
+  <x:String x:Key="Text.Cleanup.Select.All" xml:space="preserve">全选</x:String>
+  <x:String x:Key="Text.Cleanup.Select.None" xml:space="preserve">全部取消</x:String>
+  <x:String x:Key="Text.Cleanup.Select.Invert" xml:space="preserve">反选</x:String>
+  <x:String x:Key="Text.Cleanup.Filter.Placeholder" xml:space="preserve">筛选项目</x:String>
+  <x:String x:Key="Text.Cleanup.Filter.HideEmpty" xml:space="preserve">隐藏没有可删除内容的项目</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Name" xml:space="preserve">项目</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Category" xml:space="preserve">分类</x:String>
+  <x:String x:Key="Text.Cleanup.Column.State" xml:space="preserve">状态</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Files" xml:space="preserve">文件数</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Size" xml:space="preserve">大小</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Impact" xml:space="preserve">影响</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Folder" xml:space="preserve">文件夹</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Modified" xml:space="preserve">修改时间</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Rule" xml:space="preserve">规则</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Safety" xml:space="preserve">安全性</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Results" xml:space="preserve">扫描结果</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Progress" xml:space="preserve">扫描进度</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.SelectRow" xml:space="preserve">选择 {0}</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Row" xml:space="preserve">{0}，{1}，{2}</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Windows" xml:space="preserve">Windows 系统</x:String>
+  <x:String x:Key="Text.Cleanup.Category.StoreApps" xml:space="preserve">Store 应用</x:String>
+  <x:String x:Key="Text.Cleanup.Category.BrowserCache" xml:space="preserve">浏览器缓存</x:String>
+  <x:String x:Key="Text.Cleanup.Category.BrowserTrace" xml:space="preserve">浏览器历史记录和痕迹</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Cookies" xml:space="preserve">Cookie</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Traces" xml:space="preserve">使用痕迹</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Components" xml:space="preserve">Windows 组件</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Apps" xml:space="preserve">其他应用</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Custom" xml:space="preserve">自定义文件夹</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Cache" xml:space="preserve">{0} 缓存</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Log" xml:space="preserve">{0} 日志</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Temp" xml:space="preserve">{0} 临时文件</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Dump" xml:space="preserve">{0} 转储文件</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Thumbnail" xml:space="preserve">{0} 缩略图</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Shader" xml:space="preserve">{0} 着色器缓存</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Report" xml:space="preserve">{0} 报告</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.History" xml:space="preserve">{0} 历史记录</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Form" xml:space="preserve">{0} 表单数据</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Session" xml:space="preserve">{0} 会话数据</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Cookies" xml:space="preserve">{0} Cookie</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Recent" xml:space="preserve">{0} 最近使用的项目</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Backup" xml:space="preserve">{0} 备份</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Downloads" xml:space="preserve">{0} 已下载的文件</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Other" xml:space="preserve">{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Junk" xml:space="preserve">垃圾文件</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Trace" xml:space="preserve">使用痕迹</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Signout" xml:space="preserve">会退出登录</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Rebuild" xml:space="preserve">需要重建</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.UserFiles" xml:space="preserve">你的文件</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Trace.Warning" xml:space="preserve">你的使用记录将会丢失。</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Signout.Warning" xml:space="preserve">删除 Cookie 可能会使你退出网站的登录。</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Rebuild.Warning" xml:space="preserve">删除后首次使用时，由于需要重新生成数据，可能会变慢。</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.UserFiles.Warning" xml:space="preserve">包含无法重新下载的你的文件。请逐项选择；删除前会再次请你确认。</x:String>
+  <x:String x:Key="Text.Cleanup.Warning.NotRecommended" xml:space="preserve">此项目默认不推荐。选择之前，请先确认它会删除什么。</x:String>
+  <x:String x:Key="Text.Cleanup.Warning.JumpListPins" xml:space="preserve">删除跳转列表时，也会同时删除你固定到任务栏和“开始”菜单的项目。</x:String>
+  <x:String x:Key="Text.Cleanup.State.Found" xml:space="preserve">可删除</x:String>
+  <x:String x:Key="Text.Cleanup.State.Empty" xml:space="preserve">没有可删除的内容</x:String>
+  <x:String x:Key="Text.Cleanup.State.Unmeasurable" xml:space="preserve">数量未知</x:String>
+  <x:String x:Key="Text.Cleanup.State.Unavailable" xml:space="preserve">不可用</x:String>
+  <x:String x:Key="Text.Cleanup.State.NotDetected" xml:space="preserve">未检测到</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.UserScopeDifferentUser" xml:space="preserve">已登录的用户与提升权限的用户不同，因此针对用户设置和数据的项目已被禁用。</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.UserScopeUnknown" xml:space="preserve">无法确认已登录的用户，因此针对用户设置和数据的项目已被禁用。</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.TargetRejected" xml:space="preserve">出于安全考虑，该目标被拒绝（受保护的位置、凭据、链接等）。</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.ScanFailed" xml:space="preserve">扫描失败。</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.HandlerUnavailable" xml:space="preserve">无法在此环境中运行。</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.CustomFolderRejected" xml:space="preserve">此位置不允许用作自定义文件夹，因此已跳过。</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Title" xml:space="preserve">标准清理</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Description" xml:space="preserve">先扫描以查看可以删除的内容，然后只删除你所选的项目。扫描不会更改任何内容。</x:String>
+  <x:String x:Key="Text.Cleanup.Common.NotScanned" xml:space="preserve">尚未扫描。点击“扫描”以查找可以删除的内容。</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Scanning" xml:space="preserve">正在扫描第 {0} 项，共 {1} 项：{2}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanDone" xml:space="preserve">扫描完成：{0} 个项目，{1} 个文件，{2}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanCanceled" xml:space="preserve">扫描已停止。</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanFailed" xml:space="preserve">扫描失败。请查看日志。</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Stale" xml:space="preserve">由于设置已更改或运行了其他操作，扫描结果已过期。请重新扫描。</x:String>
+  <x:String x:Key="Text.Cleanup.Common.NothingFound" xml:space="preserve">未找到可以删除的内容。</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Selection" xml:space="preserve">已选择 {0} 个项目，共 {1} 个（约 {2}）</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Retained" xml:space="preserve">根据你的排除设置，有 {0} 个项目被保留。</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Unreadable" xml:space="preserve">有 {0} 个项目无法检查。</x:String>
+  <x:String x:Key="Text.Cleanup.Common.SkippedLinks" xml:space="preserve">有 {0} 个项目是链接，不会被改动。</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Unmeasurable" xml:space="preserve">可以运行，但无法事先测量其数量和大小。</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Representatives" xml:space="preserve">示例：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.RunningProcesses" xml:space="preserve">正在运行：{0}（删除前会询问是否关闭它）</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ServiceNote" xml:space="preserve">删除期间临时停止的服务：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Title" xml:space="preserve">确认删除</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Run" xml:space="preserve">删除</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Back" xml:space="preserve">返回</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Common.Body" xml:space="preserve">所选的 {0} 个项目（{1} 个文件，约 {2}）将被永久删除。它们不会移到回收站，也无法恢复。</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.NotRecommended" xml:space="preserve">包含 {0} 个不推荐的项目。请先检查它们。</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Signout" xml:space="preserve">包含 {0} 个可能使你退出登录的项目（如 Cookie）。</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.UserFiles" xml:space="preserve">有 {0} 个项目包含无法重新下载的你的文件。系统会再让你确认一次。</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.UserFiles.Check" xml:space="preserve">我了解我的文件将被永久删除</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.SecureDelete" xml:space="preserve">安全删除已开启。文件在删除前会被覆盖一次（在 SSD 上无法保证）。</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.RunningProcess" xml:space="preserve">有些产品正在运行。删除时会询问是否关闭它们。</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Body" xml:space="preserve">“{0}”正在运行（{1}）。必须先关闭它，才能删除其数据。</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Close" xml:space="preserve">关闭</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Skip" xml:space="preserve">跳过此项目</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Abort" xml:space="preserve">停止</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceBody" xml:space="preserve">无法正常关闭“{0}”（{1}）。强制退出会丢失所有未保存的输入。</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceYes" xml:space="preserve">强制退出</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceNo" xml:space="preserve">不强制退出</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Running" xml:space="preserve">正在删除第 {0} 项，共 {1} 项：{2}</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Done" xml:space="preserve">已删除 {0} 个文件，释放了 {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Run.DonePartial" xml:space="preserve">部分完成：已删除 {0} 个文件，释放了 {1}。部分项目失败或被跳过。</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Canceled" xml:space="preserve">已停止。已删除 {0} 个文件（{1}）。</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Stale" xml:space="preserve">由于扫描结果已过期，未删除任何内容。请重新扫描。</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Retained" xml:space="preserve">由于排除设置或扫描后的变化，有 {0} 个项目被保留。</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Blocked" xml:space="preserve">有 {0} 个项目无法删除（正在使用、没有权限等）。</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Wiped" xml:space="preserve">有 {0} 个项目在删除前已被覆盖（{1} 个未经覆盖直接删除）。</x:String>
+  <x:String x:Key="Text.Cleanup.Run.ServiceResumeFailed" xml:space="preserve">临时停止的服务无法重新启动。请检查服务状态。</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Succeeded" xml:space="preserve">成功</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.NothingToDo" xml:space="preserve">无需处理</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Partial" xml:space="preserve">部分完成</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Failed" xml:space="preserve">失败</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Skipped" xml:space="preserve">已跳过</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Canceled" xml:space="preserve">已停止</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.NotRun" xml:space="preserve">未运行</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.NotScanned" xml:space="preserve">未扫描，因此不会删除。</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.NothingFound" xml:space="preserve">没有可删除的内容。</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.Unavailable" xml:space="preserve">无法在此环境中运行。</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.UserFilesNotConfirmed" xml:space="preserve">由于未确认涉及你的文件，因此未删除。</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessRunningDeclined" xml:space="preserve">由于产品正在运行，已跳过。</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessUnverifiable" xml:space="preserve">由于无法确认正在运行的进程的所有者，已跳过。</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessStillRunning" xml:space="preserve">由于产品未关闭，已跳过。</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ForceTerminationDeclined" xml:space="preserve">由于未批准强制退出，已跳过。</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessIdentityMismatch" xml:space="preserve">由于无法匹配该进程，未将其关闭，已跳过。</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.TerminateFailed" xml:space="preserve">由于无法关闭该产品，已跳过。</x:String>
+  <x:String x:Key="Text.Cleanup.Totals.Last" xml:space="preserve">上次运行：{0} 个文件，{1}（{2}）</x:String>
+  <x:String x:Key="Text.Cleanup.Totals.Total" xml:space="preserve">合计：{0} 个文件，{1}</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Title" xml:space="preserve">导出扫描结果</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Done" xml:space="preserve">已导出到 {0}。</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Failed" xml:space="preserve">无法导出：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.OpenLocation.Failed" xml:space="preserve">无法打开该位置：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Name" xml:space="preserve">名称</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Category" xml:space="preserve">分类</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.State" xml:space="preserve">状态</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Files" xml:space="preserve">文件数</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Items" xml:space="preserve">项目数</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Bytes" xml:space="preserve">字节数</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Retained" xml:space="preserve">已保留</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Status" xml:space="preserve">结果</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Details" xml:space="preserve">详细信息</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Total" xml:space="preserve">合计</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Title" xml:space="preserve">高级清理</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Description" xml:space="preserve">按模式在所选驱动器中查找通常可以安全删除的文件。扫描不会更改任何内容。请先检查结果，然后只删除你所选的内容。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drives" xml:space="preserve">要扫描的驱动器</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drive.Removable" xml:space="preserve">可移动</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drive.Fixed" xml:space="preserve">固定</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.ZeroByte" xml:space="preserve">包含 0 字节文件</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.InvalidShortcuts" xml:space="preserve">包含目标已不存在的快捷方式</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.OlderThan" xml:space="preserve">包含早于指定天数的文件</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.Days" xml:space="preserve">天数</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.SelectSafe" xml:space="preserve">仅选择安全的项目</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.Default" xml:space="preserve">默认</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.Additional" xml:space="preserve">附加</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.UserDefined" xml:space="preserve">用户自定义</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.Safe" xml:space="preserve">安全</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.Undeterminable" xml:space="preserve">无法判断</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.UserDefined" xml:space="preserve">用户自定义</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.CheckpointOutsideFound" xml:space="preserve">位于 FOUND 文件夹之外的 .chk 文件。它可能是 ESE 检查点，因此在你确认之前不会被选中。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.RecentlyModified" xml:space="preserve">在最近 24 小时内修改过，因此默认不选中。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.ZeroByte" xml:space="preserve">这是 0 字节文件，因此默认不选中。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.OldFile" xml:space="preserve">仅因为文件较旧而匹配，因此默认不选中。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.UserPattern" xml:space="preserve">匹配了你定义的模式，因此默认不选中。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.NamePattern" xml:space="preserve">名称模式</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.ZeroByte" xml:space="preserve">0 字节</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.InvalidShortcut" xml:space="preserve">无效的快捷方式</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.OldFile" xml:space="preserve">旧文件</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Progress" xml:space="preserve">已检查 {0} 个文件夹和 {1} 个文件；{2} 个匹配项（{3}）：{4}</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.ScanDone" xml:space="preserve">扫描完成：在检查的 {2} 个文件中，有 {0} 个匹配项（{1}）。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Truncated" xml:space="preserve">匹配项过多，因此只显示前 {0} 个。其余 {1} 个（{2}）既不会显示，也不会被删除。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RootFailure" xml:space="preserve">无法扫描：{0}（{1}）</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Pruned" xml:space="preserve">有 {0} 个文件夹因受保护或被排除而未检查。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Empty" xml:space="preserve">没有匹配的文件。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Selection" xml:space="preserve">已选择 {0} 个文件，共 {1} 个（{2}）</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolders" xml:space="preserve">自定义文件夹</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Note" xml:space="preserve">只会清空文件夹中的内容，文件夹本身会保留。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Missing" xml:space="preserve">未找到</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Summary" xml:space="preserve">{0} 个文件，{1}</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Body" xml:space="preserve">所选的 {0} 个文件（{1}）以及 {2} 个自定义文件夹中的内容将被永久删除。它们不会移到回收站，也无法恢复。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Undeterminable" xml:space="preserve">包含 {0} 个标记为“无法判断”的文件。请取消选择你尚未检查过的文件。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Recent" xml:space="preserve">包含 {0} 个在最近 24 小时内修改过的文件。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Done" xml:space="preserve">已删除 {0} 个文件和 {1} 个文件夹，释放了 {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Partial" xml:space="preserve">部分完成：已删除 {0} 个文件和 {1} 个文件夹，释放了 {2}。部分项目被保留或无法删除。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Expired" xml:space="preserve">由于扫描结果已过期，未删除任何内容。请重新扫描。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Cancelled" xml:space="preserve">已停止。已删除 {0} 个文件（{1}）。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Blocked" xml:space="preserve">有 {0} 个文件无法删除（正在使用、没有权限等）。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Retained" xml:space="preserve">由于排除设置或扫描后的变化，有 {0} 个文件被保留。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Gone" xml:space="preserve">有 {0} 个文件已不存在。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Covered" xml:space="preserve">有 {0} 个文件位于所选的自定义文件夹内，未单独处理。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Rejected" xml:space="preserve">有 {0} 个项目被安全检查拒绝。</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Invalid" xml:space="preserve">此路径不能用作文件夹。</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.DriveRoot" xml:space="preserve">不能使用驱动器根目录。</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Windows" xml:space="preserve">不能使用 Windows 文件夹及其上级或下级文件夹。</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProgramFiles" xml:space="preserve">不能使用 Program Files 及其上级或下级文件夹。</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProgramData" xml:space="preserve">不能使用 ProgramData 及其上级或下级文件夹。</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.OtherUserProfile" xml:space="preserve">不能使用其他用户的配置文件。</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProfileRoot" xml:space="preserve">不能使用你的用户配置文件夹和 AppData，因为清空它们会丢失你的所有数据。</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Credential" xml:space="preserve">不能使用包含凭据或密钥的位置。</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Added" xml:space="preserve">已添加自定义文件夹。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Title" xml:space="preserve">瘦身</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Description" xml:space="preserve">通过删除 Windows 不需要的数据来释放磁盘空间。有些项目无法撤销，或可能影响日后的修复，因此默认不选中任何项目。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Run" xml:space="preserve">运行所选项目</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.CreateRestorePoint" xml:space="preserve">运行前创建还原点</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Item" xml:space="preserve">项目</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Status" xml:space="preserve">状态</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Size" xml:space="preserve">预计可释放空间</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Estimate" xml:space="preserve">约 {0}（估算）</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.SizeUnknown" xml:space="preserve">未知</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.NotScanned" xml:space="preserve">尚未扫描。点击“扫描”以查看每个项目可以释放多少空间。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Scanning" xml:space="preserve">正在检查瘦身项目…</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.ScanDone" xml:space="preserve">扫描完成。有 {0} 个项目可以运行。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.ScanFailed" xml:space="preserve">扫描失败。请查看日志。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Stale" xml:space="preserve">由于扫描结果已过期，未运行任何内容。请重新扫描。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.LongRunning" xml:space="preserve">使用 DISM 的项目可能需要几分钟或更长时间。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.Available" xml:space="preserve">就绪</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.NothingToClean" xml:space="preserve">无需清理</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.Unavailable" xml:space="preserve">不可用</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Notice" xml:space="preserve">提示</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Caution" xml:space="preserve">注意</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Irreversible" xml:space="preserve">无法撤销</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.EnumerationFailed" xml:space="preserve">无法完整读取注册信息，因此无法安全地做出判断。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.ProtectedByWindows" xml:space="preserve">这些文件受 Windows 保护，因此没有可删除的内容。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.LanguageInUse" xml:space="preserve">显示语言、语言列表或键盘布局正在使用它，因此无法删除。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.UserHiveNotLoaded" xml:space="preserve">部分用户的数据未加载，因此无法确认使用情况。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.NotPresent" xml:space="preserve">目标未安装或未找到。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.ToolFailed" xml:space="preserve">无法读取或理解 DISM 的结果。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.Rejected" xml:space="preserve">安全检查拒绝了该目标。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Succeeded" xml:space="preserve">成功</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Partial" xml:space="preserve">部分完成</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Failed" xml:space="preserve">失败</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Skipped" xml:space="preserve">已跳过</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Cancelled" xml:space="preserve">已停止</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Title" xml:space="preserve">确认瘦身</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Body" xml:space="preserve">将运行所选的 {0} 个项目（预计可释放空间：{1}）。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.WithRestorePoint" xml:space="preserve">运行前会创建还原点。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">不会创建还原点。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Title" xml:space="preserve">确认无法撤销的操作</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Body" xml:space="preserve">删除更新回滚数据后，已安装的更新将无法再卸载。此操作无法撤销。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Check" xml:space="preserve">我了解已安装的更新将无法再卸载</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Created" xml:space="preserve">已创建还原点。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Reused" xml:space="preserve">使用 {0} 创建的现有还原点（24 小时内不会再创建新的还原点）。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Unavailable.Title" xml:space="preserve">没有可用的还原点</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Unavailable.Body" xml:space="preserve">无法创建还原点：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Disabled.Body" xml:space="preserve">系统保护已关闭，因此无法创建还原点。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.ContinueWithout" xml:space="preserve">不创建还原点并继续</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Abort" xml:space="preserve">停止</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.EnableAndRetry" xml:space="preserve">开启系统保护并重试</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Running" xml:space="preserve">正在运行第 {0} 项，共 {1} 项：{2}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Done" xml:space="preserve">完成。已释放空间：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.DonePartial" xml:space="preserve">部分项目未完成。请查看每个项目的结果。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RebootRequired" xml:space="preserve">需要重新启动才能使更改生效。</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Title" xml:space="preserve">清理设置</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Saved" xml:space="preserve">设置已保存。</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SaveFailed" xml:space="preserve">无法保存设置。请查看日志。</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Exclusions" xml:space="preserve">排除</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Exclusions.Description" xml:space="preserve">被排除的项目不会被改动：既不会被扫描，也不会被删除。</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add" xml:space="preserve">添加</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Remove" xml:space="preserve">从列表中移除</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import" xml:space="preserve">导入</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export" xml:space="preserve">导出</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Title" xml:space="preserve">导入排除项</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Title" xml:space="preserve">导出排除项</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.File" xml:space="preserve">文件</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.File" xml:space="preserve">示例：C:\Users\me\notes.txt</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.Folder" xml:space="preserve">文件夹</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.Folder" xml:space="preserve">示例：C:\Users\me\Projects（包括子文件夹）</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.Name" xml:space="preserve">扩展名和文件名</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.Name" xml:space="preserve">示例：*.log 或 cache.db</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.CookieDomain" xml:space="preserve">Cookie 域名</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.CookieDomain" xml:space="preserve">示例：example.com（包括子域名）</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Added" xml:space="preserve">已添加。</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Duplicate" xml:space="preserve">已在列表中。</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Invalid" xml:space="preserve">格式无效。</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.LimitReached" xml:space="preserve">已达到 {0} 条的上限。</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.TooLarge" xml:space="preserve">文件太大。</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.Unreadable" xml:space="preserve">无法读取该文件。</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.InvalidFormat" xml:space="preserve">文件格式无效。</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.UnsupportedSchema" xml:space="preserve">此版本无法读取该格式。</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.TooManyEntries" xml:space="preserve">条目太多，因此未导入任何内容。</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Done" xml:space="preserve">已添加 {0} 条（重复：{1} 条，被拒绝：{2} 条）。</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Done" xml:space="preserve">已导出到 {0}。</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Failed" xml:space="preserve">无法导出：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Options" xml:space="preserve">文件的删除方式</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SecureDelete" xml:space="preserve">安全删除（覆盖一次后再删除）</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SecureDelete.Note" xml:space="preserve">删除文件前，先将其内容覆盖一次。在 SSD 上无法保证彻底擦除。具有硬链接的文件，以及压缩、稀疏或加密的文件，将不经覆盖直接删除。</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CreateRestorePoint" xml:space="preserve">瘦身前创建还原点</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CreateRestorePoint.Note" xml:space="preserve">如果最近 24 小时内已有还原点，则会重复使用。如果系统保护已关闭，你可以在确认后将其开启。</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.OpenSystemRestore" xml:space="preserve">打开系统还原</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders" xml:space="preserve">自定义文件夹</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Description" xml:space="preserve">高级清理可以清空其内容的文件夹。不允许使用 Windows、Program Files、ProgramData、其他用户的配置文件、驱动器根目录以及包含凭据的位置。新添加的文件夹始终处于未选中状态。</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Add" xml:space="preserve">添加文件夹…</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Pick" xml:space="preserve">选择自定义文件夹</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns" xml:space="preserve">用户自定义的扩展名和文件名</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.Description" xml:space="preserve">会加入高级清理的搜索。匹配的项目始终处于未选中状态。</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.Hint" xml:space="preserve">示例：*.xyz</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.BuiltIn" xml:space="preserve">内置模式</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules" xml:space="preserve">各项目的默认选择</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules.Description" xml:space="preserve">覆盖标准清理中某个项目的推荐默认选择。</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules.Reset" xml:space="preserve">恢复默认</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.Default" xml:space="preserve">遵循推荐</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.On" xml:space="preserve">始终选中</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.Off" xml:space="preserve">从不选中</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Totals" xml:space="preserve">累计成果</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Totals.None" xml:space="preserve">尚未运行过。</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.run-history" xml:space="preserve">“运行”对话框历史记录</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.recent-items" xml:space="preserve">最近使用的项目</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.rdp-history" xml:space="preserve">远程桌面连接历史记录</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.explorer-mru" xml:space="preserve">“打开”和“保存”对话框历史记录</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.search-history" xml:space="preserve">文件资源管理器搜索历史记录</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.network-drive-history" xml:space="preserve">映射网络驱动器历史记录</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.jump-lists" xml:space="preserve">跳转列表</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.ie-history" xml:space="preserve">Internet Explorer 历史记录和输入过的地址</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.userassist" xml:space="preserve">程序启动历史记录（UserAssist）</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.user-error-reports" xml:space="preserve">当前用户的 Windows 错误报告</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.user-temp" xml:space="preserve">用户临时文件</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.system-temp" xml:space="preserve">系统临时文件</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.crash-dumps" xml:space="preserve">用户模式崩溃转储</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.memory-dumps" xml:space="preserve">系统内存转储</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.error-reports" xml:space="preserve">Windows 错误报告</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.update-logs" xml:space="preserve">Windows 更新协调器日志</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.etl-trace-logs" xml:space="preserve">ETL 跟踪日志</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.defender-support-logs" xml:space="preserve">Microsoft Defender 诊断日志</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.thumbnail-cache" xml:space="preserve">缩略图缓存</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.icon-cache" xml:space="preserve">图标缓存</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.font-cache" xml:space="preserve">Windows 字体缓存</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.remote-desktop-cache" xml:space="preserve">远程桌面位图缓存</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.directx-shader-cache" xml:space="preserve">DirectX 着色器缓存</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.prefetch" xml:space="preserve">旧的 Prefetch 数据</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.recycle-bin" xml:space="preserve">回收站</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.dns-cache" xml:space="preserve">DNS 解析程序缓存</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.network-usage" xml:space="preserve">网络使用情况历史记录</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.invalid-shortcuts" xml:space="preserve">无效的快捷方式和“开始”菜单项</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.invalid-scheduled-tasks" xml:space="preserve">无效的计划任务</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.internet-cache" xml:space="preserve">Internet 缓存（WinINet）</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.office-addin-cache" xml:space="preserve">Office 加载项缓存</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.cryptnet-url-cache" xml:space="preserve">证书 URL 缓存（CryptnetUrlCache）</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Name" xml:space="preserve">孤立的 Windows Installer 文件</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Description" xml:space="preserve">删除 Windows Installer 文件夹中未注册到任何产品或修补程序、且超过 30 天的 .msi 和 .msp 文件。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Warning" xml:space="preserve">如果无法完整读取注册信息，则此项目不可用。删除前会再次检查注册情况。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Name" xml:space="preserve">更新回滚数据</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Description" xml:space="preserve">使用 DISM /StartComponentCleanup /ResetBase，删除回滚已安装更新所需的数据。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Warning" xml:space="preserve">运行后，已安装的更新将无法再卸载。此操作无法撤销。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Name" xml:space="preserve">更新备份（组件存储）</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Description" xml:space="preserve">使用 DISM /StartComponentCleanup 清理已被取代的组件。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Warning" xml:space="preserve">显示的空间是 DISM 的估算值，可能与实际释放的空间不同。这可能需要几分钟。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateCache.Name" xml:space="preserve">Windows 更新下载缓存</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateCache.Description" xml:space="preserve">删除 SoftwareDistribution\Download 中的内容。运行期间会停止 Windows Update 和 BITS 服务，并在之后恢复。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Name" xml:space="preserve">残留的修补程序缓存</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Description" xml:space="preserve">停止 Windows Installer 服务，并删除 Installer\$PatchCache$ 中的内容。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Warning" xml:space="preserve">日后进行修复或卸载时，可能会要求提供原始安装介质。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Name" xml:space="preserve">语言输入功能（日语）</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Description" xml:space="preserve">使用 DISM Remove-Capability 删除日语 Language.Basic 功能（拼写检查、文本预测等）。它不是输入法（IME）本身。仅当该语言未被显示语言、语言列表或键盘布局使用时才能运行。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Warning" xml:space="preserve">若要再次使用这些语言功能，需要重新添加。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Name" xml:space="preserve">语言输入功能（韩语）</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Description" xml:space="preserve">使用 DISM Remove-Capability 删除韩语 Language.Basic 功能（拼写检查、文本预测等）。它不是输入法（IME）本身。仅当该语言未被显示语言、语言列表或键盘布局使用时才能运行。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Warning" xml:space="preserve">若要再次使用这些语言功能，需要重新添加。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Name" xml:space="preserve">语言输入功能（中文，繁体）</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Description" xml:space="preserve">使用 DISM Remove-Capability 删除繁体中文 Language.Basic 功能（拼写检查、文本预测等）。它不是输入法（IME）本身。仅当该语言未被显示语言、语言列表或键盘布局使用时才能运行。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Warning" xml:space="preserve">若要再次使用这些语言功能，需要重新添加。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Name" xml:space="preserve">语言输入功能（中文，简体）</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Description" xml:space="preserve">使用 DISM Remove-Capability 删除简体中文 Language.Basic 功能（拼写检查、文本预测等）。它不是输入法（IME）本身。仅当该语言未被显示语言、语言列表或键盘布局使用时才能运行。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Warning" xml:space="preserve">若要再次使用这些语言功能，需要重新添加。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Name" xml:space="preserve">Windows 帮助文件</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Description" xml:space="preserve">删除 Windows 帮助文件。在 Windows 10/11 上，这些文件受 Windows 资源保护的保护，因此通常没有可删除的内容。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Warning" xml:space="preserve">受 Windows 保护或归 TrustedInstaller 所有的文件将保持不动。绝不会获取所有权。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Name" xml:space="preserve">默认壁纸</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Description" xml:space="preserve">删除 Windows 的默认壁纸。在 Windows 10/11 上，这些文件受 Windows 资源保护的保护，因此通常没有可删除的内容。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Warning" xml:space="preserve">受 Windows 保护或归 TrustedInstaller 所有的文件将保持不动。绝不会获取所有权。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleMusic.Name" xml:space="preserve">示例音乐</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleMusic.Description" xml:space="preserve">仅删除 Windows 7 附带的已知示例歌曲。文件夹中的其他文件将保持不动。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SamplePictures.Name" xml:space="preserve">示例图片</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SamplePictures.Description" xml:space="preserve">仅删除 Windows 7 附带的已知示例图片。文件夹中的其他文件将保持不动。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleVideos.Name" xml:space="preserve">示例视频</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleVideos.Description" xml:space="preserve">仅删除 Windows 7 附带的已知示例视频。文件夹中的其他文件将保持不动。</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Expand" xml:space="preserve">展开或折叠 {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Error" xml:space="preserve">无法完成删除。请查看日志。</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SaveSuppressed" xml:space="preserve">无法读取设置，因此为保护原始文件已禁用保存。更改仅在本次会话中生效。</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SystemRestore.Failed" xml:space="preserve">无法打开系统还原。</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Done" xml:space="preserve">已将 {0} 添加到排除项。由于设置已更改，请重新扫描。</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Duplicate" xml:space="preserve">{0} 已被排除。</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Failed" xml:space="preserve">无法将 {0} 添加到排除项（格式无效或已达上限）。</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.SaveFailed" xml:space="preserve">已将 {0} 添加到排除项，但无法保存。仅在关闭应用之前有效。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.NoTarget" xml:space="preserve">请选择要扫描的驱动器或自定义文件夹。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Filter.All" xml:space="preserve">显示所有类型</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Action.IgnoreFolder" xml:space="preserve">忽略此文件夹</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Kinds" xml:space="preserve">按类型显示的结果</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Failed" xml:space="preserve">删除时出错。请查看日志。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.UserScopeUnavailable" xml:space="preserve">无法使用用户范围的规则（交互用户与提升权限的用户不同，或无法确认）</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.CustomFolderRejectedAtRun" xml:space="preserve">自定义文件夹未通过运行时的检查而被拒绝</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseOutsideProfile" xml:space="preserve">环境变量 %{0}% 指向当前用户配置文件之外（或无法验证配置文件），因此不使用此目标。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseProtectedLocation" xml:space="preserve">环境变量 %{0}% 指向受保护的位置（驱动器根目录、Windows、Program Files、ProgramData 或其他用户的配置文件），因此不使用此目标。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseMachineMismatch" xml:space="preserve">环境变量 %{0}% 与系统默认位置不同，因此不使用此目标。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.CustomFolderRejected" xml:space="preserve">自定义文件夹被拒绝（{0}）</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceStopFailed" xml:space="preserve">由于无法停止某个服务，未删除任何内容：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DeleteFailed" xml:space="preserve">无法完成删除：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceResumeFailedList" xml:space="preserve">无法将某个服务恢复到原始状态（{0}）：{1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceResumeFailed" xml:space="preserve">无法将某个服务恢复到原始状态：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.UserRegistryOpenFailed" xml:space="preserve">无法打开该用户的注册表</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.HandlerUnavailable" xml:space="preserve">处理程序 {0} 不可用</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.PathReason" xml:space="preserve">{0}：{1}{2}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniContentUnverified" xml:space="preserve">（无法验证文件内容）</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ExpansionTruncated" xml:space="preserve">展开后的目标已达到上限（{0}），其余部分未包含在内</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbOpenFailed" xml:space="preserve">无法打开数据库（SQLite {0}）</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbConfigFailed" xml:space="preserve">由于无法应用某项安全设置而停止（{0}）</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbSqliteError" xml:space="preserve">SQLite 错误 {0}：{1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbPinFailed" xml:space="preserve">无法安全地固定数据库：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbHardLinked" xml:space="preserve">具有硬链接的数据库不是目标</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbTooLarge" xml:space="preserve">数据库太大，不是目标</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbIdentityUnverified" xml:space="preserve">无法验证数据库文件</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbJournalPending" xml:space="preserve">由于存在未处理的日志而跳过（正在使用或尚未恢复）</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbIntegrityFailed" xml:space="preserve">数据库完整性检查失败</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbVirtualTable" xml:space="preserve">包含虚拟表的数据库不是目标</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbUnknownTable" xml:space="preserve">预期的表 {0} 不存在（未知架构）</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbUnknownColumn" xml:space="preserve">表 {0} 没有预期的列 {1}（未知架构）</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniUnconvertible" xml:space="preserve">由于该文件无法以 UTF-8、UTF-16 或系统 ANSI 代码页无损转换，已跳过</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniTooLarge" xml:space="preserve">由于文件大于 1 MB，已跳过</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniAmbiguousSection" xml:space="preserve">由于有多个同名的节而无法确定目标，因此未做更改</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniRestored" xml:space="preserve">{0}（已恢复原始文本）</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniNotRestored" xml:space="preserve">{0}（无法恢复原始文本，内容不确定）</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniChangedWhileReading" xml:space="preserve">读取期间内容发生了变化</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniLengthChangedWhileReading" xml:space="preserve">读取期间长度发生了变化</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniLengthChangedBeforeWrite" xml:space="preserve">写入前长度发生了变化</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniVerifyMismatch" xml:space="preserve">写入后重新读取的内容与写入的不一致</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistrySymlink" xml:space="preserve">由于是注册表符号链接，已排除：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryDepthLimit" xml:space="preserve">超出了安全的递归深度上限</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DnsFlushFailed" xml:space="preserve">ipconfig /flushdns 失败：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DnsFlushError" xml:space="preserve">无法运行 ipconfig /flushdns：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeQueryFailed" xml:space="preserve">无法查询 {0}（Win32={1}）</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeUrlHistoryFailed" xml:space="preserve">无法清除 URL 历史记录（HRESULT=0x{0}）</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeClearFailed" xml:space="preserve">无法清除 {0}（Win32={1}）</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleQueryFailed" xml:space="preserve">无法查询回收站（HRESULT=0x{0}）</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleVerifyFailed" xml:space="preserve">清空后无法检查回收站（HRESULT=0x{0}）</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleRemaining" xml:space="preserve">回收站中仍有 {0} 个项目（HRESULT=0x{1}）</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDpsResumeFailed" xml:space="preserve">无法将 DPS 服务恢复到原始状态：{0}。请在 Windows 服务中启动 Diagnostic Policy Service。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDeleteFailed" xml:space="preserve">无法删除网络使用数据：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDpsStopUnverified" xml:space="preserve">由于无法确认 DPS 服务已停止，未删除网络使用数据</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutLocationOpenFailed" xml:space="preserve">无法安全地打开快捷方式所在位置</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutsUnreadable" xml:space="preserve">有 {0} 个快捷方式无法读取，已被排除</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutDeleteFailed" xml:space="preserve">无法删除无效的快捷方式：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TasksUnreadable" xml:space="preserve">有 {0} 个任务无法读取，已被排除</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TaskSchedulerQueryFailed" xml:space="preserve">无法查询任务计划程序：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TaskSchedulerOperateFailed" xml:space="preserve">无法操作任务计划程序：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEmptyDescription" xml:space="preserve">还原点的描述为空。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointStateUnknown" xml:space="preserve">无法检查还原点的状态：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointProtectionDisabled" xml:space="preserve">系统保护已关闭。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreateUninterpretable" xml:space="preserve">无法解读创建还原点的结果（退出代码 {0}）。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreateFailed" xml:space="preserve">创建还原点失败（返回值 {0}）。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointVerifyFailed" xml:space="preserve">创建后无法检查还原点：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCancelled" xml:space="preserve">已取消创建还原点。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableFailed" xml:space="preserve">无法开启系统保护（退出代码 {0}）。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableVerifyFailed" xml:space="preserve">无法检查开启保护后的状态：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnabled" xml:space="preserve">已开启系统保护。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableNotEffective" xml:space="preserve">系统保护未能开启（可能已被组策略禁用）。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableCancelled" xml:space="preserve">已取消开启系统保护。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreated" xml:space="preserve">已创建还原点。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointReused" xml:space="preserve">使用最近 24 小时内创建的还原点（{0}）。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointNoneAvailable" xml:space="preserve">未创建还原点，且最近 24 小时内也没有还原点。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointExitCode" xml:space="preserve">退出代码 {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointProtectionOutputInvalid" xml:space="preserve">保护状态输出无效</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputInvalid" xml:space="preserve">还原点输出无效</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputUnknownLine" xml:space="preserve">输出中有未知的行</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputIncomplete" xml:space="preserve">输出不完整</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimStale" xml:space="preserve">由于扫描结果已过期，未运行任何内容。请重新扫描。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimNothingSelected" xml:space="preserve">未选择可运行的项目。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimCanceledNotRun" xml:space="preserve">由于已取消，未运行。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimRestorePointUnavailable" xml:space="preserve">由于没有可用的还原点，未运行：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimItemUnavailable" xml:space="preserve">由于该项目不可用，未运行。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimNeedsTwoStep" xml:space="preserve">由于此操作无法撤销且缺少两步确认，未运行。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimCanceledPartial" xml:space="preserve">已取消。可能已部分处理。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimFailed" xml:space="preserve">失败：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimRecheckFailed" xml:space="preserve">由于运行前的重新检查失败，未删除任何内容：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimServiceResumeFailed" xml:space="preserve">无法将某个服务恢复到原始状态：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimBackupIncluded" xml:space="preserve">已作为清理更新回滚数据的一部分完成。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimBackupSkipped" xml:space="preserve">由于清理更新回滚数据未成功，未运行：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimOutcome" xml:space="preserve">已删除 {0} 个文件（{1} 字节）。保留 {2} 个，失败 {3} 个，被拒绝 {4} 个。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimOutcomeExample" xml:space="preserve">已删除 {0} 个文件（{1} 字节）。保留 {2} 个，失败 {3} 个，被拒绝 {4} 个。示例：{5}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ComponentStoreCleanup" xml:space="preserve">正在清理组件存储</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageRemoval" xml:space="preserve">正在删除 {0} 的语言输入功能</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationFailed" xml:space="preserve">{0} 失败（退出代码 {1}）。{2}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationUninterpretable" xml:space="preserve">无法解读 {0} 的结果（退出代码为 {1}，但没有成功输出）。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationDone" xml:space="preserve">{0} 已完成。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationDoneReboot" xml:space="preserve">{0} 已完成（需要重新启动）。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotTarget" xml:space="preserve">{0} 不是可以删除的语言。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotRemovable" xml:space="preserve">目前无法删除 {0} 的语言输入功能：{1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotInstalled" xml:space="preserve">未安装。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageInUse" xml:space="preserve">界面语言、语言列表或键盘布局正在使用它。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotUsed" xml:space="preserve">没有任何用户的语言设置在使用它。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderProtected" xml:space="preserve">包含 Lumin4ti 或受保护的位置</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedRootNotLocal" xml:space="preserve">不是本地文件夹的绝对路径</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedRootProtected" xml:space="preserve">由于是受保护的位置，未扫描</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ExportLinkRefused" xml:space="preserve">无法导出到链接</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerNotEnumerated" xml:space="preserve">扫描时未枚举注册信息。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerNoSource" xml:space="preserve">没有可用于枚举注册信息的来源。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerEnumerationException" xml:space="preserve">枚举注册信息时发生异常：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerEnumerationFailed" xml:space="preserve">无法枚举 Windows Installer 的注册信息：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerFolderUnresolved" xml:space="preserve">无法安全地解析 Installer 文件夹。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageSettingsUnreadable" xml:space="preserve">由于无法完整读取用户的语言设置，已跳过：{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageListUnavailable" xml:space="preserve">无法获取或解析语言输入功能列表（退出代码 {0}）。</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderNotScannable" xml:space="preserve">由于存在链接或保护，无法安全地扫描此文件夹。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">示例录制的电视节目</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">仅删除 Windows 7 附带的已知示例录制节目。文件夹中的其他文件将保持不动。</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Internet Explorer 应用程序缓存 (AppCache)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-ime-cache" xml:space="preserve">Microsoft IME 缓存和错误报告</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-office-solution-packages" xml:space="preserve">Office 解决方案包缓存</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-delivery-optimization-cache" xml:space="preserve">传递优化缓存</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-etl-logs" xml:space="preserve">ETL 跟踪日志 (Logs 和 LogFiles 文件夹)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-system-temp" xml:space="preserve">Windows 系统服务临时文件 (SystemTemp)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-icon-cache-root" xml:space="preserve">旧版图标缓存文件 (IconCache.db)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.app-cursor-cached-data" xml:space="preserve">Cursor 缓存数据 (CachedData)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.package-npm-cache" xml:space="preserve">npm 缓存 (用户文件夹中的 .npm)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-shared" xml:space="preserve">Google Chrome 共享缓存和临时文件</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-edge-shared" xml:space="preserve">Microsoft Edge 共享缓存和临时文件</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-vivaldi-shared" xml:space="preserve">Vivaldi 共享缓存和临时文件</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-brave-shared" xml:space="preserve">Brave 共享缓存和临时文件</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-shared" xml:space="preserve">Google Chrome Beta 共享缓存和临时文件</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-shared" xml:space="preserve">Google Chrome Dev 共享缓存和临时文件</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-rebuild" xml:space="preserve">Google Chrome Safe Browsing 和模型数据</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-edge-rebuild" xml:space="preserve">Microsoft Edge Safe Browsing 和模型数据</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-vivaldi-rebuild" xml:space="preserve">Vivaldi Safe Browsing 和模型数据</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-brave-rebuild" xml:space="preserve">Brave Safe Browsing 和模型数据</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-rebuild" xml:space="preserve">Google Chrome Beta Safe Browsing 和模型数据</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-rebuild" xml:space="preserve">Google Chrome Dev Safe Browsing 和模型数据</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-comet-rebuild" xml:space="preserve">Comet Safe Browsing 和模型数据</x:String>
 </ResourceDictionary>

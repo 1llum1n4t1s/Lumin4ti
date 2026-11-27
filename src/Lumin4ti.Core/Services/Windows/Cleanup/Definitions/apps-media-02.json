@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.handbrake-logs",
+      "name": "HandBrake",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\HandBrake\\logs" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\HandBrake\\logs", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["HandBrake"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://handbrake.fr/docs/en/latest/help/activity-log.html", "checked": "2026-11-26" }
+      ]
+    }
+  ]
+}

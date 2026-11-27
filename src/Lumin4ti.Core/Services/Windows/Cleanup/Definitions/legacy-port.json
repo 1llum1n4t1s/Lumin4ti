@@ -1,0 +1,817 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "browser.chrome-beta",
+      "name": "Google Chrome Beta",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "chromium",
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\Google\\Chrome Beta\\User Data"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Google\\Chrome Beta\\User Data\\*\\Cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": ["chrome"],
+      "services": [],
+      "legacy": [
+        "cleanup-browser-cache|%LOCALAPPDATA%\\Google\\Chrome Beta"
+      ],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_constants.h",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/history_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/sessions/core/session_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/bookmarks/browser/bookmark_storage.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/profiles/profile_manager.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/storage_partition_impl.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/blob_storage/chrome_blob_storage_context.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/omnibox/browser/shortcuts_constants.cc",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "legacy.browser-chrome-beta-shared", "name": "Google Chrome Beta shared caches and temporary files", "nameKey": "Text.Cleanup.Rule.legacy.browser-chrome-beta-shared", "kind": "cache", "category": "browserCache", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\Google\\Chrome Beta\\User Data" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Beta\\Temp" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Beta\\User Data\\BrowserMetrics" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Beta\\User Data\\component_crx_cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Beta\\User Data\\Crashpad" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Beta\\User Data\\extensions_crx_cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Beta\\User Data\\GraphiteDawnCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Beta\\User Data\\GrShaderCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Beta\\User Data\\ShaderCache" }
+      ],
+      "processes": ["chrome"], "services": [],
+      "legacy": [ "cleanup-browser-cache|%LOCALAPPDATA%\\Google\\Chrome Beta" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.browser-chrome-beta-rebuild", "name": "Google Chrome Beta Safe Browsing and model data", "nameKey": "Text.Cleanup.Rule.legacy.browser-chrome-beta-rebuild", "kind": "cache", "category": "browserCache", "scope": "user",
+      "recommended": false, "impact": "rebuild", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\Google\\Chrome Beta\\User Data" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Beta\\User Data\\Safe Browsing" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Beta\\User Data\\CertificateRevocation" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Beta\\User Data\\optimization_guide_model_store" }
+      ],
+      "processes": ["chrome"], "services": [],
+      "legacy": [ "cleanup-browser-cache|%LOCALAPPDATA%\\Google\\Chrome Beta" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "browser.chrome-dev",
+      "name": "Google Chrome Dev",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "chromium",
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\Google\\Chrome Dev\\User Data"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Google\\Chrome Dev\\User Data\\*\\Cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": ["chrome"],
+      "services": [],
+      "legacy": [
+        "cleanup-browser-cache|%LOCALAPPDATA%\\Google\\Chrome Dev"
+      ],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_constants.h",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/history_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/sessions/core/session_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/bookmarks/browser/bookmark_storage.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/profiles/profile_manager.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/storage_partition_impl.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/blob_storage/chrome_blob_storage_context.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/omnibox/browser/shortcuts_constants.cc",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "legacy.browser-chrome-dev-shared", "name": "Google Chrome Dev shared caches and temporary files", "nameKey": "Text.Cleanup.Rule.legacy.browser-chrome-dev-shared", "kind": "cache", "category": "browserCache", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\Google\\Chrome Dev\\User Data" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Dev\\Temp" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Dev\\User Data\\BrowserMetrics" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Dev\\User Data\\component_crx_cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Dev\\User Data\\Crashpad" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Dev\\User Data\\extensions_crx_cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Dev\\User Data\\GraphiteDawnCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Dev\\User Data\\GrShaderCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Dev\\User Data\\ShaderCache" }
+      ],
+      "processes": ["chrome"], "services": [],
+      "legacy": [ "cleanup-browser-cache|%LOCALAPPDATA%\\Google\\Chrome Dev" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.browser-chrome-dev-rebuild", "name": "Google Chrome Dev Safe Browsing and model data", "nameKey": "Text.Cleanup.Rule.legacy.browser-chrome-dev-rebuild", "kind": "cache", "category": "browserCache", "scope": "user",
+      "recommended": false, "impact": "rebuild", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\Google\\Chrome Dev\\User Data" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Dev\\User Data\\Safe Browsing" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Dev\\User Data\\CertificateRevocation" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome Dev\\User Data\\optimization_guide_model_store" }
+      ],
+      "processes": ["chrome"], "services": [],
+      "legacy": [ "cleanup-browser-cache|%LOCALAPPDATA%\\Google\\Chrome Dev" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "app.claude-logs",
+      "name": "Claude",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%APPDATA%\\Claude\\logs"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%APPDATA%\\Claude\\logs",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [
+        "cleanup-app-cache|Claude",
+        "cleanup-app-cache|%APPDATA%\\Claude\\logs"
+      ],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://modelcontextprotocol.io/docs/tools/debugging",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "app.npm-cache",
+      "name": "npm",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "rebuild",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\npm-cache"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\npm-cache\\_cacache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [
+        "cleanup-package-cache|npm",
+        "cleanup-package-cache|%LOCALAPPDATA%\\npm-cache\\_cacache"
+      ],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://docs.npmjs.com/cli/v10/commands/npm-cache",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "app.uv-cache",
+      "name": "uv",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "rebuild",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\uv\\cache"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\uv\\cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [
+        "cleanup-package-cache|uv",
+        "cleanup-package-cache|%LOCALAPPDATA%\\uv\\cache"
+      ],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://docs.astral.sh/uv/concepts/cache/",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "app.cargo-registry",
+      "name": "Cargo",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "rebuild",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%USERPROFILE%\\.cargo\\registry"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%USERPROFILE%\\.cargo\\registry",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [
+        "cleanup-package-cache|Cargo",
+        "cleanup-package-cache|%USERPROFILE%\\.cargo\\registry"
+      ],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://doc.rust-lang.org/cargo/guide/cargo-home.html",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "app.pip-cache",
+      "name": "pip",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "rebuild",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\pip\\Cache"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\pip\\Cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [
+        "cleanup-package-cache|pip",
+        "cleanup-package-cache|%LOCALAPPDATA%\\pip\\Cache"
+      ],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://pip.pypa.io/en/stable/topics/caching/",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "app.nuget-cache",
+      "name": "NuGet",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "rebuild",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\NuGet\\v3-cache"
+        },
+        {
+          "path": "%USERPROFILE%\\.nuget\\packages"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\NuGet\\v3-cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        },
+        {
+          "type": "contents",
+          "path": "%USERPROFILE%\\.nuget\\packages",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [
+        "cleanup-package-cache|NuGet",
+        "cleanup-package-cache|%LOCALAPPDATA%\\NuGet\\v3-cache",
+        "cleanup-package-cache|%USERPROFILE%\\.nuget\\packages"
+      ],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://learn.microsoft.com/en-us/nuget/consume-packages/managing-the-global-packages-and-cache-folders",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "app.gradle-caches",
+      "name": "Gradle",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "rebuild",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%USERPROFILE%\\.gradle\\caches"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%USERPROFILE%\\.gradle\\caches",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [
+        "cleanup-package-cache|Gradle",
+        "cleanup-package-cache|%USERPROFILE%\\.gradle\\caches"
+      ],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://docs.gradle.org/current/userguide/directory_layout.html",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "app.bun-cache",
+      "name": "Bun",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "rebuild",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%USERPROFILE%\\.bun\\install\\cache"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%USERPROFILE%\\.bun\\install\\cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [
+        "cleanup-package-cache|Bun",
+        "cleanup-package-cache|%USERPROFILE%\\.bun\\install\\cache"
+      ],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://bun.sh/docs/install/cache",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "legacy.app-antigravity", "name": "Antigravity", "nameKey": null, "kind": "cache", "category": "apps", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%APPDATA%\\Antigravity" } ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Antigravity\\Cache" },
+        { "type": "contents", "path": "%APPDATA%\\Antigravity\\CachedData" },
+        { "type": "contents", "path": "%APPDATA%\\Antigravity\\Crashpad" }
+      ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-app-cache|Antigravity", "cleanup-app-cache|%APPDATA%\\Antigravity\\Cache", "cleanup-app-cache|%APPDATA%\\Antigravity\\CachedData", "cleanup-app-cache|%APPDATA%\\Antigravity\\Crashpad" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.app-aqua-voice", "name": "Aqua Voice", "nameKey": null, "kind": "cache", "category": "apps", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%APPDATA%\\Aqua Voice" } ],
+      "targets": [ { "type": "contents", "path": "%APPDATA%\\Aqua Voice\\Cache" } ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-app-cache|Aqua Voice", "cleanup-app-cache|%APPDATA%\\Aqua Voice\\Cache" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.app-claude-cache", "name": "Claude", "nameKey": null, "kind": "cache", "category": "apps", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%APPDATA%\\Claude" } ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Claude\\Cache" },
+        { "type": "contents", "path": "%APPDATA%\\Claude\\Code Cache" }
+      ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-app-cache|Claude", "cleanup-app-cache|%APPDATA%\\Claude\\Cache", "cleanup-app-cache|%APPDATA%\\Claude\\Code Cache" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.app-claude-cli-logs", "name": "Claude Code", "nameKey": null, "kind": "log", "category": "apps", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%USERPROFILE%\\.claude" }, { "path": "%USERPROFILE%\\.claude-mem" } ],
+      "targets": [
+        { "type": "contents", "path": "%USERPROFILE%\\.claude\\debug" },
+        { "type": "contents", "path": "%USERPROFILE%\\.claude\\telemetry" },
+        { "type": "contents", "path": "%USERPROFILE%\\.claude-mem\\logs" }
+      ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-app-cache|Claude", "cleanup-app-cache|%USERPROFILE%\\.claude\\debug", "cleanup-app-cache|%USERPROFILE%\\.claude\\telemetry", "cleanup-app-cache|%USERPROFILE%\\.claude-mem\\logs" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.app-cursor-cached-data", "name": "Cursor cached data (CachedData)", "nameKey": "Text.Cleanup.Rule.legacy.app-cursor-cached-data", "kind": "cache", "category": "apps", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%APPDATA%\\Cursor" } ],
+      "targets": [ { "type": "contents", "path": "%APPDATA%\\Cursor\\CachedData" } ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-app-cache|Cursor", "cleanup-app-cache|%APPDATA%\\Cursor\\CachedData" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.app-discord-cache", "name": "Discord", "nameKey": null, "kind": "cache", "category": "apps", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%APPDATA%\\discord" } ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\discord\\Cache" },
+        { "type": "contents", "path": "%APPDATA%\\discord\\Code Cache" },
+        { "type": "contents", "path": "%APPDATA%\\discord\\GPUCache" },
+        { "type": "contents", "path": "%APPDATA%\\discord\\VideoDecodeStats" }
+      ],
+      "processes": ["Discord"], "services": [],
+      "legacy": [ "cleanup-app-cache|Discord", "cleanup-app-cache|%APPDATA%\\discord\\Cache", "cleanup-app-cache|%APPDATA%\\discord\\Code Cache", "cleanup-app-cache|%APPDATA%\\discord\\GPUCache", "cleanup-app-cache|%APPDATA%\\discord\\VideoDecodeStats" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.app-amd-shader-cache", "name": "AMD", "nameKey": null, "kind": "shader", "category": "apps", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\AMD" }, { "path": "%LOCALAPPDATA%\\Ati" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\AMD\\DxCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\AMD\\DxcCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\AMD\\VkCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Ati\\GLCache" }
+      ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-app-cache|AMD", "cleanup-app-cache|%LOCALAPPDATA%\\AMD\\DxCache", "cleanup-app-cache|%LOCALAPPDATA%\\AMD\\DxcCache", "cleanup-app-cache|%LOCALAPPDATA%\\AMD\\VkCache", "cleanup-app-cache|%LOCALAPPDATA%\\Ati\\GLCache" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.app-nvidia-shader-cache", "name": "NVIDIA", "nameKey": null, "kind": "shader", "category": "apps", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\NVIDIA" }, { "path": "%USERPROFILE%\\AppData\\LocalLow\\NVIDIA" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\NVIDIA\\DXCache" },
+        { "type": "contents", "path": "%USERPROFILE%\\AppData\\LocalLow\\NVIDIA\\PerDriverVersion\\DXCache" }
+      ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-app-cache|NVIDIA", "cleanup-app-cache|%LOCALAPPDATA%\\NVIDIA\\DXCache", "cleanup-app-cache|%USERPROFILE%\\AppData\\LocalLow\\NVIDIA\\PerDriverVersion\\DXCache" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.app-lghub-cache", "name": "Logitech G HUB", "nameKey": null, "kind": "cache", "category": "apps", "scope": "machine",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%ProgramData%\\LGHUB" } ],
+      "targets": [ { "type": "contents", "path": "%ProgramData%\\LGHUB\\cache" } ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-app-cache|Logitech G HUB", "cleanup-app-cache|%ProgramData%\\LGHUB\\cache" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.package-yarn-cache", "name": "Yarn", "nameKey": null, "kind": "cache", "category": "apps", "scope": "user",
+      "recommended": false, "impact": "rebuild", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\Yarn" } ],
+      "targets": [ { "type": "contents", "path": "%LOCALAPPDATA%\\Yarn\\Cache" } ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-package-cache|Yarn", "cleanup-package-cache|%LOCALAPPDATA%\\Yarn\\Cache" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.package-npm-cache", "name": "npm cache (.npm in the user folder)", "nameKey": "Text.Cleanup.Rule.legacy.package-npm-cache", "kind": "cache", "category": "apps", "scope": "user",
+      "recommended": false, "impact": "rebuild", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%USERPROFILE%\\.npm" } ],
+      "targets": [ { "type": "contents", "path": "%USERPROFILE%\\.npm\\_cacache" } ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-package-cache|npm", "cleanup-package-cache|%USERPROFILE%\\.npm\\_cacache" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.package-npm-logs", "name": "npm", "nameKey": null, "kind": "log", "category": "apps", "scope": "user",
+      "recommended": false, "impact": "rebuild", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\npm-cache" }, { "path": "%USERPROFILE%\\.npm" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\npm-cache\\_logs" },
+        { "type": "contents", "path": "%USERPROFILE%\\.npm\\_logs" }
+      ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-package-cache|npm", "cleanup-package-cache|%LOCALAPPDATA%\\npm-cache\\_logs", "cleanup-package-cache|%USERPROFILE%\\.npm\\_logs" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.package-pnpm-store", "name": "pnpm", "nameKey": null, "kind": "cache", "category": "apps", "scope": "user",
+      "recommended": false, "impact": "rebuild", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\pnpm\\store" } ],
+      "targets": [ { "type": "contents", "path": "%LOCALAPPDATA%\\pnpm\\store" } ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-package-cache|pnpm", "cleanup-package-cache|%LOCALAPPDATA%\\pnpm\\store" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.browser-comet", "name": "Comet", "nameKey": null, "kind": "cache", "category": "browserCache", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": "chromium",
+      "detect": [ { "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\Temp" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\BrowserMetrics" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\component_crx_cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\Crashpad" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\extensions_crx_cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\GraphiteDawnCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\GrShaderCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\ShaderCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\*\\Cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\*\\Code Cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\*\\Service Worker\\CacheStorage" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\*\\Service Worker\\ScriptCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\*\\GPUCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\*\\JumpListIconsRecentClosed" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\*\\JumpListIconsTopSites" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\*\\DawnGraphiteCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\*\\DawnWebGPUCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\*\\Shared Dictionary" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\*\\CRXTelemetry" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\*\\VideoDecodeStats" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\*\\blob_storage" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\*\\Media Cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\*\\Reporting and NEL" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\*\\CertificateTransparency" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\*\\DawnCache" }
+      ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-browser-cache|%LOCALAPPDATA%\\Perplexity\\Comet" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.browser-comet-rebuild", "name": "Comet Safe Browsing and model data", "nameKey": "Text.Cleanup.Rule.legacy.browser-comet-rebuild", "kind": "cache", "category": "browserCache", "scope": "user",
+      "recommended": false, "impact": "rebuild", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\Safe Browsing" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\CertificateRevocation" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Perplexity\\Comet\\User Data\\optimization_guide_model_store" }
+      ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-browser-cache|%LOCALAPPDATA%\\Perplexity\\Comet" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.windows-app-cache", "name": "Internet Explorer application cache (AppCache)", "nameKey": "Text.Cleanup.Rule.legacy.windows-app-cache", "kind": "cache", "category": "windows", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\Microsoft\\Windows\\AppCache" } ],
+      "targets": [ { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Windows\\AppCache" } ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-user-temp|Internet Cache", "cleanup-user-temp|%LOCALAPPDATA%\\Microsoft\\Windows\\AppCache" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.windows-ime-cache", "name": "Microsoft IME cache and error reports", "nameKey": "Text.Cleanup.Rule.legacy.windows-ime-cache", "kind": "cache", "category": "windows", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\Microsoft\\IME\\15.0\\IMEJP" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\IME\\15.0\\IMEJP\\Cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\IME\\15.0\\IMEJP\\Watson" }
+      ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-user-temp|Microsoft IME", "cleanup-user-temp|%LOCALAPPDATA%\\Microsoft\\IME\\15.0\\IMEJP\\Cache", "cleanup-user-temp|%LOCALAPPDATA%\\Microsoft\\IME\\15.0\\IMEJP\\Watson" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.windows-office-solution-packages", "name": "Office solution packages cache", "nameKey": "Text.Cleanup.Rule.legacy.windows-office-solution-packages", "kind": "cache", "category": "windows", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\Microsoft\\Office\\SolutionPackages" } ],
+      "targets": [ { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Office\\SolutionPackages" } ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-user-temp|Microsoft Office / Outlook", "cleanup-user-temp|%LOCALAPPDATA%\\Microsoft\\Office\\SolutionPackages" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.windows-system-temp", "name": "Windows system-service temporary files (SystemTemp)", "nameKey": "Text.Cleanup.Rule.legacy.windows-system-temp", "kind": "temp", "category": "windows", "scope": "machine",
+      "recommended": false, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%SystemRoot%\\SystemTemp" } ],
+      "targets": [ { "type": "contents", "path": "%SystemRoot%\\SystemTemp" } ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-system-temp|Windows Temp" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.windows-icon-cache-root", "name": "Legacy icon cache file (IconCache.db)", "nameKey": "Text.Cleanup.Rule.legacy.windows-icon-cache-root", "kind": "cache", "category": "windows", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\Microsoft\\Windows\\Explorer" } ],
+      "targets": [ { "type": "files", "path": "%LOCALAPPDATA%", "pattern": "IconCache.db" } ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-shell-cache|Windows Explorer" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.windows-edgeupdate-log", "name": "Microsoft Edge Update", "nameKey": null, "kind": "log", "category": "windows", "scope": "machine",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%ProgramData%\\Microsoft\\EdgeUpdate\\Log" } ],
+      "targets": [ { "type": "contents", "path": "%ProgramData%\\Microsoft\\EdgeUpdate\\Log" } ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-system-temp|Microsoft Edge Update", "cleanup-system-temp|%ProgramData%\\Microsoft\\EdgeUpdate\\Log" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.windows-delivery-optimization-cache", "name": "Delivery Optimization cache", "nameKey": "Text.Cleanup.Rule.legacy.windows-delivery-optimization-cache", "kind": "cache", "category": "windows", "scope": "machine",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%SystemRoot%\\ServiceProfiles\\NetworkService\\AppData\\Local\\Microsoft\\Windows\\DeliveryOptimization\\Cache" } ],
+      "targets": [ { "type": "contents", "path": "%SystemRoot%\\ServiceProfiles\\NetworkService\\AppData\\Local\\Microsoft\\Windows\\DeliveryOptimization\\Cache" } ],
+      "processes": [], "services": ["DoSvc"],
+      "legacy": [ "cleanup-system-temp|Delivery Optimization", "cleanup-system-temp|%SystemRoot%\\ServiceProfiles\\NetworkService\\AppData\\Local\\Microsoft\\Windows\\DeliveryOptimization\\Cache" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.windows-etl-logs", "name": "ETL trace logs (Logs and LogFiles folders)", "nameKey": "Text.Cleanup.Rule.legacy.windows-etl-logs", "kind": "log", "category": "windows", "scope": "machine",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%SystemRoot%\\Logs" }, { "path": "%SystemRoot%\\System32\\LogFiles" }, { "path": "%ProgramData%\\Microsoft\\Diagnosis\\ETLLogs" } ],
+      "targets": [
+        { "type": "files", "path": "%SystemRoot%\\Logs", "pattern": "*.etl", "recurse": true },
+        { "type": "files", "path": "%SystemRoot%\\System32\\LogFiles", "pattern": "*.etl", "recurse": true },
+        { "type": "files", "path": "%ProgramData%\\Microsoft\\Diagnosis\\ETLLogs", "pattern": "*.etl", "recurse": true }
+      ],
+      "processes": [], "services": [],
+      "legacy": [ "cleanup-system-temp|ETL Trace Logs" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.vlc-art-cache",
+      "name": "VLC",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\vlc" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\vlc\\art", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["vlc"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://raw.githubusercontent.com/videolan/vlc/master/src/preparser/art.c", "checked": "2026-11-26" },
+        { "tier": "A", "url": "https://raw.githubusercontent.com/videolan/vlc/master/src/win32/dirs.c", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.vlc-crashdump",
+      "name": "VLC",
+      "nameKey": null,
+      "kind": "report",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\vlc\\crashdump" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\vlc\\crashdump", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["vlc"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://raw.githubusercontent.com/videolan/vlc/master/bin/winvlc.c", "checked": "2026-11-27" }
+      ]
+    }
+  ]
+}

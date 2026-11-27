@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.kimi-code-updater-cache",
+      "name": "Kimi Code",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\kimi-code-app" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\kimi-code-app-updater", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["Kimi Code"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://www.kimi.com/code/docs/en/kimi-code-desktop/settings-and-extensions.html", "checked": "2026-11-26" }
+      ]
+    }
+  ]
+}

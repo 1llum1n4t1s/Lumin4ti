@@ -1,0 +1,599 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "browser.chrome-canary",
+      "name": "Google Chrome Canary",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "chromium",
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\Google\\Chrome SxS\\User Data"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Google\\Chrome SxS\\User Data\\*\\Cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [
+        "chrome"
+      ],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_constants.h",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/history_constants.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/sessions/core/session_constants.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/bookmarks/browser/bookmark_storage.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/profiles/profile_manager.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/storage_partition_impl.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/blob_storage/chrome_blob_storage_context.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/omnibox/browser/shortcuts_constants.cc",
+          "checked": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "browser.edge-beta",
+      "name": "Microsoft Edge Beta",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "chromium",
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\Microsoft\\Edge Beta\\User Data"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Microsoft\\Edge Beta\\User Data\\*\\Cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [
+        "msedge"
+      ],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://learn.microsoft.com/en-us/microsoft-edge/web-ai/devtools-mcp-server",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_constants.h",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/history_constants.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/sessions/core/session_constants.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/bookmarks/browser/bookmark_storage.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/profiles/profile_manager.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/storage_partition_impl.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/blob_storage/chrome_blob_storage_context.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/omnibox/browser/shortcuts_constants.cc",
+          "checked": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "browser.edge-dev",
+      "name": "Microsoft Edge Dev",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "chromium",
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\Microsoft\\Edge Dev\\User Data"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Microsoft\\Edge Dev\\User Data\\*\\Cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [
+        "msedge"
+      ],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://learn.microsoft.com/en-us/microsoft-edge/web-ai/devtools-mcp-server",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_constants.h",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/history_constants.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/sessions/core/session_constants.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/bookmarks/browser/bookmark_storage.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/profiles/profile_manager.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/storage_partition_impl.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/blob_storage/chrome_blob_storage_context.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/omnibox/browser/shortcuts_constants.cc",
+          "checked": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "browser.edge-canary",
+      "name": "Microsoft Edge Canary",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "chromium",
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\Microsoft\\Edge SxS\\User Data"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Microsoft\\Edge SxS\\User Data\\*\\Cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [
+        "msedge"
+      ],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://learn.microsoft.com/en-us/microsoft-edge/web-ai/devtools-mcp-server",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_constants.h",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/history_constants.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/sessions/core/session_constants.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/bookmarks/browser/bookmark_storage.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/profiles/profile_manager.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/storage_partition_impl.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/blob_storage/chrome_blob_storage_context.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/omnibox/browser/shortcuts_constants.cc",
+          "checked": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "browser.helium",
+      "name": "Helium",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "chromium",
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\imput\\Helium\\User Data"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\imput\\Helium\\User Data\\*\\Cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [
+        "chrome"
+      ],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/imputnet/helium-windows/main/patches/helium/windows/change-branding.patch",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_constants.h",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/history_constants.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/sessions/core/session_constants.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/bookmarks/browser/bookmark_storage.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/profiles/profile_manager.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/storage_partition_impl.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/blob_storage/chrome_blob_storage_context.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/omnibox/browser/shortcuts_constants.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/imputnet/helium-windows/main/installer/helium.nsi",
+          "checked": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "browser.waterfox",
+      "name": "Waterfox",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "gecko",
+      "detect": [
+        {
+          "path": "%APPDATA%\\Waterfox\\Profiles"
+        },
+        {
+          "path": "%LOCALAPPDATA%\\Waterfox\\Profiles"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Waterfox\\Profiles\\*\\cache2",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [
+        "waterfox"
+      ],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/BrowserWorks/Waterfox/current/waterfox/moz.configure",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/toolkit/xre/nsXREDirProvider.cpp",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/netwerk/cache2/CacheFileIOManager.cpp",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/browser/components/sessionstore/SessionFile.sys.mjs",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/toolkit/components/places/PlacesBackups.sys.mjs",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/toolkit/components/places/Database.h",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/toolkit/components/satchel/FormHistory.sys.mjs",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/netwerk/cookie/CookiePersistentStorage.cpp",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/BrowserWorks/Waterfox/current/waterfox/build/mozconfig.common",
+          "checked": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "app.firefox-startup-caches",
+      "name": "Firefox startup and jump list caches",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\Mozilla\\Firefox\\Profiles"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Mozilla\\Firefox\\Profiles\\*\\startupCache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        },
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Mozilla\\Firefox\\Profiles\\*\\jumpListCache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [
+        "firefox"
+      ],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/startupcache/StartupCache.cpp",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/widget/windows/WinUtils.cpp",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/toolkit/xre/nsXREDirProvider.cpp",
+          "checked": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "app.firefox-crash-reports",
+      "name": "Firefox crash reports",
+      "nameKey": null,
+      "kind": "report",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%APPDATA%\\Mozilla\\Firefox\\Profiles"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%APPDATA%\\Mozilla\\Firefox\\Crash Reports\\pending",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [
+        "firefox"
+      ],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/toolkit/crashreporter/nsExceptionHandler.cpp",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/toolkit/xre/nsXREDirProvider.cpp",
+          "checked": "2026-11-27"
+        }
+      ]
+    }
+  ]
+}

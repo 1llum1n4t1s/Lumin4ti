@@ -17,6 +17,7 @@ ON/OFF 型の Registry / VBS と UWP の一括設定は変更前の値を永続�
 | VBS | OFF で過去の独自構成を復元、途中の失敗で BCD/レジストリが混在 | fake platform で ON→別インスタンス OFF を通し BCD と3値の明示設定を解除。途中失敗は操作直前の独自構成へメモリ補償 |
 | 旧バックアップの境界 | 撤去した toggle が古い保存ファイルを読む・移行・削除する | Registry/UWP/VBS 実装の永続状態型・保護ストレージ非参照を静的補助検査。UWPは対象判別の固定manifest読み取りだけを許容。旧データの実ファイルは作成・操作しない |
 | 終了 | キャンセル後に新操作を受付、finally より先に idle | 終了 gate を保持し、idle は finally/lease 解放まで未完了 |
+| クリーンアップ走査の lease・終了・世代 (`cleanup-scan-lease-shutdown-generation`) | 走査が表示付き lease を取る、終了時に取消が走査へ届かず finally 完了前に idle になる、走査中に再入できる、終了後に再走査できる、世代が失効した結果で確認・実行へ進める | 走査は `showProcessing:false` の lease で動き、走査中の再走査と別の lease を拒否する。終了要求の取消が走査に届いて finally 完了後にだけ idle になり、終了後の走査は開かない。世代が失効した結果（模擬の判定を false にして再現）は確認の開始も確定も実行境界を呼ばない。世代を失効させる実操作（再走査・設定変更・削除開始）は `CleanupScanServiceTests` が確認する |
 | NTP | 停止失敗後の再開漏れ、未停止で設定変更 | mock stop 失敗時に設定を書かず、補償 start を呼ぶ |
 | サービス・cleanup | 依存サービスの確認失敗を無視、取消が再開失敗を隠す | SCM の状態遷移と拒否を確認し、非作動の相対 canary で engine 到達前取消、再開失敗のサービス名を結果へ残す |
 | MMAgent | 外部変化を再読込しない、照会重複、不正出力の診断消失 | キャッシュ reset と進行中照会の集約、失敗/空/不正 JSON/数値、秘密値の伏字と retry を確認 |

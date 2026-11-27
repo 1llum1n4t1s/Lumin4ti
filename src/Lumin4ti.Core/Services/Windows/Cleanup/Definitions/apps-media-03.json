@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.jellyfin-desktop-logs",
+      "name": "Jellyfin Desktop",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Jellyfin Desktop\\profiles" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Jellyfin Desktop\\profiles\\*\\logs", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://github.com/jellyfin/jellyfin-desktop", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.kodi-logs",
+      "name": "Kodi",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Kodi\\userdata" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%APPDATA%\\Kodi", "pattern": "kodi.log", "olderThanDays": null },
+        { "type": "files", "path": "%APPDATA%\\Kodi", "pattern": "kodi.old.log", "olderThanDays": null }
+      ],
+      "processes": ["kodi"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://kodi.wiki/view/Log_file", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.krita-logs",
+      "name": "Krita",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\krita" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%LOCALAPPDATA%", "pattern": "krita.log", "olderThanDays": null },
+        { "type": "files", "path": "%LOCALAPPDATA%", "pattern": "krita-sysinfo.log", "olderThanDays": null },
+        { "type": "files", "path": "%LOCALAPPDATA%", "pattern": "kritacrash.log", "olderThanDays": null }
+      ],
+      "processes": ["krita"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://docs.krita.org/en/reference_manual/sharing_krita_logs.html", "checked": "2026-11-26" }
+      ]
+    }
+  ]
+}

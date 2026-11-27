@@ -1,5 +1,6 @@
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
+using Lumin4ti.Core.Services.Windows.Cleanup;
 
 namespace Lumin4ti.Core.Services;
 
@@ -44,7 +45,9 @@ public sealed class SettingsService : ISettingsService
             {
                 // 初回起動では正常。異常時と区別できるよう、探した場所を残す。
                 LoggerBootstrap.Log.Info($"設定ファイルが無いため既定値で開始します: {settingsFilePath}");
-                return new SettingsLoadResult(new AppSettings(), SettingsLoadStatus.Missing);
+                var fresh = new AppSettings();
+                NormalizeSettings(fresh);
+                return new SettingsLoadResult(fresh, SettingsLoadStatus.Missing);
             }
 
             var json = File.ReadAllText(settingsFilePath);
@@ -86,6 +89,28 @@ public sealed class SettingsService : ISettingsService
                      .ToArray())
         {
             settings.CleanupExclusions[key] = [];
+        }
+
+        MigrateCleanup(settings);
+    }
+
+    /// <summary>
+    /// 新クリーンアップ設定へ移す。規則定義を読めなければ移行せず (版は 0 のまま)、次回に再試行する。
+    /// 設定の読込そのものは止めない。
+    /// </summary>
+    private static void MigrateCleanup(AppSettings settings)
+    {
+        settings.Cleanup ??= new();
+        settings.Cleanup.Normalize();
+        if (settings.Cleanup.SchemaVersion >= CleanupSettings.CurrentSchemaVersion) return;
+
+        try
+        {
+            CleanupSettingsMigration.Apply(settings, CleanupRuleSource.All());
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            LoggerBootstrap.Log.Error($"クリーンアップ設定の移行に失敗しました。次回に再試行します ({ex.GetType().Name})", ex);
         }
     }
 

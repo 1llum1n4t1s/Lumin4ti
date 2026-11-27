@@ -1,0 +1,241 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "traces.run-history",
+      "name": "Run dialog history",
+      "nameKey": "Text.Cleanup.Rule.traces.run-history",
+      "kind": "history",
+      "category": "traces",
+      "scope": "user",
+      "recommended": false,
+      "impact": "trace",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "registry": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU" }
+      ],
+      "targets": [
+        { "type": "registryTree", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://devblogs.microsoft.com/scripting/?p=67683", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://winreg-kb.readthedocs.io/en/latest/sources/explorer-keys/Most-recently-used.html", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://forensics.wiki/list_of_windows_mru_locations", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "traces.recent-items",
+      "name": "Recent items",
+      "nameKey": "Text.Cleanup.Rule.traces.recent-items",
+      "kind": "recent",
+      "category": "traces",
+      "scope": "user",
+      "recommended": false,
+      "impact": "trace",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Microsoft\\Windows\\Recent" },
+        { "registry": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RecentDocs" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%APPDATA%\\Microsoft\\Windows\\Recent", "pattern": "*.lnk", "recurse": false, "olderThanDays": null },
+        { "type": "registryTree", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RecentDocs" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/win32/shell/knownfolderid", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://winreg-kb.readthedocs.io/en/latest/sources/explorer-keys/Most-recently-used.html", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://forensics.wiki/list_of_windows_mru_locations", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "traces.rdp-history",
+      "name": "Remote Desktop connection history",
+      "nameKey": "Text.Cleanup.Rule.traces.rdp-history",
+      "kind": "history",
+      "category": "traces",
+      "scope": "user",
+      "recommended": false,
+      "impact": "trace",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "registry": "HKCU\\Software\\Microsoft\\Terminal Server Client\\Default" }
+      ],
+      "targets": [
+        { "type": "registryValues", "key": "HKCU\\Software\\Microsoft\\Terminal Server Client\\Default", "values": ["MRU*"] }
+      ],
+      "processes": ["mstsc"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/remote/remove-entries-from-remote-desktop-connection-computer", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "traces.explorer-mru",
+      "name": "Open and Save dialog history",
+      "nameKey": "Text.Cleanup.Rule.traces.explorer-mru",
+      "kind": "history",
+      "category": "traces",
+      "scope": "user",
+      "recommended": false,
+      "impact": "trace",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "registry": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\OpenSavePidlMRU" },
+        { "registry": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\LastVisitedPidlMRU" }
+      ],
+      "targets": [
+        { "type": "registryTree", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\OpenSavePidlMRU" },
+        { "type": "registryTree", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ComDlg32\\LastVisitedPidlMRU" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "B", "url": "https://winreg-kb.readthedocs.io/en/latest/sources/explorer-keys/Most-recently-used.html", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://forensics.wiki/opensavepidlmru", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://nk0.gitbook.io/dfir/windows/forensics/evidence-of-execution/office-apps-forensics/lastvisitedpidlmru", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "traces.search-history",
+      "name": "File Explorer search history",
+      "nameKey": "Text.Cleanup.Rule.traces.search-history",
+      "kind": "history",
+      "category": "traces",
+      "scope": "user",
+      "recommended": false,
+      "impact": "trace",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "registry": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\WordWheelQuery" }
+      ],
+      "targets": [
+        { "type": "registryTree", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\WordWheelQuery" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "B", "url": "https://winreg-kb.readthedocs.io/en/latest/sources/explorer-keys/Most-recently-used.html", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://winaero.com/clear-explorer-search-history-windows-10", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "traces.network-drive-history",
+      "name": "Map network drive history",
+      "nameKey": "Text.Cleanup.Rule.traces.network-drive-history",
+      "kind": "history",
+      "category": "traces",
+      "scope": "user",
+      "recommended": false,
+      "impact": "trace",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "registry": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Map Network Drive MRU" }
+      ],
+      "targets": [
+        { "type": "registryTree", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Map Network Drive MRU" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "B", "url": "https://winreg-kb.readthedocs.io/en/latest/sources/explorer-keys/Most-recently-used.html", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://forensics.wiki/list_of_windows_mru_locations", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "traces.jump-lists",
+      "name": "Jump Lists",
+      "nameKey": "Text.Cleanup.Rule.traces.jump-lists",
+      "kind": "recent",
+      "category": "traces",
+      "scope": "user",
+      "recommended": false,
+      "impact": "trace",
+      "warningKey": "Text.Cleanup.Warning.JumpListPins",
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Microsoft\\Windows\\Recent\\AutomaticDestinations" },
+        { "path": "%APPDATA%\\Microsoft\\Windows\\Recent\\CustomDestinations" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%APPDATA%\\Microsoft\\Windows\\Recent\\AutomaticDestinations", "pattern": "*.automaticDestinations-ms", "recurse": false, "olderThanDays": null },
+        { "type": "files", "path": "%APPDATA%\\Microsoft\\Windows\\Recent\\CustomDestinations", "pattern": "*.customDestinations-ms", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/win32/shell/taskbar-extensions", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://forensics.wiki/jump_lists/", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://artifacts-kb.readthedocs.io/en/latest/sources/windows/JumpLists.html", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "traces.ie-history",
+      "name": "Internet Explorer history and typed addresses",
+      "nameKey": "Text.Cleanup.Rule.traces.ie-history",
+      "kind": "history",
+      "category": "traces",
+      "scope": "user",
+      "recommended": false,
+      "impact": "trace",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "registry": "HKCU\\Software\\Microsoft\\Internet Explorer\\TypedURLs" }
+      ],
+      "targets": [
+        { "type": "handler", "handler": "ieHistory" },
+        { "type": "registryValues", "key": "HKCU\\Software\\Microsoft\\Internet Explorer\\TypedURLs", "values": ["url*"] }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/previous-versions/windows/internet-explorer/ie-developer/platform-apis/ms774947(v=vs.85)", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://devblogs.microsoft.com/scripting/how-can-i-clear-the-list-of-urls-that-appear-in-the-internet-explorer-address-bar/", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "traces.userassist",
+      "name": "Program launch history (UserAssist)",
+      "nameKey": "Text.Cleanup.Rule.traces.userassist",
+      "kind": "history",
+      "category": "traces",
+      "scope": "user",
+      "recommended": false,
+      "impact": "trace",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "registry": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist\\{CEBFF5CD-ACE2-4F4F-9178-9926F41749EA}\\Count" }
+      ],
+      "targets": [
+        { "type": "registryTree", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist\\{CEBFF5CD-ACE2-4F4F-9178-9926F41749EA}\\Count" },
+        { "type": "registryTree", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist\\{F4E57C4B-2036-45F0-A9AB-443BCFE33D9F}\\Count" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "B", "url": "https://magnetforensics.com/blog/artifact-profile-userassist", "checked": "2026-11-27" },
+        { "tier": "B", "url": "https://securelist.com/userassist-artifact-forensic-value-for-incident-response/116911/", "checked": "2026-11-27" }
+      ]
+    }
+  ]
+}

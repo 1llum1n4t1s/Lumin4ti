@@ -90,8 +90,6 @@
   <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">사용자 지정</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">DISM 출력에 Recall 상태가 없습니다. 자세한 내용은 로그를 확인하세요.</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">DISM이 반환한 Recall 상태를 해석할 수 없습니다. 자세한 내용은 로그를 확인하세요.</x:String>
-  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">다른 Windows 사용자가 등록한 작업이므로 변경할 수 없습니다.</x:String>
-  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">등록된 작업의 소유자를 확인할 수 없어 변경할 수 없습니다.</x:String>
 
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">설치된 앱 일괄 업데이트(winget)</x:String>
@@ -118,24 +116,10 @@
   <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">WSReset로 Microsoft Store 캐시를 초기화합니다. Store가 열리지 않거나 다운로드가 진행되지 않거나 “다시 시도” 오류가 반복될 때의 표준 해결 방법입니다. 앱과 계정 정보는 제거되지 않습니다. 완료되면 Store 앱이 자동으로 열릴 수 있습니다.</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">SSD TRIM 및 빈 공간 통합</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">SSD 쓰기 성능을 유지하고 빈 공간을 조각 모음하기 위해 모든 볼륨에서 SSD에 대한 TRIM 알림(/L)과 빈 공간 통합(/X)을 실행합니다. 드라이브 구성에 따라 몇 분에서 수십 분이 걸릴 수 있습니다. 실행 중에도 PC를 계속 사용할 수 있습니다.</x:String>
-  <x:String x:Key="Text.Action.cleanup-user-temp.Label" xml:space="preserve">사용자 임시 파일과 캐시 삭제</x:String>
-  <x:String x:Key="Text.Action.cleanup-user-temp.Desc" xml:space="preserve">임시 파일, 충돌 덤프, 셰이더 및 인터넷 캐시와 다시 만들 수 있는 IME, Office, Outlook 캐시를 삭제합니다. 브라우징 기록, 최근 파일 기록, 앱 설정은 삭제하지 않습니다. 사용 중인 파일은 건너뜁니다.</x:String>
-  <x:String x:Key="Text.Action.cleanup-system-temp.Label" xml:space="preserve">시스템 임시 파일과 로그 삭제</x:String>
-  <x:String x:Key="Text.Action.cleanup-system-temp.Desc" xml:space="preserve">Windows 임시 폴더, 알려진 Windows 로그 위치의 ETL 추적 로그, 설치 및 서비스 로그, 배달 최적화 캐시, Microsoft Defender 진단 로그를 삭제합니다. Defender의 탐지 및 조치 기록은 보존합니다. ETL은 Windows Logs, LogFiles, Panther, Diagnosis 아래의 *.etl로 제한하며 드라이브 전체를 검색하지 않습니다. 배달 최적화 서비스는 잠시 중지한 뒤 복원합니다. 문제를 조사 중일 때는 실행하지 마세요.</x:String>
-  <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">앱 캐시와 로그 삭제</x:String>
-  <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">앱 캐시, GPU 셰이더 캐시, 충돌 보고서와 도구 로그를 삭제합니다. WebStorage, 가상 머신 번들, 설정과 로그인 상태는 삭제하지 않습니다.</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">개발 도구의 패키지 캐시 삭제</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">npm, pnpm, NuGet, pip, Yarn, Gradle, Bun, uv, Cargo의 다시 다운로드 가능한 캐시만 삭제합니다. uv 관리 Python, Maven 로컬 결과물, 자격 증명, 설정과 일반 .cache 폴더는 삭제하지 않습니다.</x:String>
-  <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">브라우저 캐시 삭제</x:String>
-  <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Chromium 웹 및 셰이더 캐시, Service Worker 캐시 저장소, 충돌 보고서와 확장 프로그램 임시 데이터를 삭제합니다. Service Worker 등록, DRM 구성 요소, 북마크, 암호와 로그인 상태는 삭제하지 않습니다.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">아이콘·썸네일·글꼴 캐시 다시 만들기</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">파일 탐색기의 아이콘 캐시, 썸네일 캐시, 글꼴 캐시를 삭제해 Windows가 다시 만들도록 합니다. 아이콘이 비어 있거나 엉뚱하게 보이는 경우, 썸네일이 갱신되지 않는 경우, 글자가 깨지는 경우의 표준 복구 방법입니다. 탐색기를 강제로 종료하지 않습니다. 사용 중인 선택된 캐시는 다음 Windows 시작 시 신뢰할 수 있는 설치에서 다시 열거하여 삭제를 시도합니다. 7일 이내 최대 3회 실행하며, 계속 잠긴 대상은 유지하고 결과를 로그에 남깁니다. 캐시를 다시 만드는 동안에는 표시가 일시적으로 느려집니다.</x:String>
-  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">Windows Update 다운로드 캐시 삭제</x:String>
-  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">SoftwareDistribution\Download에서 다시 받을 수 있는 파일만 삭제합니다. 업데이트 기록과 catroot2는 삭제하지 않습니다. 관련 서비스는 복원됩니다.</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">미리 읽기 데이터와 검색 인덱스 삭제 후 다시 만들기</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">앱 실행을 빠르게 하는 미리 읽기 데이터(Prefetch)와 파일 탐색기의 검색 인덱스를 삭제하고 Windows가 다시 만들게 합니다. 검색 결과가 나오지 않거나 오래된 파일만 걸릴 때 사용합니다. 다시 만드는 동안(수십 분에서 몇 시간) 앱 실행과 검색이 느려지고 백그라운드 CPU 사용량이 올라갑니다.</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">로그인 시 정리를 자동 실행하는 작업 등록</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">로그인할 때 선택한 캐시와 로그 정리를 사용 가능한 최고 권한으로 실행하므로 관리자 권한이나 서비스 중지가 필요한 항목도 실행할 수 있습니다. 실행 버튼과 같은 목록을 사용하며 UAC 확인 없이 시작됩니다. 사용 중인 파일은 건너뜁니다. OFF는 작업을 제거합니다.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">메모리 압축</x:String>
@@ -200,7 +184,6 @@
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Edge 백그라운드 프로세스 끄기(100~300 MB 절약)</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">정책으로 Edge 백그라운드 모드와 Startup Boost를 비활성화합니다. Edge를 거의 사용하지 않는다면 약 100~300 MB의 메모리를 확보할 수 있습니다. Edge 시작이 조금 느려지고 확장 프로그램 알림이 중단될 수 있습니다. OFF로 전환하면 정책을 제거하고 Edge 기본값으로 복원합니다.</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">삭제할 대상 선택</x:String>
-  <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">로그인 시 실행할 항목 선택</x:String>
   <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">이 선택의 마지막 저장에 실패했습니다(로그를 확인하세요).</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">업데이트</x:String>
@@ -223,10 +206,548 @@
   <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">개발 빌드</x:String>
   <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">버전을 가져올 수 없습니다</x:String>
   <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">언어 및 업데이트 설정의 마지막 저장에 실패했습니다(로그를 확인하세요).</x:String>
-  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">설정을 읽을 수 없습니다. 원본 파일을 보호하기 위해 저장을 중지하고 로그인 시 정리도 실행하지 않습니다. 변경 사항은 이번 실행 중에만 적용됩니다.</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">설정을 읽을 수 없습니다. 원본 파일을 보호하기 위해 저장을 중지합니다. 변경 사항은 이번 실행 중에만 적용됩니다.</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">마지막 확인에서 대상을 찾지 못했습니다.</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">목록을 다시 열면 업데이트됩니다. 실행 시 제외되지 않은 새 대상도 포함됩니다.</x:String>
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">처리 중</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">작업이 완료될 때까지 기다려 주세요.</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">취소 및 정리 작업이 완료될 때까지 기다려 주세요.</x:String>
+
+  <!-- ===== Cleanup (standard / advanced / slim / settings) ===== -->
+
+  <x:String x:Key="Text.Cleanup.Tab.Common" xml:space="preserve">표준</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Advanced" xml:space="preserve">고급</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Slim" xml:space="preserve">용량 줄이기</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Settings" xml:space="preserve">설정</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Other" xml:space="preserve">기타</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Scan" xml:space="preserve">검사</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Rescan" xml:space="preserve">다시 검사</x:String>
+  <x:String x:Key="Text.Cleanup.Action.CancelScan" xml:space="preserve">검사 중지</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Clean" xml:space="preserve">선택 항목 삭제</x:String>
+  <x:String x:Key="Text.Cleanup.Action.ExportText" xml:space="preserve">텍스트로 내보내기</x:String>
+  <x:String x:Key="Text.Cleanup.Action.OpenLocation" xml:space="preserve">위치 열기</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Ignore" xml:space="preserve">무시(이후 검사에서 제외)</x:String>
+  <x:String x:Key="Text.Cleanup.Select.Recommended" xml:space="preserve">권장</x:String>
+  <x:String x:Key="Text.Cleanup.Select.All" xml:space="preserve">모두 선택</x:String>
+  <x:String x:Key="Text.Cleanup.Select.None" xml:space="preserve">모두 해제</x:String>
+  <x:String x:Key="Text.Cleanup.Select.Invert" xml:space="preserve">선택 반전</x:String>
+  <x:String x:Key="Text.Cleanup.Filter.Placeholder" xml:space="preserve">항목 필터링</x:String>
+  <x:String x:Key="Text.Cleanup.Filter.HideEmpty" xml:space="preserve">삭제할 것이 없는 항목 숨기기</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Name" xml:space="preserve">항목</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Category" xml:space="preserve">분류</x:String>
+  <x:String x:Key="Text.Cleanup.Column.State" xml:space="preserve">상태</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Files" xml:space="preserve">파일 수</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Size" xml:space="preserve">크기</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Impact" xml:space="preserve">영향</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Folder" xml:space="preserve">폴더</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Modified" xml:space="preserve">수정한 날짜</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Rule" xml:space="preserve">규칙</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Safety" xml:space="preserve">안전도</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Results" xml:space="preserve">검사 결과</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Progress" xml:space="preserve">검사 진행률</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.SelectRow" xml:space="preserve">{0} 선택</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Row" xml:space="preserve">{0}, {1}, {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Windows" xml:space="preserve">Windows 시스템</x:String>
+  <x:String x:Key="Text.Cleanup.Category.StoreApps" xml:space="preserve">Store 앱</x:String>
+  <x:String x:Key="Text.Cleanup.Category.BrowserCache" xml:space="preserve">브라우저 캐시</x:String>
+  <x:String x:Key="Text.Cleanup.Category.BrowserTrace" xml:space="preserve">브라우저 기록 및 흔적</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Cookies" xml:space="preserve">쿠키</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Traces" xml:space="preserve">사용 흔적</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Components" xml:space="preserve">Windows 구성 요소</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Apps" xml:space="preserve">기타 앱</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Custom" xml:space="preserve">사용자 지정 폴더</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Cache" xml:space="preserve">{0} 캐시</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Log" xml:space="preserve">{0} 로그</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Temp" xml:space="preserve">{0} 임시 파일</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Dump" xml:space="preserve">{0} 덤프</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Thumbnail" xml:space="preserve">{0} 축소판 그림</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Shader" xml:space="preserve">{0} 셰이더 캐시</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Report" xml:space="preserve">{0} 보고서</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.History" xml:space="preserve">{0} 기록</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Form" xml:space="preserve">{0} 양식 데이터</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Session" xml:space="preserve">{0} 세션 데이터</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Cookies" xml:space="preserve">{0} 쿠키</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Recent" xml:space="preserve">{0} 최근 항목</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Backup" xml:space="preserve">{0} 백업</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Downloads" xml:space="preserve">{0} 다운로드한 파일</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Other" xml:space="preserve">{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Junk" xml:space="preserve">불필요한 파일</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Trace" xml:space="preserve">사용 흔적</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Signout" xml:space="preserve">로그아웃됨</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Rebuild" xml:space="preserve">재생성 필요</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.UserFiles" xml:space="preserve">내 파일</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Trace.Warning" xml:space="preserve">사용 기록이 사라집니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Signout.Warning" xml:space="preserve">쿠키를 삭제하면 웹 사이트에서 로그아웃될 수 있습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Rebuild.Warning" xml:space="preserve">삭제 후 처음 사용할 때는 데이터를 다시 만드느라 느려질 수 있습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.UserFiles.Warning" xml:space="preserve">다시 다운로드할 수 없는 내 파일이 포함되어 있습니다. 항목을 개별적으로 선택하세요. 삭제하기 전에 한 번 더 확인합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Warning.NotRecommended" xml:space="preserve">이 항목은 기본적으로 권장되지 않습니다. 선택하기 전에 무엇이 삭제되는지 확인하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Warning.JumpListPins" xml:space="preserve">점프 목록을 삭제하면 작업 표시줄과 시작 메뉴에 고정한 항목도 함께 삭제됩니다.</x:String>
+  <x:String x:Key="Text.Cleanup.State.Found" xml:space="preserve">삭제 가능</x:String>
+  <x:String x:Key="Text.Cleanup.State.Empty" xml:space="preserve">삭제할 것 없음</x:String>
+  <x:String x:Key="Text.Cleanup.State.Unmeasurable" xml:space="preserve">개수를 알 수 없음</x:String>
+  <x:String x:Key="Text.Cleanup.State.Unavailable" xml:space="preserve">사용할 수 없음</x:String>
+  <x:String x:Key="Text.Cleanup.State.NotDetected" xml:space="preserve">감지되지 않음</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.UserScopeDifferentUser" xml:space="preserve">로그인한 사용자와 권한이 상승된 사용자가 달라, 사용자의 설정과 데이터를 대상으로 하는 항목은 사용할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.UserScopeUnknown" xml:space="preserve">로그인한 사용자를 확인할 수 없어, 사용자의 설정과 데이터를 대상으로 하는 항목은 사용할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.TargetRejected" xml:space="preserve">안전을 위해 대상이 거부되었습니다(보호된 위치, 자격 증명, 링크 등).</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.ScanFailed" xml:space="preserve">검사하지 못했습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.HandlerUnavailable" xml:space="preserve">이 환경에서는 실행할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.CustomFolderRejected" xml:space="preserve">이 위치는 사용자 지정 폴더로 허용되지 않아 건너뜁니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Title" xml:space="preserve">표준 정리</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Description" xml:space="preserve">먼저 검사하여 삭제할 수 있는 항목을 확인한 다음, 선택한 항목만 삭제합니다. 검사는 아무것도 변경하지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.NotScanned" xml:space="preserve">아직 검사하지 않았습니다. 검사를 눌러 삭제할 수 있는 항목을 찾으세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Scanning" xml:space="preserve">{1}개 중 {0}번째 검사 중: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanDone" xml:space="preserve">검사 완료: 항목 {0}개, 파일 {1}개, {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanCanceled" xml:space="preserve">검사를 중지했습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanFailed" xml:space="preserve">검사하지 못했습니다. 로그를 확인하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Stale" xml:space="preserve">설정이 변경되었거나 다른 작업이 실행되어 검사 결과가 오래되었습니다. 다시 검사하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.NothingFound" xml:space="preserve">삭제할 수 있는 항목이 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Selection" xml:space="preserve">{1}개 중 {0}개 항목 선택됨(약 {2})</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Retained" xml:space="preserve">제외 설정에 따라 항목 {0}개를 유지합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Unreadable" xml:space="preserve">항목 {0}개를 확인할 수 없었습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.SkippedLinks" xml:space="preserve">항목 {0}개는 링크이므로 건드리지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Unmeasurable" xml:space="preserve">실행할 수는 있지만, 개수와 크기를 미리 측정할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Representatives" xml:space="preserve">예: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.RunningProcesses" xml:space="preserve">실행 중: {0}(삭제하기 전에 종료할지 묻습니다)</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ServiceNote" xml:space="preserve">삭제하는 동안 일시적으로 중지되는 서비스: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Title" xml:space="preserve">삭제 확인</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Run" xml:space="preserve">삭제</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Back" xml:space="preserve">돌아가기</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Common.Body" xml:space="preserve">선택한 항목 {0}개(파일 {1}개, 약 {2})를 영구적으로 삭제합니다. 휴지통으로 이동하지 않으며 복원할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.NotRecommended" xml:space="preserve">권장되지 않는 항목 {0}개가 포함되어 있습니다. 먼저 내용을 확인하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Signout" xml:space="preserve">로그아웃될 수 있는 항목(쿠키 등) {0}개가 포함되어 있습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.UserFiles" xml:space="preserve">항목 {0}개에 다시 다운로드할 수 없는 내 파일이 포함되어 있습니다. 한 번 더 확인합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.UserFiles.Check" xml:space="preserve">내 파일이 영구적으로 삭제된다는 것을 이해했습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.SecureDelete" xml:space="preserve">보안 삭제가 켜져 있습니다. 파일을 삭제하기 전에 한 번 덮어씁니다(SSD에서는 보장되지 않습니다).</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.RunningProcess" xml:space="preserve">실행 중인 제품이 있습니다. 삭제하는 동안 종료할지 묻습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Body" xml:space="preserve">"{0}"이(가) 실행 중입니다({1}). 데이터를 삭제하려면 먼저 종료해야 합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Close" xml:space="preserve">종료</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Skip" xml:space="preserve">이 항목 건너뛰기</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Abort" xml:space="preserve">중지</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceBody" xml:space="preserve">"{0}"을(를) 정상적으로 종료하지 못했습니다({1}). 강제로 종료하면 저장하지 않은 입력 내용이 사라집니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceYes" xml:space="preserve">강제 종료</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceNo" xml:space="preserve">강제 종료하지 않음</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Running" xml:space="preserve">{1}개 중 {0}번째 삭제 중: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Done" xml:space="preserve">파일 {0}개를 삭제하여 {1}을(를) 확보했습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Run.DonePartial" xml:space="preserve">일부만 완료: 파일 {0}개를 삭제하여 {1}을(를) 확보했습니다. 일부 항목은 실패했거나 건너뛰었습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Canceled" xml:space="preserve">중지했습니다. 이미 파일 {0}개({1})를 삭제했습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Stale" xml:space="preserve">검사 결과가 오래되어 아무것도 삭제하지 않았습니다. 다시 검사하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Retained" xml:space="preserve">제외 설정 또는 검사 이후의 변경으로 항목 {0}개를 유지했습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Blocked" xml:space="preserve">항목 {0}개를 삭제할 수 없었습니다(사용 중, 권한 없음 등).</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Wiped" xml:space="preserve">항목 {0}개를 삭제 전에 덮어썼습니다({1}개는 덮어쓰지 않고 삭제했습니다).</x:String>
+  <x:String x:Key="Text.Cleanup.Run.ServiceResumeFailed" xml:space="preserve">일시적으로 중지한 서비스를 다시 시작하지 못했습니다. 서비스 상태를 확인하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Succeeded" xml:space="preserve">성공</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.NothingToDo" xml:space="preserve">할 일 없음</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Partial" xml:space="preserve">일부만 완료</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Failed" xml:space="preserve">실패</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Skipped" xml:space="preserve">건너뜀</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Canceled" xml:space="preserve">중지됨</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.NotRun" xml:space="preserve">실행 안 함</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.NotScanned" xml:space="preserve">검사하지 않았으므로 삭제하지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.NothingFound" xml:space="preserve">삭제할 것이 없었습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.Unavailable" xml:space="preserve">이 환경에서는 실행할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.UserFilesNotConfirmed" xml:space="preserve">내 파일에 대한 확인이 이루어지지 않아 삭제하지 않았습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessRunningDeclined" xml:space="preserve">제품이 실행 중이어서 건너뛰었습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessUnverifiable" xml:space="preserve">실행 중인 프로세스의 소유자를 확인할 수 없어 건너뛰었습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessStillRunning" xml:space="preserve">제품이 종료되지 않아 건너뛰었습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ForceTerminationDeclined" xml:space="preserve">강제 종료가 승인되지 않아 건너뛰었습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessIdentityMismatch" xml:space="preserve">프로세스를 일치시킬 수 없어 종료하지 않고 건너뛰었습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.TerminateFailed" xml:space="preserve">제품을 종료할 수 없어 건너뛰었습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Totals.Last" xml:space="preserve">마지막 실행: 파일 {0}개, {1}({2})</x:String>
+  <x:String x:Key="Text.Cleanup.Totals.Total" xml:space="preserve">합계: 파일 {0}개, {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Title" xml:space="preserve">검사 결과 내보내기</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Done" xml:space="preserve">{0}(으)로 내보냈습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Failed" xml:space="preserve">내보내지 못했습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.OpenLocation.Failed" xml:space="preserve">위치를 열지 못했습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Name" xml:space="preserve">이름</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Category" xml:space="preserve">분류</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.State" xml:space="preserve">상태</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Files" xml:space="preserve">파일 수</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Items" xml:space="preserve">항목 수</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Bytes" xml:space="preserve">바이트</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Retained" xml:space="preserve">유지됨</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Status" xml:space="preserve">결과</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Details" xml:space="preserve">세부 정보</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Total" xml:space="preserve">합계</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Title" xml:space="preserve">고급 정리</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Description" xml:space="preserve">선택한 드라이브에서 보통 안전하게 삭제할 수 있는 파일을 패턴으로 찾습니다. 검사는 아무것도 변경하지 않습니다. 결과를 확인한 다음, 선택한 항목만 삭제하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drives" xml:space="preserve">검사할 드라이브</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drive.Removable" xml:space="preserve">이동식</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drive.Fixed" xml:space="preserve">고정</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.ZeroByte" xml:space="preserve">0바이트 파일 포함</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.InvalidShortcuts" xml:space="preserve">대상이 없는 바로 가기 포함</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.OlderThan" xml:space="preserve">지정한 일수보다 오래된 파일 포함</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.Days" xml:space="preserve">일수</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.SelectSafe" xml:space="preserve">안전한 항목만 선택</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.Default" xml:space="preserve">기본</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.Additional" xml:space="preserve">추가</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.UserDefined" xml:space="preserve">사용자 정의</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.Safe" xml:space="preserve">안전</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.Undeterminable" xml:space="preserve">판단 불가</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.UserDefined" xml:space="preserve">사용자 정의</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.CheckpointOutsideFound" xml:space="preserve">FOUND 폴더 밖에 있는 .chk 파일입니다. ESE 검사점일 수 있으므로 직접 확인하기 전에는 선택하지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.RecentlyModified" xml:space="preserve">최근 24시간 이내에 수정되어 기본적으로 선택하지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.ZeroByte" xml:space="preserve">0바이트 파일이므로 기본적으로 선택하지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.OldFile" xml:space="preserve">오래되었다는 이유만으로 일치했으므로 기본적으로 선택하지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.UserPattern" xml:space="preserve">사용자가 정의한 패턴과 일치하므로 기본적으로 선택하지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.NamePattern" xml:space="preserve">이름 패턴</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.ZeroByte" xml:space="preserve">0바이트</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.InvalidShortcut" xml:space="preserve">잘못된 바로 가기</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.OldFile" xml:space="preserve">오래된 파일</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Progress" xml:space="preserve">폴더 {0}개, 파일 {1}개 확인함. 일치 항목 {2}개({3}): {4}</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.ScanDone" xml:space="preserve">검사 완료: 확인한 파일 {2}개 중 {0}개({1})가 일치합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Truncated" xml:space="preserve">일치 항목이 너무 많아 처음 {0}개만 표시합니다. 나머지 {1}개({2})는 표시되지도 삭제되지도 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RootFailure" xml:space="preserve">검사하지 못했습니다: {0}({1})</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Pruned" xml:space="preserve">보호되었거나 제외된 폴더 {0}개는 확인하지 않았습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Empty" xml:space="preserve">일치하는 파일이 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Selection" xml:space="preserve">{1}개 중 파일 {0}개 선택됨({2})</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolders" xml:space="preserve">사용자 지정 폴더</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Note" xml:space="preserve">폴더 안의 내용만 비웁니다. 폴더 자체는 남습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Missing" xml:space="preserve">찾을 수 없음</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Summary" xml:space="preserve">파일 {0}개, {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Body" xml:space="preserve">선택한 파일 {0}개({1})와 사용자 지정 폴더 {2}개의 내용을 영구적으로 삭제합니다. 휴지통으로 이동하지 않으며 복원할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Undeterminable" xml:space="preserve">"판단 불가"로 표시된 파일 {0}개가 포함되어 있습니다. 확인하지 않은 파일은 선택을 해제하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Recent" xml:space="preserve">최근 24시간 이내에 수정된 파일 {0}개가 포함되어 있습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Done" xml:space="preserve">파일 {0}개와 폴더 {1}개를 삭제하여 {2}을(를) 확보했습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Partial" xml:space="preserve">일부만 완료: 파일 {0}개와 폴더 {1}개를 삭제하여 {2}을(를) 확보했습니다. 일부 항목은 유지되었거나 삭제할 수 없었습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Expired" xml:space="preserve">검사 결과가 오래되어 아무것도 삭제하지 않았습니다. 다시 검사하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Cancelled" xml:space="preserve">중지했습니다. 이미 파일 {0}개({1})를 삭제했습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Blocked" xml:space="preserve">파일 {0}개를 삭제할 수 없었습니다(사용 중, 권한 없음 등).</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Retained" xml:space="preserve">제외 설정 또는 검사 이후의 변경으로 파일 {0}개를 유지했습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Gone" xml:space="preserve">파일 {0}개는 이미 존재하지 않았습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Covered" xml:space="preserve">파일 {0}개는 선택한 사용자 지정 폴더 안에 있어 따로 처리하지 않았습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Rejected" xml:space="preserve">안전 검사에서 항목 {0}개가 거부되었습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Invalid" xml:space="preserve">이 경로는 폴더로 사용할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.DriveRoot" xml:space="preserve">드라이브 루트는 사용할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Windows" xml:space="preserve">Windows 폴더와 그 상위 및 하위 폴더는 사용할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProgramFiles" xml:space="preserve">Program Files와 그 상위 및 하위 폴더는 사용할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProgramData" xml:space="preserve">ProgramData와 그 상위 및 하위 폴더는 사용할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.OtherUserProfile" xml:space="preserve">다른 사용자의 프로필은 사용할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProfileRoot" xml:space="preserve">사용자 프로필 폴더와 AppData는 비우면 모든 데이터를 잃게 되므로 사용할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Credential" xml:space="preserve">자격 증명이나 키가 들어 있는 위치는 사용할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Added" xml:space="preserve">사용자 지정 폴더를 추가했습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Title" xml:space="preserve">용량 줄이기</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Description" xml:space="preserve">Windows에 필요 없는 데이터를 삭제하여 디스크 공간을 확보합니다. 되돌릴 수 없거나 이후 복구에 영향을 줄 수 있는 항목이 있으므로, 기본적으로 아무것도 선택되어 있지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Run" xml:space="preserve">선택 항목 실행</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.CreateRestorePoint" xml:space="preserve">실행 전에 복원 지점 만들기</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Item" xml:space="preserve">항목</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Status" xml:space="preserve">상태</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Size" xml:space="preserve">예상 확보 용량</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Estimate" xml:space="preserve">약 {0}(추정)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.SizeUnknown" xml:space="preserve">알 수 없음</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.NotScanned" xml:space="preserve">아직 검사하지 않았습니다. 검사를 눌러 각 항목으로 확보할 수 있는 공간을 확인하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Scanning" xml:space="preserve">용량 줄이기 항목을 확인하는 중…</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.ScanDone" xml:space="preserve">검사 완료. 실행할 수 있는 항목은 {0}개입니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.ScanFailed" xml:space="preserve">검사하지 못했습니다. 로그를 확인하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Stale" xml:space="preserve">검사 결과가 오래되어 아무것도 실행하지 않았습니다. 다시 검사하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.LongRunning" xml:space="preserve">DISM을 사용하는 항목은 몇 분 이상 걸릴 수 있습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.Available" xml:space="preserve">실행 가능</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.NothingToClean" xml:space="preserve">정리할 것 없음</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.Unavailable" xml:space="preserve">사용할 수 없음</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Notice" xml:space="preserve">참고</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Caution" xml:space="preserve">주의</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Irreversible" xml:space="preserve">되돌릴 수 없음</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.EnumerationFailed" xml:space="preserve">등록 정보를 완전히 읽지 못해 안전하게 판단할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.ProtectedByWindows" xml:space="preserve">이 파일은 Windows에서 보호하므로 삭제할 것이 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.LanguageInUse" xml:space="preserve">표시 언어, 언어 목록 또는 키보드 레이아웃에서 사용 중이므로 제거할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.UserHiveNotLoaded" xml:space="preserve">일부 사용자의 데이터가 로드되지 않아 사용 여부를 확인할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.NotPresent" xml:space="preserve">대상이 설치되어 있지 않거나 찾을 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.ToolFailed" xml:space="preserve">DISM의 결과를 읽거나 해석할 수 없었습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.Rejected" xml:space="preserve">안전 검사에서 대상이 거부되었습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Succeeded" xml:space="preserve">성공</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Partial" xml:space="preserve">일부만 완료</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Failed" xml:space="preserve">실패</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Skipped" xml:space="preserve">건너뜀</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Cancelled" xml:space="preserve">중지됨</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Title" xml:space="preserve">용량 줄이기 확인</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Body" xml:space="preserve">선택한 항목 {0}개(예상 확보 용량: {1})를 실행합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.WithRestorePoint" xml:space="preserve">실행하기 전에 복원 지점을 만듭니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">복원 지점을 만들지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Title" xml:space="preserve">되돌릴 수 없는 작업 확인</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Body" xml:space="preserve">업데이트 롤백 데이터를 제거하면 이미 설치된 업데이트를 더 이상 제거할 수 없습니다. 이 작업은 되돌릴 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Check" xml:space="preserve">설치된 업데이트를 더 이상 제거할 수 없다는 것을 이해했습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Created" xml:space="preserve">복원 지점을 만들었습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Reused" xml:space="preserve">{0}에 만든 기존 복원 지점을 사용합니다(24시간 이내에는 새로 만들지 않습니다).</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Unavailable.Title" xml:space="preserve">사용할 수 있는 복원 지점이 없습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Unavailable.Body" xml:space="preserve">복원 지점을 만들지 못했습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Disabled.Body" xml:space="preserve">시스템 보호가 꺼져 있어 복원 지점을 만들 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.ContinueWithout" xml:space="preserve">복원 지점 없이 계속</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Abort" xml:space="preserve">중지</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.EnableAndRetry" xml:space="preserve">시스템 보호를 켜고 다시 시도</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Running" xml:space="preserve">{1}개 중 {0}번째 실행 중: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Done" xml:space="preserve">완료. 확보한 공간: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.DonePartial" xml:space="preserve">일부 항목이 완료되지 않았습니다. 각 항목의 결과를 확인하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RebootRequired" xml:space="preserve">변경 사항을 적용하려면 다시 시작해야 합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Title" xml:space="preserve">정리 설정</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Saved" xml:space="preserve">설정을 저장했습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SaveFailed" xml:space="preserve">설정을 저장하지 못했습니다. 로그를 확인하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Exclusions" xml:space="preserve">제외</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Exclusions.Description" xml:space="preserve">제외한 항목은 검사하지도 삭제하지도 않고 그대로 둡니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add" xml:space="preserve">추가</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Remove" xml:space="preserve">목록에서 제거</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import" xml:space="preserve">가져오기</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export" xml:space="preserve">내보내기</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Title" xml:space="preserve">제외 항목 가져오기</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Title" xml:space="preserve">제외 항목 내보내기</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.File" xml:space="preserve">파일</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.File" xml:space="preserve">예: C:\Users\me\notes.txt</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.Folder" xml:space="preserve">폴더</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.Folder" xml:space="preserve">예: C:\Users\me\Projects(하위 폴더 포함)</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.Name" xml:space="preserve">확장명 및 파일 이름</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.Name" xml:space="preserve">예: *.log 또는 cache.db</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.CookieDomain" xml:space="preserve">쿠키 도메인</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.CookieDomain" xml:space="preserve">예: example.com(하위 도메인 포함)</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Added" xml:space="preserve">추가했습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Duplicate" xml:space="preserve">이미 목록에 있습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Invalid" xml:space="preserve">형식이 올바르지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.LimitReached" xml:space="preserve">항목 수가 {0}개 한도에 도달했습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.TooLarge" xml:space="preserve">파일이 너무 큽니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.Unreadable" xml:space="preserve">파일을 읽을 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.InvalidFormat" xml:space="preserve">파일 형식이 올바르지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.UnsupportedSchema" xml:space="preserve">이 버전에서는 해당 형식을 읽을 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.TooManyEntries" xml:space="preserve">항목이 너무 많아 아무것도 가져오지 않았습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Done" xml:space="preserve">{0}개 추가(중복: {1}개, 거부: {2}개).</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Done" xml:space="preserve">{0}(으)로 내보냈습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Failed" xml:space="preserve">내보내지 못했습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Options" xml:space="preserve">파일 삭제 방법</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SecureDelete" xml:space="preserve">보안 삭제(한 번 덮어쓴 후 삭제)</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SecureDelete.Note" xml:space="preserve">파일을 삭제하기 전에 내용을 한 번 덮어씁니다. SSD에서는 완전한 삭제가 보장되지 않습니다. 하드 링크가 있는 파일과 압축, 스파스 또는 암호화된 파일은 덮어쓰지 않고 삭제만 합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CreateRestorePoint" xml:space="preserve">용량 줄이기 전에 복원 지점 만들기</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CreateRestorePoint.Note" xml:space="preserve">최근 24시간 이내에 만든 복원 지점이 있으면 그것을 사용합니다. 시스템 보호가 꺼져 있으면 확인한 후 켤 수 있습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.OpenSystemRestore" xml:space="preserve">시스템 복원 열기</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders" xml:space="preserve">사용자 지정 폴더</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Description" xml:space="preserve">고급 정리에서 내용을 비울 폴더입니다. Windows, Program Files, ProgramData, 다른 사용자의 프로필, 드라이브 루트, 자격 증명이 있는 위치는 허용되지 않습니다. 추가한 폴더는 항상 선택되지 않은 상태로 시작합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Add" xml:space="preserve">폴더 추가…</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Pick" xml:space="preserve">사용자 지정 폴더 선택</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns" xml:space="preserve">사용자 정의 확장명 및 파일 이름</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.Description" xml:space="preserve">고급 정리 검색에 추가됩니다. 일치한 항목은 항상 선택되지 않은 상태로 시작합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.Hint" xml:space="preserve">예: *.xyz</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.BuiltIn" xml:space="preserve">기본 제공 패턴</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules" xml:space="preserve">항목별 기본 선택</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules.Description" xml:space="preserve">표준 정리에서 항목의 권장 기본 선택을 재정의합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules.Reset" xml:space="preserve">기본값으로 되돌리기</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.Default" xml:space="preserve">권장 사항에 따름</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.On" xml:space="preserve">항상 선택</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.Off" xml:space="preserve">선택 안 함</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Totals" xml:space="preserve">지금까지의 실적</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Totals.None" xml:space="preserve">아직 실행한 적이 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.run-history" xml:space="preserve">실행 대화 상자 기록</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.recent-items" xml:space="preserve">최근 항목</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.rdp-history" xml:space="preserve">원격 데스크톱 연결 기록</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.explorer-mru" xml:space="preserve">열기/저장 대화 상자 기록</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.search-history" xml:space="preserve">파일 탐색기 검색 기록</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.network-drive-history" xml:space="preserve">네트워크 드라이브 연결 기록</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.jump-lists" xml:space="preserve">점프 목록</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.ie-history" xml:space="preserve">Internet Explorer 기록 및 입력한 주소</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.userassist" xml:space="preserve">실행한 프로그램 기록(UserAssist)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.user-error-reports" xml:space="preserve">현재 사용자의 Windows 오류 보고서</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.user-temp" xml:space="preserve">사용자 임시 파일</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.system-temp" xml:space="preserve">시스템 임시 파일</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.crash-dumps" xml:space="preserve">사용자 모드 크래시 덤프</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.memory-dumps" xml:space="preserve">시스템 메모리 덤프</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.error-reports" xml:space="preserve">Windows 오류 보고 보고서</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.update-logs" xml:space="preserve">Windows 업데이트 오케스트레이터 로그</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.etl-trace-logs" xml:space="preserve">ETL 추적 로그</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.defender-support-logs" xml:space="preserve">Microsoft Defender 진단 로그</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.thumbnail-cache" xml:space="preserve">축소판 그림 캐시</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.icon-cache" xml:space="preserve">아이콘 캐시</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.font-cache" xml:space="preserve">Windows 글꼴 캐시</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.remote-desktop-cache" xml:space="preserve">원격 데스크톱 비트맵 캐시</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.directx-shader-cache" xml:space="preserve">DirectX 셰이더 캐시</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.prefetch" xml:space="preserve">오래된 Prefetch 데이터</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.recycle-bin" xml:space="preserve">휴지통</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.dns-cache" xml:space="preserve">DNS 확인자 캐시</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.network-usage" xml:space="preserve">네트워크 사용 기록</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.invalid-shortcuts" xml:space="preserve">잘못된 바로 가기 및 시작 메뉴 항목</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.invalid-scheduled-tasks" xml:space="preserve">잘못된 예약 작업</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.internet-cache" xml:space="preserve">인터넷 캐시(WinINet)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.office-addin-cache" xml:space="preserve">Office 추가 기능 캐시</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.cryptnet-url-cache" xml:space="preserve">인증서 URL 캐시(CryptnetUrlCache)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Name" xml:space="preserve">고아가 된 Windows Installer 파일</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Description" xml:space="preserve">Windows Installer 폴더에서 어떤 제품이나 패치에도 등록되지 않았고 30일보다 오래된 .msi 및 .msp 파일을 삭제합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Warning" xml:space="preserve">등록 정보를 완전히 읽을 수 없으면 이 항목은 사용할 수 없습니다. 삭제 직전에 등록 상태를 다시 확인합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Name" xml:space="preserve">업데이트 롤백 데이터</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Description" xml:space="preserve">DISM /StartComponentCleanup /ResetBase를 사용하여 이미 설치된 업데이트를 롤백하는 데 필요한 데이터를 제거합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Warning" xml:space="preserve">실행하면 설치된 업데이트를 더 이상 제거할 수 없습니다. 이 작업은 되돌릴 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Name" xml:space="preserve">업데이트 백업(구성 요소 저장소)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Description" xml:space="preserve">DISM /StartComponentCleanup을 사용하여 대체된 구성 요소를 정리합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Warning" xml:space="preserve">표시되는 공간은 DISM의 추정값이며 실제로 확보되는 공간과 다를 수 있습니다. 몇 분 걸릴 수 있습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateCache.Name" xml:space="preserve">Windows 업데이트 다운로드 캐시</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateCache.Description" xml:space="preserve">SoftwareDistribution\Download의 내용을 삭제합니다. 실행하는 동안 Windows Update 및 BITS 서비스를 중지하고, 끝나면 원래대로 복원합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Name" xml:space="preserve">남은 패치 캐시</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Description" xml:space="preserve">Windows Installer 서비스를 중지하고 Installer\$PatchCache$의 내용을 삭제합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Warning" xml:space="preserve">이후 복구나 제거 시 원본 설치 미디어를 요구할 수 있습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Name" xml:space="preserve">언어 입력 기능(일본어)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Description" xml:space="preserve">DISM Remove-Capability를 사용하여 일본어 Language.Basic 기능(맞춤법 검사, 텍스트 예측 등)을 제거합니다. IME 자체는 아닙니다. 해당 언어가 표시 언어, 언어 목록 또는 키보드 레이아웃에서 사용되지 않을 때만 실행할 수 있습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Warning" xml:space="preserve">이 언어 기능을 다시 사용하려면 직접 추가해야 합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Name" xml:space="preserve">언어 입력 기능(한국어)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Description" xml:space="preserve">DISM Remove-Capability를 사용하여 한국어 Language.Basic 기능(맞춤법 검사, 텍스트 예측 등)을 제거합니다. IME 자체는 아닙니다. 해당 언어가 표시 언어, 언어 목록 또는 키보드 레이아웃에서 사용되지 않을 때만 실행할 수 있습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Warning" xml:space="preserve">이 언어 기능을 다시 사용하려면 직접 추가해야 합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Name" xml:space="preserve">언어 입력 기능(중국어 번체)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Description" xml:space="preserve">DISM Remove-Capability를 사용하여 중국어 번체 Language.Basic 기능(맞춤법 검사, 텍스트 예측 등)을 제거합니다. IME 자체는 아닙니다. 해당 언어가 표시 언어, 언어 목록 또는 키보드 레이아웃에서 사용되지 않을 때만 실행할 수 있습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Warning" xml:space="preserve">이 언어 기능을 다시 사용하려면 직접 추가해야 합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Name" xml:space="preserve">언어 입력 기능(중국어 간체)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Description" xml:space="preserve">DISM Remove-Capability를 사용하여 중국어 간체 Language.Basic 기능(맞춤법 검사, 텍스트 예측 등)을 제거합니다. IME 자체는 아닙니다. 해당 언어가 표시 언어, 언어 목록 또는 키보드 레이아웃에서 사용되지 않을 때만 실행할 수 있습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Warning" xml:space="preserve">이 언어 기능을 다시 사용하려면 직접 추가해야 합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Name" xml:space="preserve">Windows 도움말 파일</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Description" xml:space="preserve">Windows 도움말 파일을 삭제합니다. Windows 10/11에서는 Windows 리소스 보호로 보호되므로 보통 삭제할 것이 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Warning" xml:space="preserve">Windows에서 보호하거나 TrustedInstaller가 소유한 파일은 그대로 둡니다. 소유권은 가져오지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Name" xml:space="preserve">기본 배경 화면</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Description" xml:space="preserve">Windows 기본 배경 화면을 삭제합니다. Windows 10/11에서는 Windows 리소스 보호로 보호되므로 보통 삭제할 것이 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Warning" xml:space="preserve">Windows에서 보호하거나 TrustedInstaller가 소유한 파일은 그대로 둡니다. 소유권은 가져오지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleMusic.Name" xml:space="preserve">샘플 음악</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleMusic.Description" xml:space="preserve">Windows 7에 포함되어 있던 알려진 샘플 곡만 삭제합니다. 폴더의 다른 파일은 그대로 둡니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SamplePictures.Name" xml:space="preserve">샘플 사진</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SamplePictures.Description" xml:space="preserve">Windows 7에 포함되어 있던 알려진 샘플 사진만 삭제합니다. 폴더의 다른 파일은 그대로 둡니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleVideos.Name" xml:space="preserve">샘플 비디오</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleVideos.Description" xml:space="preserve">Windows 7에 포함되어 있던 알려진 샘플 비디오만 삭제합니다. 폴더의 다른 파일은 그대로 둡니다.</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Expand" xml:space="preserve">{0} 펼치기 또는 접기</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Error" xml:space="preserve">삭제를 완료하지 못했습니다. 로그를 확인하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SaveSuppressed" xml:space="preserve">설정을 읽을 수 없어 원본 파일을 보호하기 위해 저장을 비활성화했습니다. 변경 사항은 이번 세션에서만 적용됩니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SystemRestore.Failed" xml:space="preserve">시스템 복원을 열지 못했습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Done" xml:space="preserve">{0}을(를) 제외 목록에 추가했습니다. 설정이 변경되었으므로 다시 검사하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Duplicate" xml:space="preserve">{0}은(는) 이미 제외되어 있습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Failed" xml:space="preserve">{0}을(를) 제외 목록에 추가하지 못했습니다(형식이 올바르지 않거나 한도에 도달했습니다).</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.SaveFailed" xml:space="preserve">{0}을(를) 제외 목록에 추가했지만 저장하지 못했습니다. 앱을 닫을 때까지만 적용됩니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.NoTarget" xml:space="preserve">검사할 드라이브나 사용자 지정 폴더를 선택하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Filter.All" xml:space="preserve">모든 종류 표시</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Action.IgnoreFolder" xml:space="preserve">이 폴더 무시</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Kinds" xml:space="preserve">종류별 결과</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Failed" xml:space="preserve">삭제하는 중 오류가 발생했습니다. 로그를 확인하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.UserScopeUnavailable" xml:space="preserve">사용자 범위 규칙을 사용할 수 없습니다(대화형 사용자와 권한이 상승된 사용자가 다르거나 확인할 수 없습니다)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.CustomFolderRejectedAtRun" xml:space="preserve">실행 시점 검사에서 사용자 지정 폴더가 거부되었습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseOutsideProfile" xml:space="preserve">환경 변수 %{0}%이(가) 현재 사용자 프로필 밖을 가리키므로(또는 프로필을 확인할 수 없으므로) 이 대상은 사용하지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseProtectedLocation" xml:space="preserve">환경 변수 %{0}%이(가) 보호된 위치(드라이브 루트, Windows, Program Files, ProgramData, 다른 사용자의 프로필)를 가리키므로 이 대상은 사용하지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseMachineMismatch" xml:space="preserve">환경 변수 %{0}%이(가) 시스템 기본 위치와 다르므로 이 대상은 사용하지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.CustomFolderRejected" xml:space="preserve">사용자 지정 폴더가 거부되었습니다({0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceStopFailed" xml:space="preserve">서비스를 중지할 수 없어 아무것도 삭제하지 않았습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DeleteFailed" xml:space="preserve">삭제를 완료하지 못했습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceResumeFailedList" xml:space="preserve">서비스를 원래 상태로 되돌리지 못했습니다({0}): {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceResumeFailed" xml:space="preserve">서비스를 원래 상태로 되돌리지 못했습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.UserRegistryOpenFailed" xml:space="preserve">사용자의 레지스트리를 열 수 없었습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.HandlerUnavailable" xml:space="preserve">처리기 {0}을(를) 사용할 수 없습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.PathReason" xml:space="preserve">{0}: {1}{2}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniContentUnverified" xml:space="preserve"> (파일 내용을 확인할 수 없었습니다)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ExpansionTruncated" xml:space="preserve">확장된 대상이 한도({0})에 도달하여 나머지는 포함하지 않았습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbOpenFailed" xml:space="preserve">데이터베이스를 열 수 없었습니다(SQLite {0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbConfigFailed" xml:space="preserve">안전 설정을 적용하지 못해 중단했습니다({0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbSqliteError" xml:space="preserve">SQLite 오류 {0}: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbPinFailed" xml:space="preserve">데이터베이스를 안전하게 고정하지 못했습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbHardLinked" xml:space="preserve">하드 링크된 데이터베이스는 대상이 아닙니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbTooLarge" xml:space="preserve">데이터베이스가 너무 커서 대상이 아닙니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbIdentityUnverified" xml:space="preserve">데이터베이스 파일을 확인할 수 없었습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbJournalPending" xml:space="preserve">처리되지 않은 저널이 있어 건너뛰었습니다(사용 중이거나 복구되지 않음)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbIntegrityFailed" xml:space="preserve">데이터베이스 무결성 검사에 실패했습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbVirtualTable" xml:space="preserve">가상 테이블이 포함된 데이터베이스는 대상이 아닙니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbUnknownTable" xml:space="preserve">예상한 테이블 {0}이(가) 없습니다(알 수 없는 스키마)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbUnknownColumn" xml:space="preserve">테이블 {0}에 예상한 열 {1}이(가) 없습니다(알 수 없는 스키마)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniUnconvertible" xml:space="preserve">UTF-8, UTF-16 또는 시스템 ANSI 코드 페이지로 손실 없이 변환할 수 없는 파일이어서 건너뛰었습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniTooLarge" xml:space="preserve">파일이 1 MB보다 커서 건너뛰었습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniAmbiguousSection" xml:space="preserve">이름이 같은 섹션이 여러 개 있어 대상을 특정할 수 없으므로 변경하지 않았습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniRestored" xml:space="preserve">{0}(원래 텍스트를 복원했습니다)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniNotRestored" xml:space="preserve">{0}(원래 텍스트를 복원하지 못해 내용이 정의되지 않은 상태입니다)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniChangedWhileReading" xml:space="preserve">읽는 동안 내용이 변경되었습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniLengthChangedWhileReading" xml:space="preserve">읽는 동안 길이가 변경되었습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniLengthChangedBeforeWrite" xml:space="preserve">쓰기 전에 길이가 변경되었습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniVerifyMismatch" xml:space="preserve">쓴 후 다시 읽은 내용이 일치하지 않습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistrySymlink" xml:space="preserve">레지스트리 심볼릭 링크이므로 제외했습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryDepthLimit" xml:space="preserve">안전한 재귀 깊이 한도를 초과했습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DnsFlushFailed" xml:space="preserve">ipconfig /flushdns에 실패했습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DnsFlushError" xml:space="preserve">ipconfig /flushdns를 실행할 수 없었습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeQueryFailed" xml:space="preserve">{0}을(를) 조회할 수 없었습니다(Win32={1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeUrlHistoryFailed" xml:space="preserve">URL 기록을 지울 수 없었습니다(HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeClearFailed" xml:space="preserve">{0}을(를) 지울 수 없었습니다(Win32={1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleQueryFailed" xml:space="preserve">휴지통을 조회할 수 없었습니다(HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleVerifyFailed" xml:space="preserve">휴지통을 비운 후 상태를 확인할 수 없었습니다(HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleRemaining" xml:space="preserve">휴지통에 항목 {0}개가 남아 있습니다(HRESULT=0x{1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDpsResumeFailed" xml:space="preserve">DPS 서비스를 원래 상태로 되돌리지 못했습니다: {0}. Windows 서비스에서 Diagnostic Policy Service를 시작하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDeleteFailed" xml:space="preserve">네트워크 사용 데이터를 삭제할 수 없었습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDpsStopUnverified" xml:space="preserve">DPS 서비스가 중지되었는지 확인할 수 없어 네트워크 사용 데이터를 삭제하지 않았습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutLocationOpenFailed" xml:space="preserve">바로 가기 위치를 안전하게 열 수 없었습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutsUnreadable" xml:space="preserve">바로 가기 {0}개를 읽을 수 없어 제외했습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutDeleteFailed" xml:space="preserve">잘못된 바로 가기를 삭제할 수 없었습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TasksUnreadable" xml:space="preserve">작업 {0}개를 읽을 수 없어 제외했습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TaskSchedulerQueryFailed" xml:space="preserve">작업 스케줄러를 조회할 수 없었습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TaskSchedulerOperateFailed" xml:space="preserve">작업 스케줄러를 조작할 수 없었습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEmptyDescription" xml:space="preserve">복원 지점 설명이 비어 있습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointStateUnknown" xml:space="preserve">복원 지점 상태를 확인할 수 없었습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointProtectionDisabled" xml:space="preserve">시스템 보호가 꺼져 있습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreateUninterpretable" xml:space="preserve">복원 지점 생성 결과를 해석할 수 없었습니다(종료 코드 {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreateFailed" xml:space="preserve">복원 지점을 만들지 못했습니다(반환 값 {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointVerifyFailed" xml:space="preserve">생성 후 복원 지점을 확인할 수 없었습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCancelled" xml:space="preserve">복원 지점 만들기를 취소했습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableFailed" xml:space="preserve">시스템 보호를 켤 수 없었습니다(종료 코드 {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableVerifyFailed" xml:space="preserve">보호를 켠 후의 상태를 확인할 수 없었습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnabled" xml:space="preserve">시스템 보호를 켰습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableNotEffective" xml:space="preserve">시스템 보호가 켜지지 않았습니다(그룹 정책으로 비활성화되었을 수 있습니다).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableCancelled" xml:space="preserve">시스템 보호 켜기를 취소했습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreated" xml:space="preserve">복원 지점을 만들었습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointReused" xml:space="preserve">최근 24시간 이내에 만든 복원 지점({0})을 사용합니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointNoneAvailable" xml:space="preserve">복원 지점을 만들지 않았고, 최근 24시간 이내에 만든 복원 지점도 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointExitCode" xml:space="preserve">종료 코드 {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointProtectionOutputInvalid" xml:space="preserve">보호 상태 출력이 올바르지 않습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputInvalid" xml:space="preserve">복원 지점 출력이 올바르지 않습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputUnknownLine" xml:space="preserve">출력에 알 수 없는 줄이 있습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputIncomplete" xml:space="preserve">출력이 불완전합니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimStale" xml:space="preserve">검사 결과가 오래되어 아무것도 실행하지 않았습니다. 다시 검사하세요.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimNothingSelected" xml:space="preserve">실행할 수 있는 항목이 선택되지 않았습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimCanceledNotRun" xml:space="preserve">취소되어 실행하지 않았습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimRestorePointUnavailable" xml:space="preserve">사용할 수 있는 복원 지점이 없어 실행하지 않았습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimItemUnavailable" xml:space="preserve">항목을 사용할 수 없어 실행하지 않았습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimNeedsTwoStep" xml:space="preserve">되돌릴 수 없는 작업인데 2단계 확인이 없어 실행하지 않았습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimCanceledPartial" xml:space="preserve">취소했습니다. 일부 처리되었을 수 있습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimFailed" xml:space="preserve">실패: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimRecheckFailed" xml:space="preserve">실행 직전의 재확인에 실패하여 아무것도 삭제하지 않았습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimServiceResumeFailed" xml:space="preserve">서비스를 원래 상태로 되돌리지 못했습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimBackupIncluded" xml:space="preserve">업데이트 롤백 정리의 일부로 완료했습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimBackupSkipped" xml:space="preserve">업데이트 롤백 정리가 성공하지 않아 실행하지 않았습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimOutcome" xml:space="preserve">파일 {0}개({1}바이트)를 삭제했습니다. 유지 {2}개, 실패 {3}개, 거부 {4}개.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimOutcomeExample" xml:space="preserve">파일 {0}개({1}바이트)를 삭제했습니다. 유지 {2}개, 실패 {3}개, 거부 {4}개. 예: {5}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ComponentStoreCleanup" xml:space="preserve">구성 요소 저장소를 정리하는 중</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageRemoval" xml:space="preserve">{0}의 언어 입력 기능을 제거하는 중</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationFailed" xml:space="preserve">{0}에 실패했습니다(종료 코드 {1}). {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationUninterpretable" xml:space="preserve">{0}의 결과를 해석할 수 없었습니다(종료 코드 {1}이지만 성공 출력이 없습니다).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationDone" xml:space="preserve">{0}을(를) 완료했습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationDoneReboot" xml:space="preserve">{0}을(를) 완료했습니다(다시 시작해야 합니다).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotTarget" xml:space="preserve">{0}은(는) 제거할 수 있는 언어가 아닙니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotRemovable" xml:space="preserve">{0}의 언어 입력 기능은 지금 제거할 수 없습니다: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotInstalled" xml:space="preserve">설치되어 있지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageInUse" xml:space="preserve">UI 언어, 언어 목록 또는 키보드 레이아웃에서 사용 중입니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotUsed" xml:space="preserve">어떤 사용자의 언어 설정에서도 사용되지 않습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderProtected" xml:space="preserve">Lumin4ti 또는 보호된 위치가 포함되어 있습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedRootNotLocal" xml:space="preserve">로컬 폴더의 절대 경로가 아닙니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedRootProtected" xml:space="preserve">보호된 위치이므로 검사하지 않았습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ExportLinkRefused" xml:space="preserve">링크로는 내보낼 수 없습니다</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerNotEnumerated" xml:space="preserve">검사할 때 등록 정보를 열거하지 못했습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerNoSource" xml:space="preserve">등록 정보를 열거할 원본이 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerEnumerationException" xml:space="preserve">등록 정보를 열거하는 중 예외가 발생했습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerEnumerationFailed" xml:space="preserve">Windows Installer 등록 정보를 열거하지 못했습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerFolderUnresolved" xml:space="preserve">Installer 폴더를 안전하게 확인할 수 없습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageSettingsUnreadable" xml:space="preserve">사용자의 언어 설정을 모두 읽지 못해 건너뛰었습니다: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageListUnavailable" xml:space="preserve">언어 입력 기능 목록을 가져오거나 해석하지 못했습니다 (종료 코드 {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderNotScannable" xml:space="preserve">링크 또는 보호 때문에 이 폴더를 안전하게 검사할 수 없었습니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">샘플 녹화 TV</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">Windows 7에 포함되어 있던 알려진 샘플 녹화본만 삭제합니다. 폴더의 다른 파일은 그대로 둡니다.</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Internet Explorer 응용 프로그램 캐시 (AppCache)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-ime-cache" xml:space="preserve">Microsoft IME 캐시 및 오류 보고서</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-office-solution-packages" xml:space="preserve">Office 솔루션 패키지 캐시</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-delivery-optimization-cache" xml:space="preserve">배달 최적화 캐시</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-etl-logs" xml:space="preserve">ETL 추적 로그 (Logs 및 LogFiles 폴더)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-system-temp" xml:space="preserve">Windows 시스템 서비스 임시 파일 (SystemTemp)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-icon-cache-root" xml:space="preserve">이전 방식 아이콘 캐시 파일 (IconCache.db)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.app-cursor-cached-data" xml:space="preserve">Cursor 캐시된 데이터 (CachedData)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.package-npm-cache" xml:space="preserve">npm 캐시 (사용자 폴더의 .npm)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-shared" xml:space="preserve">Google Chrome 공유 캐시 및 임시 파일</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-edge-shared" xml:space="preserve">Microsoft Edge 공유 캐시 및 임시 파일</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-vivaldi-shared" xml:space="preserve">Vivaldi 공유 캐시 및 임시 파일</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-brave-shared" xml:space="preserve">Brave 공유 캐시 및 임시 파일</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-shared" xml:space="preserve">Google Chrome Beta 공유 캐시 및 임시 파일</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-shared" xml:space="preserve">Google Chrome Dev 공유 캐시 및 임시 파일</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-rebuild" xml:space="preserve">Google Chrome Safe Browsing 및 모델 데이터</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-edge-rebuild" xml:space="preserve">Microsoft Edge Safe Browsing 및 모델 데이터</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-vivaldi-rebuild" xml:space="preserve">Vivaldi Safe Browsing 및 모델 데이터</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-brave-rebuild" xml:space="preserve">Brave Safe Browsing 및 모델 데이터</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-rebuild" xml:space="preserve">Google Chrome Beta Safe Browsing 및 모델 데이터</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-rebuild" xml:space="preserve">Google Chrome Dev Safe Browsing 및 모델 데이터</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-comet-rebuild" xml:space="preserve">Comet Safe Browsing 및 모델 데이터</x:String>
 </ResourceDictionary>

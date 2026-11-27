@@ -4,6 +4,12 @@ using Microsoft.Win32.SafeHandles;
 
 namespace Lumin4ti.Core.Services.Windows.Actions;
 
+/// <summary>列挙で得たエントリー 1 件分。時刻は FILETIME。</summary>
+internal readonly record struct CleanupEntryInfo(string Name, FileAttributes Attributes, long Size, long CreationTime, long LastAccessTime, long LastWriteTime);
+
+/// <summary>ボリューム内で実体を一意に指す ID。</summary>
+internal readonly record struct NativeFileIdentity(ulong VolumeSerialNumber, ulong FileIdLow, ulong FileIdHigh);
+
 /// <summary>名前の再解決によるリンク追従を避け、開いた実体だけを列挙・変更する。</summary>
 internal sealed class NativeCleanupEntry : IDisposable
 {
@@ -18,6 +24,9 @@ internal sealed class NativeCleanupEntry : IDisposable
     internal string Path { get; }
     internal string NativePath { get; }
 
+    /// <summary>FILE_WRITE_DATA 付きで開いた場合だけ true。上書きはこの実体にだけ行う。</summary>
+    internal bool Writable { get; private init; }
+
     private NativeCleanupEntry(string path, string nativePath, SafeFileHandle handle)
     {
         Path = path;
@@ -25,22 +34,22 @@ internal sealed class NativeCleanupEntry : IDisposable
         Handle = handle;
     }
 
-    internal static NativeCleanupEntry Open(string path, bool directory, bool delete = false, bool pinAncestors = true, bool security = false, bool readData = false)
+    internal static NativeCleanupEntry Open(string path, bool directory, bool delete = false, bool pinAncestors = true, bool security = false, bool readData = false, bool write = false)
     {
         var fullPath = System.IO.Path.GetFullPath(path);
-        return OpenResolved(fullPath, ResolveNativePath(fullPath), directory, delete, pinAncestors, security, readData);
+        return OpenResolved(fullPath, ResolveNativePath(fullPath), directory, delete, pinAncestors, security, readData, write);
     }
 
-    internal NativeCleanupEntry OpenDescendant(string path, bool directory, bool delete = false, bool pinAncestors = false, bool security = false, bool readData = false)
+    internal NativeCleanupEntry OpenDescendant(string path, bool directory, bool delete = false, bool pinAncestors = false, bool security = false, bool readData = false, bool write = false)
     {
         var fullPath = System.IO.Path.GetFullPath(path);
         if (!fullPath.Equals(Path, StringComparison.OrdinalIgnoreCase) &&
             !fullPath.StartsWith(System.IO.Path.TrimEndingDirectorySeparator(Path) + "\\", StringComparison.OrdinalIgnoreCase))
             throw new IOException("保持したルートの外側は開けません");
-        return OpenResolved(fullPath, NativePath + fullPath[Path.Length..], directory, delete, pinAncestors, security, readData);
+        return OpenResolved(fullPath, NativePath + fullPath[Path.Length..], directory, delete, pinAncestors, security, readData, write);
     }
 
-    private static NativeCleanupEntry OpenResolved(string fullPath, string nativePath, bool directory, bool delete, bool pinAncestors, bool security, bool readData)
+    private static NativeCleanupEntry OpenResolved(string fullPath, string nativePath, bool directory, bool delete, bool pinAncestors, bool security, bool readData, bool write = false)
     {
         var ancestors = new List<SafeFileHandle>();
         try
@@ -54,12 +63,12 @@ internal sealed class NativeCleanupEntry : IDisposable
                 var parts = relative.Split(System.IO.Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
                 for (var index = 0; index < parts.Length; index++)
                 {
-                    ancestors.Add(OpenHandle(devicePrefix + current[2..], true, false, false, security, false));
+                    ancestors.Add(OpenHandle(devicePrefix + current[2..], true, false, false, security, false, false));
                     current = System.IO.Path.Combine(current, parts[index]);
                 }
             }
 
-            var entry = new NativeCleanupEntry(fullPath, nativePath, OpenHandle(nativePath, directory, delete, true, security, readData));
+            var entry = new NativeCleanupEntry(fullPath, nativePath, OpenHandle(nativePath, directory, delete, true, security, readData, write && !directory)) { Writable = write && !directory };
             entry._ancestors.AddRange(ancestors);
             ancestors.Clear();
             return entry;
@@ -70,7 +79,7 @@ internal sealed class NativeCleanupEntry : IDisposable
         }
     }
 
-    private static SafeFileHandle OpenHandle(string nativePath, bool directory, bool delete, bool list, bool security, bool readData)
+    private static SafeFileHandle OpenHandle(string nativePath, bool directory, bool delete, bool list, bool security, bool readData, bool write)
     {
         var text = Marshal.StringToHGlobalUni(nativePath);
         var unicode = new UnicodeString { Length = checked((ushort)(nativePath.Length * 2)), MaximumLength = checked((ushort)(nativePath.Length * 2 + 2)), Buffer = text };
@@ -83,6 +92,7 @@ internal sealed class NativeCleanupEntry : IDisposable
             if (directory && list) access |= 1; // LIST_DIRECTORY
             if (readData) access |= 1; // FILE_READ_DATA
             if (security) access |= 0x20000; // READ_CONTROL
+            if (write) access |= 2; // FILE_WRITE_DATA (1 パス上書き専用)
             // 予約検証の祖先は、再帰処理が既に保持する DELETE handle と共存させる。
             // 名前の固定は外側の走査 handle、予約時の信頼は全 owner/ACL の検証で担う。
             var share = readData ? 1u : security && !list ? 7u : 3u;
@@ -152,7 +162,14 @@ internal sealed class NativeCleanupEntry : IDisposable
             throw new IOException("走査中にリンクへ変更されたため対象を保持しました");
     }
 
-    internal IEnumerable<(string Name, FileAttributes Attributes)> Enumerate()
+    internal IEnumerable<(string Name, FileAttributes Attributes)> Enumerate() =>
+        EnumerateDetailed().Select(entry => (entry.Name, entry.Attributes));
+
+    /// <summary>
+    /// 取得済みの FileFullDirectoryInfo からサイズと各時刻 (FILETIME) も返す。
+    /// ファイルを 1 件ずつ開かずに集計でき、時刻やアクセス時刻は更新しない。
+    /// </summary>
+    internal IEnumerable<CleanupEntryInfo> EnumerateDetailed()
     {
         EnsureNotReparse();
         const int capacity = 65536;
@@ -185,7 +202,9 @@ internal sealed class NativeCleanupEntry : IDisposable
                     if (name is not "." and not "..")
                     {
                         if (name.IndexOfAny(['\\', '/', ':', '\0']) >= 0) throw new IOException("単一ファイル名ではありません");
-                        yield return (name, (FileAttributes)Marshal.ReadInt32(record, 56));
+                        yield return new CleanupEntryInfo(name, (FileAttributes)Marshal.ReadInt32(record, 56),
+                            Marshal.ReadInt64(record, 40), Marshal.ReadInt64(record, 8),
+                            Marshal.ReadInt64(record, 16), Marshal.ReadInt64(record, 24));
                     }
                     if (next == 0) break;
                     offset += next;
@@ -203,6 +222,55 @@ internal sealed class NativeCleanupEntry : IDisposable
             if (!GetStandardInformation(Handle, 1, out var info, (uint)Marshal.SizeOf<StandardInfo>())) ThrowLastError();
             return info.EndOfFile;
         }
+    }
+
+    /// <summary>ハードリンク数。1 より大きいファイルは他の名前と実体を共有する。</summary>
+    internal uint LinkCount
+    {
+        get
+        {
+            if (!GetStandardInformation(Handle, 1, out var info, (uint)Marshal.SizeOf<StandardInfo>())) ThrowLastError();
+            return info.Links;
+        }
+    }
+
+    /// <summary>開いた実体の作成・アクセス・更新時刻 (FILETIME)。</summary>
+    internal (long Creation, long LastAccess, long LastWrite) Times
+    {
+        get
+        {
+            if (!GetFileInformationByHandleEx(Handle, 0, out BasicInfo info, (uint)Marshal.SizeOf<BasicInfo>())) ThrowLastError();
+            return (info.CreationTime, info.LastAccessTime, info.LastWriteTime);
+        }
+    }
+
+    /// <summary>開いた実体のボリューム内一意の ID。名前ではなく実体の同一性照合に使う。</summary>
+    internal NativeFileIdentity Identity
+    {
+        get
+        {
+            if (!GetFileIdentity(Handle, 18, out var identity, 24)) ThrowLastError();
+            return new NativeFileIdentity(identity.VolumeSerialNumber, identity.FileIdLow, identity.FileIdHigh);
+        }
+    }
+
+    /// <summary>
+    /// 書込み用に開いた実体の先頭から <paramref name="length"/> バイトを 0 で 1 パス上書きして flush する。
+    /// 取消されたら途中で止め、完了したかを返す。長さが途中で変わったら例外にする。
+    /// </summary>
+    internal bool OverwriteWithZeros(long length, CancellationToken ct)
+    {
+        if (!Writable) throw new InvalidOperationException("書込み用に開いていません");
+        EnsureNotReparse();
+        var buffer = new byte[1 << 20];
+        for (long offset = 0; offset < length; offset += buffer.Length)
+        {
+            if (ct.IsCancellationRequested) return false;
+            RandomAccess.Write(Handle, buffer.AsSpan(0, (int)Math.Min(buffer.Length, length - offset)), offset);
+        }
+        if (Length != length) throw new IOException("上書き中に長さが変わりました");
+        RandomAccess.FlushToDisk(Handle);
+        return true;
     }
 
     internal void SetAttributes(FileAttributes attributes)

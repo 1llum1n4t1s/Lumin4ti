@@ -5,23 +5,11 @@ namespace Lumin4ti.Core.Services;
 
 /// <summary>
 /// <see cref="ICleanupPreferences"/> を settings.json 上に持つ実装。
-/// 画面 (手動実行) とサインイン時の定期実行の両方がこの 1 か所を読むため、
+/// 画面 (手動実行) と起動時の再試行が同じ除外設定を読むため、
 /// 「チェックを外した対象は、どちらの経路でも消えない」が成立する。
 /// </summary>
 public sealed class CleanupPreferences(ISettingsService settings) : ICleanupPreferences
 {
-    /// <summary>
-    /// 未設定のときにサインイン時のクリーンアップで実行する項目。
-    /// サインイン直後の負荷と所要時間を抑えるため、利用者固有の一時ファイルとキャッシュだけを既定にし、
-    /// 最高権限が必要なシステム側の掃除は利用者が明示的に選べるようにする。
-    /// </summary>
-    public static readonly IReadOnlyList<string> DefaultScheduledGroupIds =
-    [
-        "cleanup-user-temp",
-        "cleanup-package-cache",
-        "cleanup-browser-cache",
-    ];
-
     /// <summary>
     /// 設定サービスと共有するロック。自前のロックにすると、保存 (シリアライズ) が
     /// 別スレッドで走っている最中に除外リストを書き換えられてしまう。
@@ -75,41 +63,6 @@ public sealed class CleanupPreferences(ISettingsService settings) : ICleanupPref
             if (!list.Contains(rawPath, StringComparer.OrdinalIgnoreCase))
             {
                 list.Add(rawPath);
-            }
-        }
-    }
-
-    public IReadOnlyList<string> ScheduledGroupIds
-    {
-        get
-        {
-            lock (_lock)
-            {
-                return settings.Current.ScheduledCleanupGroupIds is { } ids
-                    ? [.. ids]
-                    : DefaultScheduledGroupIds;
-            }
-        }
-    }
-
-    public void SetScheduledGroupEnabled(string groupId, bool enabled)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(groupId);
-
-        lock (_lock)
-        {
-            // 既定セットからの初回変更時に、その時点の実効値を書き出してから差分を適用する
-            // (既定が将来変わっても、利用者が選んだ内容が勝手に増減しないようにする)。
-            var ids = settings.Current.ScheduledCleanupGroupIds ??= [.. DefaultScheduledGroupIds];
-            var index = ids.FindIndex(id => string.Equals(id, groupId, StringComparison.OrdinalIgnoreCase));
-            if (enabled && index < 0)
-            {
-                ids.Add(groupId);
-            }
-            else if (!enabled && index >= 0)
-            {
-                // 設定ファイル由来の重複も解除し、OFF にした項目を自動実行へ残さない。
-                ids.RemoveAll(id => string.Equals(id, groupId, StringComparison.OrdinalIgnoreCase));
             }
         }
     }

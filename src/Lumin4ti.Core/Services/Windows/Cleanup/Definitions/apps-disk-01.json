@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.disk-drill-logs",
+      "name": "Disk Drill",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\DiskDrill\\dd.log" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%LOCALAPPDATA%\\DiskDrill", "pattern": "dd.log", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": ["DiskDrill"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://www.cleverfiles.com/help/troubleshooting-basics/", "checked": "2026-11-26" }
+      ]
+    }
+  ]
+}

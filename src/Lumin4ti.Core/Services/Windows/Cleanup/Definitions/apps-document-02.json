@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.freeplane-logs",
+      "name": "Freeplane",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Freeplane\\1.*\\logs" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Freeplane\\1.*\\logs", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["freeplane"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://docs.freeplane.org/attic/old-mediawiki-content/FAQ.html", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.quickbooks-desktop-logs",
+      "name": "Intuit QuickBooks Desktop",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Intuit\\QuickBooks\\log" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%LOCALAPPDATA%\\Intuit\\QuickBooks\\log\\*", "pattern": "QBWin.log", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": ["qbw32"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://quickbooks.intuit.com/learn-support/en-us/help-article/data-systems/find-qbwin-log-quickbooks-log-files/L9j1NCsjM_US_en_US", "checked": "2026-11-25" }
+      ]
+    }
+  ]
+}

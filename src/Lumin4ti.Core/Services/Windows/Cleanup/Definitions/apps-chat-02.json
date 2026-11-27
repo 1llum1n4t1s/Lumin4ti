@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.slack-cache",
+      "name": "Slack",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Slack" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Slack\\Cache", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\Slack\\GPUCache", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\Slack\\Code Cache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["slack"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://www.electronjs.org/docs/latest/api/session", "checked": "2026-11-27" },
+        { "tier": "A", "url": "https://slack.com/intl/en-in/help/articles/212475728-Deploy-Slack-via-Microsoft-Installer", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://slack.engineering/growing-pains-migrating-slacks-desktop-app-to-browserview/", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://www.electronjs.org/docs/latest/api/app", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.signal-desktop-cache",
+      "name": "Signal",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Signal" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Signal\\Cache", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\Signal\\GPUCache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["Signal"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://raw.githubusercontent.com/signalapp/Signal-Desktop/main/CONTRIBUTING.md", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://raw.githubusercontent.com/signalapp/Signal-Desktop/main/package.json", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://www.electronjs.org/docs/latest/api/app", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.zoom-logs",
+      "name": "Zoom",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Zoom\\logs" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Zoom\\logs", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["Zoom"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://support.zoom.com/hc/en/article?id=zm_kb&sysparm_article=KB0066286", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.teamviewer-quicksupport-logs",
+      "name": "TeamViewer",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\TeamViewer" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%APPDATA%\\TeamViewer", "pattern": "TeamViewer*_Logfile.log", "recurse": false, "olderThanDays": null },
+        { "type": "files", "path": "%APPDATA%\\TeamViewer", "pattern": "TeamViewer*_Logfile_OLD.log", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": ["TeamViewer"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://www.teamviewer.com/en/global/support/knowledge-base/teamviewer-remote/contact-support/find-your-log-files/", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.remote-desktop-manager-logs",
+      "name": "Remote Desktop Manager",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Devolutions\\RemoteDesktopManager" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%LOCALAPPDATA%\\Devolutions\\RemoteDesktopManager", "pattern": "RemoteDesktopManager.log", "recurse": false, "olderThanDays": null },
+        { "type": "files", "path": "%LOCALAPPDATA%\\Devolutions\\RemoteDesktopManager", "pattern": "RemoteDesktopManager.log.db", "recurse": false, "olderThanDays": null },
+        { "type": "files", "path": "%LOCALAPPDATA%\\Devolutions\\RemoteDesktopManager", "pattern": "RemoteDesktopManager.debug", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": ["RemoteDesktopManager"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://docs.devolutions.net/rdm/kb/troubleshooting-articles/debugging", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://docs.devolutions.net/rdm/getting-started/installation/client/configuration-file-location.md", "checked": "2026-11-25" }
+      ]
+    }
+  ]
+}

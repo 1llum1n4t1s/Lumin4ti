@@ -88,8 +88,6 @@
   <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">Custom</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">The DISM output does not contain the Recall state. Check the log for details.</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">The Recall state returned by DISM could not be interpreted. Check the log for details.</x:String>
-  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">This task was registered by another Windows user and cannot be modified.</x:String>
-  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">The owner of the registered task could not be verified, so the task cannot be modified.</x:String>
 
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Update installed apps in bulk (winget)</x:String>
@@ -116,24 +114,10 @@
   <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">Resets the Microsoft Store cache with WSReset. A standard fix for the Store not opening, downloads not progressing, or repeated “try again” errors. Apps and account info are not removed. The Store app may open automatically when done.</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">SSD TRIM and free-space consolidation</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">Runs a TRIM notification to the SSD (/L) and free-space consolidation (/X) on all volumes to maintain SSD write performance and defragment free space. Depending on drive layout it can take minutes to tens of minutes. You can keep using the PC while it runs.</x:String>
-  <x:String x:Key="Text.Action.cleanup-user-temp.Label" xml:space="preserve">Delete user temporary files and caches</x:String>
-  <x:String x:Key="Text.Action.cleanup-user-temp.Desc" xml:space="preserve">Deletes the signed-in user's temporary files, crash dumps, shader caches, internet caches, and regenerable IME, Office, and Outlook caches. Browsing history, recent-file history, and app settings are not deleted. Files currently in use are skipped.</x:String>
-  <x:String x:Key="Text.Action.cleanup-system-temp.Label" xml:space="preserve">Delete system temporary files and logs</x:String>
-  <x:String x:Key="Text.Action.cleanup-system-temp.Desc" xml:space="preserve">Deletes Windows temporary folders, ETL trace logs in known Windows log locations, setup and service logs, the Delivery Optimization cache, and Microsoft Defender diagnostic logs. Defender detection and remediation history is preserved. ETL files are limited to *.etl under Windows Logs, LogFiles, Panther, and Diagnosis; the whole drive is never searched. The Delivery Optimization service is stopped temporarily and restored afterward. Avoid running this while investigating a problem.</x:String>
-  <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">Delete app caches and logs</x:String>
-  <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">Deletes Electron app caches, GPU shader caches, crash reports, and tool logs. WebStorage, virtual-machine bundles, application settings, and sign-in state are not deleted. Each app rebuilds the necessary caches on its next launch.</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">Delete developer package caches</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Deletes only re-downloadable package caches used by npm, pnpm, NuGet, pip, Yarn, Gradle, Bun, uv, and Cargo. uv-managed Python installations, Maven local artifacts, credentials, settings, and the general home .cache directory are not deleted.</x:String>
-  <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">Delete browser caches</x:String>
-  <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Detects installed Chromium-based browsers and deletes web caches, GPU shader caches, Service Worker cache storage, crash reports, and extension temporary data. Service Worker registrations, DRM components, bookmarks, passwords, and sign-in state are not deleted.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">Rebuild icon, thumbnail, and font caches</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">Deletes Explorer's icon cache, thumbnail cache, and font cache so that Windows rebuilds them. A standard repair for blank or wrong icons, thumbnails that never refresh, and text that renders incorrectly. Explorer is not forcibly closed. Selected caches that are in use are enumerated again from a trusted installation at the next Windows startup, and deletion is attempted. Attempts are limited to three runs within seven days; targets that remain locked are kept, and results are written to the log. Display is briefly slower while the caches are rebuilt.</x:String>
-  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">Delete the Windows Update download cache</x:String>
-  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">Deletes only re-downloadable Windows Update files from SoftwareDistribution\Download. The update-history data store and signature catalog (catroot2) are not deleted. Related services are stopped during the run and restored afterwards.</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">Delete and rebuild prefetch data and the search index</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">Deletes the prefetch data that speeds up app launches and the Explorer search index, letting Windows build both again. Use it when search returns nothing or keeps returning stale files. App launches and search stay slower for the tens of minutes to hours the rebuild takes, and background CPU usage rises meanwhile.</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">Register a task that runs cleanup automatically at sign-in</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Registers a Windows Task Scheduler task that runs the selected cache and log cleanup items at sign-in with the highest available privileges, so items that require administrator rights or stopping services can run. It uses the same per-item checklist as the Run buttons and starts without a UAC prompt. Depending on the selected cache size, cleanup can take several minutes. Files currently in use are skipped. Turning this OFF removes the task.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Memory Compression</x:String>
@@ -198,7 +182,6 @@
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Disable Edge background processes (save 100–300 MB)</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Disables Edge background mode and Startup Boost through policy. If you rarely use Edge, this can free around 100–300 MB of memory. Edge may start a little slower and extension notifications may stop. Turn this OFF to remove the policies and restore Edge defaults.</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">Choose what gets deleted</x:String>
-  <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">Choose which items run at sign-in</x:String>
   <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">The last save of this selection failed (check the log).</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">Update</x:String>
@@ -221,10 +204,582 @@
   <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">Development build</x:String>
   <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">Version unavailable</x:String>
   <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">The last save of language and update settings failed (check the log).</x:String>
-  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Settings could not be read. Saving is disabled to protect the original file, and sign-in cleanup will not run. Changes apply only during this session.</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Settings could not be read. Saving is disabled to protect the original file. Changes apply only during this session.</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">No targets were found at the last check.</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">Reopen the list to refresh it. Newly found targets that are not excluded are also included when you run the action.</x:String>
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">Processing</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Please wait for the operation to finish.</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Please wait for cancellation and cleanup to finish.</x:String>
+
+  <!-- ===== Cleanup (standard / advanced / slim / settings) ===== -->
+
+  <!-- 内側タブ -->
+  <x:String x:Key="Text.Cleanup.Tab.Common" xml:space="preserve">Standard</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Advanced" xml:space="preserve">Advanced</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Slim" xml:space="preserve">Slim down</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Settings" xml:space="preserve">Settings</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Other" xml:space="preserve">Other</x:String>
+
+  <!-- 共通の操作・列見出し -->
+  <x:String x:Key="Text.Cleanup.Action.Scan" xml:space="preserve">Scan</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Rescan" xml:space="preserve">Scan again</x:String>
+  <x:String x:Key="Text.Cleanup.Action.CancelScan" xml:space="preserve">Stop scanning</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Clean" xml:space="preserve">Delete selected</x:String>
+  <x:String x:Key="Text.Cleanup.Action.ExportText" xml:space="preserve">Export as text</x:String>
+  <x:String x:Key="Text.Cleanup.Action.OpenLocation" xml:space="preserve">Open location</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Ignore" xml:space="preserve">Ignore (exclude from future scans)</x:String>
+  <x:String x:Key="Text.Cleanup.Select.Recommended" xml:space="preserve">Recommended</x:String>
+  <x:String x:Key="Text.Cleanup.Select.All" xml:space="preserve">Select all</x:String>
+  <x:String x:Key="Text.Cleanup.Select.None" xml:space="preserve">Clear all</x:String>
+  <x:String x:Key="Text.Cleanup.Select.Invert" xml:space="preserve">Invert selection</x:String>
+  <x:String x:Key="Text.Cleanup.Filter.Placeholder" xml:space="preserve">Filter items</x:String>
+  <x:String x:Key="Text.Cleanup.Filter.HideEmpty" xml:space="preserve">Hide items with nothing to delete</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Name" xml:space="preserve">Item</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Category" xml:space="preserve">Category</x:String>
+  <x:String x:Key="Text.Cleanup.Column.State" xml:space="preserve">State</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Files" xml:space="preserve">Files</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Size" xml:space="preserve">Size</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Impact" xml:space="preserve">Impact</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Folder" xml:space="preserve">Folder</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Modified" xml:space="preserve">Modified</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Rule" xml:space="preserve">Rule</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Safety" xml:space="preserve">Safety</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Results" xml:space="preserve">Scan results</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Progress" xml:space="preserve">Scan progress</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.SelectRow" xml:space="preserve">Select {0}</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Row" xml:space="preserve">{0}, {1}, {2}</x:String>
+
+  <!-- 分類・種別・影響 -->
+  <x:String x:Key="Text.Cleanup.Category.Windows" xml:space="preserve">Windows system</x:String>
+  <x:String x:Key="Text.Cleanup.Category.StoreApps" xml:space="preserve">Store apps</x:String>
+  <x:String x:Key="Text.Cleanup.Category.BrowserCache" xml:space="preserve">Browser cache</x:String>
+  <x:String x:Key="Text.Cleanup.Category.BrowserTrace" xml:space="preserve">Browser history and traces</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Cookies" xml:space="preserve">Cookies</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Traces" xml:space="preserve">Usage traces</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Components" xml:space="preserve">Windows components</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Apps" xml:space="preserve">Other apps</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Custom" xml:space="preserve">Custom folders</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Cache" xml:space="preserve">{0} cache</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Log" xml:space="preserve">{0} logs</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Temp" xml:space="preserve">{0} temporary files</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Dump" xml:space="preserve">{0} dumps</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Thumbnail" xml:space="preserve">{0} thumbnails</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Shader" xml:space="preserve">{0} shader cache</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Report" xml:space="preserve">{0} reports</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.History" xml:space="preserve">{0} history</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Form" xml:space="preserve">{0} form data</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Session" xml:space="preserve">{0} session data</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Cookies" xml:space="preserve">{0} cookies</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Recent" xml:space="preserve">{0} recent items</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Backup" xml:space="preserve">{0} backups</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Downloads" xml:space="preserve">{0} downloaded files</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Other" xml:space="preserve">{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Junk" xml:space="preserve">Junk files</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Trace" xml:space="preserve">Usage traces</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Signout" xml:space="preserve">Signs you out</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Rebuild" xml:space="preserve">Needs rebuilding</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.UserFiles" xml:space="preserve">Your files</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Trace.Warning" xml:space="preserve">Your usage history will be lost.</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Signout.Warning" xml:space="preserve">Deleting cookies can sign you out of websites.</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Rebuild.Warning" xml:space="preserve">The first use after deletion can be slower while the data is rebuilt.</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.UserFiles.Warning" xml:space="preserve">Includes files of yours that cannot be downloaded again. Select them individually; you are asked to confirm again before deleting.</x:String>
+  <x:String x:Key="Text.Cleanup.Warning.NotRecommended" xml:space="preserve">This item is not recommended by default. Check what it removes before selecting it.</x:String>
+  <x:String x:Key="Text.Cleanup.Warning.JumpListPins" xml:space="preserve">Deleting Jump Lists also removes items you pinned to the taskbar and Start menu.</x:String>
+
+  <!-- 通常: 状態・理由 -->
+  <x:String x:Key="Text.Cleanup.State.Found" xml:space="preserve">Can be deleted</x:String>
+  <x:String x:Key="Text.Cleanup.State.Empty" xml:space="preserve">Nothing to delete</x:String>
+  <x:String x:Key="Text.Cleanup.State.Unmeasurable" xml:space="preserve">Count unknown</x:String>
+  <x:String x:Key="Text.Cleanup.State.Unavailable" xml:space="preserve">Unavailable</x:String>
+  <x:String x:Key="Text.Cleanup.State.NotDetected" xml:space="preserve">Not detected</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.UserScopeDifferentUser" xml:space="preserve">The signed-in user and the elevated user are different, so items that target a user's settings and data are disabled.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.UserScopeUnknown" xml:space="preserve">The signed-in user could not be verified, so items that target a user's settings and data are disabled.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.TargetRejected" xml:space="preserve">The target was rejected for safety (protected location, credentials, a link, and so on).</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.ScanFailed" xml:space="preserve">Scanning failed.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.HandlerUnavailable" xml:space="preserve">This cannot run in this environment.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.CustomFolderRejected" xml:space="preserve">This location is not allowed as a custom folder, so it is skipped.</x:String>
+
+  <!-- 通常: 画面・走査 -->
+  <x:String x:Key="Text.Cleanup.Common.Title" xml:space="preserve">Standard cleanup</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Description" xml:space="preserve">Scan first to see what can be removed, then delete only the items you select. Scanning changes nothing.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.NotScanned" xml:space="preserve">Nothing has been scanned yet. Press Scan to find what can be deleted.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Scanning" xml:space="preserve">Scanning {0} of {1}: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanDone" xml:space="preserve">Scan complete: {0} items, {1} files, {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanCanceled" xml:space="preserve">Scanning was stopped.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanFailed" xml:space="preserve">Scanning failed. Check the log.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Stale" xml:space="preserve">The scan result is out of date because settings changed or another operation ran. Scan again.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.NothingFound" xml:space="preserve">Nothing that can be deleted was found.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Selection" xml:space="preserve">{0} of {1} items selected (about {2})</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Retained" xml:space="preserve">{0} items are kept because of your exclusions.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Unreadable" xml:space="preserve">{0} items could not be checked.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.SkippedLinks" xml:space="preserve">{0} items are links and are left untouched.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Unmeasurable" xml:space="preserve">This can run, but its count and size cannot be measured beforehand.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Representatives" xml:space="preserve">Example: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.RunningProcesses" xml:space="preserve">Running: {0} (you are asked whether to close it before deleting)</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ServiceNote" xml:space="preserve">Services stopped temporarily during deletion: {0}</x:String>
+
+  <!-- 通常: 確認 -->
+  <x:String x:Key="Text.Cleanup.Confirm.Title" xml:space="preserve">Confirm deletion</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Run" xml:space="preserve">Delete</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Back" xml:space="preserve">Go back</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Common.Body" xml:space="preserve">The {0} selected items ({1} files, about {2}) will be deleted permanently. They are not moved to the Recycle Bin and cannot be restored.</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.NotRecommended" xml:space="preserve">Includes {0} items that are not recommended. Review them first.</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Signout" xml:space="preserve">Includes {0} items that can sign you out (such as cookies).</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.UserFiles" xml:space="preserve">{0} items include files of yours that cannot be downloaded again. You are asked to confirm once more.</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.UserFiles.Check" xml:space="preserve">I understand that my files will be deleted permanently</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.SecureDelete" xml:space="preserve">Secure delete is on. Files are overwritten once before deletion (this cannot be guaranteed on SSDs).</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.RunningProcess" xml:space="preserve">Some products are running. You are asked whether to close them while deleting.</x:String>
+
+  <!-- 通常: 実行中のプロセスの確認 -->
+  <x:String x:Key="Text.Cleanup.Process.Body" xml:space="preserve">"{0}" is running ({1}). It must be closed before its data is deleted.</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Close" xml:space="preserve">Close it</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Skip" xml:space="preserve">Skip this item</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Abort" xml:space="preserve">Stop</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceBody" xml:space="preserve">"{0}" could not be closed normally ({1}). Forcing it to quit loses any unsaved input.</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceYes" xml:space="preserve">Force quit</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceNo" xml:space="preserve">Do not force quit</x:String>
+
+  <!-- 通常: 実行・結果 -->
+  <x:String x:Key="Text.Cleanup.Run.Running" xml:space="preserve">Deleting {0} of {1}: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Done" xml:space="preserve">Deleted {0} files and freed {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Run.DonePartial" xml:space="preserve">Partly done: deleted {0} files and freed {1}. Some items failed or were skipped.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Canceled" xml:space="preserve">Stopped. {0} files ({1}) were already deleted.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Stale" xml:space="preserve">Nothing was deleted because the scan result was out of date. Scan again.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Retained" xml:space="preserve">{0} items were kept because of exclusions or changes after the scan.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Blocked" xml:space="preserve">{0} items could not be deleted (in use, no permission, and so on).</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Wiped" xml:space="preserve">{0} items were overwritten before deletion ({1} were deleted without overwriting).</x:String>
+  <x:String x:Key="Text.Cleanup.Run.ServiceResumeFailed" xml:space="preserve">A service that was stopped temporarily could not be restarted. Check the service state.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Succeeded" xml:space="preserve">Succeeded</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.NothingToDo" xml:space="preserve">Nothing to do</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Partial" xml:space="preserve">Partly done</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Failed" xml:space="preserve">Failed</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Skipped" xml:space="preserve">Skipped</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Canceled" xml:space="preserve">Stopped</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.NotRun" xml:space="preserve">Not run</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.NotScanned" xml:space="preserve">Not scanned, so it is not deleted.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.NothingFound" xml:space="preserve">There was nothing to delete.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.Unavailable" xml:space="preserve">This cannot run in this environment.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.UserFilesNotConfirmed" xml:space="preserve">Not deleted because the confirmation for your files was not given.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessRunningDeclined" xml:space="preserve">Skipped because the product is running.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessUnverifiable" xml:space="preserve">Skipped because the owner of a running process could not be verified.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessStillRunning" xml:space="preserve">Skipped because the product did not close.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ForceTerminationDeclined" xml:space="preserve">Skipped because force quit was not approved.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessIdentityMismatch" xml:space="preserve">Skipped because the process could not be matched, so it was not closed.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.TerminateFailed" xml:space="preserve">Skipped because the product could not be closed.</x:String>
+  <x:String x:Key="Text.Cleanup.Totals.Last" xml:space="preserve">Last run: {0} files, {1} ({2})</x:String>
+  <x:String x:Key="Text.Cleanup.Totals.Total" xml:space="preserve">Total: {0} files, {1}</x:String>
+
+  <!-- 書き出し・場所を開く -->
+  <x:String x:Key="Text.Cleanup.Export.Title" xml:space="preserve">Export scan results</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Done" xml:space="preserve">Exported to {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Failed" xml:space="preserve">Could not export: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.OpenLocation.Failed" xml:space="preserve">Could not open the location: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Name" xml:space="preserve">Name</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Category" xml:space="preserve">Category</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.State" xml:space="preserve">State</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Files" xml:space="preserve">Files</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Items" xml:space="preserve">Items</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Bytes" xml:space="preserve">Bytes</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Retained" xml:space="preserve">Retained</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Status" xml:space="preserve">Status</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Details" xml:space="preserve">Details</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Total" xml:space="preserve">Total</x:String>
+
+  <!-- 高度: 画面 -->
+  <x:String x:Key="Text.Cleanup.Advanced.Title" xml:space="preserve">Advanced cleanup</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Description" xml:space="preserve">Searches the selected drives for files that are usually safe to remove, by pattern. Scanning changes nothing. Review the results, then delete only what you select.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drives" xml:space="preserve">Drives to scan</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drive.Removable" xml:space="preserve">Removable</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drive.Fixed" xml:space="preserve">Fixed</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.ZeroByte" xml:space="preserve">Include zero-byte files</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.InvalidShortcuts" xml:space="preserve">Include shortcuts whose target is missing</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.OlderThan" xml:space="preserve">Include files older than the given number of days</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.Days" xml:space="preserve">Days</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.SelectSafe" xml:space="preserve">Select safe items only</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.Default" xml:space="preserve">Default</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.Additional" xml:space="preserve">Additional</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.UserDefined" xml:space="preserve">User-defined</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.Safe" xml:space="preserve">Safe</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.Undeterminable" xml:space="preserve">Cannot tell</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.UserDefined" xml:space="preserve">User-defined</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.CheckpointOutsideFound" xml:space="preserve">A .chk file outside a FOUND folder. It may be an ESE checkpoint, so it stays unselected until you check it.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.RecentlyModified" xml:space="preserve">Modified within the last 24 hours, so it is not selected by default.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.ZeroByte" xml:space="preserve">A zero-byte file, so it is not selected by default.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.OldFile" xml:space="preserve">Matched only because it is old, so it is not selected by default.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.UserPattern" xml:space="preserve">Matched a pattern you defined, so it is not selected by default.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.NamePattern" xml:space="preserve">Name pattern</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.ZeroByte" xml:space="preserve">Zero bytes</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.InvalidShortcut" xml:space="preserve">Invalid shortcut</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.OldFile" xml:space="preserve">Old file</x:String>
+
+  <!-- 高度: 走査・結果 -->
+  <x:String x:Key="Text.Cleanup.Advanced.Progress" xml:space="preserve">Checked {0} folders and {1} files; {2} matches ({3}): {4}</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.ScanDone" xml:space="preserve">Scan complete: {0} matches ({1}) among {2} files checked.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Truncated" xml:space="preserve">There are too many matches, so only the first {0} are shown. The other {1} ({2}) are neither shown nor deleted.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RootFailure" xml:space="preserve">Could not scan: {0} ({1})</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Pruned" xml:space="preserve">{0} folders were not checked because they are protected or excluded.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Empty" xml:space="preserve">No files matched.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Selection" xml:space="preserve">{0} of {1} files selected ({2})</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolders" xml:space="preserve">Custom folders</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Note" xml:space="preserve">Only the contents of the folder are emptied. The folder itself stays.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Missing" xml:space="preserve">Not found</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Summary" xml:space="preserve">{0} files, {1}</x:String>
+
+  <!-- 高度: 確認・結果 -->
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Body" xml:space="preserve">The {0} selected files ({1}) and the contents of {2} custom folders will be deleted permanently. They are not moved to the Recycle Bin and cannot be restored.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Undeterminable" xml:space="preserve">Includes {0} files marked "cannot tell". Deselect any you have not checked.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Recent" xml:space="preserve">Includes {0} files modified within the last 24 hours.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Done" xml:space="preserve">Deleted {0} files and {1} folders, freeing {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Partial" xml:space="preserve">Partly done: deleted {0} files and {1} folders, freeing {2}. Some items were kept or could not be deleted.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Expired" xml:space="preserve">Nothing was deleted because the scan result was out of date. Scan again.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Cancelled" xml:space="preserve">Stopped. {0} files ({1}) were already deleted.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Blocked" xml:space="preserve">{0} files could not be deleted (in use, no permission, and so on).</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Retained" xml:space="preserve">{0} files were kept because of exclusions or changes after the scan.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Gone" xml:space="preserve">{0} files no longer existed.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Covered" xml:space="preserve">{0} files are inside a selected custom folder and were not handled separately.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Rejected" xml:space="preserve">{0} items were rejected by a safety check.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Invalid" xml:space="preserve">This path cannot be used as a folder.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.DriveRoot" xml:space="preserve">A drive root cannot be used.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Windows" xml:space="preserve">The Windows folder and its parents or children cannot be used.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProgramFiles" xml:space="preserve">Program Files and its parents or children cannot be used.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProgramData" xml:space="preserve">ProgramData and its parents or children cannot be used.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.OtherUserProfile" xml:space="preserve">Another user's profile cannot be used.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProfileRoot" xml:space="preserve">Your profile folder and AppData cannot be used because emptying them would lose all your data.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Credential" xml:space="preserve">Locations that contain credentials or keys cannot be used.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Added" xml:space="preserve">The custom folder was added.</x:String>
+
+  <!-- スリム化: 画面 -->
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Title" xml:space="preserve">Slim down</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Description" xml:space="preserve">Frees disk space by removing data Windows does not need. Some items cannot be undone or can affect later repairs, so nothing is selected by default.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Run" xml:space="preserve">Run selected</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.CreateRestorePoint" xml:space="preserve">Create a restore point before running</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Item" xml:space="preserve">Item</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Status" xml:space="preserve">Status</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Size" xml:space="preserve">Estimated space</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Estimate" xml:space="preserve">About {0} (estimate)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.SizeUnknown" xml:space="preserve">Unknown</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.NotScanned" xml:space="preserve">Nothing has been scanned yet. Press Scan to check how much space each item can free.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Scanning" xml:space="preserve">Checking the slim-down items…</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.ScanDone" xml:space="preserve">Scan complete. {0} items can be run.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.ScanFailed" xml:space="preserve">Scanning failed. Check the log.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Stale" xml:space="preserve">Nothing was run because the scan result was out of date. Scan again.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.LongRunning" xml:space="preserve">Items that use DISM can take several minutes or more.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.Available" xml:space="preserve">Ready</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.NothingToClean" xml:space="preserve">Nothing to clean</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.Unavailable" xml:space="preserve">Unavailable</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Notice" xml:space="preserve">Note</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Caution" xml:space="preserve">Caution</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Irreversible" xml:space="preserve">Cannot be undone</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.EnumerationFailed" xml:space="preserve">Registration data could not be read completely, so this cannot be judged safely.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.ProtectedByWindows" xml:space="preserve">Windows protects these files, so there is nothing to remove.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.LanguageInUse" xml:space="preserve">It is used by the display language, the language list, or a keyboard layout, so it cannot be removed.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.UserHiveNotLoaded" xml:space="preserve">Some users' data is not loaded, so usage cannot be verified.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.NotPresent" xml:space="preserve">The target is not installed or was not found.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.ToolFailed" xml:space="preserve">The DISM result could not be read or understood.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.Rejected" xml:space="preserve">A safety check rejected the target.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Succeeded" xml:space="preserve">Succeeded</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Partial" xml:space="preserve">Partly done</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Failed" xml:space="preserve">Failed</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Skipped" xml:space="preserve">Skipped</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Cancelled" xml:space="preserve">Stopped</x:String>
+
+  <!-- スリム化: 確認・復元ポイント・結果 -->
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Title" xml:space="preserve">Confirm slim down</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Body" xml:space="preserve">The {0} selected items (estimated space: {1}) will run.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.WithRestorePoint" xml:space="preserve">A restore point is created before running.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">No restore point is created.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Title" xml:space="preserve">Confirm an action that cannot be undone</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Body" xml:space="preserve">After the update rollback data is removed, already installed updates can no longer be uninstalled. This cannot be undone.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Check" xml:space="preserve">I understand that installed updates can no longer be uninstalled</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Created" xml:space="preserve">A restore point was created.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Reused" xml:space="preserve">Using the existing restore point created {0} (a new one is not created within 24 hours).</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Unavailable.Title" xml:space="preserve">No restore point is available</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Unavailable.Body" xml:space="preserve">A restore point could not be created: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Disabled.Body" xml:space="preserve">System protection is off, so a restore point cannot be created.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.ContinueWithout" xml:space="preserve">Continue without one</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Abort" xml:space="preserve">Stop</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.EnableAndRetry" xml:space="preserve">Turn on system protection and retry</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Running" xml:space="preserve">Running {0} of {1}: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Done" xml:space="preserve">Done. Space freed: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.DonePartial" xml:space="preserve">Some items did not finish. Check each item's result.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RebootRequired" xml:space="preserve">A restart is required for the changes to take effect.</x:String>
+
+  <!-- 設定 -->
+  <x:String x:Key="Text.Cleanup.Settings.Title" xml:space="preserve">Cleanup settings</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Saved" xml:space="preserve">Settings saved.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SaveFailed" xml:space="preserve">Settings could not be saved. Check the log.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Exclusions" xml:space="preserve">Exclusions</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Exclusions.Description" xml:space="preserve">Excluded items are left alone: they are neither scanned nor deleted.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add" xml:space="preserve">Add</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Remove" xml:space="preserve">Remove from list</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import" xml:space="preserve">Import</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export" xml:space="preserve">Export</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Title" xml:space="preserve">Import exclusions</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Title" xml:space="preserve">Export exclusions</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.File" xml:space="preserve">Files</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.File" xml:space="preserve">Example: C:\Users\me\notes.txt</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.Folder" xml:space="preserve">Folders</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.Folder" xml:space="preserve">Example: C:\Users\me\Projects (subfolders too)</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.Name" xml:space="preserve">Extensions and file names</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.Name" xml:space="preserve">Example: *.log or cache.db</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.CookieDomain" xml:space="preserve">Cookie domains</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.CookieDomain" xml:space="preserve">Example: example.com (subdomains too)</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Added" xml:space="preserve">Added.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Duplicate" xml:space="preserve">Already in the list.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Invalid" xml:space="preserve">The format is not valid.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.LimitReached" xml:space="preserve">The limit of {0} entries was reached.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.TooLarge" xml:space="preserve">The file is too large.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.Unreadable" xml:space="preserve">The file could not be read.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.InvalidFormat" xml:space="preserve">The file format is not valid.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.UnsupportedSchema" xml:space="preserve">This version cannot read that format.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.TooManyEntries" xml:space="preserve">There are too many entries, so nothing was imported.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Done" xml:space="preserve">Added {0} (duplicates: {1}, rejected: {2}).</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Done" xml:space="preserve">Exported to {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Failed" xml:space="preserve">Could not export: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Options" xml:space="preserve">How files are deleted</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SecureDelete" xml:space="preserve">Secure delete (overwrite once, then delete)</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SecureDelete.Note" xml:space="preserve">Overwrites a file's contents once before deleting it. This cannot guarantee erasure on SSDs. Files with hard links, and compressed, sparse or encrypted files, are deleted without overwriting.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CreateRestorePoint" xml:space="preserve">Create a restore point before slimming down</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CreateRestorePoint.Note" xml:space="preserve">An existing restore point from the last 24 hours is reused. If system protection is off, you can turn it on after confirming.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.OpenSystemRestore" xml:space="preserve">Open System Restore</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders" xml:space="preserve">Custom folders</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Description" xml:space="preserve">Folders whose contents the advanced cleanup can empty. Windows, Program Files, ProgramData, other users' profiles, drive roots and locations with credentials are not allowed. Added folders always start unselected.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Add" xml:space="preserve">Add a folder…</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Pick" xml:space="preserve">Choose a custom folder</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns" xml:space="preserve">User-defined extensions and file names</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.Description" xml:space="preserve">Added to the advanced cleanup search. Matches always start unselected.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.Hint" xml:space="preserve">Example: *.xyz</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.BuiltIn" xml:space="preserve">Built-in patterns</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules" xml:space="preserve">Default selection per item</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules.Description" xml:space="preserve">Overrides the recommended default selection of an item in the standard cleanup.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules.Reset" xml:space="preserve">Reset to default</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.Default" xml:space="preserve">Follow the recommendation</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.On" xml:space="preserve">Always select</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.Off" xml:space="preserve">Never select</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Totals" xml:space="preserve">Results so far</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Totals.None" xml:space="preserve">Nothing has been run yet.</x:String>
+
+  <!-- Windows 項目の名称 (Definitions の nameKey) -->
+  <x:String x:Key="Text.Cleanup.Rule.traces.run-history" xml:space="preserve">Run dialog history</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.recent-items" xml:space="preserve">Recent items</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.rdp-history" xml:space="preserve">Remote Desktop connection history</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.explorer-mru" xml:space="preserve">Open and Save dialog history</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.search-history" xml:space="preserve">File Explorer search history</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.network-drive-history" xml:space="preserve">Map network drive history</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.jump-lists" xml:space="preserve">Jump Lists</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.ie-history" xml:space="preserve">Internet Explorer history and typed addresses</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.userassist" xml:space="preserve">Program launch history (UserAssist)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.user-error-reports" xml:space="preserve">Windows Error Reporting reports (current user)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.user-temp" xml:space="preserve">User temporary files</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.system-temp" xml:space="preserve">System temporary files</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.crash-dumps" xml:space="preserve">User-mode crash dumps</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.memory-dumps" xml:space="preserve">System memory dumps</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.error-reports" xml:space="preserve">Windows Error Reporting reports</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.update-logs" xml:space="preserve">Windows Update orchestrator logs</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.etl-trace-logs" xml:space="preserve">ETL trace logs</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.defender-support-logs" xml:space="preserve">Microsoft Defender diagnostic logs</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.thumbnail-cache" xml:space="preserve">Thumbnail cache</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.icon-cache" xml:space="preserve">Icon cache</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.font-cache" xml:space="preserve">Windows font cache</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.remote-desktop-cache" xml:space="preserve">Remote Desktop bitmap cache</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.directx-shader-cache" xml:space="preserve">DirectX shader cache</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.prefetch" xml:space="preserve">Old Prefetch data</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.recycle-bin" xml:space="preserve">Recycle Bin</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.dns-cache" xml:space="preserve">DNS resolver cache</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.network-usage" xml:space="preserve">Network usage history</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.invalid-shortcuts" xml:space="preserve">Invalid shortcuts and Start menu entries</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.invalid-scheduled-tasks" xml:space="preserve">Invalid scheduled tasks</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.internet-cache" xml:space="preserve">Internet cache (WinINet)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.office-addin-cache" xml:space="preserve">Office add-in cache</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.cryptnet-url-cache" xml:space="preserve">Certificate URL cache (CryptnetUrlCache)</x:String>
+
+  <!-- スリム化 15 項目 (SlimItemDefinition の NameKey / DescriptionKey / WarningKey) -->
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Name" xml:space="preserve">Orphaned Windows Installer files</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Description" xml:space="preserve">Deletes .msi and .msp files in the Windows Installer folder that are not registered to any product or patch and are older than 30 days.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Warning" xml:space="preserve">If registration data cannot be read completely, this item is unavailable. Registrations are checked again just before deleting.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Name" xml:space="preserve">Update rollback data</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Description" xml:space="preserve">Uses DISM /StartComponentCleanup /ResetBase to remove the data needed to roll back updates that are already installed.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Warning" xml:space="preserve">After this runs, installed updates can no longer be uninstalled. This cannot be undone.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Name" xml:space="preserve">Update backups (component store)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Description" xml:space="preserve">Uses DISM /StartComponentCleanup to clean up superseded components.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Warning" xml:space="preserve">The space shown is a DISM estimate and can differ from what is actually freed. This can take several minutes.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateCache.Name" xml:space="preserve">Windows Update download cache</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateCache.Description" xml:space="preserve">Deletes the contents of SoftwareDistribution\Download. The Windows Update and BITS services are stopped during the run and restored afterwards.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Name" xml:space="preserve">Leftover patch cache</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Description" xml:space="preserve">Stops the Windows Installer service and deletes the contents of Installer\$PatchCache$.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Warning" xml:space="preserve">Later repairs or uninstalls may ask for the original installation media.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Name" xml:space="preserve">Language input features (Japanese)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Description" xml:space="preserve">Uses DISM Remove-Capability to remove the Japanese Language.Basic features (spelling, text prediction and so on). It is not the IME itself. It can run only when the language is not used by the display language, the language list or a keyboard layout.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Warning" xml:space="preserve">To use these language features again, you need to add them back.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Name" xml:space="preserve">Language input features (Korean)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Description" xml:space="preserve">Uses DISM Remove-Capability to remove the Korean Language.Basic features (spelling, text prediction and so on). It is not the IME itself. It can run only when the language is not used by the display language, the language list or a keyboard layout.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Warning" xml:space="preserve">To use these language features again, you need to add them back.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Name" xml:space="preserve">Language input features (Chinese, Traditional)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Description" xml:space="preserve">Uses DISM Remove-Capability to remove the Traditional Chinese Language.Basic features (spelling, text prediction and so on). It is not the IME itself. It can run only when the language is not used by the display language, the language list or a keyboard layout.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Warning" xml:space="preserve">To use these language features again, you need to add them back.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Name" xml:space="preserve">Language input features (Chinese, Simplified)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Description" xml:space="preserve">Uses DISM Remove-Capability to remove the Simplified Chinese Language.Basic features (spelling, text prediction and so on). It is not the IME itself. It can run only when the language is not used by the display language, the language list or a keyboard layout.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Warning" xml:space="preserve">To use these language features again, you need to add them back.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Name" xml:space="preserve">Windows Help files</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Description" xml:space="preserve">Deletes Windows Help files. On Windows 10/11 these are protected by Windows Resource Protection, so there is usually nothing to delete.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Warning" xml:space="preserve">Files protected by Windows or owned by TrustedInstaller are left alone. Ownership is never taken.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Name" xml:space="preserve">Default wallpapers</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Description" xml:space="preserve">Deletes the default Windows wallpapers. On Windows 10/11 these are protected by Windows Resource Protection, so there is usually nothing to delete.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Warning" xml:space="preserve">Files protected by Windows or owned by TrustedInstaller are left alone. Ownership is never taken.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleMusic.Name" xml:space="preserve">Sample music</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleMusic.Description" xml:space="preserve">Deletes only the known sample songs that shipped with Windows 7. Other files in the folder are left alone.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SamplePictures.Name" xml:space="preserve">Sample pictures</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SamplePictures.Description" xml:space="preserve">Deletes only the known sample pictures that shipped with Windows 7. Other files in the folder are left alone.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleVideos.Name" xml:space="preserve">Sample videos</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleVideos.Description" xml:space="preserve">Deletes only the known sample video that shipped with Windows 7. Other files in the folder are left alone.</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Expand" xml:space="preserve">Expand or collapse {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Error" xml:space="preserve">Deletion could not be completed. Check the log.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SaveSuppressed" xml:space="preserve">Settings could not be read, so saving is disabled to protect the original file. Changes apply only during this session.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SystemRestore.Failed" xml:space="preserve">System Restore could not be opened.</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Done" xml:space="preserve">Added {0} to the exclusions. Settings changed, so scan again.</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Duplicate" xml:space="preserve">{0} is already excluded.</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Failed" xml:space="preserve">Could not add {0} to the exclusions (invalid format or limit reached).</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.SaveFailed" xml:space="preserve">Added {0} to the exclusions, but it could not be saved. It applies only until you close the app.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.NoTarget" xml:space="preserve">Select a drive or a custom folder to scan.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Filter.All" xml:space="preserve">Show all kinds</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Action.IgnoreFolder" xml:space="preserve">Ignore this folder</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Kinds" xml:space="preserve">Results by kind</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Failed" xml:space="preserve">An error occurred while deleting. Check the log.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.UserScopeUnavailable" xml:space="preserve">User-scoped rules cannot be used (the interactive user and the elevated user differ, or could not be confirmed)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.CustomFolderRejectedAtRun" xml:space="preserve">The custom folder was rejected by the check at run time</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseOutsideProfile" xml:space="preserve">The environment variable %{0}% points outside the current user's profile (or the profile could not be verified), so this target is not used.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseProtectedLocation" xml:space="preserve">The environment variable %{0}% points to a protected location (a drive root, Windows, Program Files, ProgramData or another user's profile), so this target is not used.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseMachineMismatch" xml:space="preserve">The environment variable %{0}% differs from the system's default location, so this target is not used.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.CustomFolderRejected" xml:space="preserve">The custom folder was rejected ({0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceStopFailed" xml:space="preserve">Nothing was deleted because a service could not be stopped: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DeleteFailed" xml:space="preserve">Deletion could not be completed: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceResumeFailedList" xml:space="preserve">A service could not be returned to its original state ({0}): {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceResumeFailed" xml:space="preserve">A service could not be returned to its original state: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.UserRegistryOpenFailed" xml:space="preserve">The user's registry could not be opened</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.HandlerUnavailable" xml:space="preserve">Handler {0} is not available</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.PathReason" xml:space="preserve">{0}: {1}{2}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniContentUnverified" xml:space="preserve"> (the file contents could not be verified)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ExpansionTruncated" xml:space="preserve">The expanded targets reached the limit ({0}); the rest are not included</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbOpenFailed" xml:space="preserve">The database could not be opened (SQLite {0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbConfigFailed" xml:space="preserve">Stopped because a safety setting could not be applied ({0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbSqliteError" xml:space="preserve">SQLite error {0}: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbPinFailed" xml:space="preserve">The database could not be pinned safely: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbHardLinked" xml:space="preserve">A hard-linked database is not a target</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbTooLarge" xml:space="preserve">The database is too large to be a target</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbIdentityUnverified" xml:space="preserve">The database file could not be verified</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbJournalPending" xml:space="preserve">Skipped because an unprocessed journal exists (in use or not recovered)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbIntegrityFailed" xml:space="preserve">The database integrity check failed</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbVirtualTable" xml:space="preserve">A database that contains a virtual table is not a target</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbUnknownTable" xml:space="preserve">The expected table {0} does not exist (unknown schema)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbUnknownColumn" xml:space="preserve">Table {0} does not have the expected column {1} (unknown schema)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniUnconvertible" xml:space="preserve">Skipped because the file cannot be converted losslessly as UTF-8, UTF-16 or the system ANSI code page</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniTooLarge" xml:space="preserve">Skipped because the file is larger than 1 MB</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniAmbiguousSection" xml:space="preserve">Not changed because several sections have the same name and the target cannot be identified</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniRestored" xml:space="preserve">{0} (the original text was restored)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniNotRestored" xml:space="preserve">{0} (the original text could not be restored and the contents are undefined)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniChangedWhileReading" xml:space="preserve">The contents changed while reading</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniLengthChangedWhileReading" xml:space="preserve">The length changed while reading</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniLengthChangedBeforeWrite" xml:space="preserve">The length changed before writing</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniVerifyMismatch" xml:space="preserve">The re-read after writing does not match</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistrySymlink" xml:space="preserve">Excluded because it is a registry symbolic link: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryDepthLimit" xml:space="preserve">The safe recursion depth limit was exceeded</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DnsFlushFailed" xml:space="preserve">ipconfig /flushdns failed: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DnsFlushError" xml:space="preserve">ipconfig /flushdns could not be run: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeQueryFailed" xml:space="preserve">{0} could not be queried (Win32={1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeUrlHistoryFailed" xml:space="preserve">The URL history could not be cleared (HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeClearFailed" xml:space="preserve">{0} could not be cleared (Win32={1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleQueryFailed" xml:space="preserve">The Recycle Bin could not be queried (HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleVerifyFailed" xml:space="preserve">The Recycle Bin could not be checked after emptying (HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleRemaining" xml:space="preserve">{0} items remain in the Recycle Bin (HRESULT=0x{1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDpsResumeFailed" xml:space="preserve">The DPS service could not be returned to its original state: {0}. Start Diagnostic Policy Service in Windows Services.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDeleteFailed" xml:space="preserve">Network usage data could not be deleted: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDpsStopUnverified" xml:space="preserve">Network usage data was not deleted because the DPS service could not be confirmed as stopped</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutLocationOpenFailed" xml:space="preserve">The shortcut location could not be opened safely</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutsUnreadable" xml:space="preserve">{0} shortcuts could not be read and were left out</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutDeleteFailed" xml:space="preserve">Invalid shortcuts could not be deleted: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TasksUnreadable" xml:space="preserve">{0} tasks could not be read and were left out</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TaskSchedulerQueryFailed" xml:space="preserve">Task Scheduler could not be queried: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TaskSchedulerOperateFailed" xml:space="preserve">Task Scheduler could not be operated: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEmptyDescription" xml:space="preserve">The restore point description is empty.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointStateUnknown" xml:space="preserve">The restore point state could not be checked: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointProtectionDisabled" xml:space="preserve">System protection is turned off.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreateUninterpretable" xml:space="preserve">The result of creating the restore point could not be interpreted (exit code {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreateFailed" xml:space="preserve">Creating the restore point failed (return value {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointVerifyFailed" xml:space="preserve">The restore point could not be checked after creation: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCancelled" xml:space="preserve">Creating the restore point was canceled.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableFailed" xml:space="preserve">System protection could not be turned on (exit code {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableVerifyFailed" xml:space="preserve">The state after turning on protection could not be checked: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnabled" xml:space="preserve">System protection was turned on.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableNotEffective" xml:space="preserve">System protection did not turn on (it may be disabled by Group Policy).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableCancelled" xml:space="preserve">Turning on system protection was canceled.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreated" xml:space="preserve">A restore point was created.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointReused" xml:space="preserve">Using the restore point ({0}) created within the last 24 hours.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointNoneAvailable" xml:space="preserve">No restore point was created and there is none from the last 24 hours.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointExitCode" xml:space="preserve">Exit code {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointProtectionOutputInvalid" xml:space="preserve">The protection state output is invalid</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputInvalid" xml:space="preserve">The restore point output is invalid</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputUnknownLine" xml:space="preserve">The output has an unknown line</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputIncomplete" xml:space="preserve">The output is incomplete</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimStale" xml:space="preserve">Nothing was run because the scan result was out of date. Scan again.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimNothingSelected" xml:space="preserve">No runnable item is selected.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimCanceledNotRun" xml:space="preserve">Not run because it was canceled.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimRestorePointUnavailable" xml:space="preserve">Not run because no restore point is available: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimItemUnavailable" xml:space="preserve">Not run because the item is not available.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimNeedsTwoStep" xml:space="preserve">Not run because this cannot be undone and the two-step confirmation is missing.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimCanceledPartial" xml:space="preserve">Canceled. It may have been partly processed.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimFailed" xml:space="preserve">Failed: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimRecheckFailed" xml:space="preserve">Nothing was deleted because the re-check just before running failed: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimServiceResumeFailed" xml:space="preserve">A service could not be returned to its original state: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimBackupIncluded" xml:space="preserve">Done as part of cleaning up update rollbacks.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimBackupSkipped" xml:space="preserve">Not run because cleaning up update rollbacks did not succeed: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimOutcome" xml:space="preserve">Deleted {0} files ({1} bytes). Kept {2}, failed {3}, rejected {4}.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimOutcomeExample" xml:space="preserve">Deleted {0} files ({1} bytes). Kept {2}, failed {3}, rejected {4}. Example: {5}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ComponentStoreCleanup" xml:space="preserve">Cleaning up the component store</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageRemoval" xml:space="preserve">Removing the language input features for {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationFailed" xml:space="preserve">{0} failed (exit code {1}). {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationUninterpretable" xml:space="preserve">The result of {0} could not be interpreted (exit code {1} but no success output).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationDone" xml:space="preserve">{0} finished.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationDoneReboot" xml:space="preserve">{0} finished (a restart is required).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotTarget" xml:space="preserve">{0} is not a language that can be removed.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotRemovable" xml:space="preserve">The language input features for {0} cannot be removed now: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotInstalled" xml:space="preserve">Not installed.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageInUse" xml:space="preserve">It is used by the UI language, the language list or a keyboard layout.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotUsed" xml:space="preserve">It is not used by any user's language settings.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderProtected" xml:space="preserve">It contains Lumin4ti or a protected location</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedRootNotLocal" xml:space="preserve">It is not an absolute path to a local folder</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedRootProtected" xml:space="preserve">Not scanned because it is a protected location</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ExportLinkRefused" xml:space="preserve">Cannot export to a link</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerNotEnumerated" xml:space="preserve">The registrations were not enumerated at scan time.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerNoSource" xml:space="preserve">There is no source to enumerate registrations from.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerEnumerationException" xml:space="preserve">An exception occurred while enumerating registrations: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerEnumerationFailed" xml:space="preserve">Could not enumerate Windows Installer registrations: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerFolderUnresolved" xml:space="preserve">The Installer folder cannot be resolved safely.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageSettingsUnreadable" xml:space="preserve">Skipped because the users' language settings could not be fully read: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageListUnavailable" xml:space="preserve">Could not get or interpret the list of language input features (exit code {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderNotScannable" xml:space="preserve">This folder could not be scanned safely because of a link or protection.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">Sample recorded TV</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">Deletes only the known sample recording that shipped with Windows 7. Other files in the folder are left alone.</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Internet Explorer application cache (AppCache)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-ime-cache" xml:space="preserve">Microsoft IME cache and error reports</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-office-solution-packages" xml:space="preserve">Office solution packages cache</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-delivery-optimization-cache" xml:space="preserve">Delivery Optimization cache</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-etl-logs" xml:space="preserve">ETL trace logs (Logs and LogFiles folders)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-system-temp" xml:space="preserve">Windows system-service temporary files (SystemTemp)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-icon-cache-root" xml:space="preserve">Legacy icon cache file (IconCache.db)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.app-cursor-cached-data" xml:space="preserve">Cursor cached data (CachedData)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.package-npm-cache" xml:space="preserve">npm cache (.npm in the user folder)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-shared" xml:space="preserve">Google Chrome shared caches and temporary files</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-edge-shared" xml:space="preserve">Microsoft Edge shared caches and temporary files</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-vivaldi-shared" xml:space="preserve">Vivaldi shared caches and temporary files</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-brave-shared" xml:space="preserve">Brave shared caches and temporary files</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-shared" xml:space="preserve">Google Chrome Beta shared caches and temporary files</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-shared" xml:space="preserve">Google Chrome Dev shared caches and temporary files</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-rebuild" xml:space="preserve">Google Chrome Safe Browsing and model data</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-edge-rebuild" xml:space="preserve">Microsoft Edge Safe Browsing and model data</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-vivaldi-rebuild" xml:space="preserve">Vivaldi Safe Browsing and model data</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-brave-rebuild" xml:space="preserve">Brave Safe Browsing and model data</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-rebuild" xml:space="preserve">Google Chrome Beta Safe Browsing and model data</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-rebuild" xml:space="preserve">Google Chrome Dev Safe Browsing and model data</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-comet-rebuild" xml:space="preserve">Comet Safe Browsing and model data</x:String>
+  <!-- ===== /Cleanup ===== -->
 </ResourceDictionary>

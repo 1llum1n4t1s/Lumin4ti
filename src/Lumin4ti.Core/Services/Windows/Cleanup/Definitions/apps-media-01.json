@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.ableton-live-crash-reports",
+      "name": "Ableton Live",
+      "nameKey": null,
+      "kind": "report",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Ableton\\Live Reports" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Ableton\\Live Reports", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://help.ableton.com/hc/en-us/articles/209071629", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.ableton-live-logs",
+      "name": "Ableton Live",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Ableton\\Live *\\Preferences" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%APPDATA%\\Ableton\\Live *\\Preferences", "pattern": "Log.txt", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://help.ableton.com/hc/en-us/articles/5301568366354", "checked": "2026-11-26" }
+      ]
+    }
+  ]
+}

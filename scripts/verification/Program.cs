@@ -9,6 +9,7 @@ using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services;
 using Lumin4ti.Core.Services.Windows;
 using Lumin4ti.Core.Services.Windows.Actions;
+using Lumin4ti.Core.Services.Windows.Cleanup;
 using Lumin4ti.UI.Services;
 using Lumin4ti.UI.ViewModels;
 using Microsoft.Extensions.Logging;
@@ -70,6 +71,7 @@ internal static class Program
         await Run("registry-reapply-failure-immediate-state-and-default", RegistryReapplyWorkflow);
         await Run("registry-memory-compensation-cancellation-and-defaults", RegistryPreparationWorkflow);
         await Run("shutdown-cancellation-finally-gate", ShutdownWorkflow);
+        await Run("cleanup-scan-lease-shutdown-generation", CleanupScanWorkflow);
         await Run("ntp-stop-failure-compensation", NtpWorkflow);
         await Run("service-stop-scm-and-dependent-safety", ServiceWorkflow);
         await Run("cleanup-cancel-resume-failure-visible", CleanupWorkflow);
@@ -83,7 +85,6 @@ internal static class Program
         await Run("mmagent-failure-diagnostic-and-retry", MmAgentDiagnosticWorkflow);
         await Run("parser-and-diagnostic", ParserWorkflow);
         await Run("migration-download-body-timeout-and-cancel", DownloadWorkflow);
-        await Run("scheduled-checklist-duplicate-off-selection", ScheduledSelectionWorkflow);
         await Run("clear-ignored-update-save-failure-boundary", IgnoredUpdateWorkflow);
         await Run("migration-pending-json-legacy-compatibility", PendingJsonWorkflow);
         await Run("item-operation-failure-partial-busy-log-causes", OperationFailureLogWorkflow);
@@ -270,17 +271,7 @@ internal static class Program
                 vm.ApplyBatchOnCommand.CanExecute(null) && vm.ApplyBatchOffCommand.CanExecute(null),
                 "batch canceled result or command reset lost");
         }
-        var scheduledFailed = new LogProbeAction("scheduled-failed") { Result = MaintenanceActionResult.Fail(LogCanaryDetail) };
-        var scheduledPartial = new LogProbeAction("scheduled-partial") { Result = MaintenanceActionResult.Partial(LogCanaryDetail) };
-        var scheduledException = new LogProbeAction("scheduled-exception") { Failure = new IOException(LogCanaryDetail) };
-        var scheduledLast = new LogProbeAction("scheduled-last-success");
-        var scheduledStart = Logs.Messages.Count;
-        Require(ScheduledTempCleanup.RunAsync([scheduledFailed, scheduledPartial, scheduledException, scheduledLast])
-            .GetAwaiter().GetResult() == 1, "scheduled failure exit code lost");
-        foreach (var action in new[] { scheduledFailed, scheduledPartial, scheduledException })
-            RequireItemCauseLog(scheduledStart, action, LogCanaryCause, redacted: true);
-        Require(scheduledLast.OperationCalls == 1, "scheduled sequence stopped after earlier failure");
-        return Task.FromResult("Actual category/card VM toggle, choice and action: Failed/Partial retained name/id/sanitized cause; Busy rejected without fake calls; scheduled fake batch retained Failed/Partial/exception causes and continued through final success");
+        return Task.FromResult("Actual category/card VM toggle, choice and action: Failed/Partial retained name/id/sanitized cause; Busy rejected without fake calls");
     }
 
     private static void TriggerLogProbe(CommandItemViewModel vm, string kind)
@@ -431,6 +422,86 @@ internal static class Program
         return "Cancellation observed; idle waited for finally; later lease refused even after old lease disposal";
     }
 
+
+    private sealed class DecliningCleanupPrompts : ICleanupRunPrompts
+    {
+        public Task<CleanupProcessChoice> ChooseForRunningProcessesAsync(CleanupProcessPrompt prompt, CancellationToken ct) =>
+            Task.FromResult(CleanupProcessChoice.Abort);
+        public Task<bool> ConfirmForceTerminationAsync(CleanupProcessPrompt prompt, CancellationToken ct) => Task.FromResult(false);
+    }
+
+    private static CleanupScanSnapshot CleanupSnapshot() => new(
+        1, DateTime.UtcNow, CleanupScopeStatus.Available,
+        [new CleanupScanItem(
+            new CleanupRuleInfo("canary.rule", "canary.rule", null, CleanupRuleKind.Cache, CleanupRuleCategory.Windows,
+                CleanupRuleImpact.Junk, true, null, false, [], [], false),
+            CleanupItemState.Found, CleanupUnavailableReason.None, 3, 0, 0, 1024, 0, 0, 0, true, [], [], [])],
+        new Dictionary<string, RulePlan>(),
+        new CleanupScanContext(CleanupExclusionMatcher.Empty, [], false, "fp"));
+
+    /// <summary>新しいクリーンアップの走査 lease・終了時の待機・世代失効を、実機に触れない偽の境界で確かめる。</summary>
+    private static async Task<string> CleanupScanWorkflow()
+    {
+        var coordinator = new MaintenanceOperationCoordinator(() => new NoopLease());
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var release = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        bool? processing = null;
+        var scanToken = CancellationToken.None;
+        var scanCalls = 0;
+        var runCalls = 0;
+        var current = true;
+        var services = new CommonCleanServices(
+            async (_, ct) =>
+            {
+                scanCalls++;
+                processing = coordinator.ProcessingState.IsProcessing;
+                scanToken = ct;
+                started.TrySetResult();
+                await release.Task;
+                ct.ThrowIfCancellationRequested();
+                return CleanupSnapshot();
+            },
+            (_, _, _) => { runCalls++; throw new InvalidOperationException("このフローで削除を呼んではいけません"); },
+            _ => current, _ => Task.CompletedTask, new DecliningCleanupPrompts(), action => action());
+        var vm = new CommonCleanViewModel(null!, null!, new CleanupSettingsStore(new MemorySettings()), null!, coordinator, services);
+
+        var scan = vm.ScanCommand.ExecuteAsync(null);
+        await started.Task;
+        Require(processing == false && coordinator.ActiveCount == 1, "scan did not hold a showProcessing:false lease");
+        Require(!coordinator.TryBegin(out _), "second lease allowed during scan");
+        await vm.ScanCommand.ExecuteAsync(null);
+        Require(scanCalls == 1, "scan re-entered while running");
+
+        coordinator.RequestCancellation();
+        Require(scanToken.IsCancellationRequested && coordinator.IsStopping, "shutdown did not cancel the scan");
+        var idle = coordinator.WaitForIdleAsync();
+        Require(!idle.IsCompleted, "idle completed before the scan finally");
+        release.SetResult();
+        await scan;
+        await idle;
+        Require(!vm.HasSnapshot && coordinator.ActiveCount == 0, "canceled scan left a snapshot or lease");
+        await vm.ScanCommand.ExecuteAsync(null);
+        Require(scanCalls == 1 && !coordinator.TryBegin(out _), "scan reopened after shutdown");
+
+        // 世代の失効: 走査後に結果が古くなったら、確認の開始も確定も実行を呼ばない。
+        var freshCoordinator = new MaintenanceOperationCoordinator(() => new NoopLease());
+        var fresh = new CommonCleanViewModel(null!, null!, new CleanupSettingsStore(new MemorySettings()), null!, freshCoordinator,
+            services with { Scan = (_, _) => Task.FromResult(CleanupSnapshot()) });
+        release.TrySetResult();
+        await fresh.ScanCommand.ExecuteAsync(null);
+        Require(fresh.HasSnapshot && fresh.CanRun, "fresh scan not selectable");
+        current = false;
+        fresh.RequestRunCommand.Execute(null);
+        Require(!fresh.IsConfirming && fresh.IsStale && runCalls == 0, "stale snapshot reached confirmation");
+        await fresh.ScanCommand.ExecuteAsync(null);
+        current = true;
+        fresh.RequestRunCommand.Execute(null);
+        Require(fresh.IsConfirming && !fresh.IsStale, "current snapshot refused confirmation");
+        current = false;
+        await fresh.ConfirmRunCommand.ExecuteAsync(null);
+        Require(!fresh.IsConfirming && fresh.IsStale && runCalls == 0 && freshCoordinator.ActiveCount == 0, "invalidated snapshot reached the run boundary");
+        return "Scan held a non-processing lease and refused re-entry; shutdown canceled it, idle waited for finally, later scan refused; invalidated generation blocked confirmation and run without calling the run boundary";
+    }
 
     private static async Task<string> NtpWorkflow()
     {
@@ -660,26 +731,6 @@ internal static class Program
         Require(userCanceled, "user cancellation incorrectly converted to timeout");
         return "Mock handler only: normal body copied, blocked body timed out, user cancellation remained OCE; no network";
     }
-    private static async Task<string> ScheduledSelectionWorkflow()
-    {
-        var settings = new MemorySettings();
-        settings.Current.ScheduledCleanupGroupIds = ["cleanup-user-temp", "CLEANUP-USER-TEMP", "cleanup-system-temp"];
-        var preferences = new CleanupPreferences(settings);
-        var executor = new MockExecutor((_, _, _) => throw new InvalidOperationException("Must not register or run a task"));
-        var toggle = new ScheduledTempCleanupToggle(executor, preferences);
-        IMaintenanceAction[] actions = [
-            new FileCleanupAction("cleanup-user-temp", "検証", "検証", () => throw new InvalidOperationException("Must not resolve user cleanup targets")),
-            new FileCleanupAction("cleanup-system-temp", "検証", "検証", () => throw new InvalidOperationException("Must not resolve system cleanup targets"))];
-        Require(ScheduledTempCleanup.SelectActions(actions, preferences.ScheduledGroupIds).Count == 2, "duplicate setup not selected");
-        await toggle.SetCheckListEntrySelectedAsync("cleanup-user-temp", false);
-        Require(preferences.ScheduledGroupIds.SequenceEqual(new[] { "cleanup-system-temp" }), "OFF retained a duplicate or removed unrelated ID");
-        Require(ScheduledTempCleanup.SelectActions(actions, preferences.ScheduledGroupIds).Single().Id == "cleanup-system-temp", "OFF item retained by actual scheduled selection");
-        await toggle.SetCheckListEntrySelectedAsync("cleanup-user-temp", false);
-        await toggle.SetCheckListEntrySelectedAsync("cleanup-user-temp", true);
-        await toggle.SetCheckListEntrySelectedAsync("CLEANUP-USER-TEMP", true);
-        Require(preferences.ScheduledGroupIds.Count == 2 && settings.SaveCount == 4 && executor.Calls.Count == 0, "idempotent checklist edits changed unrelated selections or executed OS task");
-        return "Actual checklist save -> preferences -> scheduled selection removed both case-variant duplicates; unrelated selection/order kept; repeated OFF/ON idempotent; no target resolution or execution";
-    }
     private static async Task<string> IgnoredUpdateWorkflow()
     {
         foreach (var fail in new[] { false, true })
@@ -717,8 +768,7 @@ internal static class Program
         Require(locales.Length == 17, "locale count differs from 17");
         string[] added = ["UpdateDialog.Title", "UpdateDialog.AvailableHeader", "UpdateDialog.DownloadAndInstall", "UpdateDialog.IgnoreThisVersion", "UpdateDialog.UpToDateMessage", "UpdateDialog.ErrorHeader", "UpdateDialog.Close", "UpdateDialog.CheckingMessage", "UpdateDialog.DevelopmentBuild", "UpdateDialog.CheckFailed", "Status.Applying", "Status.Applied", "Status.ApplyFailed", "Shutdown.BlockReason"];
         added = [.. added, "Setting.DefaultFormat", "Setting.DefaultEnvironment",
-            "Toggle.RecallQueryFailed", "Toggle.RecallStateMissing", "Toggle.RecallStateUnsupported",
-            "Toggle.ScheduledTaskOtherUser", "Toggle.ScheduledTaskOwnershipUnknown"];
+            "Toggle.RecallQueryFailed", "Toggle.RecallStateMissing", "Toggle.RecallStateUnsupported"];
         foreach (var path in locales)
         {
             var keys = XDocument.Load(path).Descendants().Select(e => (string?)e.Attribute(x + "Key")).Where(k => k is not null).ToArray();

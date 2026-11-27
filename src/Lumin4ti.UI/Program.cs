@@ -32,12 +32,12 @@ internal static class Program
             Console.Error.WriteLine($"[Lumin4ti] ログを記録できない状態で起動します: {logFailure}");
         }
 
-        // タスクスケジューラーからのスケジュール実行はここで即終了する。
-        // 自己昇格・多重起動ガード・UI 起動を一切経由しないため、ログオンのたびに
-        // UAC プロンプトを出さず、登録済みタスクの最高権限で無人実行できる。
-        if (OperatingSystem.IsWindows() && args.Contains(ScheduledTempCleanup.CommandLineArgument))
+        // 予約実行は廃止した。旧版が登録したサインイン時タスクから引数付きで起動された場合は、
+        // 掃除をせず旧タスクの削除だけを試みて、常に 0 で終わる。GUI・自己昇格・移行 MSI・Velopack へ流さない
+        // (失敗しても 0 を返し、残存タスクがサインインのたびに昇格 GUI を開くことを避ける)。
+        if (OperatingSystem.IsWindows() && args.Contains(LegacyScheduledCleanupMigration.ObsoleteArgument))
         {
-            return ScheduledTempCleanup.Run();
+            return LegacyScheduledCleanupMigration.RunForObsoleteArgument();
         }
 
         // Velopack のブートストラップを最初に走らせる
@@ -105,22 +105,12 @@ internal static class Program
             return 1;
         }
 
-        // 旧版の低権限タスクやログオン対象未指定のタスクは、単一インスタンス確保後に
-        // 既存登録だけを現行の権限・利用者限定定義へ移行する。
+        // 旧版が登録したサインイン時のクリーンアップタスクは、単一インスタンス確保後に取り除く。
+        // 共有ロックを取れなければ次回へ持ち越し、失敗しても起動は続ける。
         if (OperatingSystem.IsWindows() && isElevated)
         {
             RebootCacheCleanup.ReportCurrentUserResults();
-            try
-            {
-                new ScheduledTempCleanupToggle(new ProcessCommandExecutor())
-                    .RepairLegacyRegistrationAsync()
-                    .GetAwaiter()
-                    .GetResult();
-            }
-            catch (Exception ex) when (ex is not OutOfMemoryException)
-            {
-                LoggerBootstrap.Log.Error("scheduled-temp-cleanup: 既存タスクの更新に失敗しました", ex);
-            }
+            LegacyScheduledCleanupMigration.RunAtStartup();
         }
 
         return BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);

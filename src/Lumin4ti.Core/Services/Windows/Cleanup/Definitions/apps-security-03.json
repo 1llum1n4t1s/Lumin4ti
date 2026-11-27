@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.openvpn-gui-logs",
+      "name": "OpenVPN GUI",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%USERPROFILE%\\OpenVPN\\log" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%USERPROFILE%\\OpenVPN\\log", "pattern": "*.log", "olderThanDays": null }
+      ],
+      "processes": ["openvpn-gui", "openvpn"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://github.com/OpenVPN/openvpn-gui", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.openvpn-service-logs",
+      "name": "OpenVPN",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "machine",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%PROGRAMFILES%\\OpenVPN\\log" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%PROGRAMFILES%\\OpenVPN\\log", "pattern": "*.log", "olderThanDays": null }
+      ],
+      "processes": ["openvpn", "openvpnserv2"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://openvpn.net/community-docs/running-openvpn-as-a-windows-service/", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.nordpass-logs",
+      "name": "NordPass",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\NordPass\\logs" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\NordPass\\logs", "pattern": "*.log", "olderThanDays": null }
+      ],
+      "processes": ["NordPass"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://support.nordpass.com/hc/en-us/articles/360002456957", "checked": "2026-11-26" }
+      ]
+    },
+    {
+      "id": "app.zonealarm-log",
+      "name": "ZoneAlarm",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "machine",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%PROGRAMDATA%\\CheckPoint\\ZoneAlarm\\Logs" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%PROGRAMDATA%\\CheckPoint\\ZoneAlarm\\Logs", "pattern": "ZALog.txt", "olderThanDays": null }
+      ],
+      "processes": ["vsmon"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://support.zonealarm.com/hc/en-us/articles/360060208611-Customizing-log-archiving", "checked": "2026-11-26" }
+      ]
+    }
+  ]
+}

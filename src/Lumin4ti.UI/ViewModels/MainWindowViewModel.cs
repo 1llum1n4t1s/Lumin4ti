@@ -16,13 +16,14 @@ namespace Lumin4ti.UI.ViewModels;
 public class MainWindowViewModel : ObservableObject, IDisposable
 {
     private readonly CommandItemViewModel[] _items;
+    private readonly IProcessingOperation[] _operations;
     private bool _cancelRequested;
     private bool _disposed;
 
     public bool IsProcessing => _operationCoordinator.ProcessingState.IsProcessing || Version.IsSavingSettings ||
         _items.Any(item => item.IsSavingSelection);
 
-    private CommandItemViewModel? RunningItem => _items.FirstOrDefault(item => item.IsRunning);
+    private IProcessingOperation? RunningItem => _operations.FirstOrDefault(operation => operation.IsRunning);
 
     public bool CanCancelProcessing => !_cancelRequested &&
         _operationCoordinator.ProcessingState.CanCancel &&
@@ -38,7 +39,7 @@ public class MainWindowViewModel : ObservableObject, IDisposable
 
     public CommandCategoryViewModel Update { get; }
 
-    public CommandCategoryViewModel Cleanup { get; }
+    public CleanupViewModel Cleanup { get; }
 
     public CommandCategoryViewModel Repair { get; }
 
@@ -56,6 +57,7 @@ public class MainWindowViewModel : ObservableObject, IDisposable
 
     public MainWindowViewModel(
         MaintenanceActionCatalog catalog,
+        CleanupViewModel cleanup,
         DeviceCleanupViewModel deviceCleanup,
         VersionViewModel version,
         MaintenanceOperationCoordinator operationCoordinator)
@@ -67,12 +69,7 @@ public class MainWindowViewModel : ObservableObject, IDisposable
             CommandCategory.Update,
             "更新・セキュリティ",
             "アプリと Windows Defender の更新、セキュリティ設定の健全化を行います。");
-        Cleanup = new CommandCategoryViewModel(
-            catalog,
-            operationCoordinator,
-            CommandCategory.Cleanup,
-            "クリーンアップ",
-            "ディスク領域の回収と、不要なファイル・登録情報の削除を行います。");
+        Cleanup = cleanup;
         Repair = new CommandCategoryViewModel(
             catalog,
             operationCoordinator,
@@ -101,15 +98,16 @@ public class MainWindowViewModel : ObservableObject, IDisposable
 
         DeviceCleanup = deviceCleanup;
         Version = version;
-        _items = new[] { Update, Cleanup, Repair, Performance, System, Organize }
+        _items = new[] { Update, Cleanup.Other, Repair, Performance, System, Organize }
             .SelectMany(category => category.Items)
             .SelectMany(item => new[] { item }.Concat(item.Children)).ToArray();
+        _operations = [.. _items, .. Cleanup.Operations];
         CancelProcessingCommand = new RelayCommand(CancelProcessing, () => CanCancelProcessing);
         _operationCoordinator.StateChanged += OnOperationStateChanged;
         Version.PropertyChanged += OnProcessingPropertyChanged;
-        foreach (var item in _items)
+        foreach (var operation in _operations)
         {
-            item.PropertyChanged += OnProcessingPropertyChanged;
+            operation.PropertyChanged += OnProcessingPropertyChanged;
         }
         App.LocaleChanged += OnLocaleChanged;
 
@@ -222,8 +220,8 @@ public class MainWindowViewModel : ObservableObject, IDisposable
 
     private void OnProcessingPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(CommandItemViewModel.IsRunning) or nameof(CommandItemViewModel.CanCancel)
-            or nameof(CommandItemViewModel.Label) or nameof(CommandItemViewModel.ProgressText)
+        if (e.PropertyName is nameof(IProcessingOperation.IsRunning) or nameof(IProcessingOperation.CanCancel)
+            or nameof(IProcessingOperation.Label) or nameof(IProcessingOperation.ProgressText)
             or nameof(CommandItemViewModel.IsSavingSelection)
             or nameof(VersionViewModel.IsSavingSettings))
         {
@@ -265,9 +263,9 @@ public class MainWindowViewModel : ObservableObject, IDisposable
         _disposed = true;
         _operationCoordinator.StateChanged -= OnOperationStateChanged;
         Version.PropertyChanged -= OnProcessingPropertyChanged;
-        foreach (var item in _items)
+        foreach (var operation in _operations)
         {
-            item.PropertyChanged -= OnProcessingPropertyChanged;
+            operation.PropertyChanged -= OnProcessingPropertyChanged;
         }
         App.LocaleChanged -= OnLocaleChanged;
         GC.SuppressFinalize(this);

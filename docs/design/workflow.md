@@ -6,9 +6,9 @@
 
 通常起動は次の順序で進む。
 
-1. ログを初期化する。スケジュール済み一時ファイル整理の引数なら、UI・自己昇格・多重起動ガードを経由せず、タスクスケジューラーから与えられた最高権限で実行して終了する。
+1. ログを初期化する。旧タスクが付けた引数`--scheduled-cleanup-temp`なら、掃除をせず旧タスクの削除だけを試みて、UI・自己昇格・多重起動ガード・Velopackを経由せず常に終了コード0で終了する（[legacy-scheduled-cleanup-removal.md](legacy-scheduled-cleanup-removal.md)）。
 2. Velopackのinstall/update hookを処理し、旧ショートカットと旧PerUser版から署名済みPerMachine版への移行を試みる。
-3. デバッガ未接続の非管理者プロセスを`runas`で再起動する。昇格後に単一起動mutexを取得する。管理者起動では、信頼済みインストールから現在利用者の既存クリーンアップタスクだけを現行定義へ修復する。未登録なら新規作成せず、修復失敗はログへ残して画面起動を続ける。
+3. デバッガ未接続の非管理者プロセスを`runas`で再起動する。昇格後に単一起動mutexを取得する。管理者起動では、共有ロックを取って旧版のサインイン時クリーンアップタスクを自己移行で取り除く。ロックを取れなければ次回へ持ち越し、失敗はログへ残して画面起動を続ける。
 4. Avaloniaを起動し、`App.ConfigureServices`が設定、コマンド実行、カタログ、操作コーディネーター、ViewModelをSingletonとして構成する。
 5. `SettingsService`から表示言語と利用者設定を読み、`MainWindowViewModel`へカテゴリ別ViewModelを組み立てる。
 
@@ -16,7 +16,11 @@
 
 ## メンテナンス操作のモデル
 
-`MaintenanceActionCatalog` の Action / BatchSetting / Toggle / Choice を、ViewModel が排他 lease 内で実行し、結果と実状態を画面へ返す。4 型の契約、既定値・カスタム状態の表示、データの流れは [section-02.md](section-02.md) にまとめる。
+`MaintenanceActionCatalog` の Action / BatchSetting / Toggle / Choice を、ViewModel が排他 lease 内で実行し、結果と実状態を画面へ返す。4 型の契約、既定値・カスタム状態の表示、データの流れは [maintenance-action-model.md](maintenance-action-model.md) にまとめる。
+
+## クリーンアップ
+
+クリーンアップは単一項目のモデルではなく、走査と実行を分けた専用フローで扱う。`CleanupScanService`が規則データを走査して項目別の件数とサイズを返し、利用者の選択後に`CleanupRunService`が、走査結果が現在のもの（世代・設定が一致）であることを確認して選ばれた規則だけを実行する。走査は何も変更しない。実行は確認（実行中の製品の終了、受信ファイル類の再確認、推奨外の警告）を経て、サービスの停止と復帰を`finally`で補償し、成功・`Partial`・`Failed`・`Skipped`・キャンセルを規則ごとに集計して実績へ反映する。高度なクリーンとスリム化も同じ「走査→選択→確認→削除→実績」で、スリム化の前には復元ポイントを作る。詳細は[cleanup-design.md](cleanup-design.md)を参照する。
 
 ## 未接続デバイス管理
 
@@ -40,4 +44,4 @@
 
 ## 使用中キャッシュの起動時再試行
 
-固定 5 対象の削除予約を利用者別の保護キューへ保存し、専用コンソールが現在利用者の権限で次回起動時に再試行する（最大 3 実行・7 日）。対象の再構成、タスクの検証、期限と権限の境界は [section-03.md](section-03.md) にまとめる。
+固定 5 対象の削除予約を利用者別の保護キューへ保存し、専用コンソールが現在利用者の権限で次回起動時に再試行する（最大 3 実行・7 日）。対象の再構成、タスクの検証、期限と権限の境界は [reboot-cache-retry.md](reboot-cache-retry.md) にまとめる。

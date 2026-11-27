@@ -4,6 +4,9 @@ using Lumin4ti.Core.Services.Windows;
 using Lumin4ti.Core.Services.Windows.Actions;
 using System.Security.AccessControl;
 using System.Security.Principal;
+using CleanupExclusionMatcher = Lumin4ti.Core.Services.Windows.Cleanup.CleanupExclusionMatcher;
+using CleanupScanOptions = Lumin4ti.Core.Services.Windows.Cleanup.CleanupScanOptions;
+using FileCleanupScanner = Lumin4ti.Core.Services.Windows.Cleanup.FileCleanupScanner;
 
 namespace Lumin4ti.Tests;
 
@@ -715,36 +718,6 @@ public sealed class FileCleanupTests
     }
 
     [TestMethod]
-    public void 列挙用ガードの保持中は祖先をジャンクションへ差し替えられない()
-    {
-        var browserRoot = Path.Combine(_root, "browser-swap");
-        var userData = Path.Combine(browserRoot, "User Data");
-        var movedRoot = Path.Combine(_root, "browser-moved");
-        var external = Path.Combine(_root, "external-browser", "User Data", "External Profile");
-        var profile = Path.Combine(userData, "Default");
-        Directory.CreateDirectory(profile);
-        Directory.CreateDirectory(external);
-
-        using (var targets = FileCleanupGroups.EnumerateBrowserTargets([browserRoot]).GetEnumerator())
-        {
-            Assert.IsTrue(targets.MoveNext());
-            Assert.ThrowsExactly<IOException>(() => Directory.Move(browserRoot, movedRoot));
-            while (!targets.Current.RawPath.StartsWith(profile + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
-            {
-                Assert.IsTrue(targets.MoveNext(), "通常のプロファイルを列挙する必要があります");
-            }
-
-            Assert.ThrowsExactly<IOException>(() => Directory.Move(userData, Path.Combine(browserRoot, "User Data moved")));
-            Assert.ThrowsExactly<IOException>(() => Directory.Move(profile, Path.Combine(userData, "Default moved")));
-        }
-
-        Directory.Move(browserRoot, movedRoot);
-        CreateJunction(browserRoot, Path.GetDirectoryName(Path.GetDirectoryName(external)!)!);
-        Assert.HasCount(0, FileCleanupGroups.EnumerateBrowserTargets([browserRoot]).ToArray(),
-            "保持解除後に差し替えられた祖先リンクも次の列挙で拒否する");
-    }
-
-    [TestMethod]
     public async Task 実行時の対象列挙は呼出しスレッドで行わない()
     {
         var callerThread = 0;
@@ -797,23 +770,6 @@ public sealed class FileCleanupTests
         });
 
         Assert.AreEqual(MaintenanceActionStatus.Canceled, (await action.ExecuteAsync(cancellation.Token)).Status);
-    }
-
-    [TestMethod]
-    public void ブラウザ列挙はリンクになっているプロファイルを対象に含めない()
-    {
-        var browserRoot = Path.Combine(_root, "browser");
-        var userData = Path.Combine(browserRoot, "User Data");
-        var externalProfile = Path.Combine(_root, "external-profile");
-        Directory.CreateDirectory(userData);
-        Directory.CreateDirectory(externalProfile);
-        CreateJunction(Path.Combine(userData, "Profile 1"), externalProfile);
-
-        var targets = FileCleanupGroups.EnumerateBrowserTargets([browserRoot]).ToArray();
-
-        Assert.IsFalse(
-            targets.Any(target => target.RawPath.Contains("Profile 1", StringComparison.OrdinalIgnoreCase)),
-            "リンク先プロファイルのキャッシュを対象へ展開しない");
     }
 
     [TestMethod]
@@ -934,13 +890,7 @@ public sealed class FileCleanupTests
 
     private static IEnumerable<CleanupTarget> AllStaticTargets() =>
     [
-        .. FileCleanupGroups.UserTempTargets,
-        .. FileCleanupGroups.SystemTempTargets,
-        .. FileCleanupGroups.SystemEtlRoots.Select(root => CleanupTarget.Files(root, "*.etl")),
-        .. FileCleanupGroups.AppCacheTargets,
-        .. FileCleanupGroups.PackageCacheTargets,
         .. FileCleanupGroups.ShellCacheTargets,
-        .. FileCleanupGroups.WindowsUpdateCacheTargets,
         .. FileCleanupGroups.OsIndexTargets,
     ];
 
@@ -974,7 +924,7 @@ public sealed class FileCleanupTests
             if (target.Kind == CleanupTargetKind.Files)
             {
                 CollectionAssert.Contains(
-                    new[] { "*.etl", "IconCache.db", "FNTCACHE.DAT" },
+                    new[] { "IconCache.db", "FNTCACHE.DAT" },
                     target.Pattern!,
                     "ファイル名指定は既知のキャッシュまたはログファイルだけに限定します");
             }
@@ -986,29 +936,6 @@ public sealed class FileCleanupTests
                     $"永続データまたは広すぎる対象を検出しました: {target.RawPath}");
             }
         }
-    }
-
-    [TestMethod]
-    public void npmのnpx実行環境は削除対象に含めない()
-    {
-        var npmTargets = FileCleanupGroups.PackageCacheTargets
-            .Where(target => FileCleanupGroups.GetPackageCacheGroupName(target) == "npm")
-            .Select(target => target.RawPath)
-            .ToArray();
-
-        CollectionAssert.AreEquivalent(
-            new[]
-            {
-                @"%LOCALAPPDATA%\npm-cache\_cacache",
-                @"%LOCALAPPDATA%\npm-cache\_logs",
-                @"%USERPROFILE%\.npm\_cacache",
-                @"%USERPROFILE%\.npm\_logs",
-            },
-            npmTargets);
-        Assert.IsFalse(
-            FileCleanupGroups.PackageCacheTargets.Any(target =>
-                target.RawPath.Contains(@"\_npx", StringComparison.OrdinalIgnoreCase)),
-            "npx の展開済み実行環境を削除対象へ戻さないでください");
     }
 
     [TestMethod]
@@ -1028,109 +955,6 @@ public sealed class FileCleanupTests
         var paths = AllStaticTargets().Select(t => $"{t.RawPath}|{t.Pattern}").ToList();
 
         CollectionAssert.AllItemsAreUnique(paths);
-    }
-
-    [TestMethod]
-    public void ETL列挙は指定した基点配下だけを対象にしてリンクを辿らない()
-    {
-        var root = Path.Combine(_root, "etl-root");
-        var child = Path.Combine(root, "child");
-        var external = Path.Combine(_root, "external");
-        Directory.CreateDirectory(child);
-        Directory.CreateDirectory(external);
-        var rootEtl = CreateFile(@"etl-root\root.etl");
-        var childEtl = CreateFile(@"etl-root\child\child.etl");
-        var keepLog = CreateFile(@"etl-root\child\keep.log");
-        var keepEtl1 = CreateFile(@"etl-root\child\trace.etl1");
-        var keepEtlBackup = CreateFile(@"etl-root\child\trace.etlbackup");
-        var linkedEtl = CreateFile(@"external\linked.etl");
-        CreateJunction(Path.Combine(root, "linked"), external);
-
-        var targets = FileCleanupGroups.EnumerateKnownTreeEtlTargets(root).ToArray();
-
-        CollectionAssert.AreEquivalent(
-            new[] { root, child },
-            targets.Select(target => target.RawPath).ToArray());
-        Assert.IsTrue(targets.All(target => target.Kind == CleanupTargetKind.Files));
-        Assert.IsTrue(targets.All(target => target.Pattern == "*.etl"));
-
-        var outcome = FileCleanupEngine.Run(
-            targets,
-            scheduleBlockedForReboot: false,
-            progress: null,
-            ct: CancellationToken.None);
-
-        Assert.AreEqual(2, outcome.DeletedFiles);
-        Assert.IsFalse(File.Exists(rootEtl));
-        Assert.IsFalse(File.Exists(childEtl));
-        Assert.IsTrue(File.Exists(keepLog), "ETL 以外のログはこの選択では残す");
-        Assert.IsTrue(File.Exists(keepEtl1), ".etl1 は .etl として削除しない");
-        Assert.IsTrue(File.Exists(keepEtlBackup), ".etlbackup は .etl として削除しない");
-        Assert.IsTrue(File.Exists(linkedEtl), "リンク先の ETL は削除しない");
-    }
-
-    [TestMethod]
-    public async Task 実ETLツリーの列挙途中で取消したら残りを走査せず削除しない()
-    {
-        var root = Path.Combine(_root, "etl-cancel");
-        for (var index = 0; index < 16; index++)
-        {
-            CreateFile($@"etl-cancel\branch-{index}\leaf\trace.etl");
-        }
-
-        using var cancellation = new CancellationTokenSource();
-        var observed = 0;
-        IEnumerable<CleanupTarget> EnumerateTargets()
-        {
-            foreach (var target in FileCleanupGroups.EnumerateKnownTreeEtlTargets(root))
-            {
-                observed++;
-                if (observed == 2)
-                {
-                    // 最初の子を返した時点で実走査中のハンドルが保持されている。
-                    // 全ツリーを先にリスト化してから返す実装では、この検査は成立しない。
-                    Assert.ThrowsExactly<IOException>(() => Directory.Move(target.RawPath, target.RawPath + "-moved"));
-                    cancellation.Cancel();
-                }
-
-                yield return target;
-            }
-        }
-
-        var action = new FileCleanupAction("test-etl-cancel", "test", "test", EnumerateTargets);
-
-        Assert.AreEqual(MaintenanceActionStatus.Canceled, (await action.ExecuteAsync(cancellation.Token)).Status);
-
-        Assert.AreEqual(2, observed, "取消後は次の ETL ディレクトリ走査へ進まない");
-        Assert.HasCount(16, Directory.GetFiles(root, "*.etl", SearchOption.AllDirectories),
-            "対象確定前の取消では ETL ファイルを削除しない");
-        var movedRoot = Path.Combine(_root, "etl-cancel-moved");
-        Directory.Move(root, movedRoot);
-        Assert.IsTrue(Directory.Exists(movedRoot), "取消による列挙終了で走査用ハンドルを解放する");
-    }
-
-    [TestMethod]
-    public void ETL削除は既知のWindowsログ基点とetlパターンだけを使う()
-    {
-        CollectionAssert.AreEquivalent(
-            new[]
-            {
-                @"%SystemRoot%\Logs",
-                @"%SystemRoot%\System32\LogFiles",
-                @"%SystemRoot%\Panther",
-                @"%ProgramData%\Microsoft\Diagnosis\ETLLogs",
-            },
-            FileCleanupGroups.SystemEtlRoots);
-
-        var etlTargets = FileCleanupGroups.EnumerateSystemTempTargets()
-            .Where(target => string.Equals(target.Pattern, "*.etl", StringComparison.OrdinalIgnoreCase))
-            .ToArray();
-
-        Assert.AreEqual(
-            FileCleanupGroups.SystemEtlRoots.Length,
-            etlTargets.Count(target => target.RawPath.Contains('%')),
-            "各基点を未展開パスのまま 1 件ずつ保持します");
-        Assert.IsTrue(etlTargets.All(target => target.Kind == CleanupTargetKind.Files));
     }
 
     [TestMethod]
@@ -1155,39 +979,238 @@ public sealed class FileCleanupTests
         }
     }
 
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
+    [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
+    private static extern bool CreateHardLinkW(string newFile, string existingFile, nint security);
+
     [TestMethod]
-    public void AMDのキャッシュ削除はシェーダーキャッシュのサブフォルダに限定する()
+    public void 列挙はファイルを開かずにサイズと各時刻を返す()
     {
-        // %LOCALAPPDATA%\AMD 全体を消すと設定・プロファイルまで巻き添えにするため、
-        // 既知のシェーダーキャッシュのサブフォルダだけを対象にする (回帰防止)。
-        Assert.IsFalse(
-            FileCleanupGroups.AppCacheTargets.Any(t =>
-                t.RawPath.Equals(@"%LOCALAPPDATA%\AMD", StringComparison.OrdinalIgnoreCase)));
-        Assert.IsTrue(
-            FileCleanupGroups.AppCacheTargets.Any(t =>
-                t.RawPath.Equals(@"%LOCALAPPDATA%\AMD\DxCache", StringComparison.OrdinalIgnoreCase)));
+        var file = CreateFile(@"detail\a.bin", "12345678");
+        File.SetLastWriteTimeUtc(file, new DateTime(2020, 1, 2, 3, 4, 5, DateTimeKind.Utc));
+        var info = new FileInfo(file);
+
+        using var directory = NativeCleanupEntry.Open(Path.GetDirectoryName(file)!, true);
+        var entry = directory.EnumerateDetailed().Single();
+
+        Assert.AreEqual("a.bin", entry.Name);
+        Assert.AreEqual(8, entry.Size);
+        Assert.AreEqual(info.CreationTimeUtc.ToFileTimeUtc(), entry.CreationTime);
+        Assert.AreEqual(info.LastWriteTimeUtc.ToFileTimeUtc(), entry.LastWriteTime);
+        Assert.AreEqual(info.LastAccessTimeUtc.ToFileTimeUtc(), entry.LastAccessTime);
     }
 
     [TestMethod]
-    public void ブラウザキャッシュの対象はサイトデータ相当を含まない()
+    public void 除外はRetainedに数え親フォルダーの削除失敗をBlockedにしない()
     {
-        // IndexedDB / WebStorage / File System / Extension State はログイン状態等を保持する
-        // サイトデータであり、「ログイン状態は消えません」という説明と矛盾するため対象外にする (回帰防止)。
-        string[] forbiddenLeafNames = ["IndexedDB", "WebStorage", "File System", "Extension State"];
+        var keep = CreateFile(@"ex\keep.dat");
+        var keepInner = CreateFile(@"ex\sub\keep2.dat");
+        CreateFile(@"ex\drop.dat");
+        CreateFile(@"ex\sub\drop2.dat");
+        CreateFile(@"ex\Skip\inner.dat");
+        var options = new CleanupRunOptions(new CleanupExclusionMatcher([keep, keepInner], [Path.Combine(_root, @"ex\Skip")], null));
 
-        foreach (var target in FileCleanupGroups.EnumerateBrowserTargets())
+        var outcome = FileCleanupEngine.Run([CleanupTarget.Contents(Path.Combine(_root, "ex"))], false, null, CancellationToken.None, options);
+
+        Assert.AreEqual(2, outcome.DeletedFiles);
+        Assert.AreEqual(3, outcome.Retained, "keep.dat・keep2.dat・Skip フォルダー");
+        Assert.AreEqual(0, outcome.Blocked, string.Join("; ", outcome.BlockedExamples));
+        Assert.IsEmpty(outcome.RejectedTargets);
+        Assert.IsTrue(File.Exists(keep) && File.Exists(keepInner));
+        Assert.IsTrue(File.Exists(Path.Combine(_root, @"ex\Skip\inner.dat")));
+        Assert.IsFalse(File.Exists(Path.Combine(_root, @"ex\drop.dat")));
+        Assert.IsTrue(FileCleanupEngine.DescribeOutcome(outcome).Any(line => line.Contains("3 個の項目を残しました")));
+    }
+
+    [TestMethod]
+    public void 基点フォルダー自体の除外は何も消さずRetainedに数える()
+    {
+        var file = CreateFile(@"base\a.dat");
+        var options = new CleanupRunOptions(new CleanupExclusionMatcher(null, [Path.Combine(_root, "base")], null));
+
+        var outcome = FileCleanupEngine.Run([CleanupTarget.Contents(Path.Combine(_root, "base"))], false, null, CancellationToken.None, options);
+
+        Assert.AreEqual(1, outcome.Retained);
+        Assert.AreEqual(0, outcome.DeletedFiles);
+        Assert.IsTrue(File.Exists(file));
+    }
+
+    [TestMethod]
+    public void 走査後に作られたファイルとフォルダーは削除せず残す()
+    {
+        CreateFile(@"late\old1.dat");
+        CreateFile(@"late\sub\old2.dat");
+        var path = Path.Combine(_root, "late");
+        // 走査直前 50 ms 以内に作ったものは走査後扱いで残るため、既存ファイルを十分古くする。
+        Thread.Sleep(150);
+        var scan = FileCleanupScanner.Scan(CleanupTarget.Contents(path), null, CancellationToken.None);
+        Thread.Sleep(30);
+        var newFile = CreateFile(@"late\new.dat");
+        var newInner = CreateFile(@"late\newdir\inner.dat");
+
+        var outcome = FileCleanupEngine.Run([CleanupTarget.Contents(path)], false, null, CancellationToken.None,
+            new CleanupRunOptions(CreatedBefore: scan.CreatedBefore));
+
+        Assert.AreEqual(2, scan.Files);
+        Assert.AreEqual(2, outcome.DeletedFiles);
+        Assert.AreEqual(2, outcome.Retained, "新しいファイルと新しいフォルダー");
+        Assert.AreEqual(0, outcome.Blocked, string.Join("; ", outcome.BlockedExamples));
+        Assert.IsTrue(File.Exists(newFile) && File.Exists(newInner));
+        Assert.IsFalse(File.Exists(Path.Combine(path, "old1.dat")));
+        Assert.IsFalse(Directory.Exists(Path.Combine(path, "sub")));
+    }
+
+    [TestMethod]
+    public void 絞り込み削除は古いファイルだけ消し空になったフォルダーだけ片付ける()
+    {
+        var old = CreateFile(@"age\sub\old.tmp");
+        var mixed = CreateFile(@"age\mixed\old2.tmp");
+        var fresh = CreateFile(@"age\mixed\fresh.tmp");
+        var freshTop = CreateFile(@"age\fresh2.tmp");
+        File.SetLastWriteTimeUtc(old, DateTime.UtcNow.AddDays(-40));
+        File.SetLastWriteTimeUtc(mixed, DateTime.UtcNow.AddDays(-40));
+
+        var outcome = FileCleanupEngine.Run(
+            [CleanupTarget.Files(Path.Combine(_root, "age"), "*.tmp", recurse: true, removeEmptyDirs: true, olderThanDays: 30)],
+            false, null, CancellationToken.None);
+
+        Assert.AreEqual(2, outcome.DeletedFiles);
+        Assert.AreEqual(1, outcome.DeletedDirectories, "空になった sub だけ消える");
+        Assert.AreEqual(0, outcome.Blocked, string.Join("; ", outcome.BlockedExamples));
+        Assert.IsTrue(File.Exists(fresh) && File.Exists(freshTop));
+        Assert.IsTrue(Directory.Exists(Path.GetDirectoryName(fresh)!));
+        Assert.IsFalse(Directory.Exists(Path.GetDirectoryName(old)!));
+    }
+
+    [TestMethod]
+    public void 走査時と同一の実体だけを削除し差替え更新された実体は残す()
+    {
+        var same = CreateFile(@"id\same.dat", "AAAA");
+        var appended = CreateFile(@"id\appended.dat", "BBBB");
+        var replaced = CreateFile(@"id\replaced.dat", "CCCC");
+        var touched = CreateFile(@"id\touched.dat", "DDDD");
+        var path = Path.Combine(_root, "id");
+        var scan = FileCleanupScanner.Scan(CleanupTarget.Contents(path), new CleanupScanOptions(CollectIdentities: true), CancellationToken.None);
+        var replacedTime = File.GetLastWriteTimeUtc(replaced);
+        File.AppendAllText(appended, "more");
+        File.Delete(replaced);
+        File.WriteAllText(replaced, "CCCC");
+        File.SetLastWriteTimeUtc(replaced, replacedTime);
+        File.SetLastWriteTimeUtc(touched, File.GetLastWriteTimeUtc(touched).AddMinutes(5));
+
+        var outcome = FileCleanupEngine.DeleteVerified(scan.Identities, null, CancellationToken.None);
+
+        Assert.HasCount(4, scan.Identities);
+        Assert.AreEqual(1, outcome.DeletedFiles);
+        Assert.AreEqual(3, outcome.Retained, "サイズ変更・実体差替え・更新時刻変更");
+        Assert.AreEqual(0, outcome.Blocked);
+        Assert.IsFalse(File.Exists(same));
+        Assert.AreEqual("CCCC", File.ReadAllText(replaced));
+        Assert.AreEqual("BBBBmore", File.ReadAllText(appended));
+        Assert.IsTrue(File.Exists(touched));
+    }
+
+    [TestMethod]
+    public void 同一性照合の削除は走査後に祖先がjunctionへ差し替わってもリンク先を消さない()
+    {
+        var inner = CreateFile(@"vs\sub\f.dat", "data");
+        var outside = CreateFile(@"vs-outside\f.dat", "data");
+        var scan = FileCleanupScanner.Scan(CleanupTarget.Contents(Path.Combine(_root, "vs")), new CleanupScanOptions(CollectIdentities: true), CancellationToken.None);
+        var sub = Path.GetDirectoryName(inner)!;
+        File.Delete(inner);
+        Directory.Delete(sub);
+        CreateJunction(sub, Path.GetDirectoryName(outside)!);
+
+        var outcome = FileCleanupEngine.DeleteVerified(scan.Identities, null, CancellationToken.None);
+
+        Assert.AreEqual(0, outcome.DeletedFiles);
+        Assert.AreEqual(1, outcome.Blocked + outcome.Retained);
+        Assert.AreEqual("data", File.ReadAllText(outside));
+        Directory.Delete(sub);
+    }
+
+    [TestMethod]
+    public void 上書き削除はハードリンクと読取専用を上書きせず通常ファイルだけ上書きする()
+    {
+        var linked = CreateFile(@"wipe\linked.dat", "ABCDEF");
+        var other = Path.Combine(_root, @"wipe-other\link.dat");
+        Directory.CreateDirectory(Path.GetDirectoryName(other)!);
+        Assert.IsTrue(CreateHardLinkW(other, linked, 0), $"ハードリンクを作れません: {System.Runtime.InteropServices.Marshal.GetLastWin32Error()}");
+        CreateFile(@"wipe\plain.dat", "plain data");
+        var readOnly = CreateFile(@"wipe\readonly.dat", "locked");
+        File.SetAttributes(readOnly, FileAttributes.ReadOnly);
+        CreateFile(@"wipe\empty.dat", string.Empty);
+
+        var outcome = FileCleanupEngine.Run([CleanupTarget.Contents(Path.Combine(_root, "wipe"))], false, null, CancellationToken.None,
+            new CleanupRunOptions(Wipe: true));
+
+        Assert.AreEqual(4, outcome.DeletedFiles);
+        Assert.AreEqual(1, outcome.WipedFiles, "上書きできるのは plain.dat だけ");
+        Assert.AreEqual(2, outcome.WipeSkipped, "リンク数 2 と読取専用は削除だけ。空ファイルは数えない");
+        Assert.AreEqual(0, outcome.Blocked, string.Join("; ", outcome.BlockedExamples));
+        Assert.IsFalse(File.Exists(linked));
+        Assert.AreEqual("ABCDEF", File.ReadAllText(other), "他のリンク名の内容は壊さない");
+    }
+
+    [TestMethod]
+    public void 上書きは開いた書込みhandleの全バイトを0にして取消では途中で止まる()
+    {
+        var file = Path.Combine(_root, @"zero\big.bin");
+        Directory.CreateDirectory(Path.GetDirectoryName(file)!);
+        File.WriteAllBytes(file, Enumerable.Repeat((byte)0xAB, (1 << 20) + 123).ToArray());
+
+        using (var readOnly = NativeCleanupEntry.Open(file, false))
+            Assert.ThrowsExactly<InvalidOperationException>(() => readOnly.OverwriteWithZeros(10, CancellationToken.None));
+        using (var cancelled = new CancellationTokenSource())
+        using (var entry = NativeCleanupEntry.Open(file, false, write: true))
         {
-            var leaf = Path.GetFileName(target.RawPath);
-            Assert.IsFalse(
-                forbiddenLeafNames.Contains(leaf, StringComparer.OrdinalIgnoreCase),
-                target.RawPath);
+            cancelled.Cancel();
+            Assert.IsFalse(entry.OverwriteWithZeros(entry.Length, cancelled.Token));
         }
+        Assert.IsTrue(File.ReadAllBytes(file).All(value => value == 0xAB), "取消済みなら 1 バイトも書かない");
+        using (var entry = NativeCleanupEntry.Open(file, false, write: true))
+            Assert.IsTrue(entry.OverwriteWithZeros(entry.Length, CancellationToken.None));
+        Assert.AreEqual((1 << 20) + 123, new FileInfo(file).Length);
+        Assert.IsTrue(File.ReadAllBytes(file).All(value => value == 0));
+    }
 
-        CollectionAssert.DoesNotContain(FileCleanupGroups.BrowserProfileCaches, "Service Worker");
-        CollectionAssert.Contains(FileCleanupGroups.BrowserProfileCaches, @"Service Worker\CacheStorage");
-        CollectionAssert.Contains(FileCleanupGroups.BrowserProfileCaches, @"Service Worker\ScriptCache");
-        CollectionAssert.DoesNotContain(FileCleanupGroups.BrowserProfileCaches, "screen_ai");
-        CollectionAssert.DoesNotContain(FileCleanupGroups.BrowserSharedCaches, @"User Data\WidevineCdm");
+    [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public void オプション付きの実行でも対象自体をjunction化してもリンク先を保持する(bool files)
+    {
+        var target = Path.Combine(_root, "opt-inplace");
+        Directory.CreateDirectory(target);
+        var outside = CreateFile(@"opt-outside\canary.etl", "external data");
+        var progress = new SynchronousProgress(_ => CreateJunctionInPlace(target, Path.GetDirectoryName(outside)!));
+        var options = new CleanupRunOptions(new CleanupExclusionMatcher(null, null, [".bak"]), DateTime.UtcNow, Wipe: true);
+
+        var outcome = FileCleanupEngine.Run(
+            [files ? CleanupTarget.Files(target, "*.etl", recurse: true) : CleanupTarget.Contents(target)], false, progress, CancellationToken.None, options);
+
+        Assert.AreEqual(0, outcome.DeletedFiles);
+        Assert.AreEqual(0, outcome.WipedFiles);
+        Assert.IsTrue(outcome.Blocked > 0 || outcome.RejectedTargets.Count > 0);
+        Assert.AreEqual("external data", File.ReadAllText(outside));
+        Assert.IsTrue((File.GetAttributes(target) & FileAttributes.ReparsePoint) != 0, "リンク自身も保持する");
+    }
+
+    [TestMethod]
+    public void リンクを含む対象はオプション付きでもリンクとリンク先を保持する()
+    {
+        CreateFile(@"lk\real.dat");
+        var outside = CreateFile(@"lk-outside\secret.dat", "secret");
+        var junction = Path.Combine(_root, "lk", "junction");
+        CreateJunction(junction, Path.GetDirectoryName(outside)!);
+
+        var outcome = FileCleanupEngine.Run([CleanupTarget.Contents(Path.Combine(_root, "lk"))], false, null, CancellationToken.None,
+            new CleanupRunOptions(Wipe: true));
+
+        Assert.AreEqual(1, outcome.DeletedFiles);
+        Assert.HasCount(1, outcome.RejectedTargets);
+        Assert.AreEqual("secret", File.ReadAllText(outside));
+        Assert.IsTrue(Directory.Exists(junction));
+        Directory.Delete(junction);
     }
 
 }

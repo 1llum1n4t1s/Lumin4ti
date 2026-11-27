@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.tencent-meeting-logs",
+      "name": "Tencent Meeting",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Tencent\\WeMeet" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Tencent\\WeMeet\\Global\\Logs", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\Tencent\\WeMeet\\Logs", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["wemeetapp"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://cloud.tencent.com/document/product/1095/54153", "checked": "2026-11-26" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,591 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "windows.user-temp",
+      "name": "User temporary files",
+      "nameKey": "Text.Cleanup.Rule.windows.user-temp",
+      "kind": "temp",
+      "category": "windows",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Temp" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Temp" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": ["cleanup-user-temp|Windows Temp"],
+      "evidence": [
+        { "tier": "B", "url": "https://www.windowsdigitals.com/temp-folder-keeps-filling-up-windows-11/", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://techdows.com/where-is-the-temp-folder-in-windows-11-and-how-to-access-it.html", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.system-temp",
+      "name": "System temporary files",
+      "nameKey": "Text.Cleanup.Rule.windows.system-temp",
+      "kind": "temp",
+      "category": "windows",
+      "scope": "machine",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%SystemRoot%\\Temp" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%SystemRoot%\\Temp" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": ["cleanup-system-temp|Windows Temp"],
+      "evidence": [
+        { "tier": "B", "url": "https://www.windowsdigitals.com/temp-folder-keeps-filling-up-windows-11/", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://techdows.com/where-is-the-temp-folder-in-windows-11-and-how-to-access-it.html", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.crash-dumps",
+      "name": "User-mode crash dumps",
+      "nameKey": "Text.Cleanup.Rule.windows.crash-dumps",
+      "kind": "dump",
+      "category": "windows",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\CrashDumps" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\CrashDumps" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": ["cleanup-user-temp|CrashDumps"],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/win32/wer/collecting-user-mode-dumps", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.memory-dumps",
+      "name": "System memory dumps",
+      "nameKey": "Text.Cleanup.Rule.windows.memory-dumps",
+      "kind": "dump",
+      "category": "windows",
+      "scope": "machine",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%SystemRoot%\\Minidump" },
+        { "path": "%SystemRoot%\\LiveKernelReports" },
+        { "path": "%SystemRoot%\\MEMORY.DMP" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%SystemRoot%", "pattern": "MEMORY.DMP" },
+        { "type": "contents", "path": "%SystemRoot%\\Minidump" },
+        { "type": "contents", "path": "%SystemRoot%\\LiveKernelReports" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-server/performance/memory-dump-file-options", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/win32/wer/wer-settings", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.error-reports",
+      "name": "Windows Error Reporting reports",
+      "nameKey": "Text.Cleanup.Rule.windows.error-reports",
+      "kind": "report",
+      "category": "windows",
+      "scope": "machine",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%ProgramData%\\Microsoft\\Windows\\WER\\ReportQueue" },
+        { "path": "%ProgramData%\\Microsoft\\Windows\\WER\\ReportArchive" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%ProgramData%\\Microsoft\\Windows\\WER\\ReportQueue" },
+        { "type": "contents", "path": "%ProgramData%\\Microsoft\\Windows\\WER\\ReportArchive" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows-server/failover-clustering/troubleshooting-using-wer-reports", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.user-error-reports",
+      "name": "Windows Error Reporting reports (current user)",
+      "nameKey": "Text.Cleanup.Rule.windows.user-error-reports",
+      "kind": "report",
+      "category": "windows",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Microsoft\\Windows\\WER\\ReportQueue" },
+        { "path": "%LOCALAPPDATA%\\Microsoft\\Windows\\WER\\ReportArchive" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Windows\\WER\\ReportQueue" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Windows\\WER\\ReportArchive" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "B", "url": "https://winreg-kb.readthedocs.io/en/latest/sources/system-keys/Windows-error-reporting.html", "checked": "2026-11-27" },
+        { "tier": "B", "url": "https://psmths.gitbook.io/windows-forensics/artifacts-by-type/filesystem-artifacts/wer-files", "checked": "2026-11-27" }
+      ]
+    },
+    {
+      "id": "windows.update-logs",
+      "name": "Windows Update orchestrator logs",
+      "nameKey": "Text.Cleanup.Rule.windows.update-logs",
+      "kind": "log",
+      "category": "windows",
+      "scope": "machine",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%ProgramData%\\USOShared\\Logs" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%ProgramData%\\USOShared\\Logs" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": ["cleanup-system-temp|Windows Update Logs"],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/deployment/update/windows-update-logs", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.etl-trace-logs",
+      "name": "ETL trace logs",
+      "nameKey": "Text.Cleanup.Rule.windows.etl-trace-logs",
+      "kind": "log",
+      "category": "windows",
+      "scope": "machine",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%SystemRoot%\\Panther" },
+        { "path": "%SystemRoot%\\System32\\LogFiles\\WMI" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%SystemRoot%\\Panther", "pattern": "*.etl", "recurse": true },
+        { "type": "files", "path": "%SystemRoot%\\System32\\LogFiles\\WMI", "pattern": "*.etl", "recurse": true },
+        { "type": "files", "path": "%SystemRoot%\\System32\\LogFiles\\WMI", "pattern": "*.etl.*", "recurse": true }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": ["cleanup-system-temp|ETL Trace Logs"],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/windows-setup-log-files-and-event-logs", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/win32/etw/configuring-and-starting-an-autologger-session", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.defender-support-logs",
+      "name": "Microsoft Defender diagnostic logs",
+      "nameKey": "Text.Cleanup.Rule.windows.defender-support-logs",
+      "kind": "log",
+      "category": "windows",
+      "scope": "machine",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%ProgramData%\\Microsoft\\Windows Defender\\Support" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%ProgramData%\\Microsoft\\Windows Defender\\Support" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": ["cleanup-system-temp|Microsoft Defender"],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/defender-endpoint/collect-diagnostic-data", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.thumbnail-cache",
+      "name": "Thumbnail cache",
+      "nameKey": "Text.Cleanup.Rule.windows.thumbnail-cache",
+      "kind": "thumbnail",
+      "category": "windows",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Microsoft\\Windows\\Explorer" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%LOCALAPPDATA%\\Microsoft\\Windows\\Explorer", "pattern": "thumbcache_*.db" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": ["cleanup-shell-cache|Windows Explorer"],
+      "evidence": [
+        { "tier": "B", "url": "https://www.thewindowsclub.com/rebuild-icon-clear-thumbnail-cache-windows-10", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://rtech.support/guides/rebuilding-icon-cache/", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.icon-cache",
+      "name": "Icon cache",
+      "nameKey": "Text.Cleanup.Rule.windows.icon-cache",
+      "kind": "cache",
+      "category": "windows",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Microsoft\\Windows\\Explorer" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%LOCALAPPDATA%\\Microsoft\\Windows\\Explorer", "pattern": "iconcache_*.db" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": ["cleanup-shell-cache|Windows Explorer"],
+      "evidence": [
+        { "tier": "B", "url": "https://rtech.support/guides/rebuilding-icon-cache/", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://www.ninjaone.com/blog/how-to-rebuild-the-icon-cache-in-windows/", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.font-cache",
+      "name": "Windows font cache",
+      "nameKey": "Text.Cleanup.Rule.windows.font-cache",
+      "kind": "cache",
+      "category": "windows",
+      "scope": "machine",
+      "recommended": false,
+      "impact": "rebuild",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%SystemRoot%\\ServiceProfiles\\LocalService\\AppData\\Local\\FontCache" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%SystemRoot%\\ServiceProfiles\\LocalService\\AppData\\Local\\FontCache" },
+        { "type": "files", "path": "%SystemRoot%\\System32", "pattern": "FNTCACHE.DAT" }
+      ],
+      "processes": [],
+      "services": ["FontCache", "FontCache3.0.0.0"],
+      "legacy": ["cleanup-shell-cache|Windows Font Cache"],
+      "evidence": [
+        { "tier": "B", "url": "https://winaero.com/rebuild-font-cache-windows-10/", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://www.thewindowsclub.com/rebuild-font-cache-in-windows", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://www.tenforums.com/tutorials/54452-rebuild-font-cache-windows-10-a.html", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.remote-desktop-cache",
+      "name": "Remote Desktop bitmap cache",
+      "nameKey": "Text.Cleanup.Rule.windows.remote-desktop-cache",
+      "kind": "cache",
+      "category": "windows",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Microsoft\\Terminal Server Client\\Cache" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Terminal Server Client\\Cache" }
+      ],
+      "processes": ["mstsc"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "B", "url": "https://thedfirjournal.com/posts/rdp-bitmap-cache/", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://www.moxfive.com/blog/cache-me-if-you-can-through-the-hackers-eyes", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.directx-shader-cache",
+      "name": "DirectX shader cache",
+      "nameKey": "Text.Cleanup.Rule.windows.directx-shader-cache",
+      "kind": "shader",
+      "category": "windows",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\D3DSCache" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\D3DSCache" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": ["cleanup-user-temp|Direct3D Shader Cache"],
+      "evidence": [
+        { "tier": "B", "url": "https://commandlinux.com/windows/d3dscache/", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://pigtou.com/finding-and-clearing-directx-shader-cache/", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.prefetch",
+      "name": "Old Prefetch data",
+      "nameKey": "Text.Cleanup.Rule.windows.prefetch",
+      "kind": "cache",
+      "category": "windows",
+      "scope": "machine",
+      "recommended": false,
+      "impact": "rebuild",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%SystemRoot%\\Prefetch" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%SystemRoot%\\Prefetch", "pattern": "*.pf", "olderThanDays": 30 }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "B", "url": "https://isc.sans.edu/diary/29168", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://sethenoka.com/prefetch-execution-evidence-and-its-limits/", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.recycle-bin",
+      "name": "Recycle Bin",
+      "nameKey": "Text.Cleanup.Rule.windows.recycle-bin",
+      "kind": "other",
+      "category": "windows",
+      "scope": "user",
+      "recommended": false,
+      "impact": "userFiles",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%USERPROFILE%" }
+      ],
+      "targets": [
+        { "type": "handler", "handler": "recycleBin" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shemptyrecyclebina", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.dns-cache",
+      "name": "DNS resolver cache",
+      "nameKey": "Text.Cleanup.Rule.windows.dns-cache",
+      "kind": "cache",
+      "category": "windows",
+      "scope": "machine",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%SystemRoot%\\System32" }
+      ],
+      "targets": [
+        { "type": "handler", "handler": "dnsCache" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/ipconfig", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.network-usage",
+      "name": "Network usage history",
+      "nameKey": "Text.Cleanup.Rule.windows.network-usage",
+      "kind": "other",
+      "category": "windows",
+      "scope": "machine",
+      "recommended": false,
+      "impact": "trace",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%SystemRoot%\\System32\\sru" }
+      ],
+      "targets": [
+        { "type": "handler", "handler": "networkUsage" }
+      ],
+      "processes": [],
+      "services": ["DPS"],
+      "legacy": [],
+      "evidence": [
+        { "tier": "B", "url": "https://www.magnetforensics.com/blog/srum-forensic-analysis-of-windows-system-resource-utilization-monitor/", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://www.forensafe.com/blogs/srudb.html", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.invalid-shortcuts",
+      "name": "Invalid shortcuts and Start menu entries",
+      "nameKey": "Text.Cleanup.Rule.windows.invalid-shortcuts",
+      "kind": "other",
+      "category": "windows",
+      "scope": "user",
+      "recommended": false,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs" }
+      ],
+      "targets": [
+        { "type": "handler", "handler": "invalidShortcut" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-shllink/16cb4ca1-9339-4d0c-a68d-bf1d6cc0f943", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.invalid-scheduled-tasks",
+      "name": "Invalid scheduled tasks",
+      "nameKey": "Text.Cleanup.Rule.windows.invalid-scheduled-tasks",
+      "kind": "other",
+      "category": "windows",
+      "scope": "machine",
+      "recommended": false,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%SystemRoot%\\System32\\Tasks" }
+      ],
+      "targets": [
+        { "type": "handler", "handler": "invalidScheduledTask" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/win32/taskschd/execaction", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.internet-cache",
+      "name": "Internet cache (WinINet)",
+      "nameKey": "Text.Cleanup.Rule.windows.internet-cache",
+      "kind": "cache",
+      "category": "windows",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Microsoft\\Windows\\INetCache" },
+        { "path": "%LOCALAPPDATA%\\Microsoft\\Windows\\Temporary Internet Files" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Windows\\INetCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Windows\\Temporary Internet Files" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": ["cleanup-user-temp|Internet Cache"],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/win32/shell/knownfolderid", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/troubleshoot/developer/browsers/security-privacy/apps-access-admin-web-cache", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://www.minitool.com/news/temporary-internet-files-location-has-changed.html", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.office-addin-cache",
+      "name": "Office add-in cache",
+      "nameKey": "Text.Cleanup.Rule.windows.office-addin-cache",
+      "kind": "cache",
+      "category": "windows",
+      "scope": "user",
+      "recommended": false,
+      "impact": "rebuild",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Microsoft\\Office\\16.0\\Wef" },
+        { "path": "%LOCALAPPDATA%\\Microsoft\\Outlook\\HubAppFileCache" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Office\\16.0\\Wef" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Outlook\\HubAppFileCache" }
+      ],
+      "processes": ["excel", "winword", "powerpnt", "outlook"],
+      "services": [],
+      "legacy": ["cleanup-user-temp|Microsoft Office / Outlook"],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/office/dev/add-ins/testing/clear-cache", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "windows.cryptnet-url-cache",
+      "name": "Certificate URL cache (CryptnetUrlCache)",
+      "nameKey": "Text.Cleanup.Rule.windows.cryptnet-url-cache",
+      "kind": "cache",
+      "category": "windows",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%USERPROFILE%\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%USERPROFILE%\\AppData\\LocalLow\\Microsoft\\CryptnetUrlCache" }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": ["cleanup-user-temp|CryptnetUrlCache"],
+      "evidence": [
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/certutil", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://learn.microsoft.com/en-us/windows/win32/shell/knownfolderid", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://www.cybertriage.com/blog/dfir-breakdown-using-certutil-to-download-attack-tools/", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://unmitigatedrisk.com/?p=23", "checked": "2026-11-25" }
+      ]
+    }
+  ]
+}

@@ -90,8 +90,6 @@
   <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">Власне налаштування</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">Вивід DISM не містить стану Recall. Докладніше див. у журналі.</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">Не вдалося інтерпретувати стан Recall, повернутий DISM. Докладніше див. у журналі.</x:String>
-  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">Це завдання зареєстровано іншим користувачем Windows, тому його не можна змінити.</x:String>
-  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">Не вдалося перевірити власника зареєстрованого завдання, тому його не можна змінити.</x:String>
 
   <!-- ===== Actions: Update &amp; Security ===== -->
   <x:String x:Key="Text.Action.winget-upgrade-all.Label" xml:space="preserve">Масове оновлення встановлених застосунків (winget)</x:String>
@@ -118,24 +116,10 @@
   <x:String x:Key="Text.Action.store-cache-reset.Desc" xml:space="preserve">Скидає кеш Microsoft Store за допомогою WSReset. Стандартне рішення, коли Store не відкривається, завантаження не просуваються або повторюються помилки «повторіть спробу». Застосунки та дані облікового запису не видаляються. Після завершення застосунок Store може відкритися автоматично.</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Label" xml:space="preserve">TRIM для SSD і обʼєднання вільного простору</x:String>
   <x:String x:Key="Text.Action.ssd-trim.Desc" xml:space="preserve">Виконує сповіщення TRIM для SSD (/L) та обʼєднання вільного простору (/X) на всіх томах для підтримання продуктивності запису SSD і дефрагментації вільного місця. Залежно від структури диска це може зайняти від кількох до десятків хвилин. Під час виконання можна продовжувати користуватися ПК.</x:String>
-  <x:String x:Key="Text.Action.cleanup-user-temp.Label" xml:space="preserve">Видалити тимчасові файли та кеші користувача</x:String>
-  <x:String x:Key="Text.Action.cleanup-user-temp.Desc" xml:space="preserve">Видаляє тимчасові файли, дампи збоїв, кеші шейдерів та Інтернету, а також відновлювані кеші IME, Office і Outlook. Історія браузера, недавні файли та налаштування програм не видаляються. Файли у використанні пропускаються.</x:String>
-  <x:String x:Key="Text.Action.cleanup-system-temp.Label" xml:space="preserve">Видалити тимчасові файли та журнали системи</x:String>
-  <x:String x:Key="Text.Action.cleanup-system-temp.Desc" xml:space="preserve">Видаляє тимчасові папки Windows, журнали трасування ETL у відомих каталогах журналів Windows, журнали встановлення та служб, кеш оптимізації доставки й діагностичні журнали Microsoft Defender. Історія виявлення та усунення загроз Defender зберігається. Обробляються лише файли *.etl у Windows Logs, LogFiles, Panther і Diagnosis; увесь диск не сканується. Служба оптимізації доставки тимчасово зупиняється, а потім відновлюється. Не запускайте під час розслідування проблеми.</x:String>
-  <x:String x:Key="Text.Action.cleanup-app-cache.Label" xml:space="preserve">Видалити кеші та журнали програм</x:String>
-  <x:String x:Key="Text.Action.cleanup-app-cache.Desc" xml:space="preserve">Видаляє кеші програм і шейдерів GPU, звіти про збої та журнали інструментів. WebStorage, пакети віртуальних машин, налаштування та дані входу не видаляються.</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Label" xml:space="preserve">Видалити кеші пакетів засобів розробки</x:String>
-  <x:String x:Key="Text.Action.cleanup-package-cache.Desc" xml:space="preserve">Видаляє лише повторно завантажувані кеші npm, pnpm, NuGet, pip, Yarn, Gradle, Bun, uv і Cargo. Керований uv Python, локальні артефакти Maven, облікові дані, налаштування та загальна папка .cache не видаляються.</x:String>
-  <x:String x:Key="Text.Action.cleanup-browser-cache.Label" xml:space="preserve">Видалити кеші браузерів</x:String>
-  <x:String x:Key="Text.Action.cleanup-browser-cache.Desc" xml:space="preserve">Видаляє веб-кеші та кеші шейдерів Chromium, сховище кешу Service Worker, звіти про збої та тимчасові дані розширень. Реєстрації Service Worker, компоненти DRM, закладки, паролі та дані входу не видаляються.</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Label" xml:space="preserve">Перебудувати кеші піктограм, ескізів і шрифтів</x:String>
   <x:String x:Key="Text.Action.cleanup-shell-cache.Desc" xml:space="preserve">Видаляє кеш піктограм, кеш ескізів і кеш шрифтів провідника, щоб Windows створила їх заново. Це стандартне виправлення для порожніх чи хибних піктограм, ескізів, які не оновлюються, і некоректно відображеного тексту. Провідник не завершується примусово. Під час наступного запуску Windows вибрані використовувані кеші повторно перелічуються з довіреної інсталяції, після чого виконується спроба видалення. Передбачено щонайбільше три запуски протягом семи днів; об’єкти, що залишаються заблокованими, зберігаються, а результати записуються до журналу. Поки кеші перебудовуються, відображення тимчасово повільніше.</x:String>
-  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Label" xml:space="preserve">Видалити кеш завантажень Windows Update</x:String>
-  <x:String x:Key="Text.Action.cleanup-windows-update-cache.Desc" xml:space="preserve">Видаляє лише повторно завантажувані файли із SoftwareDistribution\Download. Історія оновлень і catroot2 не видаляються. Пов’язані служби відновлюються.</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Label" xml:space="preserve">Видалити й перебудувати дані попереднього завантаження та індекс пошуку</x:String>
   <x:String x:Key="Text.Action.cleanup-os-index.Desc" xml:space="preserve">Видаляє дані попереднього завантаження (Prefetch), які пришвидшують запуск програм, та індекс пошуку провідника, щоб Windows створила їх заново. Допомагає, коли пошук нічого не знаходить або видає застарілі файли. Поки триває перебудова, від десятків хвилин до кількох годин, програми запускаються повільніше, пошук обмежений, а фонове навантаження на процесор зростає.</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Label" xml:space="preserve">Зареєструвати завдання, яке виконує очищення автоматично під час входу</x:String>
-  <x:String x:Key="Text.Action.scheduled-temp-cleanup.Desc" xml:space="preserve">Під час входу виконує вибране очищення кешів і журналів із найвищими доступними правами, тому також можуть виконуватися елементи, що потребують прав адміністратора або зупинки служб. Використовує ті самі списки, що й кнопки запуску, і запускається без запиту UAC. Файли у використанні пропускаються. OFF видаляє завдання.</x:String>
 
   <!-- ===== Actions: Performance ===== -->
   <x:String x:Key="Text.Action.mmagent-memory-compression.Label" xml:space="preserve">Стиснення памʼяті</x:String>
@@ -200,7 +184,6 @@
   <x:String x:Key="Text.Action.edge-background-off.Label" xml:space="preserve">Вимкнути фонові процеси Edge (заощадження 100–300 MB)</x:String>
   <x:String x:Key="Text.Action.edge-background-off.Desc" xml:space="preserve">Вимикає політиками фоновий режим Edge і Startup Boost. Якщо ви рідко користуєтеся Edge, це може звільнити близько 100–300 MB пам’яті. Edge може запускатися трохи повільніше, а сповіщення розширень можуть перестати надходити. Переведіть цей параметр у стан ВИМК, щоб видалити політики й відновити типові значення Edge.</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">Виберіть, що видаляти</x:String>
-  <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">Виберіть, що виконувати під час входу</x:String>
   <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">Останнє збереження цього вибору не вдалося (див. журнал).</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">Оновлення</x:String>
@@ -223,10 +206,547 @@
   <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">Збірка для розробки</x:String>
   <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">Версія недоступна</x:String>
   <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">Останнє збереження налаштувань мови й оновлення не вдалося (див. журнал).</x:String>
-  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Не вдалося прочитати налаштування. Збереження вимкнено для захисту оригінального файлу, очищення під час входу не виконуватиметься. Зміни діють лише в цьому сеансі.</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">Не вдалося прочитати налаштування. Збереження вимкнено для захисту оригінального файлу. Зміни діють лише в цьому сеансі.</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">Під час останньої перевірки об’єктів не знайдено.</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">Відкрийте список знову, щоб оновити його. Під час виконання також враховуються нові об’єкти, не виключені з обробки.</x:String>
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">Обробка</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">Дочекайтеся завершення операції.</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">Дочекайтеся завершення скасування та очищення.</x:String>
+
+  <!-- ===== Cleanup (standard / advanced / slim / settings) ===== -->
+  <x:String x:Key="Text.Cleanup.Tab.Common" xml:space="preserve">Стандартна</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Advanced" xml:space="preserve">Розширена</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Slim" xml:space="preserve">Зменшення розміру</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Settings" xml:space="preserve">Налаштування</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Other" xml:space="preserve">Інше</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Scan" xml:space="preserve">Сканувати</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Rescan" xml:space="preserve">Сканувати знову</x:String>
+  <x:String x:Key="Text.Cleanup.Action.CancelScan" xml:space="preserve">Зупинити сканування</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Clean" xml:space="preserve">Видалити вибране</x:String>
+  <x:String x:Key="Text.Cleanup.Action.ExportText" xml:space="preserve">Експортувати як текст</x:String>
+  <x:String x:Key="Text.Cleanup.Action.OpenLocation" xml:space="preserve">Відкрити розташування</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Ignore" xml:space="preserve">Ігнорувати (виключити з майбутніх перевірок)</x:String>
+  <x:String x:Key="Text.Cleanup.Select.Recommended" xml:space="preserve">Рекомендовані</x:String>
+  <x:String x:Key="Text.Cleanup.Select.All" xml:space="preserve">Вибрати все</x:String>
+  <x:String x:Key="Text.Cleanup.Select.None" xml:space="preserve">Зняти вибір</x:String>
+  <x:String x:Key="Text.Cleanup.Select.Invert" xml:space="preserve">Інвертувати вибір</x:String>
+  <x:String x:Key="Text.Cleanup.Filter.Placeholder" xml:space="preserve">Фільтр елементів</x:String>
+  <x:String x:Key="Text.Cleanup.Filter.HideEmpty" xml:space="preserve">Сховати елементи, у яких немає що видаляти</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Name" xml:space="preserve">Елемент</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Category" xml:space="preserve">Категорія</x:String>
+  <x:String x:Key="Text.Cleanup.Column.State" xml:space="preserve">Стан</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Files" xml:space="preserve">Файли</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Size" xml:space="preserve">Розмір</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Impact" xml:space="preserve">Вплив</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Folder" xml:space="preserve">Папка</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Modified" xml:space="preserve">Змінено</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Rule" xml:space="preserve">Правило</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Safety" xml:space="preserve">Безпека</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Results" xml:space="preserve">Результати сканування</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Progress" xml:space="preserve">Перебіг сканування</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.SelectRow" xml:space="preserve">Вибрати: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Row" xml:space="preserve">{0}, {1}, {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Windows" xml:space="preserve">Система Windows</x:String>
+  <x:String x:Key="Text.Cleanup.Category.StoreApps" xml:space="preserve">Програми Store</x:String>
+  <x:String x:Key="Text.Cleanup.Category.BrowserCache" xml:space="preserve">Кеш браузерів</x:String>
+  <x:String x:Key="Text.Cleanup.Category.BrowserTrace" xml:space="preserve">Історія та сліди браузерів</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Cookies" xml:space="preserve">Файли cookie</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Traces" xml:space="preserve">Сліди використання</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Components" xml:space="preserve">Компоненти Windows</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Apps" xml:space="preserve">Інші програми</x:String>
+  <x:String x:Key="Text.Cleanup.Category.Custom" xml:space="preserve">Користувацькі папки</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Cache" xml:space="preserve">Кеш {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Log" xml:space="preserve">Журнали {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Temp" xml:space="preserve">Тимчасові файли {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Dump" xml:space="preserve">Дампи {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Thumbnail" xml:space="preserve">Ескізи {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Shader" xml:space="preserve">Кеш шейдерів {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Report" xml:space="preserve">Звіти {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.History" xml:space="preserve">Історія {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Form" xml:space="preserve">Дані форм {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Session" xml:space="preserve">Дані сеансу {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Cookies" xml:space="preserve">Файли cookie {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Recent" xml:space="preserve">Нещодавні елементи {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Backup" xml:space="preserve">Резервні копії {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Downloads" xml:space="preserve">Завантажені файли {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Kind.Other" xml:space="preserve">{0}</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Junk" xml:space="preserve">Непотрібні файли</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Trace" xml:space="preserve">Сліди використання</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Signout" xml:space="preserve">Виконує вихід із облікових записів</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Rebuild" xml:space="preserve">Потребує перебудови</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.UserFiles" xml:space="preserve">Ваші файли</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Trace.Warning" xml:space="preserve">Вашу історію використання буде втрачено.</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Signout.Warning" xml:space="preserve">Видалення файлів cookie може призвести до виходу з облікових записів на сайтах.</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.Rebuild.Warning" xml:space="preserve">Під час першого використання після видалення робота може бути повільнішою, доки дані створюються заново.</x:String>
+  <x:String x:Key="Text.Cleanup.Impact.UserFiles.Warning" xml:space="preserve">Містить ваші файли, які не можна завантажити повторно. Вибирайте їх окремо; перед видаленням буде потрібне ще одне підтвердження.</x:String>
+  <x:String x:Key="Text.Cleanup.Warning.NotRecommended" xml:space="preserve">Цей елемент за замовчуванням не рекомендований. Перш ніж вибирати його, перевірте, що він видаляє.</x:String>
+  <x:String x:Key="Text.Cleanup.Warning.JumpListPins" xml:space="preserve">Видалення списків переходів також видаляє елементи, закріплені на панелі завдань і в меню «Пуск».</x:String>
+  <x:String x:Key="Text.Cleanup.State.Found" xml:space="preserve">Можна видалити</x:String>
+  <x:String x:Key="Text.Cleanup.State.Empty" xml:space="preserve">Нічого видаляти</x:String>
+  <x:String x:Key="Text.Cleanup.State.Unmeasurable" xml:space="preserve">Кількість невідома</x:String>
+  <x:String x:Key="Text.Cleanup.State.Unavailable" xml:space="preserve">Недоступно</x:String>
+  <x:String x:Key="Text.Cleanup.State.NotDetected" xml:space="preserve">Не виявлено</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.UserScopeDifferentUser" xml:space="preserve">Користувач, що ввійшов, і користувач із підвищеними правами різні, тому елементи, які стосуються налаштувань і даних користувача, вимкнено.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.UserScopeUnknown" xml:space="preserve">Не вдалося перевірити користувача, що ввійшов, тому елементи, які стосуються налаштувань і даних користувача, вимкнено.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.TargetRejected" xml:space="preserve">Ціль відхилено з міркувань безпеки (захищене розташування, облікові дані, посилання тощо).</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.ScanFailed" xml:space="preserve">Не вдалося виконати сканування.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.HandlerUnavailable" xml:space="preserve">Це неможливо виконати в цьому середовищі.</x:String>
+  <x:String x:Key="Text.Cleanup.Reason.CustomFolderRejected" xml:space="preserve">Це розташування не можна використовувати як користувацьку папку, тому його пропущено.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Title" xml:space="preserve">Стандартне очищення</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Description" xml:space="preserve">Спочатку виконайте сканування, щоб побачити, що можна видалити, а потім видаліть лише вибрані елементи. Сканування нічого не змінює.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.NotScanned" xml:space="preserve">Сканування ще не виконувалося. Натисніть «Сканувати», щоб знайти те, що можна видалити.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Scanning" xml:space="preserve">Сканування {0} із {1}: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanDone" xml:space="preserve">Сканування завершено: елементів — {0}, файлів — {1}, розмір — {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanCanceled" xml:space="preserve">Сканування зупинено.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ScanFailed" xml:space="preserve">Не вдалося виконати сканування. Перевірте журнал.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Stale" xml:space="preserve">Результат сканування застарів через зміну налаштувань або іншу операцію. Виконайте сканування знову.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.NothingFound" xml:space="preserve">Нічого, що можна видалити, не знайдено.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Selection" xml:space="preserve">Вибрано елементів: {0} із {1} (приблизно {2})</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Retained" xml:space="preserve">Елементів, залишених через ваші винятки: {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Unreadable" xml:space="preserve">Елементів, які не вдалося перевірити: {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.SkippedLinks" xml:space="preserve">Елементів, що є посиланнями, залишено без змін: {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Unmeasurable" xml:space="preserve">Це можна виконати, але кількість і розмір заздалегідь виміряти не можна.</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Representatives" xml:space="preserve">Приклад: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Common.RunningProcesses" xml:space="preserve">Запущено: {0} (перед видаленням вас запитають, чи закривати його)</x:String>
+  <x:String x:Key="Text.Cleanup.Common.ServiceNote" xml:space="preserve">Служби, тимчасово зупинені на час видалення: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Title" xml:space="preserve">Підтвердження видалення</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Run" xml:space="preserve">Видалити</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Back" xml:space="preserve">Назад</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Common.Body" xml:space="preserve">Вибрані елементи ({0}; файлів — {1}, приблизно {2}) буде видалено назавжди. Їх не переміщують до Кошика, і їх неможливо відновити.</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.NotRecommended" xml:space="preserve">Містить не рекомендовані елементи: {0}. Спочатку перевірте їх.</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Signout" xml:space="preserve">Містить елементи, після яких може знадобитися повторний вхід (наприклад, файли cookie): {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.UserFiles" xml:space="preserve">Елементи ({0}) містять ваші файли, які не можна завантажити повторно. Буде потрібне ще одне підтвердження.</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.UserFiles.Check" xml:space="preserve">Я розумію, що мої файли буде видалено назавжди</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.SecureDelete" xml:space="preserve">Безпечне видалення ввімкнено. Перед видаленням файли один раз перезаписуються (на SSD це не гарантується).</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.RunningProcess" xml:space="preserve">Деякі продукти запущено. Під час видалення вас запитають, чи закривати їх.</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Body" xml:space="preserve">«{0}» запущено ({1}). Його потрібно закрити, перш ніж видаляти його дані.</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Close" xml:space="preserve">Закрити</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Skip" xml:space="preserve">Пропустити цей елемент</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Abort" xml:space="preserve">Зупинити</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceBody" xml:space="preserve">Не вдалося закрити «{0}» звичайним способом ({1}). Під час примусового завершення незбережені дані буде втрачено.</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceYes" xml:space="preserve">Завершити примусово</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceNo" xml:space="preserve">Не завершувати примусово</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Running" xml:space="preserve">Видалення {0} із {1}: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Done" xml:space="preserve">Видалено файлів: {0}, звільнено: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Run.DonePartial" xml:space="preserve">Виконано частково: видалено файлів — {0}, звільнено — {1}. Деякі елементи не вдалося обробити або їх було пропущено.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Canceled" xml:space="preserve">Зупинено. Уже видалено файлів: {0} ({1}).</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Stale" xml:space="preserve">Нічого не видалено, бо результат сканування застарів. Виконайте сканування знову.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Retained" xml:space="preserve">Елементів, залишених через винятки або зміни після сканування: {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Blocked" xml:space="preserve">Елементів, які не вдалося видалити (використовуються, немає дозволу тощо): {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Wiped" xml:space="preserve">Елементів, перезаписаних перед видаленням: {0} (видалено без перезапису: {1}).</x:String>
+  <x:String x:Key="Text.Cleanup.Run.ServiceResumeFailed" xml:space="preserve">Не вдалося знову запустити службу, тимчасово зупинену на час роботи. Перевірте стан служби.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Succeeded" xml:space="preserve">Виконано</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.NothingToDo" xml:space="preserve">Нічого робити</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Partial" xml:space="preserve">Виконано частково</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Failed" xml:space="preserve">Помилка</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Skipped" xml:space="preserve">Пропущено</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.Canceled" xml:space="preserve">Зупинено</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Status.NotRun" xml:space="preserve">Не виконувалося</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.NotScanned" xml:space="preserve">Не скановано, тому не видаляється.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.NothingFound" xml:space="preserve">Видаляти було нічого.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.Unavailable" xml:space="preserve">Це неможливо виконати в цьому середовищі.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.UserFilesNotConfirmed" xml:space="preserve">Не видалено, бо підтвердження для ваших файлів не отримано.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessRunningDeclined" xml:space="preserve">Пропущено, бо продукт запущено.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessUnverifiable" xml:space="preserve">Пропущено, бо не вдалося перевірити власника запущеного процесу.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessStillRunning" xml:space="preserve">Пропущено, бо продукт не закрився.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ForceTerminationDeclined" xml:space="preserve">Пропущено, бо примусове завершення не схвалено.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.ProcessIdentityMismatch" xml:space="preserve">Пропущено, бо не вдалося зіставити процес, тому його не закрито.</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Skip.TerminateFailed" xml:space="preserve">Пропущено, бо не вдалося закрити продукт.</x:String>
+  <x:String x:Key="Text.Cleanup.Totals.Last" xml:space="preserve">Останній запуск: файлів — {0}, {1} ({2})</x:String>
+  <x:String x:Key="Text.Cleanup.Totals.Total" xml:space="preserve">Усього: файлів — {0}, {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Title" xml:space="preserve">Експорт результатів сканування</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Done" xml:space="preserve">Експортовано до {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Failed" xml:space="preserve">Не вдалося експортувати: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.OpenLocation.Failed" xml:space="preserve">Не вдалося відкрити розташування: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Name" xml:space="preserve">Ім’я</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Category" xml:space="preserve">Категорія</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.State" xml:space="preserve">Стан</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Files" xml:space="preserve">Файли</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Items" xml:space="preserve">Елементи</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Bytes" xml:space="preserve">Байти</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Retained" xml:space="preserve">Залишено</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Status" xml:space="preserve">Статус</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Details" xml:space="preserve">Докладно</x:String>
+  <x:String x:Key="Text.Cleanup.Export.Header.Total" xml:space="preserve">Разом</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Title" xml:space="preserve">Розширене очищення</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Description" xml:space="preserve">Шукає на вибраних дисках за шаблонами файли, які зазвичай можна безпечно видалити. Сканування нічого не змінює. Перегляньте результати й видаліть лише те, що вибрали.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drives" xml:space="preserve">Диски для сканування</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drive.Removable" xml:space="preserve">Знімний</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drive.Fixed" xml:space="preserve">Фіксований</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.ZeroByte" xml:space="preserve">Включати файли нульового розміру</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.InvalidShortcuts" xml:space="preserve">Включати ярлики, у яких немає цільового об’єкта</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.OlderThan" xml:space="preserve">Включати файли, старші за вказану кількість днів</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.Days" xml:space="preserve">Днів</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.SelectSafe" xml:space="preserve">Вибрати лише безпечні елементи</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.Default" xml:space="preserve">За замовчуванням</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.Additional" xml:space="preserve">Додатково</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Group.UserDefined" xml:space="preserve">Користувацькі</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.Safe" xml:space="preserve">Безпечно</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.Undeterminable" xml:space="preserve">Не визначено</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Verdict.UserDefined" xml:space="preserve">Користувацький</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.CheckpointOutsideFound" xml:space="preserve">Файл .chk поза папкою FOUND. Це може бути контрольна точка ESE, тому він залишається невибраним, доки ви його не перевірите.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.RecentlyModified" xml:space="preserve">Змінено за останні 24 години, тому за замовчуванням не вибирається.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.ZeroByte" xml:space="preserve">Файл нульового розміру, тому за замовчуванням не вибирається.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.OldFile" xml:space="preserve">Знайдено лише тому, що він старий, тому за замовчуванням не вибирається.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Hint.UserPattern" xml:space="preserve">Відповідає заданому вами шаблону, тому за замовчуванням не вибирається.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.NamePattern" xml:space="preserve">Шаблон імені</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.ZeroByte" xml:space="preserve">Нульовий розмір</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.InvalidShortcut" xml:space="preserve">Недійсний ярлик</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RuleKind.OldFile" xml:space="preserve">Старий файл</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Progress" xml:space="preserve">Перевірено папок: {0}, файлів: {1}; збігів: {2} ({3}): {4}</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.ScanDone" xml:space="preserve">Сканування завершено: збігів — {0} ({1}), перевірено файлів — {2}.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Truncated" xml:space="preserve">Збігів надто багато, тому показано лише перші {0}. Решту ({1}, {2}) не показано й не буде видалено.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.RootFailure" xml:space="preserve">Не вдалося виконати сканування: {0} ({1})</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Pruned" xml:space="preserve">Папок, які не перевірялися, бо вони захищені або виключені: {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Empty" xml:space="preserve">Відповідних файлів немає.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Selection" xml:space="preserve">Вибрано файлів: {0} із {1} ({2})</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolders" xml:space="preserve">Користувацькі папки</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Note" xml:space="preserve">Очищається лише вміст папки. Сама папка залишається.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Missing" xml:space="preserve">Не знайдено</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolder.Summary" xml:space="preserve">Файлів: {0}, {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Body" xml:space="preserve">Вибрані файли ({0}; {1}) і вміст користувацьких папок ({2}) буде видалено назавжди. Їх не переміщують до Кошика, і їх неможливо відновити.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Undeterminable" xml:space="preserve">Містить файли ({0}), позначені як «Не визначено». Зніміть вибір із тих, які ви не перевірили.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Confirm.Recent" xml:space="preserve">Містить файли, змінені за останні 24 години: {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Done" xml:space="preserve">Видалено файлів: {0}, папок: {1}, звільнено: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Partial" xml:space="preserve">Виконано частково: видалено файлів — {0}, папок — {1}, звільнено — {2}. Деякі елементи було залишено або їх не вдалося видалити.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Expired" xml:space="preserve">Нічого не видалено, бо результат сканування застарів. Виконайте сканування знову.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Cancelled" xml:space="preserve">Зупинено. Уже видалено файлів: {0} ({1}).</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Blocked" xml:space="preserve">Файлів, які не вдалося видалити (використовуються, немає дозволу тощо): {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Retained" xml:space="preserve">Файлів, залишених через винятки або зміни після сканування: {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Gone" xml:space="preserve">Файлів, яких уже не існувало: {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Covered" xml:space="preserve">Файлів, що містяться у вибраній користувацькій папці й не оброблялися окремо: {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Rejected" xml:space="preserve">Елементів, відхилених перевіркою безпеки: {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Invalid" xml:space="preserve">Цей шлях не можна використовувати як папку.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.DriveRoot" xml:space="preserve">Корінь диска використовувати не можна.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Windows" xml:space="preserve">Папку Windows, а також її батьківські та вкладені папки використовувати не можна.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProgramFiles" xml:space="preserve">Папку Program Files, а також її батьківські та вкладені папки використовувати не можна.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProgramData" xml:space="preserve">Папку ProgramData, а також її батьківські та вкладені папки використовувати не можна.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.OtherUserProfile" xml:space="preserve">Профіль іншого користувача використовувати не можна.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.ProfileRoot" xml:space="preserve">Папку вашого профілю та AppData використовувати не можна, бо їх очищення призведе до втрати всіх ваших даних.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Reject.Credential" xml:space="preserve">Розташування, що містять облікові дані або ключі, використовувати не можна.</x:String>
+  <x:String x:Key="Text.Cleanup.CustomFolder.Added" xml:space="preserve">Користувацьку папку додано.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Title" xml:space="preserve">Зменшення розміру</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Description" xml:space="preserve">Звільняє місце на диску, видаляючи дані, які Windows не потрібні. Деякі дії не можна скасувати, а деякі можуть вплинути на подальше відновлення, тому за замовчуванням нічого не вибрано.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Run" xml:space="preserve">Виконати вибране</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.CreateRestorePoint" xml:space="preserve">Створити точку відновлення перед виконанням</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Item" xml:space="preserve">Елемент</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Status" xml:space="preserve">Статус</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Size" xml:space="preserve">Очікуваний обсяг</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Estimate" xml:space="preserve">Приблизно {0} (оцінка)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.SizeUnknown" xml:space="preserve">Невідомо</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.NotScanned" xml:space="preserve">Сканування ще не виконувалося. Натисніть «Сканувати», щоб дізнатися, скільки місця може звільнити кожен елемент.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Scanning" xml:space="preserve">Перевірка елементів зменшення розміру…</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.ScanDone" xml:space="preserve">Сканування завершено. Можна виконати елементів: {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.ScanFailed" xml:space="preserve">Не вдалося виконати сканування. Перевірте журнал.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Stale" xml:space="preserve">Нічого не виконано, бо результат сканування застарів. Виконайте сканування знову.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.LongRunning" xml:space="preserve">Елементи, що використовують DISM, можуть виконуватися кілька хвилин і довше.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.Available" xml:space="preserve">Готово</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.NothingToClean" xml:space="preserve">Нічого очищати</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Status.Unavailable" xml:space="preserve">Недоступно</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Notice" xml:space="preserve">Примітка</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Caution" xml:space="preserve">Обережно</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Level.Irreversible" xml:space="preserve">Не можна скасувати</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.EnumerationFailed" xml:space="preserve">Не вдалося повністю прочитати дані реєстрації, тому безпеку не можна оцінити.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.ProtectedByWindows" xml:space="preserve">Windows захищає ці файли, тому видаляти нічого.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.LanguageInUse" xml:space="preserve">Його використовують мова інтерфейсу, список мов або розкладка клавіатури, тому його не можна видалити.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.UserHiveNotLoaded" xml:space="preserve">Дані деяких користувачів не завантажено, тому використання перевірити не можна.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.NotPresent" xml:space="preserve">Об’єкт не встановлено або не знайдено.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.ToolFailed" xml:space="preserve">Не вдалося прочитати або зрозуміти результат DISM.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Reason.Rejected" xml:space="preserve">Перевірка безпеки відхилила об’єкт.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Succeeded" xml:space="preserve">Виконано</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Partial" xml:space="preserve">Виконано частково</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Failed" xml:space="preserve">Помилка</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Skipped" xml:space="preserve">Пропущено</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Result.Cancelled" xml:space="preserve">Зупинено</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Title" xml:space="preserve">Підтвердження зменшення розміру</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Body" xml:space="preserve">Буде виконано вибрані елементи ({0}; очікуваний обсяг: {1}).</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.WithRestorePoint" xml:space="preserve">Перед виконанням буде створено точку відновлення.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.WithoutRestorePoint" xml:space="preserve">Точку відновлення створено не буде.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Title" xml:space="preserve">Підтвердження незворотної дії</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Body" xml:space="preserve">Після видалення даних відкату оновлень уже встановлені оновлення не можна буде видалити. Цю дію не можна скасувати.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Check" xml:space="preserve">Я розумію, що встановлені оновлення більше не можна буде видалити</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Created" xml:space="preserve">Точку відновлення створено.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Reused" xml:space="preserve">Використовується наявна точка відновлення, створена {0} (нова протягом 24 годин не створюється).</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Unavailable.Title" xml:space="preserve">Точка відновлення недоступна</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Unavailable.Body" xml:space="preserve">Не вдалося створити точку відновлення: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Disabled.Body" xml:space="preserve">Захист системи вимкнено, тому створити точку відновлення не можна.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.ContinueWithout" xml:space="preserve">Продовжити без неї</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Abort" xml:space="preserve">Зупинити</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.EnableAndRetry" xml:space="preserve">Увімкнути захист системи й повторити</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Running" xml:space="preserve">Виконання {0} із {1}: {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Done" xml:space="preserve">Готово. Звільнено місця: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.DonePartial" xml:space="preserve">Деякі елементи не завершилися. Перевірте результат кожного елемента.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RebootRequired" xml:space="preserve">Щоб зміни набули чинності, потрібне перезавантаження.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Title" xml:space="preserve">Налаштування очищення</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Saved" xml:space="preserve">Налаштування збережено.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SaveFailed" xml:space="preserve">Не вдалося зберегти налаштування. Перевірте журнал.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Exclusions" xml:space="preserve">Винятки</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Exclusions.Description" xml:space="preserve">Виключені елементи не зачіпаються: вони не скануються й не видаляються.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add" xml:space="preserve">Додати</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Remove" xml:space="preserve">Видалити зі списку</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import" xml:space="preserve">Імпорт</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export" xml:space="preserve">Експорт</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Title" xml:space="preserve">Імпорт винятків</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Title" xml:space="preserve">Експорт винятків</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.File" xml:space="preserve">Файли</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.File" xml:space="preserve">Приклад: C:\Users\me\notes.txt</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.Folder" xml:space="preserve">Папки</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.Folder" xml:space="preserve">Приклад: C:\Users\me\Projects (разом із вкладеними папками)</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.Name" xml:space="preserve">Розширення та імена файлів</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.Name" xml:space="preserve">Приклад: *.log або cache.db</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Kind.CookieDomain" xml:space="preserve">Домени cookie</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Hint.CookieDomain" xml:space="preserve">Приклад: example.com (разом із піддоменами)</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Added" xml:space="preserve">Додано.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Duplicate" xml:space="preserve">Уже є у списку.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.Invalid" xml:space="preserve">Недійсний формат.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add.LimitReached" xml:space="preserve">Досягнуто ліміту записів: {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.TooLarge" xml:space="preserve">Файл завеликий.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.Unreadable" xml:space="preserve">Не вдалося прочитати файл.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.InvalidFormat" xml:space="preserve">Недійсний формат файлу.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.UnsupportedSchema" xml:space="preserve">Ця версія не може прочитати цей формат.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Failure.TooManyEntries" xml:space="preserve">Записів надто багато, тому нічого не імпортовано.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Done" xml:space="preserve">Додано: {0} (дублікатів: {1}, відхилено: {2}).</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Done" xml:space="preserve">Експортовано до {0}.</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Failed" xml:space="preserve">Не вдалося експортувати: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Options" xml:space="preserve">Спосіб видалення файлів</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SecureDelete" xml:space="preserve">Безпечне видалення (одноразовий перезапис, потім видалення)</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SecureDelete.Note" xml:space="preserve">Одноразово перезаписує вміст файлу перед видаленням. На SSD повне стирання не гарантується. Файли з жорсткими посиланнями, а також стиснуті, розріджені й зашифровані файли видаляються без перезапису.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CreateRestorePoint" xml:space="preserve">Створювати точку відновлення перед зменшенням розміру</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CreateRestorePoint.Note" xml:space="preserve">Використовується наявна точка відновлення, створена за останні 24 години. Якщо захист системи вимкнено, після підтвердження його можна ввімкнути.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.OpenSystemRestore" xml:space="preserve">Відкрити «Відновлення системи»</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders" xml:space="preserve">Користувацькі папки</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Description" xml:space="preserve">Папки, вміст яких може очищати розширене очищення. Не можна додавати Windows, Program Files, ProgramData, профілі інших користувачів, корені дисків і розташування з обліковими даними. Додані папки завжди спочатку не вибрані.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Add" xml:space="preserve">Додати папку…</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Pick" xml:space="preserve">Виберіть користувацьку папку</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns" xml:space="preserve">Користувацькі розширення та імена файлів</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.Description" xml:space="preserve">Додаються до пошуку розширеного очищення. Знайдене завжди спочатку не вибране.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.Hint" xml:space="preserve">Приклад: *.xyz</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.BuiltIn" xml:space="preserve">Вбудовані шаблони</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules" xml:space="preserve">Вибір за замовчуванням для кожного елемента</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules.Description" xml:space="preserve">Перевизначає рекомендований вибір елемента за замовчуванням у стандартному очищенні.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules.Reset" xml:space="preserve">Скинути до типових</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.Default" xml:space="preserve">Дотримуватися рекомендації</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.On" xml:space="preserve">Завжди вибирати</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rule.Off" xml:space="preserve">Ніколи не вибирати</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Totals" xml:space="preserve">Результати на цей момент</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Totals.None" xml:space="preserve">Поки що нічого не виконувалося.</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.run-history" xml:space="preserve">Історія діалогу «Виконати»</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.recent-items" xml:space="preserve">Нещодавні елементи</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.rdp-history" xml:space="preserve">Історія підключень до віддаленого робочого столу</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.explorer-mru" xml:space="preserve">Історія діалогів відкриття та збереження</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.search-history" xml:space="preserve">Історія пошуку в Провіднику</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.network-drive-history" xml:space="preserve">Історія підключення мережних дисків</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.jump-lists" xml:space="preserve">Списки переходів</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.ie-history" xml:space="preserve">Історія Internet Explorer і введені адреси</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.traces.userassist" xml:space="preserve">Історія запущених програм (UserAssist)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.user-error-reports" xml:space="preserve">Звіти про помилки Windows поточного користувача</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.user-temp" xml:space="preserve">Тимчасові файли користувача</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.system-temp" xml:space="preserve">Тимчасові файли системи</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.crash-dumps" xml:space="preserve">Дампи збоїв у режимі користувача</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.memory-dumps" xml:space="preserve">Дампи пам’яті системи</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.error-reports" xml:space="preserve">Звіти служби звітування про помилки Windows</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.update-logs" xml:space="preserve">Журнали оркестратора оновлень Windows</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.etl-trace-logs" xml:space="preserve">Журнали трасування ETL</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.defender-support-logs" xml:space="preserve">Діагностичні журнали Microsoft Defender</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.thumbnail-cache" xml:space="preserve">Кеш ескізів</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.icon-cache" xml:space="preserve">Кеш піктограм</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.font-cache" xml:space="preserve">Кеш шрифтів Windows</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.remote-desktop-cache" xml:space="preserve">Кеш растрових зображень віддаленого робочого столу</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.directx-shader-cache" xml:space="preserve">Кеш шейдерів DirectX</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.prefetch" xml:space="preserve">Застарілі дані Prefetch</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.recycle-bin" xml:space="preserve">Кошик</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.dns-cache" xml:space="preserve">Кеш DNS-клієнта</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.network-usage" xml:space="preserve">Історія використання мережі</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.invalid-shortcuts" xml:space="preserve">Недійсні ярлики та елементи меню «Пуск»</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.invalid-scheduled-tasks" xml:space="preserve">Недійсні заплановані завдання</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.internet-cache" xml:space="preserve">Кеш Інтернету (WinINet)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.office-addin-cache" xml:space="preserve">Кеш надбудов Office</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.windows.cryptnet-url-cache" xml:space="preserve">Кеш URL-адрес сертифікатів (CryptnetUrlCache)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Name" xml:space="preserve">Осиротілі файли Windows Installer</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Description" xml:space="preserve">Видаляє файли .msi і .msp у папці Windows Installer, які не зареєстровані за жодним продуктом чи виправленням і старші за 30 днів.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.InstallerOrphans.Warning" xml:space="preserve">Якщо дані реєстрації не вдається прочитати повністю, цей елемент недоступний. Реєстрації перевіряються повторно безпосередньо перед видаленням.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Name" xml:space="preserve">Дані відкату оновлень</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Description" xml:space="preserve">За допомогою DISM /StartComponentCleanup /ResetBase видаляє дані, потрібні для відкату вже встановлених оновлень.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateRollback.Warning" xml:space="preserve">Після виконання встановлені оновлення не можна буде видалити. Цю дію не можна скасувати.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Name" xml:space="preserve">Резервні копії оновлень (сховище компонентів)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Description" xml:space="preserve">За допомогою DISM /StartComponentCleanup очищає замінені компоненти.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateBackup.Warning" xml:space="preserve">Показаний обсяг — оцінка DISM і може відрізнятися від фактично звільненого. Виконання може тривати кілька хвилин.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateCache.Name" xml:space="preserve">Кеш завантаження Windows Update</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.UpdateCache.Description" xml:space="preserve">Видаляє вміст папки SoftwareDistribution\Download. Служби Windows Update і BITS на час виконання зупиняються, а потім відновлюються.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Name" xml:space="preserve">Залишковий кеш виправлень</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Description" xml:space="preserve">Зупиняє службу Windows Installer і видаляє вміст папки Installer\$PatchCache$.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.PatchCache.Warning" xml:space="preserve">Під час подальшого відновлення чи видалення програм може знадобитися початковий інсталяційний носій.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Name" xml:space="preserve">Функції введення мови (японська)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Description" xml:space="preserve">За допомогою DISM Remove-Capability видаляє японські функції Language.Basic (перевірка правопису, прогнозування тексту тощо). Це не сам IME. Виконати можна, лише якщо мова не використовується як мова інтерфейсу, у списку мов або в розкладці клавіатури.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageJa.Warning" xml:space="preserve">Щоб знову користуватися цими мовними функціями, їх потрібно додати заново.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Name" xml:space="preserve">Функції введення мови (корейська)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Description" xml:space="preserve">За допомогою DISM Remove-Capability видаляє корейські функції Language.Basic (перевірка правопису, прогнозування тексту тощо). Це не сам IME. Виконати можна, лише якщо мова не використовується як мова інтерфейсу, у списку мов або в розкладці клавіатури.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageKo.Warning" xml:space="preserve">Щоб знову користуватися цими мовними функціями, їх потрібно додати заново.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Name" xml:space="preserve">Функції введення мови (китайська, традиційне письмо)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Description" xml:space="preserve">За допомогою DISM Remove-Capability видаляє функції Language.Basic для традиційної китайської (перевірка правопису, прогнозування тексту тощо). Це не сам IME. Виконати можна, лише якщо мова не використовується як мова інтерфейсу, у списку мов або в розкладці клавіатури.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhTw.Warning" xml:space="preserve">Щоб знову користуватися цими мовними функціями, їх потрібно додати заново.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Name" xml:space="preserve">Функції введення мови (китайська, спрощене письмо)</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Description" xml:space="preserve">За допомогою DISM Remove-Capability видаляє функції Language.Basic для спрощеної китайської (перевірка правопису, прогнозування тексту тощо). Це не сам IME. Виконати можна, лише якщо мова не використовується як мова інтерфейсу, у списку мов або в розкладці клавіатури.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.LanguageZhCn.Warning" xml:space="preserve">Щоб знову користуватися цими мовними функціями, їх потрібно додати заново.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Name" xml:space="preserve">Файли довідки Windows</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Description" xml:space="preserve">Видаляє файли довідки Windows. У Windows 10/11 вони захищені захистом ресурсів Windows, тому видаляти зазвичай нічого.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Help.Warning" xml:space="preserve">Файли, захищені Windows або такі, що належать TrustedInstaller, не зачіпаються. Володіння ніколи не привласнюється.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Name" xml:space="preserve">Шпалери за замовчуванням</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Description" xml:space="preserve">Видаляє шпалери Windows за замовчуванням. У Windows 10/11 вони захищені захистом ресурсів Windows, тому видаляти зазвичай нічого.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.DefaultWallpapers.Warning" xml:space="preserve">Файли, захищені Windows або такі, що належать TrustedInstaller, не зачіпаються. Володіння ніколи не привласнюється.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleMusic.Name" xml:space="preserve">Зразки музики</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleMusic.Description" xml:space="preserve">Видаляє лише відомі зразки пісень, що входили до складу Windows 7. Інші файли в папці не зачіпаються.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SamplePictures.Name" xml:space="preserve">Зразки зображень</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SamplePictures.Description" xml:space="preserve">Видаляє лише відомі зразки зображень, що входили до складу Windows 7. Інші файли в папці не зачіпаються.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleVideos.Name" xml:space="preserve">Зразки відео</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleVideos.Description" xml:space="preserve">Видаляє лише відомий зразок відео, що входив до складу Windows 7. Інші файли в папці не зачіпаються.</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Expand" xml:space="preserve">Розгорнути або згорнути: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Run.Error" xml:space="preserve">Не вдалося завершити видалення. Перевірте журнал.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SaveSuppressed" xml:space="preserve">Не вдалося прочитати налаштування, тому збереження вимкнено, щоб захистити вихідний файл. Зміни діють лише в поточному сеансі.</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SystemRestore.Failed" xml:space="preserve">Не вдалося відкрити «Відновлення системи».</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Done" xml:space="preserve">{0} додано до винятків. Налаштування змінилися, виконайте сканування знову.</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Duplicate" xml:space="preserve">{0} уже у винятках.</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.Failed" xml:space="preserve">Не вдалося додати {0} до винятків (недійсний формат або досягнуто ліміту).</x:String>
+  <x:String x:Key="Text.Cleanup.Ignore.SaveFailed" xml:space="preserve">{0} додано до винятків, але зберегти не вдалося. Воно діє лише до закриття програми.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.NoTarget" xml:space="preserve">Виберіть диск або користувацьку папку для сканування.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Filter.All" xml:space="preserve">Показати всі види</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Action.IgnoreFolder" xml:space="preserve">Ігнорувати цю папку</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Kinds" xml:space="preserve">Результати за видами</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Result.Failed" xml:space="preserve">Під час видалення сталася помилка. Перевірте журнал.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.UserScopeUnavailable" xml:space="preserve">Правила рівня користувача використовувати не можна (інтерактивний користувач і користувач із підвищеними правами різні або це не вдалося підтвердити)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.CustomFolderRejectedAtRun" xml:space="preserve">Користувацьку папку відхилено перевіркою під час виконання</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseOutsideProfile" xml:space="preserve">Змінна середовища %{0}% вказує за межі профілю поточного користувача (або профіль не вдалося перевірити), тому ця ціль не використовується.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseProtectedLocation" xml:space="preserve">Змінна середовища %{0}% вказує на захищене розташування (корінь диска, Windows, Program Files, ProgramData або профіль іншого користувача), тому ця ціль не використовується.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.BaseMachineMismatch" xml:space="preserve">Змінна середовища %{0}% відрізняється від типового розташування в системі, тому ця ціль не використовується.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.CustomFolderRejected" xml:space="preserve">Користувацьку папку відхилено ({0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceStopFailed" xml:space="preserve">Нічого не видалено, бо не вдалося зупинити службу: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DeleteFailed" xml:space="preserve">Не вдалося завершити видалення: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceResumeFailedList" xml:space="preserve">Не вдалося повернути службу до початкового стану ({0}): {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ServiceResumeFailed" xml:space="preserve">Не вдалося повернути службу до початкового стану: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.UserRegistryOpenFailed" xml:space="preserve">Не вдалося відкрити реєстр користувача</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.HandlerUnavailable" xml:space="preserve">Обробник {0} недоступний</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.PathReason" xml:space="preserve">{0}: {1}{2}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniContentUnverified" xml:space="preserve"> (не вдалося перевірити вміст файлу)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ExpansionTruncated" xml:space="preserve">Розгорнуті цілі досягли ліміту ({0}); решту не включено</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbOpenFailed" xml:space="preserve">Не вдалося відкрити базу даних (SQLite {0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbConfigFailed" xml:space="preserve">Зупинено, бо не вдалося застосувати параметр безпеки ({0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbSqliteError" xml:space="preserve">Помилка SQLite {0}: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbPinFailed" xml:space="preserve">Не вдалося безпечно закріпити базу даних: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbHardLinked" xml:space="preserve">База даних із жорстким посиланням не є ціллю</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbTooLarge" xml:space="preserve">База даних завелика, щоб бути ціллю</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbIdentityUnverified" xml:space="preserve">Не вдалося перевірити файл бази даних</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbJournalPending" xml:space="preserve">Пропущено, бо існує необроблений журнал (використовується або не відновлено)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbIntegrityFailed" xml:space="preserve">Перевірка цілісності бази даних не пройдена</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbVirtualTable" xml:space="preserve">База даних із віртуальною таблицею не є ціллю</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbUnknownTable" xml:space="preserve">Очікувана таблиця {0} не існує (невідома схема)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DbUnknownColumn" xml:space="preserve">У таблиці {0} немає очікуваного стовпця {1} (невідома схема)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniUnconvertible" xml:space="preserve">Пропущено, бо файл не можна без втрат перетворити на UTF-8, UTF-16 або системну кодову сторінку ANSI</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniTooLarge" xml:space="preserve">Пропущено, бо файл більший за 1 МБ</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniAmbiguousSection" xml:space="preserve">Не змінено, бо кілька розділів мають однакову назву й ціль визначити не можна</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniRestored" xml:space="preserve">{0} (вихідний текст відновлено)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniNotRestored" xml:space="preserve">{0} (не вдалося відновити вихідний текст, вміст не визначено)</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniChangedWhileReading" xml:space="preserve">Вміст змінився під час читання</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniLengthChangedWhileReading" xml:space="preserve">Довжина змінилася під час читання</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniLengthChangedBeforeWrite" xml:space="preserve">Довжина змінилася перед записом</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IniVerifyMismatch" xml:space="preserve">Повторне читання після запису не збігається</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistrySymlink" xml:space="preserve">Виключено, бо це символічне посилання реєстру: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RegistryDepthLimit" xml:space="preserve">Перевищено безпечну межу глибини рекурсії</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DnsFlushFailed" xml:space="preserve">Не вдалося виконати ipconfig /flushdns: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.DnsFlushError" xml:space="preserve">Не вдалося запустити ipconfig /flushdns: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeQueryFailed" xml:space="preserve">Не вдалося виконати запит {0} (Win32={1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeUrlHistoryFailed" xml:space="preserve">Не вдалося очистити історію URL (HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.IeClearFailed" xml:space="preserve">Не вдалося очистити {0} (Win32={1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleQueryFailed" xml:space="preserve">Не вдалося виконати запит до Кошика (HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleVerifyFailed" xml:space="preserve">Не вдалося перевірити Кошик після очищення (HRESULT=0x{0})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RecycleRemaining" xml:space="preserve">У Кошику залишилося елементів: {0} (HRESULT=0x{1})</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDpsResumeFailed" xml:space="preserve">Не вдалося повернути службу DPS до початкового стану: {0}. Запустіть «Службу політики діагностики» у службах Windows.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDeleteFailed" xml:space="preserve">Не вдалося видалити дані про використання мережі: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.NetworkDpsStopUnverified" xml:space="preserve">Дані про використання мережі не видалено, бо не вдалося підтвердити зупинку служби DPS</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutLocationOpenFailed" xml:space="preserve">Не вдалося безпечно відкрити розташування ярликів</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutsUnreadable" xml:space="preserve">Ярликів, які не вдалося прочитати й які пропущено: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ShortcutDeleteFailed" xml:space="preserve">Не вдалося видалити недійсні ярлики: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TasksUnreadable" xml:space="preserve">Завдань, які не вдалося прочитати й які пропущено: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TaskSchedulerQueryFailed" xml:space="preserve">Не вдалося виконати запит до Планувальника завдань: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.TaskSchedulerOperateFailed" xml:space="preserve">Не вдалося виконати операцію в Планувальнику завдань: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEmptyDescription" xml:space="preserve">Опис точки відновлення порожній.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointStateUnknown" xml:space="preserve">Не вдалося перевірити стан точки відновлення: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointProtectionDisabled" xml:space="preserve">Захист системи вимкнено.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreateUninterpretable" xml:space="preserve">Не вдалося інтерпретувати результат створення точки відновлення (код виходу {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreateFailed" xml:space="preserve">Не вдалося створити точку відновлення (повернуте значення {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointVerifyFailed" xml:space="preserve">Не вдалося перевірити точку відновлення після створення: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCancelled" xml:space="preserve">Створення точки відновлення скасовано.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableFailed" xml:space="preserve">Не вдалося ввімкнути захист системи (код виходу {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableVerifyFailed" xml:space="preserve">Не вдалося перевірити стан після ввімкнення захисту: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnabled" xml:space="preserve">Захист системи ввімкнено.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableNotEffective" xml:space="preserve">Захист системи не ввімкнувся (можливо, його вимкнено груповою політикою).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointEnableCancelled" xml:space="preserve">Ввімкнення захисту системи скасовано.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointCreated" xml:space="preserve">Точку відновлення створено.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointReused" xml:space="preserve">Використовується точка відновлення ({0}), створена за останні 24 години.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointNoneAvailable" xml:space="preserve">Точку відновлення не створено, і за останні 24 години її немає.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointExitCode" xml:space="preserve">Код виходу {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointProtectionOutputInvalid" xml:space="preserve">Недійсні вихідні дані стану захисту</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputInvalid" xml:space="preserve">Недійсні вихідні дані точки відновлення</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputUnknownLine" xml:space="preserve">У вихідних даних є невідомий рядок</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.RestorePointOutputIncomplete" xml:space="preserve">Вихідні дані неповні</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimStale" xml:space="preserve">Нічого не виконано, бо результат сканування застарів. Виконайте сканування знову.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimNothingSelected" xml:space="preserve">Немає вибраних елементів, які можна виконати.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimCanceledNotRun" xml:space="preserve">Не виконано, бо операцію було скасовано.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimRestorePointUnavailable" xml:space="preserve">Не виконано, бо немає доступної точки відновлення: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimItemUnavailable" xml:space="preserve">Не виконано, бо елемент недоступний.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimNeedsTwoStep" xml:space="preserve">Не виконано, бо це не можна скасувати, а двоетапне підтвердження відсутнє.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimCanceledPartial" xml:space="preserve">Скасовано. Можливо, обробку виконано частково.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimFailed" xml:space="preserve">Помилка: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimRecheckFailed" xml:space="preserve">Нічого не видалено, бо не вдалася повторна перевірка безпосередньо перед виконанням: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimServiceResumeFailed" xml:space="preserve">Не вдалося повернути службу до початкового стану: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimBackupIncluded" xml:space="preserve">Виконано в межах очищення даних відкату оновлень.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimBackupSkipped" xml:space="preserve">Не виконано, бо очищення даних відкату оновлень не вдалося: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimOutcome" xml:space="preserve">Видалено файлів: {0} (байтів: {1}). Залишено: {2}, помилок: {3}, відхилено: {4}.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.SlimOutcomeExample" xml:space="preserve">Видалено файлів: {0} (байтів: {1}). Залишено: {2}, помилок: {3}, відхилено: {4}. Приклад: {5}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ComponentStoreCleanup" xml:space="preserve">Очищення сховища компонентів</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageRemoval" xml:space="preserve">Видалення функцій введення мови: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationFailed" xml:space="preserve">Помилка: {0} (код виходу {1}). {2}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationUninterpretable" xml:space="preserve">Не вдалося інтерпретувати результат операції «{0}» (код виходу {1}, але немає вихідних даних про успіх).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationDone" xml:space="preserve">Операцію «{0}» завершено.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.OperationDoneReboot" xml:space="preserve">Операцію «{0}» завершено (потрібне перезавантаження).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotTarget" xml:space="preserve">{0} — мова, яку не можна видалити.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotRemovable" xml:space="preserve">Функції введення мови {0} зараз видалити не можна: {1}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotInstalled" xml:space="preserve">Не встановлено.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageInUse" xml:space="preserve">Використовується як мова інтерфейсу, у списку мов або в розкладці клавіатури.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageNotUsed" xml:space="preserve">Не використовується в мовних налаштуваннях жодного користувача.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderProtected" xml:space="preserve">Містить Lumin4ti або захищене розташування</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedRootNotLocal" xml:space="preserve">Це не абсолютний шлях до локальної папки</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedRootProtected" xml:space="preserve">Не скановано, бо це захищене розташування</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.ExportLinkRefused" xml:space="preserve">Експорт за посиланням неможливий</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerNotEnumerated" xml:space="preserve">Реєстрації не були перелічені під час сканування.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerNoSource" xml:space="preserve">Немає джерела для переліку реєстрацій.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerEnumerationException" xml:space="preserve">Під час переліку реєстрацій виникло виняток: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerEnumerationFailed" xml:space="preserve">Не вдалося перелічити реєстрації Windows Installer: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.InstallerFolderUnresolved" xml:space="preserve">Папку Installer не можна безпечно визначити.</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageSettingsUnreadable" xml:space="preserve">Пропущено, бо мовні параметри користувачів прочитано не повністю: {0}</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.LanguageListUnavailable" xml:space="preserve">Не вдалося отримати або розібрати список функцій мовного введення (код виходу {0}).</x:String>
+  <x:String x:Key="Text.Cleanup.Msg.AdvancedFolderNotScannable" xml:space="preserve">Цю папку не вдалося безпечно просканувати через посилання або захист.</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Name" xml:space="preserve">Зразки записаних передач</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.SampleRecordedTv.Description" xml:space="preserve">Видаляє лише відомий зразок запису, що входив до складу Windows 7. Інші файли в папці не зачіпаються.</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-app-cache" xml:space="preserve">Кеш програм Internet Explorer (AppCache)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-ime-cache" xml:space="preserve">Кеш Microsoft IME і звіти про помилки</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-office-solution-packages" xml:space="preserve">Кеш пакетів рішень Office</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-delivery-optimization-cache" xml:space="preserve">Кеш оптимізації доставки</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-etl-logs" xml:space="preserve">Журнали трасування ETL (папки Logs і LogFiles)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-system-temp" xml:space="preserve">Тимчасові файли системних служб Windows (SystemTemp)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.windows-icon-cache-root" xml:space="preserve">Застарілий файл кешу піктограм (IconCache.db)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.app-cursor-cached-data" xml:space="preserve">Кешовані дані Cursor (CachedData)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.package-npm-cache" xml:space="preserve">Кеш npm (.npm у папці користувача)</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-shared" xml:space="preserve">Спільні кеші й тимчасові файли Google Chrome</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-edge-shared" xml:space="preserve">Спільні кеші й тимчасові файли Microsoft Edge</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-vivaldi-shared" xml:space="preserve">Спільні кеші й тимчасові файли Vivaldi</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-brave-shared" xml:space="preserve">Спільні кеші й тимчасові файли Brave</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-shared" xml:space="preserve">Спільні кеші й тимчасові файли Google Chrome Beta</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-shared" xml:space="preserve">Спільні кеші й тимчасові файли Google Chrome Dev</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-rebuild" xml:space="preserve">Дані Safe Browsing і моделей Google Chrome</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-edge-rebuild" xml:space="preserve">Дані Safe Browsing і моделей Microsoft Edge</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-vivaldi-rebuild" xml:space="preserve">Дані Safe Browsing і моделей Vivaldi</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-brave-rebuild" xml:space="preserve">Дані Safe Browsing і моделей Brave</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-rebuild" xml:space="preserve">Дані Safe Browsing і моделей Google Chrome Beta</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-rebuild" xml:space="preserve">Дані Safe Browsing і моделей Google Chrome Dev</x:String>
+  <x:String x:Key="Text.Cleanup.Rule.legacy.browser-comet-rebuild" xml:space="preserve">Дані Safe Browsing і моделей Comet</x:String>
 </ResourceDictionary>

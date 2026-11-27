@@ -270,13 +270,12 @@ public sealed class RebootCacheCleanupTests
     [TestMethod]
     [DataRow(false)]
     [DataRow(true)]
-    public async Task 部分OFFの履歴も結果保存前crashや再ONで復活させずScheduledGroupIdsは混ぜない(bool crashBeforeResult)
+    public async Task 部分OFFの履歴も結果保存前crashや再ONで復活させない(bool crashBeforeResult)
     {
         var seen = new List<string[]>();
         var state = Create((_, ids, _) => { seen.Add(ids); return Task.FromResult(MaintenanceActionResult.Partial("locked")); });
         var icon = FileCleanupGroups.ShellCacheTargets[0];
         var font = FileCleanupGroups.ShellCacheTargets[2];
-        state.Environment.Settings.Current.ScheduledCleanupGroupIds = [];
         await state.Service.QueueAsync([icon, font], [icon, font], default);
         var preferences = new CleanupPreferences(state.Environment.Settings);
         preferences.SetTargetEnabled("cleanup-shell-cache", "Windows Explorer", false);
@@ -891,7 +890,7 @@ public sealed class RebootCacheCleanupTests
     [TestMethod]
     [DataRow(false)]
     [DataRow(true)]
-    public async Task 実ETL探索中の取消も旧予約の解除を待ち解除失敗はFailedにする(bool failCancel)
+    public async Task 対象列挙中の取消も旧予約の解除を待ち解除失敗はFailedにする(bool failCancel)
     {
         var seen = new List<string>();
         var state = Create((_, ids, _) => { seen.AddRange(ids); return Task.FromResult(MaintenanceActionResult.Ok()); });
@@ -902,13 +901,18 @@ public sealed class RebootCacheCleanupTests
         await state.Service.QueueAsync([font], [font], default);
         state.Environment.CurrentSid = Sid;
         if (failCancel) state.Store.FailWritePrefix = "job-";
-        var etlRoot = Path.Combine(_root, "enumeration-cancel");
-        Directory.CreateDirectory(Path.Combine(etlRoot, "child"));
+        var enumerationRoot = Path.Combine(_root, "enumeration-cancel");
+        Directory.CreateDirectory(Path.Combine(enumerationRoot, "child"));
         using var cancellation = new CancellationTokenSource();
         var observed = 0;
         IEnumerable<CleanupTarget> Targets()
         {
-            foreach (var target in FileCleanupGroups.EnumerateKnownTreeEtlTargets(etlRoot))
+            foreach (var target in new[]
+                     {
+                         CleanupTarget.Files(enumerationRoot, "*.etl"),
+                         CleanupTarget.Files(Path.Combine(enumerationRoot, "child"), "*.etl"),
+                         CleanupTarget.Files(Path.Combine(enumerationRoot, "child2"), "*.etl"),
+                     })
             {
                 if (++observed == 2) cancellation.Cancel();
                 yield return target;

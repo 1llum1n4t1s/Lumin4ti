@@ -1,0 +1,16 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Lumin4ti.UI.Views.CommonCleanPromptDialog"
+        Title="{DynamicResource Text.Cleanup.Confirm.Title}"
+        Width="480" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource Brush.Window}">
+  <StackPanel Margin="20" Spacing="16">
+    <TextBlock x:Name="BodyText" TextWrapping="Wrap" />
+    <WrapPanel Orientation="Horizontal">
+      <Button x:Name="PrimaryButton" Classes="danger" Margin="0,0,8,8" />
+      <Button x:Name="SecondaryButton" Margin="0,0,8,8" />
+      <Button x:Name="AbortButton" Margin="0,0,8,8" />
+    </WrapPanel>
+  </StackPanel>
+</Window>

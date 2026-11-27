@@ -1,0 +1,213 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Lumin4ti.UI.ViewModels"
+             x:Class="Lumin4ti.UI.Views.AdvancedCleanView"
+             x:DataType="vm:AdvancedCleanViewModel">
+
+  <!--  ドライブ選択 → 走査 → 種別ごとの結果と 5 列の一覧 (仮想化) → 選択 → 確認 → 削除。自動では走査も削除もしない。  -->
+  <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto,Auto" Margin="8,0">
+    <TextBlock Grid.Row="0" Classes="h1" Text="{DynamicResource Text.Cleanup.Advanced.Title}" />
+    <TextBlock Grid.Row="1" Classes="caption" TextWrapping="Wrap" Margin="0,0,0,10"
+               Text="{DynamicResource Text.Cleanup.Advanced.Description}" />
+
+    <StackPanel Grid.Row="2" Spacing="6" Margin="0,0,0,8" IsEnabled="{Binding CanScan}">
+      <TextBlock Text="{DynamicResource Text.Cleanup.Advanced.Drives}" FontWeight="SemiBold" />
+      <ItemsControl ItemsSource="{Binding Drives}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel Orientation="Horizontal" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:AdvancedCleanDriveViewModel">
+            <!--  文字列を直接 Content にすると "_" がアクセスキー扱いで消えるため、TextBlock で包む  -->
+            <CheckBox Margin="0,0,16,0" IsChecked="{Binding IsSelected}">
+              <TextBlock Text="{Binding DisplayName}" />
+            </CheckBox>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <WrapPanel Orientation="Horizontal">
+        <CheckBox Margin="0,0,16,0" IsChecked="{Binding IncludeZeroByte}"
+                  Content="{DynamicResource Text.Cleanup.Advanced.Option.ZeroByte}" />
+        <CheckBox Margin="0,0,16,0" IsChecked="{Binding IncludeInvalidShortcuts}"
+                  Content="{DynamicResource Text.Cleanup.Advanced.Option.InvalidShortcuts}" />
+        <CheckBox Margin="0,0,8,0" IsChecked="{Binding IncludeOlder}"
+                  Content="{DynamicResource Text.Cleanup.Advanced.Option.OlderThan}" />
+        <NumericUpDown Width="130" Minimum="1" Maximum="36500" Increment="30" FormatString="0"
+                       Value="{Binding OlderThanDays}" IsEnabled="{Binding IncludeOlder}"
+                       AutomationProperties.Name="{DynamicResource Text.Cleanup.Advanced.Option.Days}" />
+      </WrapPanel>
+    </StackPanel>
+
+    <WrapPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,8">
+      <Button Margin="0,0,8,6" Content="{Binding ScanButtonText}"
+              Command="{Binding ScanCommand}" IsEnabled="{Binding CanScan}" />
+      <Button Margin="0,0,8,6" Content="{DynamicResource Text.Cleanup.Action.CancelScan}"
+              Command="{Binding CancelCommand}" IsVisible="{Binding CanCancel}" />
+      <Button Margin="0,0,8,6" Content="{DynamicResource Text.Cleanup.Select.Recommended}"
+              Command="{Binding SelectRecommendedCommand}" IsEnabled="{Binding CanScan}" IsVisible="{Binding HasResults}" />
+      <Button Margin="0,0,8,6" Content="{DynamicResource Text.Cleanup.Advanced.SelectSafe}"
+              Command="{Binding SelectSafeCommand}" IsEnabled="{Binding CanScan}" IsVisible="{Binding HasResults}" />
+      <Button Margin="0,0,8,6" Content="{DynamicResource Text.Cleanup.Select.All}"
+              Command="{Binding SelectAllCommand}" IsEnabled="{Binding CanScan}" IsVisible="{Binding HasResults}" />
+      <Button Margin="0,0,8,6" Content="{DynamicResource Text.Cleanup.Select.None}"
+              Command="{Binding SelectNoneCommand}" IsEnabled="{Binding CanScan}" IsVisible="{Binding HasResults}" />
+      <Button Classes="danger" Margin="0,0,8,6" Content="{DynamicResource Text.Cleanup.Action.Clean}"
+              Command="{Binding RequestDeleteCommand}" IsEnabled="{Binding CanDelete}" IsVisible="{Binding HasResults}" />
+      <TextBlock Margin="0,0,0,6" VerticalAlignment="Center" Classes="caption"
+                 Text="{Binding SelectionText}" IsVisible="{Binding HasResults}" />
+    </WrapPanel>
+
+    <StackPanel Grid.Row="4" Spacing="4" IsVisible="{Binding IsRunning}" Margin="0,0,0,8">
+      <ProgressBar IsIndeterminate="True" AutomationProperties.Name="{DynamicResource Text.Cleanup.A11y.Progress}" />
+      <TextBlock Classes="caption" TextWrapping="Wrap" Text="{Binding ProgressText}" />
+    </StackPanel>
+
+    <Grid Grid.Row="5" ColumnDefinitions="210,8,*" MinHeight="220" IsVisible="{Binding HasResults}">
+      <!--  左: 種別ごとの件数とサイズ (選ぶと一覧を絞り込む) と、カスタムフォルダー  -->
+      <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="6">
+          <TextBlock FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding KindsHeaderText}" IsVisible="{Binding HasScan}" />
+          <Button Command="{Binding ShowAllKindsCommand}" HorizontalAlignment="Stretch"
+                  IsEnabled="{Binding SelectedGroup, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <TextBlock Text="{Binding ShowAllText}" TextWrapping="Wrap" />
+          </Button>
+          <ListBox ItemsSource="{Binding Groups}" SelectedItem="{Binding SelectedGroup}"
+                   Background="Transparent" BorderThickness="0">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:AdvancedCleanGroupViewModel">
+                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                  <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Grid.Row="0" Grid.Column="1" Classes="caption" Text="{Binding CountText}" />
+                  <TextBlock Grid.Row="1" Grid.Column="0" Classes="caption" Text="{Binding GroupText}" />
+                  <TextBlock Grid.Row="1" Grid.Column="1" Classes="caption" Text="{Binding SizeText}" />
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+
+          <TextBlock FontWeight="SemiBold" Margin="0,8,0,0" Text="{DynamicResource Text.Cleanup.Advanced.CustomFolders}"
+                     IsVisible="{Binding HasCustomFolders}" />
+          <ItemsControl ItemsSource="{Binding CustomFolders}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:AdvancedCleanFolderViewModel">
+                <CheckBox IsChecked="{Binding IsSelected}" IsEnabled="{Binding IsSelectable}" Margin="0,0,0,4">
+                  <StackPanel>
+                    <TextBlock Text="{Binding Path}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Path}" />
+                    <TextBlock Classes="caption" TextWrapping="Wrap" Text="{Binding SummaryText}" />
+                  </StackPanel>
+                </CheckBox>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </ScrollViewer>
+
+      <!--  右: 絞り込み・並べ替え・5 列の一覧 (仮想化)  -->
+      <Grid Grid.Column="2" RowDefinitions="Auto,Auto,*">
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,6" IsVisible="{Binding HasScan}">
+          <TextBox Grid.Column="0" Text="{Binding FilterText}"
+                   PlaceholderText="{DynamicResource Text.Cleanup.Filter.Placeholder}" />
+          <TextBlock Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center" Classes="caption" Text="{Binding SortStateText}" />
+        </Grid>
+        <WrapPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,6" IsVisible="{Binding HasCurrentRow}">
+          <Button Margin="0,0,8,0" Content="{DynamicResource Text.Cleanup.Action.OpenLocation}"
+                  Command="{Binding OpenLocationCommand}" CommandParameter="{Binding CurrentRow}" />
+          <Button Margin="0,0,8,0" Content="{DynamicResource Text.Cleanup.Action.Ignore}"
+                  Command="{Binding IgnoreFileCommand}" CommandParameter="{Binding CurrentRow}" />
+          <Button Margin="0,0,8,0" Content="{Binding IgnoreFolderText}"
+                  Command="{Binding IgnoreFolderCommand}" CommandParameter="{Binding CurrentRow}" />
+        </WrapPanel>
+        <!--  5 列 + 選択 + 安全性の固定幅だけで 400px 以上あり、最小幅では名前・フォルダー列が潰れる。
+              一覧の最小幅を決め、足りない分は横スクロールにする。  -->
+        <ScrollViewer x:Name="ResultsScroll" Grid.Row="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+        <Grid x:Name="ResultsGrid" RowDefinitions="Auto,*" Width="780">
+        <Grid Grid.Row="0" ColumnDefinitions="28,2*,3*,80,130,100,150" Margin="0,0,0,2" IsVisible="{Binding HasScan}">
+          <Button Grid.Column="1" Classes="flat" Padding="8,4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                  Content="{DynamicResource Text.Cleanup.Column.Name}" Command="{Binding SortByCommand}" CommandParameter="Name" />
+          <Button Grid.Column="2" Classes="flat" Padding="8,4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                  Content="{DynamicResource Text.Cleanup.Column.Folder}" Command="{Binding SortByCommand}" CommandParameter="Folder" />
+          <Button Grid.Column="3" Classes="flat" Padding="8,4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                  Content="{DynamicResource Text.Cleanup.Column.Size}" Command="{Binding SortByCommand}" CommandParameter="Size" />
+          <Button Grid.Column="4" Classes="flat" Padding="8,4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                  Content="{DynamicResource Text.Cleanup.Column.Modified}" Command="{Binding SortByCommand}" CommandParameter="Modified" />
+          <Button Grid.Column="5" Classes="flat" Padding="8,4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                  Content="{DynamicResource Text.Cleanup.Column.Rule}" Command="{Binding SortByCommand}" CommandParameter="Rule" />
+          <TextBlock Grid.Column="6" Margin="12,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"
+                     Text="{DynamicResource Text.Cleanup.Column.Safety}" />
+        </Grid>
+        <ListBox Grid.Row="1" ItemsSource="{Binding VisibleRows}" SelectedItem="{Binding CurrentRow}"
+                 SelectionMode="Single" Background="Transparent" BorderThickness="0"
+                 AutomationProperties.Name="{DynamicResource Text.Cleanup.A11y.Results}"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+          <ListBox.ItemsPanel>
+            <ItemsPanelTemplate>
+              <VirtualizingStackPanel />
+            </ItemsPanelTemplate>
+          </ListBox.ItemsPanel>
+          <ListBox.Styles>
+            <Style Selector="ListBoxItem">
+              <Setter Property="Padding" Value="0" />
+              <Setter Property="Margin" Value="0" />
+              <Setter Property="MinHeight" Value="28" />
+              <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            </Style>
+            <Style Selector="TextBlock.warning">
+              <Setter Property="Foreground" Value="#D97706" />
+            </Style>
+          </ListBox.Styles>
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:AdvancedCleanRowViewModel">
+              <Grid ColumnDefinitions="28,2*,3*,80,130,100,150" Height="28" ToolTip.Tip="{Binding ToolTipText}">
+                <CheckBox Grid.Column="0" MinWidth="0" IsChecked="{Binding IsSelected}"
+                          AutomationProperties.Name="{Binding Name}" />
+                <TextBlock Grid.Column="1" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="{Binding Name}" />
+                <TextBlock Grid.Column="2" VerticalAlignment="Center" Classes="caption" TextTrimming="CharacterEllipsis" Text="{Binding Folder}" />
+                <TextBlock Grid.Column="3" VerticalAlignment="Center" Classes="caption" Text="{Binding SizeText}" />
+                <TextBlock Grid.Column="4" VerticalAlignment="Center" Classes="caption" Text="{Binding ModifiedText}" />
+                <TextBlock Grid.Column="5" VerticalAlignment="Center" Classes="caption" TextTrimming="CharacterEllipsis" Text="{Binding RuleText}" />
+                <TextBlock Grid.Column="6" Margin="12,0,0,0" VerticalAlignment="Center" Classes="caption"
+                           Classes.warning="{Binding IsWarning}" Text="{Binding SafetyText}" />
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+        </Grid>
+        </ScrollViewer>
+      </Grid>
+    </Grid>
+
+    <Border Grid.Row="6" Margin="0,8,0,0" Padding="12,10" CornerRadius="10"
+            Background="#18FF3B30" BorderBrush="#66FF3B30" BorderThickness="1"
+            IsVisible="{Binding IsConfirming}">
+      <StackPanel Spacing="8">
+        <TextBlock FontWeight="SemiBold" Text="{DynamicResource Text.Cleanup.Confirm.Title}" />
+        <ItemsControl ItemsSource="{Binding ConfirmLines}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="x:String">
+              <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,0,0,4" />
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <WrapPanel Orientation="Horizontal">
+          <Button Classes="danger" Margin="0,0,8,0" Content="{DynamicResource Text.Cleanup.Confirm.Run}"
+                  Command="{Binding ConfirmDeleteCommand}" />
+          <Button Content="{DynamicResource Text.Cleanup.Confirm.Back}" Command="{Binding CancelDeleteCommand}" />
+        </WrapPanel>
+      </StackPanel>
+    </Border>
+
+    <StackPanel Grid.Row="7" Margin="0,8,0,0" Spacing="2">
+      <TextBlock Classes="caption" TextWrapping="Wrap" Text="{Binding StatusText}"
+                 IsVisible="{Binding StatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      <ItemsControl ItemsSource="{Binding Notices}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="x:String">
+            <TextBlock Classes="caption" TextWrapping="Wrap" Text="{Binding}" />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+  </Grid>
+</UserControl>

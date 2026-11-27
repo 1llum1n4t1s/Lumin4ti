@@ -1,0 +1,227 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.android-studio-logs",
+      "name": "Android Studio",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Google\\AndroidStudio*\\log" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\AndroidStudio*\\log", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["studio64"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://developer.android.com/studio/troubleshoot", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.intellij-idea-logs",
+      "name": "IntelliJ IDEA",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\JetBrains\\IntelliJIdea*\\log" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\JetBrains\\IntelliJIdea*\\log", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["idea64"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://www.jetbrains.com/help/idea/directories-used-by-the-ide-to-store-settings-caches-plugins-and-logs.html", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.pycharm-logs",
+      "name": "PyCharm",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\JetBrains\\PyCharm*\\log" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\JetBrains\\PyCharm*\\log", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["pycharm64"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://www.jetbrains.com/help/pycharm/directories-used-by-the-ide-to-store-settings-caches-plugins-and-logs.html", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.webstorm-logs",
+      "name": "WebStorm",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\JetBrains\\WebStorm*\\log" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\JetBrains\\WebStorm*\\log", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["webstorm64"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://www.jetbrains.com/help/webstorm/directories-used-by-the-ide-to-store-settings-caches-plugins-and-logs.html", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.dbeaver-logs",
+      "name": "DBeaver",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\DBeaverData\\workspace6\\.metadata" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%APPDATA%\\DBeaverData\\workspace6\\.metadata", "pattern": ".log", "recurse": false, "olderThanDays": null },
+        { "type": "files", "path": "%APPDATA%\\DBeaverData\\workspace6\\.metadata", "pattern": "dbeaver-debug.log", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": ["dbeaver"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://github.com/dbeaver/dbeaver/wiki/Log-files", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.docker-desktop-logs",
+      "name": "Docker Desktop",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Docker\\log\\vm" }
+      ],
+      "targets": [
+        { "type": "files", "path": "%LOCALAPPDATA%\\Docker\\log\\vm", "pattern": "init.log", "recurse": false, "olderThanDays": null }
+      ],
+      "processes": ["Docker Desktop", "com.docker.backend"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://docs.docker.com/engine/daemon/logs.md", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.github-desktop-logs",
+      "name": "GitHub Desktop",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\GitHub Desktop\\logs" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\GitHub Desktop\\logs", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["GitHubDesktop"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://raw.githubusercontent.com/desktop/desktop/development/app/src/lib/logging/get-log-path.ts", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://raw.githubusercontent.com/desktop/desktop/development/docs/known-issues.md", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.cursor-cache",
+      "name": "Cursor",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\Cursor\\Cache" },
+        { "path": "%APPDATA%\\Cursor\\GPUCache" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\Cursor\\Cache", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\Cursor\\Code Cache", "pattern": null, "olderThanDays": null },
+        { "type": "contents", "path": "%APPDATA%\\Cursor\\GPUCache", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["Cursor"],
+      "services": [],
+      "legacy": ["cleanup-app-cache|Cursor"],
+      "evidence": [
+        { "tier": "A", "url": "https://forum.cursor.com/t/completely-reinstall-cursor-and-remove-all-settings/1743/13", "checked": "2026-11-25" },
+        { "tier": "A", "url": "https://forum.cursor.com/t/cursor-not-working-on-windows/158817/12", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "app.revit-journals",
+      "name": "Autodesk Revit",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Autodesk\\Revit\\Autodesk Revit *\\Journals" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Autodesk\\Revit\\Autodesk Revit *\\Journals", "pattern": null, "olderThanDays": 30 }
+      ],
+      "processes": ["Revit"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://help.autodesk.com/cloudhelp/2014/ENU/Revit/files/GUID-477C6854-2724-4B5D-8B95-9657B636C48D.htm", "checked": "2026-11-25" }
+      ]
+    }
+  ]
+}

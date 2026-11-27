@@ -8,6 +8,8 @@ using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
 using Lumin4ti.Core.Services;
 using Lumin4ti.Core.Services.Windows;
+using Lumin4ti.Core.Services.Windows.Cleanup;
+using Lumin4ti.Core.Services.Windows.Cleanup.Slim;
 using Lumin4ti.UI.Services;
 using Lumin4ti.UI.ViewModels;
 using Lumin4ti.UI.Views;
@@ -112,8 +114,22 @@ public partial class App : Application
 
         services.AddSingleton(sp => new Services.UpdateService(sp.GetRequiredService<ISettingsService>().Current));
 
+        // クリーンアップ (通常・高度・スリム化・設定)。走査・削除は画面の操作でだけ始まり、構築時には何も実行しない。
+        services.AddSingleton<CleanupSettingsStore>();
+        services.AddSingleton<CleanupScanService>();
+        services.AddSingleton<CleanupRunService>();
+        services.AddSingleton<AdvancedScanLedger>();
+        services.AddSingleton<AdvancedCleanScanner>();
+        services.AddSingleton<AdvancedCleaner>();
+        services.AddSingleton<SlimService>();
+
         services.AddSingleton<VersionViewModel>();
         services.AddSingleton<DeviceCleanupViewModel>();
+        services.AddSingleton<CommonCleanViewModel>();
+        services.AddSingleton<AdvancedCleanViewModel>();
+        services.AddSingleton<SlimViewModel>();
+        services.AddSingleton<CleanupSettingsViewModel>();
+        services.AddSingleton<CleanupViewModel>();
         services.AddSingleton<MainWindowViewModel>();
     }
 }

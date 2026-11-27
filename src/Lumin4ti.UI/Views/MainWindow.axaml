@@ -22,6 +22,8 @@
             TintColor="{DynamicResource Color.Window}" />
       </ExperimentalAcrylicBorder.Material>
     </ExperimentalAcrylicBorder>
+    <!--  明るいデスクトップが透けても文字とのコントラストを保つテーマ色のスクリム (Lhamiel と同じ)  -->
+    <Border Background="{DynamicResource Brush.Window}" IsHitTestVisible="False" Opacity="0.5" />
 
     <Grid Margin="16,36,16,16" RowDefinitions="Auto,*" IsEnabled="{Binding !IsProcessing}">
       <TextBlock Text="{Binding Version.SettingsSaveStatusText}" Classes="caption" TextWrapping="Wrap" Margin="0,0,0,8"
@@ -47,7 +49,7 @@
               <TextBlock Text="{DynamicResource Text.Tab.Cleanup}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
             </StackPanel>
           </TabItem.Header>
-          <views:CommandCategoryView DataContext="{Binding Cleanup}" />
+          <views:CleanupView DataContext="{Binding Cleanup}" />
         </TabItem>
         <TabItem>
           <TabItem.Header>

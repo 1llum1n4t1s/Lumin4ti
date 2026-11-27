@@ -54,7 +54,6 @@
   <x:String x:Key="Text.Status.Busy" xml:space="preserve">別のメンテナンス操作が実行中です。完了後にもう一度お試しください。</x:String>
   <x:String x:Key="Text.Result.Partial" xml:space="preserve">⚠ 一部完了しました</x:String>
   <x:String x:Key="Text.CheckList.Targets" xml:space="preserve">削除する対象を選ぶ</x:String>
-  <x:String x:Key="Text.CheckList.ScheduledGroups" xml:space="preserve">サインイン時に実行する項目を選ぶ</x:String>
   <x:String x:Key="Text.CheckList.SaveFailed" xml:space="preserve">この選択の前回の保存に失敗しました（ログを確認してください）。</x:String>
   <!-- ===== Update dialog / operation status ===== -->
   <x:String x:Key="Text.UpdateDialog.Title" xml:space="preserve">アップデート</x:String>
@@ -78,8 +77,6 @@
   <x:String x:Key="Text.Toggle.CustomPlaceholder" xml:space="preserve">カスタム</x:String>
   <x:String x:Key="Text.Toggle.RecallStateMissing" xml:space="preserve">DISM の出力に Recall の状態が見つかりません。詳細はログを確認してください。</x:String>
   <x:String x:Key="Text.Toggle.RecallStateUnsupported" xml:space="preserve">DISM が返した Recall の状態を判定できません。詳細はログを確認してください。</x:String>
-  <x:String x:Key="Text.Toggle.ScheduledTaskOtherUser" xml:space="preserve">別の Windows ユーザーが登録したタスクのため操作できません。</x:String>
-  <x:String x:Key="Text.Toggle.ScheduledTaskOwnershipUnknown" xml:space="preserve">登録済みタスクの所有者を確認できないため操作できません。</x:String>
   <x:String x:Key="Text.Button.BatchOn" xml:space="preserve">一括ON</x:String>
   <x:String x:Key="Text.Button.BatchOff" xml:space="preserve">一括OFF</x:String>
   <x:String x:Key="Text.Action.uwp-background-off.Label" xml:space="preserve">UWPバックグラウンド実行</x:String>
@@ -88,10 +85,126 @@
   <x:String x:Key="Text.Version.DevelopmentBuild" xml:space="preserve">開発ビルド</x:String>
   <x:String x:Key="Text.Version.Unavailable" xml:space="preserve">バージョンを取得できませんでした</x:String>
   <x:String x:Key="Text.Settings.SaveFailed" xml:space="preserve">言語・更新設定の前回の保存に失敗しました（ログを確認してください）。</x:String>
-  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">設定を読み込めないため、原本を保護して保存を停止し、サインイン時クリーンアップも実行しません。変更はこの起動中だけ有効です。</x:String>
+  <x:String x:Key="Text.Settings.SaveSuppressed" xml:space="preserve">設定を読み込めないため、原本を保護して保存を停止します。変更はこの起動中だけ有効です。</x:String>
   <x:String x:Key="Text.CheckList.Empty" xml:space="preserve">前回の確認では、対象が見つかりませんでした。</x:String>
   <x:String x:Key="Text.CheckList.RefreshHint" xml:space="preserve">一覧は開き直すと更新されます。実行時は除外されていない新しい対象も含みます。</x:String>
   <x:String x:Key="Text.Processing.Title" xml:space="preserve">処理中</x:String>
   <x:String x:Key="Text.Processing.Wait" xml:space="preserve">処理が完了するまでお待ちください。</x:String>
   <x:String x:Key="Text.Processing.Cancelling" xml:space="preserve">キャンセル後の後処理が完了するまでお待ちください。</x:String>
+
+  <!-- ===== Cleanup (standard / advanced / slim / settings) ===== -->
+
+  <!-- 内側タブ -->
+  <x:String x:Key="Text.Cleanup.Tab.Common" xml:space="preserve">通常</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Advanced" xml:space="preserve">高度</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Slim" xml:space="preserve">スリム化</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Settings" xml:space="preserve">設定</x:String>
+  <x:String x:Key="Text.Cleanup.Tab.Other" xml:space="preserve">その他</x:String>
+
+  <!-- 共通の操作・列見出し -->
+  <x:String x:Key="Text.Cleanup.Action.Scan" xml:space="preserve">走査</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Rescan" xml:space="preserve">再走査</x:String>
+  <x:String x:Key="Text.Cleanup.Action.CancelScan" xml:space="preserve">走査を中断</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Clean" xml:space="preserve">選択した項目を削除</x:String>
+  <x:String x:Key="Text.Cleanup.Action.ExportText" xml:space="preserve">テキストで書き出す</x:String>
+  <x:String x:Key="Text.Cleanup.Action.OpenLocation" xml:space="preserve">場所を開く</x:String>
+  <x:String x:Key="Text.Cleanup.Action.Ignore" xml:space="preserve">無視（今後の走査から除外）</x:String>
+  <x:String x:Key="Text.Cleanup.Select.Recommended" xml:space="preserve">おすすめ</x:String>
+  <x:String x:Key="Text.Cleanup.Select.All" xml:space="preserve">すべて選択</x:String>
+  <x:String x:Key="Text.Cleanup.Select.None" xml:space="preserve">すべて解除</x:String>
+  <x:String x:Key="Text.Cleanup.Select.Invert" xml:space="preserve">選択を反転</x:String>
+  <x:String x:Key="Text.Cleanup.Filter.Placeholder" xml:space="preserve">項目を絞り込む</x:String>
+  <x:String x:Key="Text.Cleanup.Filter.HideEmpty" xml:space="preserve">削除できるものがない項目を隠す</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Name" xml:space="preserve">項目</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Category" xml:space="preserve">分類</x:String>
+  <x:String x:Key="Text.Cleanup.Column.State" xml:space="preserve">状態</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Files" xml:space="preserve">ファイル数</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Size" xml:space="preserve">サイズ</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Impact" xml:space="preserve">影響</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Folder" xml:space="preserve">フォルダー</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Modified" xml:space="preserve">更新日時</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Rule" xml:space="preserve">規則</x:String>
+  <x:String x:Key="Text.Cleanup.Column.Safety" xml:space="preserve">安全度</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Results" xml:space="preserve">走査結果の一覧</x:String>
+  <x:String x:Key="Text.Cleanup.A11y.Progress" xml:space="preserve">走査の進捗</x:String>
+
+  <!-- 通常: 画面・走査 -->
+  <x:String x:Key="Text.Cleanup.Common.Title" xml:space="preserve">通常のクリーンアップ</x:String>
+  <x:String x:Key="Text.Cleanup.Common.Description" xml:space="preserve">削除できるものを走査で調べてから、選んだ項目だけを削除します。走査では何も変更しません。</x:String>
+
+  <!-- 通常: 確認 -->
+  <x:String x:Key="Text.Cleanup.Confirm.Title" xml:space="preserve">削除の確認</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Run" xml:space="preserve">削除する</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.Back" xml:space="preserve">戻る</x:String>
+  <x:String x:Key="Text.Cleanup.Confirm.UserFiles.Check" xml:space="preserve">利用者のファイルが完全に削除されることを理解しました</x:String>
+
+  <!-- 通常: 実行中のプロセスの確認 -->
+  <x:String x:Key="Text.Cleanup.Process.Close" xml:space="preserve">終了する</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Skip" xml:space="preserve">この項目を飛ばす</x:String>
+  <x:String x:Key="Text.Cleanup.Process.Abort" xml:space="preserve">中止</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceYes" xml:space="preserve">強制終了する</x:String>
+  <x:String x:Key="Text.Cleanup.Process.ForceNo" xml:space="preserve">強制終了しない</x:String>
+
+  <!-- 書き出し・場所を開く -->
+  <x:String x:Key="Text.Cleanup.Export.Title" xml:space="preserve">走査結果を書き出す</x:String>
+
+  <!-- 高度: 画面 -->
+  <x:String x:Key="Text.Cleanup.Advanced.Title" xml:space="preserve">高度なクリーンアップ</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Description" xml:space="preserve">選んだドライブ全体から、不要になりやすいファイルをパターンで探します。走査では何も変更しません。結果を確かめてから、選んだファイルだけを削除します。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Drives" xml:space="preserve">走査するドライブ</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.ZeroByte" xml:space="preserve">0 バイトのファイルを含める</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.InvalidShortcuts" xml:space="preserve">リンク先がないショートカットを含める</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.OlderThan" xml:space="preserve">指定した日数より古いファイルを含める</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.Option.Days" xml:space="preserve">日数</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.SelectSafe" xml:space="preserve">安全なものだけ選ぶ</x:String>
+
+  <!-- 高度: 走査・結果 -->
+  <x:String x:Key="Text.Cleanup.Advanced.CustomFolders" xml:space="preserve">カスタムフォルダー</x:String>
+
+  <!-- スリム化: 画面 -->
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Title" xml:space="preserve">スリム化</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Description" xml:space="preserve">Windows の不要なデータを整理して容量を空けます。元に戻せない項目や、以後の修復に影響し得る項目があるため、すべて未選択から始まります。</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Run" xml:space="preserve">選択した項目を実行</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.CreateRestorePoint" xml:space="preserve">実行前に復元ポイントを作成する</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Item" xml:space="preserve">項目</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Status" xml:space="preserve">状態</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Column.Size" xml:space="preserve">空きの見込み</x:String>
+
+  <!-- スリム化: 確認・復元ポイント・結果 -->
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Title" xml:space="preserve">スリム化の確認</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Title" xml:space="preserve">元に戻せない操作の確認</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.Confirm.Irreversible.Check" xml:space="preserve">更新プログラムをアンインストールできなくなることを理解しました</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Unavailable.Title" xml:space="preserve">復元ポイントを利用できません</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.ContinueWithout" xml:space="preserve">復元ポイントなしで続行</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.Abort" xml:space="preserve">中止</x:String>
+  <x:String x:Key="Text.Cleanup.Slim.Ui.RestorePoint.EnableAndRetry" xml:space="preserve">システムの保護を有効にして再試行</x:String>
+
+  <!-- 設定 -->
+  <x:String x:Key="Text.Cleanup.Settings.Title" xml:space="preserve">クリーンアップの設定</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Exclusions" xml:space="preserve">除外</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Exclusions.Description" xml:space="preserve">除外したものは、走査にも削除にも使われず、そのまま残ります。</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Add" xml:space="preserve">追加</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Remove" xml:space="preserve">リストから外す</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import" xml:space="preserve">インポート</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export" xml:space="preserve">エクスポート</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Import.Title" xml:space="preserve">除外のインポート</x:String>
+  <x:String x:Key="Text.Cleanup.Exclusion.Export.Title" xml:space="preserve">除外のエクスポート</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Options" xml:space="preserve">削除の方法</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SecureDelete" xml:space="preserve">安全な削除（1 回上書きしてから削除）</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.SecureDelete.Note" xml:space="preserve">ファイルの内容を 1 回上書きしてから削除します。SSD では完全な消去を保証しません。ハードリンクのあるファイルと、圧縮・スパース・暗号化されたファイルは上書きせず、削除だけを行います。</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CreateRestorePoint" xml:space="preserve">スリム化の前に復元ポイントを作成する</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CreateRestorePoint.Note" xml:space="preserve">24 時間以内に作成された復元ポイントがあれば、それを利用します。システムの保護が無効なときは、確認のうえで有効にできます。</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.OpenSystemRestore" xml:space="preserve">システムの復元を開く</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders" xml:space="preserve">カスタムフォルダー</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Description" xml:space="preserve">高度なクリーンアップで、中身だけを空にするフォルダーを指定します。Windows・Program Files・ProgramData・ほかの利用者のプロファイル・ドライブ直下・認証情報を含む場所は指定できません。追加したフォルダーは、毎回未選択から始まります。</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Add" xml:space="preserve">フォルダーを追加…</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.CustomFolders.Pick" xml:space="preserve">カスタムフォルダーを選択</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns" xml:space="preserve">ユーザー定義の拡張子・ファイル名</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.Description" xml:space="preserve">高度なクリーンアップの検索に追加します。一致したものは、毎回未選択から始まります。</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Patterns.BuiltIn" xml:space="preserve">組み込みのパターン</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules" xml:space="preserve">項目ごとの既定の選択</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules.Description" xml:space="preserve">通常のクリーンアップで、おすすめに従う既定の選択を項目ごとに上書きします。</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Rules.Reset" xml:space="preserve">既定に戻す</x:String>
+  <x:String x:Key="Text.Cleanup.Settings.Totals" xml:space="preserve">実績</x:String>
+  <!-- ===== /Cleanup ===== -->
 </ResourceDictionary>

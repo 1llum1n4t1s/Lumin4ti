@@ -1,0 +1,731 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "browser.chrome",
+      "name": "Google Chrome",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "chromium",
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\Google\\Chrome\\User Data"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\*\\Cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        },
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\DeferredBrowserMetrics",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": ["chrome"],
+      "services": [],
+      "legacy": [
+        "cleanup-browser-cache|%LOCALAPPDATA%\\Google\\Chrome"
+      ],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/metrics/chrome_metrics_service_client.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_constants.h",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/history_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/sessions/core/session_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/bookmarks/browser/bookmark_storage.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/profiles/profile_manager.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/storage_partition_impl.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/blob_storage/chrome_blob_storage_context.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/omnibox/browser/shortcuts_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/metrics/persistent_histograms.cc",
+          "checked": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "legacy.browser-chrome-shared", "name": "Google Chrome shared caches and temporary files", "nameKey": "Text.Cleanup.Rule.legacy.browser-chrome-shared", "kind": "cache", "category": "browserCache", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\Google\\Chrome\\User Data" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome\\Temp" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\BrowserMetrics" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\component_crx_cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\Crashpad" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\extensions_crx_cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\GraphiteDawnCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\GrShaderCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\ShaderCache" }
+      ],
+      "processes": ["chrome"], "services": [],
+      "legacy": [ "cleanup-browser-cache|%LOCALAPPDATA%\\Google\\Chrome" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.browser-chrome-rebuild", "name": "Google Chrome Safe Browsing and model data", "nameKey": "Text.Cleanup.Rule.legacy.browser-chrome-rebuild", "kind": "cache", "category": "browserCache", "scope": "user",
+      "recommended": false, "impact": "rebuild", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\Google\\Chrome\\User Data" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\Safe Browsing" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\CertificateRevocation" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Google\\Chrome\\User Data\\optimization_guide_model_store" }
+      ],
+      "processes": ["chrome"], "services": [],
+      "legacy": [ "cleanup-browser-cache|%LOCALAPPDATA%\\Google\\Chrome" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "browser.chromium",
+      "name": "Chromium",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "chromium",
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\Chromium\\User Data"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Chromium\\User Data\\*\\Cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        },
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Chromium\\User Data\\DeferredBrowserMetrics",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": ["chrome"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/metrics/chrome_metrics_service_client.cc",
+          "checked": "2026-11-27"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_constants.h",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/history_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/sessions/core/session_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/bookmarks/browser/bookmark_storage.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/profiles/profile_manager.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/storage_partition_impl.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/blob_storage/chrome_blob_storage_context.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/omnibox/browser/shortcuts_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/metrics/persistent_histograms.cc",
+          "checked": "2026-11-27"
+        }
+      ]
+    },
+    {
+      "id": "browser.edge",
+      "name": "Microsoft Edge",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "chromium",
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\*\\Cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": ["msedge"],
+      "services": [],
+      "legacy": [
+        "cleanup-browser-cache|%LOCALAPPDATA%\\Microsoft\\Edge"
+      ],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://learn.microsoft.com/en-us/deployedge/edge-learnmore-create-user-directory-vars",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_constants.h",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/history_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/sessions/core/session_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/bookmarks/browser/bookmark_storage.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/profiles/profile_manager.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/storage_partition_impl.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/blob_storage/chrome_blob_storage_context.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/omnibox/browser/shortcuts_constants.cc",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "legacy.browser-edge-shared", "name": "Microsoft Edge shared caches and temporary files", "nameKey": "Text.Cleanup.Rule.legacy.browser-edge-shared", "kind": "cache", "category": "browserCache", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Edge\\Temp" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\BrowserMetrics" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\component_crx_cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\Crashpad" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\extensions_crx_cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\GraphiteDawnCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\GrShaderCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\ShaderCache" }
+      ],
+      "processes": ["msedge"], "services": [],
+      "legacy": [ "cleanup-browser-cache|%LOCALAPPDATA%\\Microsoft\\Edge" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.browser-edge-rebuild", "name": "Microsoft Edge Safe Browsing and model data", "nameKey": "Text.Cleanup.Rule.legacy.browser-edge-rebuild", "kind": "cache", "category": "browserCache", "scope": "user",
+      "recommended": false, "impact": "rebuild", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\Safe Browsing" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\CertificateRevocation" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\Edge\\User Data\\optimization_guide_model_store" }
+      ],
+      "processes": ["msedge"], "services": [],
+      "legacy": [ "cleanup-browser-cache|%LOCALAPPDATA%\\Microsoft\\Edge" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "browser.vivaldi",
+      "name": "Vivaldi",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "chromium",
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\Vivaldi\\User Data"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Vivaldi\\User Data\\*\\Cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": ["vivaldi"],
+      "services": [],
+      "legacy": [
+        "cleanup-browser-cache|%LOCALAPPDATA%\\Vivaldi"
+      ],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://help.vivaldi.com/desktop/privacy/preventing-vivaldi-profiles-from-being-uploaded-to-git-repositories/",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_constants.h",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/history_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/sessions/core/session_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/bookmarks/browser/bookmark_storage.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/profiles/profile_manager.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/storage_partition_impl.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/blob_storage/chrome_blob_storage_context.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/omnibox/browser/shortcuts_constants.cc",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "legacy.browser-vivaldi-shared", "name": "Vivaldi shared caches and temporary files", "nameKey": "Text.Cleanup.Rule.legacy.browser-vivaldi-shared", "kind": "cache", "category": "browserCache", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\Vivaldi\\User Data" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Vivaldi\\Temp" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Vivaldi\\User Data\\BrowserMetrics" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Vivaldi\\User Data\\component_crx_cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Vivaldi\\User Data\\Crashpad" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Vivaldi\\User Data\\extensions_crx_cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Vivaldi\\User Data\\GraphiteDawnCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Vivaldi\\User Data\\GrShaderCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Vivaldi\\User Data\\ShaderCache" }
+      ],
+      "processes": ["vivaldi"], "services": [],
+      "legacy": [ "cleanup-browser-cache|%LOCALAPPDATA%\\Vivaldi" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.browser-vivaldi-rebuild", "name": "Vivaldi Safe Browsing and model data", "nameKey": "Text.Cleanup.Rule.legacy.browser-vivaldi-rebuild", "kind": "cache", "category": "browserCache", "scope": "user",
+      "recommended": false, "impact": "rebuild", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\Vivaldi\\User Data" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Vivaldi\\User Data\\Safe Browsing" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Vivaldi\\User Data\\CertificateRevocation" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Vivaldi\\User Data\\optimization_guide_model_store" }
+      ],
+      "processes": ["vivaldi"], "services": [],
+      "legacy": [ "cleanup-browser-cache|%LOCALAPPDATA%\\Vivaldi" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "browser.yandex",
+      "name": "Yandex Browser",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "chromium",
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\Yandex\\YandexBrowser\\User Data"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Yandex\\YandexBrowser\\User Data\\*\\Cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": ["browser"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://yandex.com/support/browser/personalization/profile.html",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_constants.h",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/history_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/sessions/core/session_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/bookmarks/browser/bookmark_storage.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/profiles/profile_manager.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/storage_partition_impl.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/blob_storage/chrome_blob_storage_context.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/omnibox/browser/shortcuts_constants.cc",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "browser.brave",
+      "name": "Brave",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "chromium",
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\*\\Cache",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": ["brave"],
+      "services": [],
+      "legacy": [
+        "cleanup-browser-cache|%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser"
+      ],
+      "evidence": [
+        {
+          "tier": "B",
+          "url": "https://community.brave.app/t/where-brave-browser-profiles-are-located/646708",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "B",
+          "url": "https://gist.github.com/hosaka/bd889b596f25292e14c97d558ad6cff8",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/docs/user_data_dir.md",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/common/chrome_constants.h",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/history/core/browser/history_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/sessions/core/session_constants.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/bookmarks/browser/bookmark_storage.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/chrome/browser/profiles/profile_manager.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/storage_partition_impl.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/content/browser/blob_storage/chrome_blob_storage_context.cc",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://chromium.googlesource.com/chromium/src/+/main/components/omnibox/browser/shortcuts_constants.cc",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "legacy.browser-brave-shared", "name": "Brave shared caches and temporary files", "nameKey": "Text.Cleanup.Rule.legacy.browser-brave-shared", "kind": "cache", "category": "browserCache", "scope": "user",
+      "recommended": true, "impact": "junk", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\Temp" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\BrowserMetrics" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\component_crx_cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\Crashpad" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\extensions_crx_cache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\GraphiteDawnCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\GrShaderCache" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\ShaderCache" }
+      ],
+      "processes": ["brave"], "services": [],
+      "legacy": [ "cleanup-browser-cache|%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "legacy.browser-brave-rebuild", "name": "Brave Safe Browsing and model data", "nameKey": "Text.Cleanup.Rule.legacy.browser-brave-rebuild", "kind": "cache", "category": "browserCache", "scope": "user",
+      "recommended": false, "impact": "rebuild", "warningKey": null, "engine": null,
+      "detect": [ { "path": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data" } ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\Safe Browsing" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\CertificateRevocation" },
+        { "type": "contents", "path": "%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser\\User Data\\optimization_guide_model_store" }
+      ],
+      "processes": ["brave"], "services": [],
+      "legacy": [ "cleanup-browser-cache|%LOCALAPPDATA%\\BraveSoftware\\Brave-Browser" ],
+      "evidence": [ { "tier": "L", "url": "", "checked": "2026-11-26" } ]
+    },
+    {
+      "id": "browser.firefox",
+      "name": "Firefox",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "browserCache",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": "gecko",
+      "detect": [
+        {
+          "path": "%APPDATA%\\Mozilla\\Firefox\\Profiles"
+        },
+        {
+          "path": "%LOCALAPPDATA%\\Mozilla\\Firefox\\Profiles"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Mozilla\\Firefox\\Profiles\\*\\cache2",
+          "pattern": null,
+          "recurse": false,
+          "olderThanDays": null
+        }
+      ],
+      "processes": ["firefox"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/browser/moz.configure",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/browser/branding/official/configure.sh",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/toolkit/xre/nsXREDirProvider.cpp",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/netwerk/cache2/CacheFileIOManager.cpp",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/browser/components/sessionstore/SessionFile.sys.mjs",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/toolkit/components/places/PlacesBackups.sys.mjs",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/toolkit/components/places/Database.h",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/toolkit/components/satchel/FormHistory.sys.mjs",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://raw.githubusercontent.com/mozilla-firefox/firefox/main/netwerk/cookie/CookiePersistentStorage.cpp",
+          "checked": "2026-11-26"
+        }
+      ]
+    }
+  ]
+}

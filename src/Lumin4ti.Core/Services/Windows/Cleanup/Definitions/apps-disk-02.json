@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.nero-support-logs",
+      "name": "Nero",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%TEMP%\\NeroSupport" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%TEMP%\\NeroSupport", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://nerosupport.freshdesk.com/en/support/solutions/articles/44000808581-i-have-encountered-a-technical-issue-how-can-i-get-help-", "checked": "2026-11-26" }
+      ]
+    }
+  ]
+}

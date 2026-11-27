@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "components.paint-recent",
+      "name": "Paint",
+      "nameKey": null,
+      "kind": "recent",
+      "category": "components",
+      "scope": "user",
+      "recommended": false,
+      "impact": "trace",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "registry": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Applets\\Paint\\Recent File List" }
+      ],
+      "targets": [
+        { "type": "registryTree", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Applets\\Paint\\Recent File List" }
+      ],
+      "processes": ["mspaint"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "B", "url": "https://winaero.com/clear-recent-pictures-in-ms-paint-on-windows-10", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://forensics.wiki/list_of_windows_mru_locations", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "components.wordpad-recent",
+      "name": "WordPad",
+      "nameKey": null,
+      "kind": "recent",
+      "category": "components",
+      "scope": "user",
+      "recommended": false,
+      "impact": "trace",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "registry": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Applets\\Wordpad\\Recent File List" }
+      ],
+      "targets": [
+        { "type": "registryTree", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Applets\\Wordpad\\Recent File List" }
+      ],
+      "processes": ["wordpad"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "B", "url": "https://winaero.com/how-to-clear-recent-documents-history-in-wordpad-on-windows-10", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://forensics.wiki/list_of_windows_mru_locations", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "components.media-player-recent",
+      "name": "Windows Media Player",
+      "nameKey": null,
+      "kind": "recent",
+      "category": "components",
+      "scope": "user",
+      "recommended": false,
+      "impact": "trace",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "registry": "HKCU\\Software\\Microsoft\\MediaPlayer\\Player\\RecentFileList" },
+        { "registry": "HKCU\\Software\\Microsoft\\MediaPlayer\\Player\\RecentURLList" }
+      ],
+      "targets": [
+        { "type": "registryTree", "key": "HKCU\\Software\\Microsoft\\MediaPlayer\\Player\\RecentFileList" },
+        { "type": "registryTree", "key": "HKCU\\Software\\Microsoft\\MediaPlayer\\Player\\RecentURLList" }
+      ],
+      "processes": ["wmplayer"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "B", "url": "https://ftp.zx.net.nz/pub/mirror/ftp.microsoft.com/MISC/KB/en-us/243/621.HTM", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://forensics.wiki/list_of_windows_mru_locations", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "components.regedit-last-key",
+      "name": "Registry Editor",
+      "nameKey": null,
+      "kind": "history",
+      "category": "components",
+      "scope": "user",
+      "recommended": false,
+      "impact": "trace",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "registry": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Applets\\Regedit", "valueName": "LastKey" }
+      ],
+      "targets": [
+        { "type": "registryValues", "key": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Applets\\Regedit", "values": ["LastKey"] }
+      ],
+      "processes": ["regedit"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "B", "url": "https://ftp.zx.net.nz/pub/archive/ftp.microsoft.com/MISC/KB/en-us/244/004.HTM", "checked": "2026-11-25" },
+        { "tier": "B", "url": "https://winaero.com/how-to-jump-to-the-desired-registry-key-with-one-click", "checked": "2026-11-25" }
+      ]
+    },
+    {
+      "id": "components.powertoys-logs",
+      "name": "PowerToys",
+      "nameKey": null,
+      "kind": "log",
+      "category": "components",
+      "scope": "user",
+      "recommended": false,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%LOCALAPPDATA%\\Microsoft\\PowerToys\\Logs" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%LOCALAPPDATA%\\Microsoft\\PowerToys\\Logs", "pattern": null, "recurse": false, "olderThanDays": 7 }
+      ],
+      "processes": [],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://microsoft.github.io/PowerToys/development/logging/", "checked": "2026-11-25" }
+      ]
+    }
+  ]
+}

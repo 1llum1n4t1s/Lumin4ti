@@ -1,0 +1,399 @@
+{
+  "schema": 1,
+  "rules": [
+    {
+      "id": "app.jdownloader-logs",
+      "name": "JDownloader",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\JDownloader 2.0\\logs"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\JDownloader 2.0\\logs",
+          "pattern": null,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [
+        "JDownloader2"
+      ],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://support.jdownloader.org/de/knowledgebase/article/how-to-create-and-upload-session-logs",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://support.jdownloader.org/Knowledgebase/Article/View/locate-find-jdownloader-installation-directory",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "app.onedrive-logs",
+      "name": "OneDrive",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\Microsoft\\OneDrive\\logs"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Microsoft\\OneDrive\\logs",
+          "pattern": null,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [
+        "OneDrive"
+      ],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "B",
+          "url": "https://learn.microsoft.com/en-us/answers/questions/2101718/microsoft-onedrive-logs-information-for-it-adminis",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "B",
+          "url": "https://forensics.wiki/microsoft_onedrive/",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "app.megasync-logs",
+      "name": "MEGAsync",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\Mega Limited\\MEGAsync\\logs"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\Mega Limited\\MEGAsync\\logs",
+          "pattern": null,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [
+        "MEGAsync"
+      ],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://github.com/meganz/MEGAsync/blob/master/src/MEGASync/control/MegaSyncLogger.cpp",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://github.com/meganz/MEGAsync/blob/master/src/MEGASync/MegaApplication.cpp",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://github.com/meganz/MEGAsync/blob/master/src/MEGASync/main.cpp",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://github.com/qt/qtbase/blob/dev/src/corelib/io/qstandardpaths_win.cpp",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "app.nextcloud-logs",
+      "name": "Nextcloud",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%APPDATA%\\Nextcloud\\nextcloud.cfg"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%APPDATA%\\Nextcloud\\logs",
+          "pattern": null,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [
+        "nextcloud"
+      ],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://github.com/nextcloud/desktop/blob/master/src/libsync/configfile.cpp",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://github.com/nextcloud/desktop/blob/master/src/gui/application.cpp",
+          "checked": "2026-11-26"
+        },
+        {
+          "tier": "A",
+          "url": "https://docs.nextcloud.com/server/stable/admin_manual/desktop/troubleshooting.html",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "app.nicotine-debug-logs",
+      "name": "Nicotine+",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%APPDATA%\\nicotine\\config\\config"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%APPDATA%\\nicotine\\logs\\debug",
+          "pattern": null,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [
+        "nicotine"
+      ],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://github.com/nicotine-plus/nicotine-plus/blob/master/pynicotine/config.py",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "app.nicotine-transfer-logs",
+      "name": "Nicotine+",
+      "nameKey": null,
+      "kind": "history",
+      "category": "apps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "trace",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%APPDATA%\\nicotine\\config\\config"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%APPDATA%\\nicotine\\logs\\transfers",
+          "pattern": null,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [
+        "nicotine"
+      ],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://github.com/nicotine-plus/nicotine-plus/blob/master/pynicotine/config.py",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "app.lbry-logs",
+      "name": "LBRY",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\lbry\\lbrynet"
+        }
+      ],
+      "targets": [
+        {
+          "type": "files",
+          "path": "%LOCALAPPDATA%\\lbry\\lbrynet",
+          "pattern": "lbrynet.log*",
+          "olderThanDays": null
+        }
+      ],
+      "processes": [
+        "LBRY",
+        "lbrynet"
+      ],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://lbry.com/faq/how-to-find-lbry-log-file",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "app.i2p-wrapper-logs",
+      "name": "I2P",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\I2P\\router.config"
+        }
+      ],
+      "targets": [
+        {
+          "type": "files",
+          "path": "%LOCALAPPDATA%\\I2P",
+          "pattern": "wrapper.log",
+          "olderThanDays": null
+        }
+      ],
+      "processes": [
+        "i2p",
+        "i2psvc"
+      ],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://github.com/i2p/i2p.i2p/blob/master/installer/java/src/net/i2p/installer/FixWinPaths.java",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "app.smartftp-logs",
+      "name": "SmartFTP",
+      "nameKey": null,
+      "kind": "log",
+      "category": "apps",
+      "scope": "user",
+      "recommended": false,
+      "impact": "trace",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        {
+          "path": "%LOCALAPPDATA%\\SmartFTP\\Client 2.0"
+        }
+      ],
+      "targets": [
+        {
+          "type": "contents",
+          "path": "%LOCALAPPDATA%\\SmartFTP\\Client 2.0\\Log",
+          "pattern": null,
+          "olderThanDays": null
+        }
+      ],
+      "processes": [
+        "SmartFTP"
+      ],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        {
+          "tier": "A",
+          "url": "https://smartftp.com/support/kb/2564",
+          "checked": "2026-11-26"
+        }
+      ]
+    },
+    {
+      "id": "app.smartftp-directory-cache",
+      "name": "SmartFTP",
+      "nameKey": null,
+      "kind": "cache",
+      "category": "apps",
+      "scope": "user",
+      "recommended": true,
+      "impact": "junk",
+      "warningKey": null,
+      "engine": null,
+      "detect": [
+        { "path": "%APPDATA%\\SmartFTP\\Client 2.0\\Storage" }
+      ],
+      "targets": [
+        { "type": "contents", "path": "%APPDATA%\\SmartFTP\\Client 2.0\\Storage", "pattern": null, "olderThanDays": null }
+      ],
+      "processes": ["SmartFTP"],
+      "services": [],
+      "legacy": [],
+      "evidence": [
+        { "tier": "A", "url": "https://www.smartftp.com/support/kb/34", "checked": "2026-11-27" }
+      ]
+    }
+  ]
+}

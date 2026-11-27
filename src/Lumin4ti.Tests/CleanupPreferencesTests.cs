@@ -25,6 +25,15 @@ public sealed class CleanupPreferencesTests
         public Task FlushAsync(CancellationToken ct = default) => Task.CompletedTask;
     }
 
+    private static readonly CleanupTarget[] SampleTargets =
+    [
+        CleanupTarget.Contents(@"%LOCALAPPDATA%\Temp"),
+        CleanupTarget.Contents(@"%LOCALAPPDATA%\CrashDumps"),
+    ];
+
+    private static FileCleanupAction CreateAction(ICleanupPreferences preferences) =>
+        new("cleanup-user-temp", "test", "test", () => SampleTargets, preferences: preferences);
+
     [TestMethod]
     public void 外した対象だけが除外として保存される()
     {
@@ -78,40 +87,11 @@ public sealed class CleanupPreferencesTests
     }
 
     [TestMethod]
-    public void 定期実行の項目を外すと既定セットから減る()
-    {
-        var settings = new FakeSettingsService();
-        var preferences = new CleanupPreferences(settings);
-
-        preferences.SetScheduledGroupEnabled("cleanup-package-cache", enabled: false);
-
-        CollectionAssert.DoesNotContain(preferences.ScheduledGroupIds.ToArray(), "cleanup-package-cache");
-        CollectionAssert.Contains(preferences.ScheduledGroupIds.ToArray(), "cleanup-user-temp");
-        Assert.IsNotNull(
-            settings.Current.ScheduledCleanupGroupIds,
-            "初回変更時に実効値を書き出しておかないと、既定セットの変更で選択が勝手に増減します");
-    }
-
-    [TestMethod]
-    public void 定期実行を全て外した状態は既定セットへ戻らない()
-    {
-        var settings = new FakeSettingsService();
-        var preferences = new CleanupPreferences(settings);
-
-        foreach (var id in CleanupPreferences.DefaultScheduledGroupIds.ToArray())
-        {
-            preferences.SetScheduledGroupEnabled(id, enabled: false);
-        }
-
-        Assert.AreEqual(0, preferences.ScheduledGroupIds.Count);
-    }
-
-    [TestMethod]
     public void 削除対象の一覧は外した対象を除く()
     {
         var preferences = new CleanupPreferences(new FakeSettingsService());
-        var action = FileCleanupGroups.CreateUserTemp(preferences);
-        var excluded = FileCleanupAction.DescribeTarget(FileCleanupGroups.UserTempTargets[0]);
+        var action = CreateAction(preferences);
+        var excluded = FileCleanupAction.DescribeTarget(SampleTargets[0]);
 
         preferences.SetTargetEnabled(action.Id, excluded, enabled: false);
 
@@ -128,7 +108,7 @@ public sealed class CleanupPreferencesTests
     public async Task 全ての対象を外した項目は何も削除しない()
     {
         var preferences = new CleanupPreferences(new FakeSettingsService());
-        var action = FileCleanupGroups.CreateUserTemp(preferences);
+        var action = CreateAction(preferences);
         foreach (var target in action.EnumerateAllTargets())
         {
             preferences.SetTargetEnabled(action.Id, FileCleanupAction.DescribeTarget(target), enabled: false);
@@ -138,64 +118,6 @@ public sealed class CleanupPreferencesTests
 
         Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
         StringAssert.Contains(result.Detail, "対象が選ばれていない");
-    }
-
-    [TestMethod]
-    [DoNotParallelize]
-    public async Task ブラウザを1つ外すとその配下の対象がすべて外れる()
-    {
-        var previousLocalAppData = Environment.GetEnvironmentVariable("LOCALAPPDATA");
-        var root = Path.Combine(Path.GetTempPath(), "Lumin4tiCleanupPreferencesTests", Guid.NewGuid().ToString("N"));
-        var chromeCache = Path.Combine(root, "Google", "Chrome", "User Data", "Default", "Cache");
-        var edgeCache = Path.Combine(root, "Microsoft", "Edge", "User Data", "Default", "Cache");
-        try
-        {
-            Directory.CreateDirectory(chromeCache);
-            Directory.CreateDirectory(edgeCache);
-            var chromeFile = Path.Combine(chromeCache, "keep.bin");
-            var edgeFile = Path.Combine(edgeCache, "delete.bin");
-            await File.WriteAllTextAsync(chromeFile, "chrome");
-            await File.WriteAllTextAsync(edgeFile, "edge");
-            Environment.SetEnvironmentVariable("LOCALAPPDATA", root);
-
-            var preferences = new CleanupPreferences(new FakeSettingsService());
-            var action = FileCleanupGroups.CreateBrowserCache(preferences);
-            Assert.HasCount(2, action.GetCheckListEntries());
-            const string excluded = @"%LOCALAPPDATA%\Google\Chrome";
-            await action.SetCheckListEntrySelectedAsync(excluded, selected: false);
-
-            Assert.IsFalse(action.EnumerateSelectedTargets().Any(t => action.GetCheckListKey(t) == excluded));
-            Assert.IsTrue(action.GetCheckListEntries().Any(e => e.Value == excluded && !e.IsSelected));
-            var result = await action.ExecuteAsync();
-
-            Assert.AreEqual(MaintenanceActionStatus.Success, result.Status);
-            Assert.IsTrue(File.Exists(chromeFile), "除外したブラウザのキャッシュは保持する");
-            Assert.IsFalse(File.Exists(edgeFile), "選択中のブラウザのキャッシュは削除する");
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("LOCALAPPDATA", previousLocalAppData);
-            if (Directory.Exists(root))
-            {
-                Directory.Delete(root, recursive: true);
-            }
-        }
-    }
-
-    [TestMethod]
-    public void アプリを1つ外すとその配下のキャッシュとログがすべて外れる()
-    {
-        var preferences = new CleanupPreferences(new FakeSettingsService());
-        var action = FileCleanupGroups.CreateAppCache(preferences);
-
-        preferences.SetTargetEnabled(action.Id, "Claude", enabled: false);
-
-        Assert.IsFalse(
-            action.EnumerateSelectedTargets().Any(t =>
-                FileCleanupGroups.GetAppCacheGroupName(t) == "Claude"));
-        Assert.IsTrue(
-            action.EnumerateSelectedTargets().Any(t =>
-                FileCleanupGroups.GetAppCacheGroupName(t) == "Cursor"));
     }
 
     [TestMethod]
@@ -241,28 +163,11 @@ public sealed class CleanupPreferencesTests
     }
 
     [TestMethod]
-    public void 開発ツールを1つ外すと同じツールの全キャッシュが外れる()
-    {
-        var preferences = new CleanupPreferences(new FakeSettingsService());
-        var action = FileCleanupGroups.CreatePackageCache(preferences);
-
-        preferences.SetTargetEnabled(action.Id, "npm", enabled: false);
-
-        var npmTargets = FileCleanupGroups.PackageCacheTargets
-            .Where(t => FileCleanupGroups.GetPackageCacheGroupName(t) == "npm")
-            .ToArray();
-        Assert.HasCount(4, npmTargets);
-        Assert.IsFalse(action.EnumerateSelectedTargets().Intersect(npmTargets).Any());
-        Assert.IsTrue(
-            action.EnumerateSelectedTargets().Any(t => FileCleanupGroups.GetPackageCacheGroupName(t) == "pnpm"));
-    }
-
-    [TestMethod]
     public async Task チェックの変更は設定の保存まで行う()
     {
         var settings = new FakeSettingsService();
         var preferences = new CleanupPreferences(settings);
-        IMaintenanceCheckList action = FileCleanupGroups.CreateUserTemp(preferences);
+        IMaintenanceCheckList action = CreateAction(preferences);
 
         await action.SetCheckListEntrySelectedAsync(@"%LOCALAPPDATA%\Temp", selected: false);
 
