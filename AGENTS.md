@@ -30,6 +30,11 @@ Lumin4ti は Windows 10/11 向けのメンテナンス・最適化 GUI ツール
 - メンテナンス項目・カタログを変える前に [architecture.md](docs/agents/architecture.md) を読む。4 型の契約と親子表示を定める。
 - 外部プロセス・復元・ファイル削除・排他・昇格・デバイス削除を変える前に [security.md](docs/agents/security.md) を読む。回帰厳禁の安全ガードを定める。
 - クリーンアップの規則・走査・削除・高度・スリム化を変える前に [cleanup-rules-and-deletion.md](docs/agents/cleanup-rules-and-deletion.md) を読む。規則データの根拠・影響度・既定選択と、世代失効・lease・補償の契約を定める。
+- クリーンアップの詳細は、変更内容に応じて [cleanup-rule-data.md](docs/agents/cleanup-rule-data.md)、[cleanup-deletion-guards.md](docs/agents/cleanup-deletion-guards.md)、[cleanup-path-trust.md](docs/agents/cleanup-path-trust.md)、[cleanup-running-products-sqlite.md](docs/agents/cleanup-running-products-sqlite.md)、[cleanup-advanced-slim-restore.md](docs/agents/cleanup-advanced-slim-restore.md) も読む。
+- 未接続 PnP デバイスの削除を変える前に [disconnected-pnp-devices.md](docs/agents/disconnected-pnp-devices.md) を読む。
+- 起動時再試行・終了・タスク実行を変える前に [workflow.md](docs/agents/workflow.md) を読む。
+- コードレビューの前に [code-review-pitfalls.md](docs/agents/code-review-pitfalls.md) を読む。
+- リリースの実行手順を扱う前に [release-process.md](docs/agents/release-process.md) を読む。
 - ログ・デバッグ画面・winget・AUMID・ローカライズ・状態表示の変更時とコードレビュー前に [conventions.md](docs/agents/conventions.md) を読む。
 - 配布・署名・リリース・移行コードを変える前に [cloudflare-r2-sigilune.md](docs/agents/cloudflare-r2-sigilune.md) を読む。
 - ドメインや更新 URL を変える前に [2026-07-2027-05-31.md](docs/agents/2026-07-2027-05-31.md) を読む。旧ホストの経路は期限 (2027/05/31) まで消さない。
