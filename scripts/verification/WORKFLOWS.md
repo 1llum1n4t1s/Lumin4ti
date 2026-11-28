@@ -55,4 +55,14 @@ ON/OFF 型の Registry / VBS と UWP の一括設定は変更前の値を永続�
 
 同じプレビューの設定画面では、メモリ圧縮の切替（6秒）・チェック選択保存（3秒）・模擬実行（15秒）を使い、Shisui型オーバーレイ、背面操作禁止、ライブ進捗、中断後の後処理待ちと再操作を確認します。Debugビルドでは実際のCRDebuggerが自動表示され、Releaseには含まれません。LUMIN4TI_PREVIEW_LOGへ今回の作業領域内の絶対パスを渡すと、同じ模擬ログのファイル出力とデバッグ画面への転送も確認できます。既存利用者のログ・設定・OSは変更しません。
 
+クリーンアップ画面は同じ `--preview-state-diagnostics` で開き、偽データで動きます。実ファイル・実レジストリ・復元ポイント・サービスには届きません。高度だけは本物の削除を `%TEMP%\lumin4ti-preview-*` の合成フォルダーの中に閉じ込め、カスタムフォルダーの外のパスは設定の読み取り時に除きます。環境変数は次の3つです。
+
+| 環境変数 | 内容 |
+| --- | --- |
+| `LUMIN4TI_PREVIEW_OPEN=cleanup` | クリーンアップ画面を最初から開く |
+| `LUMIN4TI_PREVIEW_SELFCHECK=1` | 各タブの走査と、外へ届かないことの自己検査を行い、結果を標準出力へ書いて終了する |
+| `LUMIN4TI_PREVIEW_CAPTURE=<出力フォルダー>` | 各状態を PNG と `report.txt`（スクロール・フォーカスと Esc・メニュー・バインドエラーの検査）へ書き出す |
+
+自己検査と書き出しは Avalonia.Headless（Skia 描画）で動き、OS の窓・ポップアップ・タスクバー項目を作りません（report.txt に可視の HWND 数を出し、0 であることを検査します）。手で見る実窓は環境変数なしの起動だけです。
+
 watchdog の異常系は `dotnet run --project scripts/verification/Lumin4ti.Verification.csproj --no-build -- D:\Dev\Lumin4ti D:\Dev\Lumin4ti\local-release\verification-watchdog.json --simulate-missing-download-cancellation` で再現します。mock body だけが cancellation を無視し、15秒後に取得ケースの失敗、後続ケース継続、JSON 出力、exit1 を確認します。製品 timeout は変更しません。

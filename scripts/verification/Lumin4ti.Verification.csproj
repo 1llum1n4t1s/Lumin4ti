@@ -8,6 +8,10 @@
     <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
   </PropertyGroup>
   <ItemGroup>
+    <!--  書き出し・自己検査を OS の窓なしで動かすための検証専用の依存 (製品の csproj・配布物には入れない)。  -->
+    <PackageReference Include="Avalonia.Headless" Version="12.1.6" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../../src/Lumin4ti.Core/Lumin4ti.Core.csproj" />
     <ProjectReference Include="../../src/Lumin4ti.UI/Lumin4ti.UI.csproj" />
   </ItemGroup>

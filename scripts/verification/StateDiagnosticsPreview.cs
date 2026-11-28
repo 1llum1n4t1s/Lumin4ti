@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Headless;
 using Avalonia.Layout;
 using Lumin4ti.Core.Interfaces;
 using Lumin4ti.Core.Models;
@@ -25,8 +26,14 @@ internal static class StateDiagnosticsPreview
     {
         // 製品 VM のログ呼出しにもファイル出力先を与えない。
         LogManager.Configure(builder => builder.ClearProviders());
-        return AppBuilder.Configure<PreviewApp>()
-            .UsePlatformDetect()
+        var builder = AppBuilder.Configure<PreviewApp>();
+        var noWindows = !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(PreviewCapture.EnvName))
+                        || Environment.GetEnvironmentVariable("LUMIN4TI_PREVIEW_SELFCHECK") == "1";
+        // 書き出しと自己検査は OS の窓・ポップアップ・タスクバー項目を一切作らない (Avalonia.Headless + Skia 描画)。
+        // 手で見る実窓のプレビュー (環境変数なし) だけが UsePlatformDetect の実窓を使う。
+        return (noWindows
+                ? builder.UseSkia().UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false })
+                : builder.UsePlatformDetect())
             .StartWithClassicDesktopLifetime([]);
     }
 
@@ -41,7 +48,10 @@ internal static class StateDiagnosticsPreview
             // 本番 App の初期化は呼ばない。DI・設定保存・OS 操作を持ち込まない。
             SetLocale("ja_JP");
 #if DEBUG
-            _debugger = new DebuggerService(provider =>
+            // 書き出し・自己検査 (窓を作らない方式) ではデバッガーを初期化しない。
+            var headlessRun = Environment.GetEnvironmentVariable(PreviewCapture.EnvName) is { Length: > 0 }
+                              || Environment.GetEnvironmentVariable("LUMIN4TI_PREVIEW_SELFCHECK") == "1";
+            if (!headlessRun) _debugger = new DebuggerService(provider =>
             {
                 var output = Environment.GetEnvironmentVariable("LUMIN4TI_PREVIEW_LOG");
                 var factory = LoggerFactory.Create(builder =>
@@ -53,7 +63,7 @@ internal static class StateDiagnosticsPreview
                 factory.CreateLogger("Lumin4ti.Preview").LogInformation("CRDebugger の模擬画面接続を確認しました。");
                 return subscription;
             });
-            _debugger.Initialize();
+            _debugger?.Initialize();
 #endif
             var catalog = new MaintenanceActionCatalog(new IMaintenanceItem[]
             {
@@ -112,6 +122,14 @@ internal static class StateDiagnosticsPreview
             var unwritableSettings = new Button { Content = "設定保存失敗（模擬）" };
             unwritableSettings.Click += (_, _) => ShowSettingsPreview(catalog, new MemorySettings { FailSave = true });
             controls.Children.Add(unwritableSettings);
+            var german = new Button { Content = "Deutsch" };
+            german.Click += (_, _) => SetLocale("de_DE");
+            controls.Children.Add(german);
+            var cleanup = new Button { Content = "クリーンアップ画面（偽データ）" };
+            cleanup.Click += (_, _) => OpenCleanupWindow(catalog);
+            controls.Children.Add(cleanup);
+            var autoOpen = Environment.GetEnvironmentVariable("LUMIN4TI_PREVIEW_OPEN");
+            var selfCheck = Environment.GetEnvironmentVariable("LUMIN4TI_PREVIEW_SELFCHECK") == "1";
             var content = new Grid { RowDefinitions = new RowDefinitions("Auto,*"), Margin = new Thickness(12) };
             content.Children.Add(controls);
             Grid.SetRow(category, 1);
@@ -123,10 +141,29 @@ internal static class StateDiagnosticsPreview
                 Height = 820,
                 Content = content,
             };
+            if (Environment.GetEnvironmentVariable(PreviewCapture.EnvName) is { Length: > 0 } || selfCheck)
+            {
+                // 書き出し・自己検査では利用者の画面の前面に出さない。
+                PreviewCapture.MakeBackground(window);
+            }
+
             window.Opened += async (_, _) => await viewModel.LoadToggleStatesAsync();
+            var captureDir = Environment.GetEnvironmentVariable(PreviewCapture.EnvName);
+            var capturing = !string.IsNullOrWhiteSpace(captureDir);
 #if DEBUG
-            window.Opened += (_, _) => _debugger.Show();
+            // デバッガー窓は前面に出て活性になるため、書き出し・自己検査では開かない。
+            if (!capturing && !selfCheck) window.Opened += (_, _) => _debugger?.Show();
 #endif
+            if (capturing)
+            {
+                // 書き出しモード: クリーンアップ窓の各状態を PNG にして自動で終了する。
+                window.Opened += (_, _) => _ = RunCaptureAsync(catalog, captureDir!);
+            }
+            else if (string.Equals(autoOpen, "cleanup", StringComparison.OrdinalIgnoreCase) || selfCheck)
+            {
+                window.Opened += (_, _) => OpenCleanupWindow(catalog, selfCheck);
+            }
+
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
@@ -134,10 +171,173 @@ internal static class StateDiagnosticsPreview
                 desktop.Exit += (_, _) =>
                 {
 #if DEBUG
-                    _debugger.Dispose();
+                    _debugger?.Dispose();
 #endif
                     LogManager.Shutdown();
+                    // 合成フォルダーは終了時に消す (自分が作った名前・場所のときだけ)。
+                    _sandbox.Dispose();
                 };
+            }
+        }
+
+        private readonly PreviewSandbox _sandbox = PreviewSandbox.Create();
+        private readonly PreviewToggles _toggles = new();
+
+        /// <summary>本物の <see cref="CleanupView"/> と <see cref="CleanupViewModel"/> を、偽のサービスだけで開く。</summary>
+        private void OpenCleanupWindow(MaintenanceActionCatalog catalog, bool selfCheck = false)
+        {
+            var coordinator = new MaintenanceOperationCoordinator(() => new PreviewLease());
+            var viewModel = PreviewCleanupFactory.Create(catalog, new MemorySettings(), coordinator, _sandbox, _toggles, background: selfCheck);
+            var view = new CleanupView { DataContext = viewModel };
+
+            // MainWindow の処理中オーバーレイの代わり (削除・実行の lease の間だけ表示する)。
+            var overlayLabel = new TextBlock { FontSize = 16, TextWrapping = Avalonia.Media.TextWrapping.Wrap };
+            var overlayDetail = new TextBlock { TextWrapping = Avalonia.Media.TextWrapping.Wrap, MaxLines = 6 };
+            var overlayCancel = new Button { Content = "中断 / Cancel", HorizontalAlignment = HorizontalAlignment.Center };
+            overlayCancel.Click += (_, _) =>
+                viewModel.Operations.FirstOrDefault(o => o.IsRunning)?.CancelCommand.Execute(null);
+            var overlay = new Border
+            {
+                Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.FromArgb(0xB0, 0, 0, 0)),
+                IsVisible = false,
+                Child = new StackPanel
+                {
+                    Spacing = 8,
+                    MaxWidth = 520,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    Children = { overlayLabel, overlayDetail, overlayCancel },
+                },
+            };
+            void Refresh()
+            {
+                var state = coordinator.ProcessingState;
+                var running = viewModel.Operations.FirstOrDefault(o => o.IsRunning);
+                overlay.IsVisible = state.IsProcessing;
+                view.IsEnabled = !state.IsProcessing;
+                overlayLabel.Text = running?.Label ?? string.Empty;
+                overlayDetail.Text = running?.ProgressText ?? string.Empty;
+                overlayCancel.IsEnabled = state.CanCancel && running is { CanCancel: true };
+            }
+
+            void Post() => Avalonia.Threading.Dispatcher.UIThread.Post(Refresh);
+            coordinator.StateChanged += (_, _) => Post();
+            foreach (var operation in viewModel.Operations) operation.PropertyChanged += (_, _) => Post();
+
+            var window = new Window
+            {
+                Title = "Lumin4ti — Cleanup preview (fake data only)",
+                Width = 880,
+                Height = 700,
+            };
+            var bar = new WrapPanel { Margin = new Thickness(8, 4) };
+            void AddButton(string text, Action action)
+            {
+                var button = new Button { Content = text, Margin = new Thickness(0, 0, 6, 4) };
+                button.Click += (_, _) => action();
+                bar.Children.Add(button);
+            }
+
+            void Resize(double width, double height)
+            {
+                window.Width = width;
+                window.Height = height + 40 + bar.Bounds.Height;
+            }
+
+            AddButton("760×500", () => Resize(760, 500));
+            AddButton("880×620", () => Resize(880, 620));
+            AddButton("日本語", () => SetLocale("ja_JP"));
+            AddButton("English", () => SetLocale("en_US"));
+            AddButton("Deutsch", () => SetLocale("de_DE"));
+            AddButton("ライト", () => RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Light);
+            AddButton("ダーク", () => RequestedThemeVariant = Avalonia.Styling.ThemeVariant.Dark);
+            AddButton("HKCU 走査可/不可", () => _toggles.HkcuAvailable = !_toggles.HkcuAvailable);
+            AddButton("復元ポイント: 作成可→保護無効→失敗", () =>
+                _toggles.RestoreMode = (PreviewRestoreMode)(((int)_toggles.RestoreMode + 1) % 3));
+
+            var body = new Grid { Children = { view, overlay } };
+            var root = new DockPanel();
+            DockPanel.SetDock(bar, Dock.Top);
+            root.Children.Add(bar);
+            root.Children.Add(body);
+            window.Content = root;
+            if (selfCheck) PreviewCapture.MakeBackground(window);
+            window.Show();
+            if (selfCheck) _ = RunSelfCheckAsync(catalog, viewModel, window);
+        }
+
+        private async Task RunCaptureAsync(MaintenanceActionCatalog catalog, string dir)
+        {
+            // 想定外のダイアログなどで止まっても、一定時間で報告を残して終了する。
+            using var watchdog = new CancellationTokenSource();
+            _ = Task.Delay(TimeSpan.FromMinutes(12), watchdog.Token).ContinueWith(
+                t =>
+                {
+                    if (t.IsCanceled) return;
+                    Console.Error.WriteLine("PREVIEW capture watchdog: 12 分で終わらなかったため強制終了します");
+                    _sandbox.Dispose();
+                    Environment.Exit(2);
+                },
+                TaskScheduler.Default);
+            try
+            {
+                var coordinator = new MaintenanceOperationCoordinator(() => new PreviewLease());
+                var viewModel = PreviewCleanupFactory.Create(catalog, new MemorySettings(), coordinator, _sandbox, _toggles, background: true);
+                var capture = new PreviewCapture(dir, viewModel, _toggles, SetLocale, theme => RequestedThemeVariant = theme);
+                using var foreground = PreviewForeground.ForApplication();
+                await capture.RunAsync();
+                Console.WriteLine($"PREVIEW foreground {foreground.Summary} clean={foreground.Clean}");
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("PREVIEW capture failed: " + ex);
+            }
+            finally
+            {
+                watchdog.Cancel();
+                if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) desktop.Shutdown();
+            }
+        }
+
+        /// <summary>LUMIN4TI_PREVIEW_SELFCHECK=1 のときだけ、各タブの走査を実行して結果を標準出力へ書き、終了する。</summary>
+        private async Task RunSelfCheckAsync(MaintenanceActionCatalog catalog, CleanupViewModel viewModel, Window window)
+        {
+            using var foreground = PreviewForeground.ForApplication();
+            try
+            {
+                Console.OutputEncoding = System.Text.Encoding.UTF8;
+                await Task.Delay(1000);
+                var before = Directory.EnumerateFiles(_sandbox.Root, "*", SearchOption.AllDirectories).Count();
+                await viewModel.Common.ScanCommand.ExecuteAsync(null);
+                Console.WriteLine($"PREVIEW common rows={viewModel.Common.Rows.Count}");
+                await viewModel.Advanced.ScanCommand.ExecuteAsync(null);
+                Console.WriteLine($"PREVIEW advanced hasScan={viewModel.Advanced.HasScan} status={viewModel.Advanced.StatusText} notices={string.Join(" / ", viewModel.Advanced.Notices)}");
+                await viewModel.Slim.ScanCommand.ExecuteAsync(null);
+                Console.WriteLine($"PREVIEW slim status={viewModel.Slim.StatusText}");
+                await viewModel.Registry.ScanCommand.ExecuteAsync(null);
+                Console.WriteLine($"PREVIEW registry groups={viewModel.Registry.Groups.Count} status={viewModel.Registry.StatusText} scope={viewModel.Registry.UserScopeNote}");
+                // 高度タブの削除も、合成フォルダーの中だけで完結することを確かめる。
+                viewModel.Advanced.SelectRecommendedCommand.Execute(null);
+                viewModel.Advanced.RequestDeleteCommand.Execute(null);
+                await viewModel.Advanced.ConfirmDeleteCommand.ExecuteAsync(null);
+                Console.WriteLine($"PREVIEW advanced delete status={viewModel.Advanced.StatusText} success={viewModel.Advanced.IsResultSuccess} warning={viewModel.Advanced.IsResultWarning} error={viewModel.Advanced.IsResultError}");
+                var after = Directory.EnumerateFiles(_sandbox.Root, "*", SearchOption.AllDirectories).Count();
+                Console.WriteLine($"PREVIEW sandbox={_sandbox.Root} files before={before} after={after}");
+                Console.WriteLine($"PREVIEW in-use file kept={File.Exists(_sandbox.LockedAdvancedFile)} (partial 期待: warning=True)");
+                var escaped = await PreviewEscapeCheck.RunAsync(
+                    catalog, _sandbox, _toggles, () => new MaintenanceOperationCoordinator(() => new PreviewLease()));
+                if (!escaped) Environment.ExitCode = 1;
+                Console.WriteLine($"PREVIEW foreground {foreground.Summary} clean={foreground.Clean}");
+                if (!foreground.Clean) Environment.ExitCode = 1;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("PREVIEW selfcheck failed: " + ex);
+            }
+            finally
+            {
+                window.Close();
+                if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) desktop.Shutdown();
             }
         }
 
@@ -150,56 +350,9 @@ internal static class StateDiagnosticsPreview
             {
                 Title = "Lumin4ti — Settings preview (fake state only)",
                 DataContext = new MainWindowViewModel(
-                    catalog, CreateCleanupPreview(catalog, settings, coordinator), devices, version, coordinator),
+                    catalog, PreviewCleanupFactory.Create(catalog, settings, coordinator, _sandbox, _toggles), devices, version, coordinator),
             }.Show();
         }
-
-        /// <summary>クリーンアップ画面の器。偽の実行境界と偽の設定を使い、構築しても走査・削除は始まらない。</summary>
-        private static CleanupViewModel CreateCleanupPreview(
-            MaintenanceActionCatalog catalog, ISettingsService settings, MaintenanceOperationCoordinator coordinator)
-        {
-            var executor = new MockExecutor((_, _, _) => throw new InvalidOperationException("preview does not run processes"));
-            var store = new CleanupSettingsStore(settings);
-            var scan = new CleanupScanService(store, executor);
-            var ledger = new AdvancedScanLedger();
-            var slim = new SlimService(executor);
-            // プレビューは実機のレジストリとバックアップを読まず、変更もしない偽の境界を使う。
-            var registry = new RegistryCleanViewModel(new PreviewRegistryCleanBackend(), coordinator);
-            return new CleanupViewModel(
-                catalog,
-                coordinator,
-                new CommonCleanViewModel(scan, new CleanupRunService(scan, executor), store, executor, coordinator),
-                new AdvancedCleanViewModel(new AdvancedCleanScanner(ledger), new AdvancedCleaner(ledger), ledger, store, executor, coordinator),
-                new SlimViewModel(slim, store, coordinator),
-                registry,
-                new RegistryRestoreViewModel(new PreviewRegistryRestoreBackend(), registry, coordinator),
-                new CleanupSettingsViewModel(
-                    store, scan, ledger, slim, executor, coordinator));
-        }
-    }
-
-    private sealed class PreviewRegistryCleanBackend : IRegistryCleanBackend
-    {
-        public Task<RegistryScanResult> ScanAsync(CancellationToken ct) =>
-            throw new InvalidOperationException("preview does not scan the registry");
-
-        public Task<RegistryCleanRunResult> CleanAsync(RegistryCleanRequest request, CancellationToken ct) =>
-            throw new InvalidOperationException("preview does not change the registry");
-
-        public void Invalidate()
-        {
-        }
-    }
-
-    private sealed class PreviewRegistryRestoreBackend : IRegistryRestoreBackend
-    {
-        public IReadOnlyList<RegistryBackupSummary> List() => [];
-
-        public RegistryRestoreResult Restore(string id, CancellationToken ct) =>
-            throw new InvalidOperationException("preview does not restore the registry");
-
-        public void Delete(string id) =>
-            throw new InvalidOperationException("preview does not delete backups");
     }
 
     private sealed class PreviewShellCacheDescription : IMaintenanceAction
