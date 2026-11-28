@@ -141,7 +141,31 @@ public sealed partial class CommonCleanViewModel : CleanupOperationViewModel
 
     public bool HasRows => Rows.Count > 0;
 
+    /// <summary>表示用: まだ走査していない (または実行後に走査結果が消えた) とき true。</summary>
+    public bool IsNotScanned => _snapshot is null;
+
+    /// <summary>表示用: 走査前の空状態を出すか (走査中と実行結果の表示中は出さない)。</summary>
+    public bool ShowNotScannedState => IsNotScanned && !HasResult && !IsRunning;
+
+    /// <summary>
+    /// 表示用: 通知欄に状態文を出すか。未走査の案内文は空状態と重複するため出さず、走査中は出さない。
+    /// 失効は警告帯が文を出すため、ここでは出さない。
+    /// </summary>
+    public bool ShowStatusLine => !IsStale && !IsRunning && !(IsNotScanned && StatusText == CleanupText.Get("Cleanup.Common.NotScanned"));
+
+    /// <summary>表示用: 走査結果の列見出しと一覧を出すか (実行結果の表示中は出さない)。</summary>
+    public bool ShowScanRows => HasRows && !HasResult;
+
+    /// <summary>表示用: 実行が失敗したときの結果カード (赤)。</summary>
+    public bool ResultIsError => HasResult && _runFailed;
+
+    /// <summary>表示用: 成功でも失敗でもない結果 (部分失敗・失効・取消) の結果カード (警告色)。</summary>
+    public bool ResultIsWarning => HasResult && !_runFailed && !ResultIsSuccess;
+
     public string UserFilesWarningText => CleanupText.Get("Cleanup.Impact.UserFiles.Warning");
+
+    /// <summary>表示用: 実行後は走査結果が使えない旨の案内 (結果カードの下の注記)。</summary>
+    public string RescanAfterRunText => CleanupText.Get("Cleanup.Ui.RescanAfterRun");
 
     public string ScanButtonText => CleanupText.Get(_snapshot is null ? "Cleanup.Action.Scan" : "Cleanup.Action.Rescan");
 
@@ -265,6 +289,7 @@ public sealed partial class CommonCleanViewModel : CleanupOperationViewModel
     private void ApplySnapshot(CleanupScanSnapshot snapshot)
     {
         _snapshot = snapshot;
+        OnPropertyChanged(nameof(IsNotScanned));
         IsStale = false;
         _selected.Clear();
         foreach (var item in snapshot.Items.Where(i => i.CanSelect && i.DefaultSelected && i.Rule.Impact != CleanupRuleImpact.UserFiles))
@@ -291,6 +316,7 @@ public sealed partial class CommonCleanViewModel : CleanupOperationViewModel
     private void ClearTree()
     {
         _snapshot = null;
+        OnPropertyChanged(nameof(IsNotScanned));
         _selected.Clear();
         _ruleRows = new(StringComparer.OrdinalIgnoreCase);
         _pathRows = new(StringComparer.OrdinalIgnoreCase);
@@ -299,6 +325,8 @@ public sealed partial class CommonCleanViewModel : CleanupOperationViewModel
         IsStale = false;
         Rows = [];
         RefreshSelection();
+        OnPropertyChanged(nameof(HasRows));
+        NotifyDisplay();
     }
 
     private void MarkStale(Func<string> status)
@@ -485,6 +513,7 @@ public sealed partial class CommonCleanViewModel : CleanupOperationViewModel
 
         Rows = list;
         OnPropertyChanged(nameof(HasRows));
+        OnPropertyChanged(nameof(ShowScanRows));
     }
 
     private void AddRuleRows(List<CommonCleanRowViewModel> list, List<CommonCleanRowViewModel> rules)
@@ -801,9 +830,12 @@ public sealed partial class CommonCleanViewModel : CleanupOperationViewModel
         HasResult = false;
         _lastRun = null;
         _runFailed = false;
+        OnPropertyChanged(nameof(ResultIsError));
+        OnPropertyChanged(nameof(ResultIsWarning));
         ResultLines = [];
         ResultNotes = [];
         ResultBanner = string.Empty;
+        NotifyDisplay();
     }
 
     private void RefreshResultTexts()
@@ -995,10 +1027,21 @@ public sealed partial class CommonCleanViewModel : CleanupOperationViewModel
     {
         _status = status;
         OnPropertyChanged(nameof(StatusText));
+        NotifyDisplay();
+    }
+
+    private void NotifyDisplay()
+    {
+        OnPropertyChanged(nameof(ShowNotScannedState));
+        OnPropertyChanged(nameof(ShowStatusLine));
+        OnPropertyChanged(nameof(ShowScanRows));
     }
 
     private void NotifyState()
     {
+        NotifyDisplay();
+        OnPropertyChanged(nameof(ResultIsError));
+        OnPropertyChanged(nameof(ResultIsWarning));
         OnPropertyChanged(nameof(CanScan));
         OnPropertyChanged(nameof(HasSnapshot));
         OnPropertyChanged(nameof(CanChangeSelection));
@@ -1024,5 +1067,6 @@ public sealed partial class CommonCleanViewModel : CleanupOperationViewModel
         RefreshResultTexts();
         OnPropertyChanged(nameof(StatusText));
         OnPropertyChanged(nameof(ScanButtonText));
+        OnPropertyChanged(nameof(RescanAfterRunText));
     }
 }

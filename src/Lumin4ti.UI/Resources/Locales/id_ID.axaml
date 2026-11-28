@@ -819,7 +819,6 @@
   <x:String x:Key="Text.Cleanup.Registry.View.NoCandidates" xml:space="preserve">Tidak ada kandidat.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.ValueName" xml:space="preserve">Nama nilai:</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Approval.Title" xml:space="preserve">Item berikut memerlukan persetujuan satu per satu. Tinjau dan centang yang boleh dihapus.</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Title" xml:space="preserve">Cadangan dan pemulihan</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Refresh" xml:space="preserve">Segarkan daftar</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Empty" xml:space="preserve">Tidak ada cadangan.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Restore" xml:space="preserve">Pulihkan</x:String>
@@ -827,7 +826,6 @@
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">Hapus cadangan ini?</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">Hapus</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Confirm.Title" xml:space="preserve">Konfirmasi penghapusan registri</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.View.CancelRun" xml:space="preserve">Hentikan penghapusan</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Cancel" xml:space="preserve">Batal</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.ValueDefault" xml:space="preserve">(Default)</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonLine.One" xml:space="preserve">{0}: {1} ({2} item)</x:String>
@@ -862,4 +860,19 @@
   <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-rebuild" xml:space="preserve">Data Safe Browsing dan model Google Chrome Beta</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-rebuild" xml:space="preserve">Data Safe Browsing dan model Google Chrome Dev</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.browser-comet-rebuild" xml:space="preserve">Data Safe Browsing dan model Comet</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.SelectMenu" xml:space="preserve">Pilih</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.MoreActions" xml:space="preserve">Tindakan lainnya</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.RowActions" xml:space="preserve">Tindakan untuk item ini</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.NotScanned.Title" xml:space="preserve">Belum dipindai</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.NotScanned.Body" xml:space="preserve">Pemindaian saja tidak menghapus apa pun.</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.Sort" xml:space="preserve">Urutkan</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.SelectedCount" xml:space="preserve">{0} item dipilih</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.SelectedCount.One" xml:space="preserve">{0} item dipilih</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.RescanAfterRun" xml:space="preserve">Hasil pemindaian tidak dapat dipakai lagi karena operasi sudah dijalankan. Pindai ulang untuk melanjutkan.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.ScanScope" xml:space="preserve">Lokasi dan kriteria pemindaian</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Section.Clean" xml:space="preserve">Hapus entri yang tidak diperlukan</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Section.Backups" xml:space="preserve">Pulihkan dari cadangan</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.RestoreConfirm.Title" xml:space="preserve">Pulihkan dari cadangan ini?</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.RestoreRun" xml:space="preserve">Pulihkan</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.RestoreConfirm" xml:space="preserve">Isi cadangan yang dibuat pada {0} akan ditulis kembali ke registri.</x:String>
 </ResourceDictionary>

@@ -820,7 +820,6 @@
   <x:String x:Key="Text.Cleanup.Registry.View.NoCandidates" xml:space="preserve">没有候选项。</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.ValueName" xml:space="preserve">值名称：</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Approval.Title" xml:space="preserve">以下项目需要单独确认。请检查内容，并勾选可以删除的项目。</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Title" xml:space="preserve">备份与还原</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Refresh" xml:space="preserve">刷新列表</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Empty" xml:space="preserve">没有备份。</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Restore" xml:space="preserve">还原</x:String>
@@ -828,7 +827,6 @@
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">删除此备份？</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">删除</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Confirm.Title" xml:space="preserve">确认删除注册表项</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.View.CancelRun" xml:space="preserve">停止删除</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Cancel" xml:space="preserve">取消</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.ValueDefault" xml:space="preserve">（默认）</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonLine.One" xml:space="preserve">{0}：{1}（{2} 项）</x:String>
@@ -863,4 +861,19 @@
   <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-rebuild" xml:space="preserve">Google Chrome Beta Safe Browsing 和模型数据</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-rebuild" xml:space="preserve">Google Chrome Dev Safe Browsing 和模型数据</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.browser-comet-rebuild" xml:space="preserve">Comet Safe Browsing 和模型数据</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.SelectMenu" xml:space="preserve">选择</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.MoreActions" xml:space="preserve">更多操作</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.RowActions" xml:space="preserve">此项目的操作</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.NotScanned.Title" xml:space="preserve">尚未扫描</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.NotScanned.Body" xml:space="preserve">仅扫描不会删除任何内容。</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.Sort" xml:space="preserve">排序</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.SelectedCount" xml:space="preserve">已选择 {0} 项</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.SelectedCount.One" xml:space="preserve">已选择 {0} 项</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.RescanAfterRun" xml:space="preserve">由于已执行操作，扫描结果已不能再使用。若要继续，请重新扫描。</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.ScanScope" xml:space="preserve">扫描的位置和条件</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Section.Clean" xml:space="preserve">删除不需要的注册项</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Section.Backups" xml:space="preserve">从备份还原</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.RestoreConfirm.Title" xml:space="preserve">从此备份还原？</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.RestoreRun" xml:space="preserve">还原</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.RestoreConfirm" xml:space="preserve">将把 {0} 创建的备份内容写回注册表。</x:String>
 </ResourceDictionary>

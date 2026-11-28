@@ -2,59 +2,75 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Lumin4ti.UI.ViewModels"
              xmlns:views="using:Lumin4ti.UI.Views"
+             xmlns:controls="using:Lumin4ti.UI.Controls"
              x:Class="Lumin4ti.UI.Views.CleanupView"
              x:DataType="vm:CleanupViewModel">
 
-  <!--  内側 6 タブ: 通常／高度／スリム化／レジストリ／設定／その他 (その他は従来のカテゴリ画面)  -->
-  <TabControl>
-    <!--  見出しは折り返さず 1 行に保ち、幅が足りない言語では見出し列だけを横スクロールにする (このタブ列に閉じる)  -->
-    <TabControl.Styles>
-      <Style Selector="TabItem">
-        <Setter Property="Padding" Value="8,0" />
-      </Style>
-    </TabControl.Styles>
-    <TabControl.Template>
-      <ControlTemplate TargetType="TabControl">
-        <DockPanel>
-          <ScrollViewer
-              DockPanel.Dock="Top"
-              HorizontalScrollBarVisibility="Auto"
-              VerticalScrollBarVisibility="Disabled">
-            <ItemsPresenter Name="PART_ItemsPresenter">
-              <ItemsPresenter.ItemsPanel>
-                <ItemsPanelTemplate>
-                  <StackPanel Orientation="Horizontal" />
-                </ItemsPanelTemplate>
-              </ItemsPresenter.ItemsPanel>
-            </ItemsPresenter>
-          </ScrollViewer>
-          <ContentPresenter
-              Name="PART_SelectedContentHost"
-              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-              Content="{TemplateBinding SelectedContent}"
-              ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
-        </DockPanel>
-      </ControlTemplate>
-    </TabControl.Template>
+  <!--  内側 6 タブ: 通常／高度／スリム化／レジストリ／設定／その他 (その他は従来のカテゴリ画面)。見出しは折り返す (スタイルは CleanupStyles.axaml)。  -->
+  <TabControl Classes="cleanup-tabs">
     <TabItem Header="{DynamicResource Text.Cleanup.Tab.Common}">
+      <ToolTip.Tip>
+        <TextBlock MaxWidth="320" TextWrapping="Wrap" Text="{DynamicResource Text.Cleanup.Common.Description}" />
+      </ToolTip.Tip>
       <views:CommonCleanView DataContext="{Binding Common}" />
     </TabItem>
     <TabItem Header="{DynamicResource Text.Cleanup.Tab.Advanced}">
+      <ToolTip.Tip>
+        <TextBlock MaxWidth="320" TextWrapping="Wrap" Text="{DynamicResource Text.Cleanup.Advanced.Description}" />
+      </ToolTip.Tip>
       <views:AdvancedCleanView DataContext="{Binding Advanced}" />
     </TabItem>
     <TabItem Header="{DynamicResource Text.Cleanup.Tab.Slim}">
+      <ToolTip.Tip>
+        <TextBlock MaxWidth="320" TextWrapping="Wrap" Text="{DynamicResource Text.Cleanup.Slim.Ui.Description}" />
+      </ToolTip.Tip>
       <views:SlimView DataContext="{Binding Slim}" />
     </TabItem>
+    <!--  レジストリ: 見出しと目的の文 (常に表示) の下で、削除とバックアップからの復元を切り替える。
+          バックアップ側は表示のたびに一覧を読み直すため、選択中の画面だけを作る差し替え式のままにする。  -->
     <TabItem Header="{DynamicResource Text.Cleanup.Tab.Registry}">
-      <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <StackPanel>
-          <views:RegistryCleanView DataContext="{Binding Registry}" />
-          <views:RegistryRestoreView DataContext="{Binding RegistryRestore}" />
-        </StackPanel>
-      </ScrollViewer>
+      <controls:CleanupPage AutomationProperties.Name="{DynamicResource Text.Cleanup.Registry.View.Title}"
+                            Description="{Binding Registry.PurposeText}">
+        <controls:CleanupPage.Body>
+          <TabControl Classes="segment">
+            <!--  確認シートを開いている間は切り替えを操作不可にする (切り替えると確認中の画面が外れるため)。内容は別の場所に載るので、シートは操作できる。  -->
+            <TabItem>
+              <!--  見出しは TextBlock で持ち、言語を切り替えても幅と高さを測り直す (足りなければ折り返す)。  -->
+              <TabItem.Header>
+                <TextBlock TextWrapping="Wrap" Text="{DynamicResource Text.Cleanup.Registry.View.Section.Clean}" />
+              </TabItem.Header>
+              <TabItem.IsEnabled>
+                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                  <Binding Path="!Registry.IsConfirming" />
+                  <Binding Path="!RegistryRestore.IsSheetOpen" />
+                </MultiBinding>
+              </TabItem.IsEnabled>
+              <views:RegistryCleanView DataContext="{Binding Registry}" />
+            </TabItem>
+            <!--  見出しにバックアップの件数を出す (0 件のときは出さない)。内側の画面が一覧の縦スクロールを持つため ScrollViewer では包まない。  -->
+            <TabItem>
+              <TabItem.IsEnabled>
+                <MultiBinding Converter="{x:Static BoolConverters.And}">
+                  <Binding Path="!Registry.IsConfirming" />
+                  <Binding Path="!RegistryRestore.IsSheetOpen" />
+                </MultiBinding>
+              </TabItem.IsEnabled>
+              <TabItem.Header>
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                  <TextBlock Text="{DynamicResource Text.Cleanup.Registry.View.Section.Backups}" TextWrapping="Wrap" VerticalAlignment="Center" />
+                  <Border Classes="badge" IsVisible="{Binding RegistryRestore.HasBackups}">
+                    <TextBlock Text="{Binding RegistryRestore.Backups.Count}" />
+                  </Border>
+                </StackPanel>
+              </TabItem.Header>
+              <views:RegistryRestoreView DataContext="{Binding RegistryRestore}" />
+            </TabItem>
+          </TabControl>
+        </controls:CleanupPage.Body>
+      </controls:CleanupPage>
     </TabItem>
-    <TabItem Header="{DynamicResource Text.Cleanup.Tab.Settings}">
+    <!--  設定は他の操作と性質が違うため、少し間を空ける  -->
+    <TabItem Margin="16,0,0,0" Header="{DynamicResource Text.Cleanup.Tab.Settings}">
       <views:CleanupSettingsView DataContext="{Binding Settings}" />
     </TabItem>
     <TabItem Header="{DynamicResource Text.Cleanup.Tab.Other}">

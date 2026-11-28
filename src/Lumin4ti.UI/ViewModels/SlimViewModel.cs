@@ -35,6 +35,8 @@ public sealed partial class SlimViewModel : CleanupOperationViewModel
     private CancellationTokenSource? _cancelSource;
     private Func<string> _status;
     private SlimRunResult? _lastResult;
+    private bool _isInitialStatus = true;
+    private bool _statusIsWarning;
 
     public SlimViewModel(
         SlimService slim,
@@ -56,8 +58,15 @@ public sealed partial class SlimViewModel : CleanupOperationViewModel
             {
                 RefreshState();
             }
+            else if (e.PropertyName is nameof(Label) or nameof(ProgressText))
+            {
+                OnPropertyChanged(nameof(ProgressDisplayText));
+            }
         };
     }
+
+    /// <summary>進捗欄に出す文 (操作名と、直近の進捗行)。</summary>
+    public string ProgressDisplayText => ProgressText.Length == 0 ? Label : Label + Environment.NewLine + ProgressText;
 
     internal SlimService Slim { get; }
 
@@ -109,6 +118,33 @@ public sealed partial class SlimViewModel : CleanupOperationViewModel
     private string rebootText = string.Empty;
 
     public int SelectedCount => Items.Count(row => row.IsSelected);
+
+    /// <summary>実行バーに出す選択数の要約 (言語を切り替えると引き直す)。</summary>
+    public string SelectionText => CleanupText.Get(SelectedCount == 1 ? "Cleanup.Ui.SelectedCount.One" : "Cleanup.Ui.SelectedCount", SelectedCount);
+
+    /// <summary>実行結果があるか (結果カードを出す条件)。</summary>
+    public bool HasResult => ResultSummary.Length > 0;
+
+    /// <summary>実行がすべて成功したときだけ true (成功色の結果カード)。部分失敗・拒否・取消では false。</summary>
+    public bool IsResultSuccess => _lastResult?.AllSucceeded == true;
+
+    /// <summary>結果があり完全な成功ではない (警告色の結果カード)。</summary>
+    public bool IsResultWarning => HasResult && !IsResultSuccess;
+
+    /// <summary>走査も実行もまだ何も始めていない初期状態 (未走査の案内を出す)。</summary>
+    public bool ShowNotScannedNotice => _isInitialStatus && !IsRunning;
+
+    /// <summary>実行後に走査結果が失効しているとき、再走査を案内する警告帯を出すか。</summary>
+    public bool ShowRescanNotice => HasResult && !HasScan && !IsRunning;
+
+    /// <summary>実行後の再走査の案内文 (結果カードの中に注記として出す)。</summary>
+    public string RescanNoticeText => CleanupText.Get("Cleanup.Ui.RescanAfterRun");
+
+    /// <summary>状態文を警告帯で出すか (失効・取消・失敗・他の操作中)。</summary>
+    public bool ShowStatusWarning => _statusIsWarning && StatusText.Length > 0;
+
+    /// <summary>状態文を通常の文として出すか (結果カードと重複する文は出さない)。</summary>
+    public bool ShowStatusPlain => !_isInitialStatus && !_statusIsWarning && !HasResult && StatusText.Length > 0;
 
     public bool CanScan => !IsRunning;
 
@@ -177,7 +213,7 @@ public sealed partial class SlimViewModel : CleanupOperationViewModel
         if (ended == Ended.Busy)
         {
             // 何も走査していないので、直前の結果と選択はそのまま。
-            SetStatus(() => CleanupText.Get("Status.Busy"));
+            SetStatus(() => CleanupText.Get("Status.Busy"), warning: true);
             return;
         }
 
@@ -200,10 +236,10 @@ public sealed partial class SlimViewModel : CleanupOperationViewModel
                 SetStatus(() => CleanupText.Get("Cleanup.Slim.Ui.ScanDone", selectable));
                 break;
             case Ended.Cancelled:
-                SetStatus(() => CleanupText.Get("Cleanup.Slim.Ui.Result.Cancelled"));
+                SetStatus(() => CleanupText.Get("Cleanup.Slim.Ui.Result.Cancelled"), warning: true);
                 break;
             default:
-                SetStatus(() => CleanupText.Get("Cleanup.Slim.Ui.ScanFailed"));
+                SetStatus(() => CleanupText.Get("Cleanup.Slim.Ui.ScanFailed"), warning: true);
                 break;
         }
 
@@ -277,7 +313,7 @@ public sealed partial class SlimViewModel : CleanupOperationViewModel
         if (ended == Ended.Busy)
         {
             // 何も実行していないので、走査結果と選択はそのまま。
-            SetStatus(() => CleanupText.Get("Status.Busy"));
+            SetStatus(() => CleanupText.Get("Status.Busy"), warning: true);
             return;
         }
 
@@ -295,7 +331,7 @@ public sealed partial class SlimViewModel : CleanupOperationViewModel
             }
 
             var key = ended == Ended.Cancelled ? "Cleanup.Slim.Ui.Result.Cancelled" : "Cleanup.Slim.Ui.Result.Failed";
-            SetStatus(() => CleanupText.Get(key));
+            SetStatus(() => CleanupText.Get(key), warning: true);
         }
 
         RefreshState();
@@ -310,7 +346,7 @@ public sealed partial class SlimViewModel : CleanupOperationViewModel
 
         if (result.Rejected is not null)
         {
-            SetStatus(() => CleanupText.Get("Cleanup.Slim.Ui.Stale"));
+            SetStatus(() => CleanupText.Get("Cleanup.Slim.Ui.Stale"), warning: true);
             return;
         }
 
@@ -336,7 +372,10 @@ public sealed partial class SlimViewModel : CleanupOperationViewModel
         ResultSummary = CleanupText.Get(result.AllSucceeded ? "Cleanup.Slim.Ui.Done" : "Cleanup.Slim.Ui.DonePartial", CleanupText.FormatBytes(freed));
         RestorePointResultText = DescribeRestorePoint(result.RestorePoint);
         RebootText = result.RebootRequired ? CleanupText.Get("Cleanup.Slim.Ui.RebootRequired") : string.Empty;
+        RefreshResultFlags();
     }
+
+    partial void OnResultSummaryChanged(string value) => RefreshResultFlags();
 
     private static string DescribeRestorePoint(RestorePointResult? restorePoint) => restorePoint switch
     {
@@ -367,10 +406,30 @@ public sealed partial class SlimViewModel : CleanupOperationViewModel
         }
     }
 
-    private void SetStatus(Func<string> text)
+    private void SetStatus(Func<string> text, bool warning = false)
     {
         _status = text;
+        _isInitialStatus = false;
+        _statusIsWarning = warning;
         StatusText = text();
+        RefreshStatusFlags();
+    }
+
+    private void RefreshStatusFlags()
+    {
+        OnPropertyChanged(nameof(ShowNotScannedNotice));
+        OnPropertyChanged(nameof(ShowRescanNotice));
+        OnPropertyChanged(nameof(RescanNoticeText));
+        OnPropertyChanged(nameof(ShowStatusWarning));
+        OnPropertyChanged(nameof(ShowStatusPlain));
+    }
+
+    private void RefreshResultFlags()
+    {
+        OnPropertyChanged(nameof(HasResult));
+        OnPropertyChanged(nameof(IsResultSuccess));
+        OnPropertyChanged(nameof(IsResultWarning));
+        RefreshStatusFlags();
     }
 
     private static void PostToUi(Action action)
@@ -396,7 +455,9 @@ public sealed partial class SlimViewModel : CleanupOperationViewModel
         }
 
         StatusText = _status();
+        RefreshStatusFlags();
         OnPropertyChanged(nameof(ScanButtonText));
+        OnPropertyChanged(nameof(SelectionText));
     }
 
     private List<SlimItemRowViewModel> SelectedRows() => [.. Items.Where(row => row.IsSelected)];
@@ -412,6 +473,9 @@ public sealed partial class SlimViewModel : CleanupOperationViewModel
     private void RefreshState()
     {
         OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(SelectionText));
+        OnPropertyChanged(nameof(ShowNotScannedNotice));
+        OnPropertyChanged(nameof(ShowRescanNotice));
         OnPropertyChanged(nameof(CanScan));
         OnPropertyChanged(nameof(CanRequestRun));
         OnPropertyChanged(nameof(CanConfirm));

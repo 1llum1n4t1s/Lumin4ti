@@ -1,0 +1,340 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:Lumin4ti.UI.Controls">
+
+  <!--  クリーンアップ画面の共通スタイル。色は Themes.axaml のブラシだけを使い、ここへ直書きしない。  -->
+
+  <Styles.Resources>
+    <!--  CleanupPage: 見出し → 操作バー → 進捗 → 通知 → 結果 → 本体 (残り全部) → 実行バー。確認シートは全体の上へ重ねる。  -->
+    <ControlTheme x:Key="{x:Type controls:CleanupPage}" TargetType="controls:CleanupPage">
+      <Setter Property="Padding" Value="8,0" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Panel>
+            <Border Padding="{TemplateBinding Padding}"
+                    IsEnabled="{TemplateBinding IsSheetOpen, Converter={x:Static BoolConverters.Not}}">
+              <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto">
+                <StackPanel Grid.Row="0">
+                  <TextBlock Classes="h1" Margin="0,0,0,2" TextWrapping="Wrap"
+                             Text="{TemplateBinding Title}"
+                             IsVisible="{TemplateBinding Title, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                  <!--  説明は最大 2 行で省略し、全文はツールチップに出す (縦の場所を一覧へ回す)。  -->
+                  <TextBlock Classes="caption" Margin="0,0,0,4" TextWrapping="Wrap"
+                             MaxLines="{TemplateBinding DescriptionMaxLines}" TextTrimming="CharacterEllipsis"
+                             Text="{TemplateBinding Description}"
+                             ToolTip.Tip="{TemplateBinding Description}"
+                             IsVisible="{TemplateBinding Description, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                </StackPanel>
+
+                <ContentPresenter Grid.Row="1" Margin="0,0,0,4"
+                                  Content="{TemplateBinding Toolbar}"
+                                  IsVisible="{TemplateBinding IsToolbarShown}" />
+
+                <StackPanel Grid.Row="2" Margin="0,0,0,6" Spacing="2"
+                            IsVisible="{TemplateBinding IsBusy}">
+                  <ProgressBar Height="4"
+                               AutomationProperties.Name="{DynamicResource Text.Cleanup.A11y.Progress}"
+                               IsIndeterminate="{TemplateBinding IsProgressIndeterminate}"
+                               Maximum="{TemplateBinding ProgressMaximum}"
+                               Value="{TemplateBinding ProgressValue}" />
+                  <TextBlock Classes="caption" TextWrapping="Wrap"
+                             Text="{TemplateBinding ProgressText}"
+                             IsVisible="{TemplateBinding ProgressText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                </StackPanel>
+
+                <ContentPresenter Grid.Row="3" Margin="0,0,0,4"
+                                  Content="{TemplateBinding Notices}"
+                                  IsVisible="{TemplateBinding IsNoticesShown}" />
+
+                <ContentPresenter Grid.Row="4" Margin="0,0,0,4"
+                                  Content="{TemplateBinding Result}"
+                                  IsVisible="{TemplateBinding IsResultShown}" />
+
+                <ContentPresenter Grid.Row="5"
+                                  HorizontalContentAlignment="Stretch"
+                                  VerticalContentAlignment="Stretch"
+                                  Content="{TemplateBinding Body}" />
+
+                <Border Grid.Row="6" Margin="0,4,0,0" Padding="0,6,0,0"
+                        BorderBrush="{DynamicResource Brush.Border}"
+                        BorderThickness="0,1,0,0"
+                        IsVisible="{TemplateBinding IsFooterShown}">
+                  <ContentPresenter Content="{TemplateBinding Footer}" />
+                </Border>
+              </Grid>
+            </Border>
+
+            <!--  確認シート: 背面を薄く覆い、中央寄せ・最大幅あり。ここではスクロールさせず、上下の余白 16 を除いたページの高さへ収まるよう制約するだけ
+                  (中身のスクロールとボタンの固定は各 View のシートが DockPanel で行う)。  -->
+            <Panel IsVisible="{TemplateBinding IsSheetOpen}">
+              <Border Background="{DynamicResource Brush.Scrim}" />
+              <Border Name="PART_SheetHost" Focusable="True"
+                      Margin="12,16"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Center"
+                      MaxWidth="560">
+                <ContentPresenter Content="{TemplateBinding Sheet}" />
+              </Border>
+            </Panel>
+          </Panel>
+        </ControlTemplate>
+      </Setter>
+    </ControlTheme>
+  </Styles.Resources>
+
+  <!--  ═══ 枠 ═══  -->
+
+  <!--  危険系の確認シートの枠 (背面の幕の上に載るため不透明にする)  -->
+  <Style Selector="Border.sheet">
+    <Setter Property="Background" Value="{DynamicResource Brush.Window}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Brush.DangerBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="14" />
+    <Setter Property="Padding" Value="16" />
+  </Style>
+
+  <!--  通知 (失効の警告帯・注意)。無印は中立。  -->
+  <Style Selector="Border.notice">
+    <Setter Property="Background" Value="{DynamicResource Brush.Container}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="Padding" Value="10,8" />
+  </Style>
+  <Style Selector="Border.notice.warning">
+    <Setter Property="Background" Value="{DynamicResource Brush.WarningSurface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Brush.WarningBorder}" />
+  </Style>
+  <Style Selector="Border.notice.error">
+    <Setter Property="Background" Value="{DynamicResource Brush.DangerSurface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Brush.DangerBorder}" />
+  </Style>
+
+  <!--  結果。無印は中立。  -->
+  <Style Selector="Border.result">
+    <Setter Property="Background" Value="{DynamicResource Brush.Container}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="Padding" Value="12,10" />
+  </Style>
+  <Style Selector="Border.result.success">
+    <Setter Property="Background" Value="{DynamicResource Brush.SuccessSurface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Brush.SuccessBorder}" />
+  </Style>
+  <Style Selector="Border.result.warning">
+    <Setter Property="Background" Value="{DynamicResource Brush.WarningSurface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Brush.WarningBorder}" />
+  </Style>
+  <Style Selector="Border.result.error">
+    <Setter Property="Background" Value="{DynamicResource Brush.DangerSurface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Brush.DangerBorder}" />
+  </Style>
+
+  <Style Selector="TextBlock.warning">
+    <Setter Property="Foreground" Value="{DynamicResource Brush.Warning}" />
+  </Style>
+  <Style Selector="TextBlock.error">
+    <Setter Property="Foreground" Value="{DynamicResource Brush.Danger}" />
+  </Style>
+
+  <!--  ライトでも読める警告色のバッジ (基本のバッジは App.axaml)  -->
+  <Style Selector="Border.badge.warning">
+    <Setter Property="Background" Value="{DynamicResource Brush.WarningSurface}" />
+  </Style>
+  <Style Selector="Border.badge.warning > TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource Brush.Warning}" />
+  </Style>
+
+  <!--  詰めたカード (Border.card の余白だけ狭める)  -->
+  <Style Selector="Border.card.compact">
+    <Setter Property="Padding" Value="10,8" />
+    <Setter Property="Margin" Value="0,0,0,8" />
+    <Setter Property="CornerRadius" Value="10" />
+  </Style>
+
+  <!--  ═══ 一覧 ═══  -->
+
+  <!--  選択色・ホバー色を持たない一覧。行の見た目は Border.list-row が持つ。横スクロールは出さない。  -->
+  <Style Selector="ListBox.cleanup-list">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+  </Style>
+  <Style Selector="ListBox.cleanup-list > ListBoxItem">
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+  </Style>
+  <Style Selector="ListBox.cleanup-list > ListBoxItem /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Padding" Value="0" />
+  </Style>
+  <Style Selector="ListBox.cleanup-list > ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="ListBox.cleanup-list > ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="ListBox.cleanup-list > ListBoxItem:selected:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="ListBox.cleanup-list > ListBoxItem:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <Style Selector="ListBox.cleanup-list > ListBoxItem:selected:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+
+  <!--  一覧の行: 下の区切り線とホバーだけ。枠付きカードではない。  -->
+  <Style Selector="Border.list-row">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+    <Setter Property="Padding" Value="8,6" />
+  </Style>
+  <Style Selector="Border.list-row:pointerover">
+    <Setter Property="Background" Value="{DynamicResource Brush.SidebarHover}" />
+  </Style>
+
+  <!--  一覧の見出し行 (分類など)  -->
+  <Style Selector="Border.group-row">
+    <Setter Property="Background" Value="{DynamicResource Brush.ContainerAlt}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+    <Setter Property="Padding" Value="8,5" />
+  </Style>
+  <Style Selector="Border.group-row > TextBlock">
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <!--  見出し行の開閉記号: Fluent の ToggleButton は状態ごとに ContentPresenter の前景を上書きし、ライトでは白に近くなる。見出し行の中だけ両テーマで読める色に固定する。  -->
+  <Style Selector="Border.group-row ToggleButton.disclosure /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource Brush.FG1}" />
+  </Style>
+  <Style Selector="Border.group-row ToggleButton.disclosure:checked /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource Brush.FG1}" />
+  </Style>
+  <Style Selector="Border.group-row ToggleButton.disclosure:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource Brush.FG1}" />
+  </Style>
+  <Style Selector="Border.group-row ToggleButton.disclosure:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource Brush.FG1}" />
+  </Style>
+  <Style Selector="Border.group-row ToggleButton.disclosure:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource Brush.FG1}" />
+  </Style>
+  <Style Selector="Border.group-row ToggleButton.disclosure:checked:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Foreground" Value="{DynamicResource Brush.FG1}" />
+  </Style>
+
+  <!--  ═══ タブ ═══  -->
+
+  <!--  内側のタブ: 見出しを折り返す (横スクロールにしない)  -->
+  <Style Selector="TabControl.cleanup-tabs">
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="TabControl">
+        <DockPanel>
+          <ItemsPresenter Name="PART_ItemsPresenter" DockPanel.Dock="Top" Margin="0,0,0,4">
+            <ItemsPresenter.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel Orientation="Horizontal" />
+              </ItemsPanelTemplate>
+            </ItemsPresenter.ItemsPanel>
+          </ItemsPresenter>
+          <ContentPresenter
+              Name="PART_SelectedContentHost"
+              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+              Content="{TemplateBinding SelectedContent}"
+              ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
+        </DockPanel>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="TabControl.cleanup-tabs > TabItem">
+    <!--  既定の項目の高さ (48) は、見出しが折り返す言語で 2 行分の縦を使うため、内容に合わせて詰める。  -->
+    <Setter Property="MinHeight" Value="30" />
+    <!--  760 幅・長い言語 (ドイツ語) でも 6 項目が 1 行に収まるよう、左右の余白と文字 (既定 24) を詰める。
+          それでも足りない幅・言語では WrapPanel が折り返す。  -->
+    <Setter Property="Padding" Value="6,0" />
+    <Setter Property="FontSize" Value="18" />
+  </Style>
+
+  <!--  タブの中で 2 画面を切り替える小さな切り替え (選択中の画面だけを作り直す差し替え式)  -->
+  <Style Selector="TabControl.segment">
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="TabControl">
+        <DockPanel>
+          <Border DockPanel.Dock="Top"
+                  HorizontalAlignment="Stretch"
+                  Margin="0,0,0,4"
+                  Padding="2"
+                  Background="{DynamicResource Brush.SidebarHover}"
+                  CornerRadius="10">
+            <ItemsPresenter Name="PART_ItemsPresenter">
+              <ItemsPresenter.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <!--  2 項目を同じ幅で並べる。各項目は窓の半分の幅で測るため、長い言語でも見出しが切れず、足りなければその項目の中で折り返す。  -->
+                  <UniformGrid Rows="1" />
+                </ItemsPanelTemplate>
+              </ItemsPresenter.ItemsPanel>
+            </ItemsPresenter>
+          </Border>
+          <ContentPresenter
+              Name="PART_SelectedContentHost"
+              HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+              VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+              Content="{TemplateBinding SelectedContent}"
+              ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
+        </DockPanel>
+      </ControlTemplate>
+    </Setter>
+  </Style>
+  <Style Selector="TabControl.segment > TabItem">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="0,0,2,0" />
+    <!--  高さは内容に合わせる (折り返した 2 行目を切らない)。固定の高さ・上限を外す。  -->
+    <Setter Property="MinHeight" Value="24" />
+    <Setter Property="Height" Value="NaN" />
+    <Setter Property="MaxHeight" Value="Infinity" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+    <Setter Property="ClipToBounds" Value="False" />
+    <Setter Property="Width" Value="NaN" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="MaxWidth" Value="Infinity" />
+    <Setter Property="Foreground" Value="{DynamicResource Brush.FG2}" />
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+  <!--  見出しは内容の幅に合わせ、足りなければ折り返す。  -->
+  <Style Selector="TabControl.segment > TabItem /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="TextWrapping" Value="Wrap" />
+  </Style>
+  <Style Selector="TabControl.segment > TabItem /template/ Border#PART_LayoutRoot">
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="12,3" />
+  </Style>
+  <Style Selector="TabControl.segment > TabItem /template/ Border#PART_SelectedPipe">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+  <Style Selector="TabControl.segment > TabItem:pointerover /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource Brush.SidebarSelected}" />
+  </Style>
+  <Style Selector="TabControl.segment > TabItem:selected">
+    <Setter Property="Foreground" Value="{DynamicResource Brush.FG1}" />
+  </Style>
+  <Style Selector="TabControl.segment > TabItem:selected /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{DynamicResource Brush.Window}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Padding" Value="11,2" />
+  </Style>
+</Styles>

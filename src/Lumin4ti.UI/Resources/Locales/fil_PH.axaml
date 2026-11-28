@@ -817,7 +817,6 @@
   <x:String x:Key="Text.Cleanup.Registry.View.NoCandidates" xml:space="preserve">Walang kandidato.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.ValueName" xml:space="preserve">Pangalan ng value:</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Approval.Title" xml:space="preserve">Kailangan ng hiwalay na pag-apruba ang mga sumusunod na item. Suriin ang mga ito at lagyan ng check ang maaaring burahin.</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Title" xml:space="preserve">Mga backup at pagbabalik</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Refresh" xml:space="preserve">I-refresh ang listahan</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Empty" xml:space="preserve">Walang mga backup.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Restore" xml:space="preserve">Ibalik</x:String>
@@ -825,7 +824,6 @@
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">Burahin ang backup na ito?</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">Burahin</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Confirm.Title" xml:space="preserve">Kumpirmahin ang pagbura sa registry</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.View.CancelRun" xml:space="preserve">Ihinto ang pagbura</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Cancel" xml:space="preserve">Kanselahin</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.ValueDefault" xml:space="preserve">(Default)</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonLine.One" xml:space="preserve">{0}: {1} ({2} item)</x:String>
@@ -860,4 +858,19 @@
   <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-rebuild" xml:space="preserve">Data ng Safe Browsing at model ng Google Chrome Beta</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-rebuild" xml:space="preserve">Data ng Safe Browsing at model ng Google Chrome Dev</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.browser-comet-rebuild" xml:space="preserve">Data ng Safe Browsing at model ng Comet</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.SelectMenu" xml:space="preserve">Piliin</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.MoreActions" xml:space="preserve">Iba pang aksyon</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.RowActions" xml:space="preserve">Mga aksyon para sa item na ito</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.NotScanned.Title" xml:space="preserve">Hindi pa na-scan</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.NotScanned.Body" xml:space="preserve">Walang binubura ang pag-scan lamang.</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.Sort" xml:space="preserve">Ayusin</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.SelectedCount" xml:space="preserve">{0} item ang napili</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.SelectedCount.One" xml:space="preserve">{0} item ang napili</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.RescanAfterRun" xml:space="preserve">Hindi na magagamit ang mga resulta ng pag-scan dahil naisagawa na ang operasyon. Mag-scan muli para magpatuloy.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.ScanScope" xml:space="preserve">Saan at paano mag-scan</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Section.Clean" xml:space="preserve">Burahin ang mga hindi kailangang entry</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Section.Backups" xml:space="preserve">Ibalik mula sa backup</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.RestoreConfirm.Title" xml:space="preserve">Ibalik mula sa backup na ito?</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.RestoreRun" xml:space="preserve">Ibalik</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.RestoreConfirm" xml:space="preserve">Isusulat pabalik sa registry ang laman ng backup na ginawa noong {0}.</x:String>
 </ResourceDictionary>

@@ -74,7 +74,22 @@ public sealed partial class AdvancedCleanViewModel(
     private bool isConfirming;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsNotScannedState))]
+    [NotifyPropertyChangedFor(nameof(IsStatusEmptyState))]
     private string statusText = string.Empty;
+
+    /// <summary>表示用: 削除の完了・失敗で真になり、次の走査で偽になる (結果カードを出す)。</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsResultSuccess))]
+    [NotifyPropertyChangedFor(nameof(IsResultWarning))]
+    [NotifyPropertyChangedFor(nameof(IsResultError))]
+    [NotifyPropertyChangedFor(nameof(IsNotScannedState))]
+    [NotifyPropertyChangedFor(nameof(IsStatusEmptyState))]
+    private bool hasResult;
+
+    /// <summary>表示用: 走査条件の開閉欄。走査前は開き、走査結果を出したら閉じる (利用者の開閉は妨げない)。</summary>
+    [ObservableProperty]
+    private bool isScopeExpanded = true;
 
     [ObservableProperty]
     private IReadOnlyList<string> notices = [];
@@ -155,6 +170,68 @@ public sealed partial class AdvancedCleanViewModel(
     public bool HasCustomFolders => CustomFolders.Count > 0;
 
     public bool HasResults => HasScan && (_rows.Count > 0 || CustomFolders.Count > 0);
+
+    /// <summary>削除が例外で失敗した (結果は使えない)。成功の見た目にしないための表示用の印。</summary>
+    private bool _resultFailed;
+
+    /// <summary>結果カードの色: 完全な成功のときだけ成功色。</summary>
+    public bool IsResultSuccess => HasResult && !_resultFailed && LastOutcome is { Succeeded: true };
+
+    /// <summary>結果カードの色: 部分失敗・失効・取消は警告色。</summary>
+    public bool IsResultWarning => HasResult && !_resultFailed && LastOutcome is { Succeeded: false };
+
+    /// <summary>結果カードの色: 削除の失敗は誤り色。</summary>
+    public bool IsResultError => HasResult && _resultFailed;
+
+    /// <summary>空状態「まだ走査していません」を出すか (走査結果が無く、走査中でもなく、結果カードも別の状態文も無いとき)。</summary>
+    public bool IsNotScannedState => !HasResults && !IsRunning && !HasResult && string.IsNullOrEmpty(StatusText);
+
+    /// <summary>表示用: 削除の後、走査結果は使えなくなったので再走査が要る旨 (結果カードの下に出す)。</summary>
+    public string RescanAfterRunText => CleanupText.Get("Cleanup.Ui.RescanAfterRun");
+
+    /// <summary>空状態に状態文 (0 件・対象なし・走査の中止や失敗) を出すか。</summary>
+    public bool IsStatusEmptyState => !HasResults && !IsRunning && !HasResult && !string.IsNullOrEmpty(StatusText);
+
+    /// <summary>失効の警告帯を出すか。</summary>
+    public bool ShowStaleBand => IsStale && HasScan;
+
+    /// <summary>走査結果の状態文を通知の欄に出すか (結果カードが出ている間と、結果が空の間は出さない)。</summary>
+    public bool ShowScanStatus => HasResults && !HasResult && !IsStale && !string.IsNullOrEmpty(StatusText);
+
+    /// <summary>走査の通知 (表示上限の超過など) を通知の欄に出すか。</summary>
+    public bool ShowScanNotices => !HasResult && HasScan;
+
+    private void RaiseDisplayState()
+    {
+        OnPropertyChanged(nameof(IsNotScannedState));
+        OnPropertyChanged(nameof(IsStatusEmptyState));
+        OnPropertyChanged(nameof(ShowStaleBand));
+        OnPropertyChanged(nameof(ShowScanStatus));
+        OnPropertyChanged(nameof(ShowScanNotices));
+    }
+
+    partial void OnHasScanChanged(bool value) => RaiseDisplayState();
+
+    partial void OnIsStaleChanged(bool value) => RaiseDisplayState();
+
+    partial void OnHasResultChanged(bool value) => RaiseDisplayState();
+
+    partial void OnStatusTextChanged(string value) => RaiseDisplayState();
+
+    private void SetResult(bool failed)
+    {
+        _resultFailed = failed;
+        if (HasResult)
+        {
+            OnPropertyChanged(nameof(IsResultSuccess));
+            OnPropertyChanged(nameof(IsResultWarning));
+            OnPropertyChanged(nameof(IsResultError));
+        }
+        else
+        {
+            HasResult = true;
+        }
+    }
 
     public string ScanButtonText => CleanupText.Get(HasScan ? "Cleanup.Action.Rescan" : "Cleanup.Action.Scan");
 
@@ -250,6 +327,8 @@ public sealed partial class AdvancedCleanViewModel(
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(activeLease.Token);
         BeginOperation(cts, CleanupText.Get("Cleanup.Tab.Advanced"));
         ClearResults();
+        _resultFailed = false;
+        HasResult = false;
         var options = new AdvancedScanOptions(roots)
         {
             SavedPatterns = Settings.GetPatterns(),
@@ -297,6 +376,7 @@ public sealed partial class AdvancedCleanViewModel(
         _rows = rows;
         IsStale = false;
         HasScan = true;
+        IsScopeExpanded = false;
         CustomFolders.Clear();
         foreach (var folder in result.CustomFolders) CustomFolders.Add(new AdvancedCleanFolderViewModel(folder, RecomputeSelection));
         Groups = BuildGroups(rows);
@@ -308,6 +388,7 @@ public sealed partial class AdvancedCleanViewModel(
             ? CleanupText.Get("Cleanup.Advanced.Empty")
             : CleanupText.Get("Cleanup.Advanced.ScanDone", result.TotalMatched.ToString("N0"), CleanupText.FormatBytes(result.TotalBytes), result.FilesScanned.ToString("N0")));
         OnPropertyChanged(nameof(HasResults));
+        RaiseDisplayState();
         OnPropertyChanged(nameof(HasCustomFolders));
         OnPropertyChanged(nameof(ScanButtonText));
         OnPropertyChanged(nameof(TotalFileCount));
@@ -341,6 +422,7 @@ public sealed partial class AdvancedCleanViewModel(
         Notices = [];
         RecomputeSelection();
         OnPropertyChanged(nameof(HasResults));
+        RaiseDisplayState();
         OnPropertyChanged(nameof(HasCustomFolders));
         OnPropertyChanged(nameof(ScanButtonText));
         OnPropertyChanged(nameof(TotalFileCount));
@@ -543,6 +625,7 @@ public sealed partial class AdvancedCleanViewModel(
         if (IsConfirming) ConfirmLines = BuildConfirmLines();
         if (_status is { } status) StatusText = status();
         OnPropertyChanged(nameof(ScanButtonText));
+        OnPropertyChanged(nameof(RescanAfterRunText));
         OnPropertyChanged(nameof(ShowAllText));
         OnPropertyChanged(nameof(IgnoreFolderText));
         OnPropertyChanged(nameof(KindsHeaderText));
@@ -606,6 +689,7 @@ public sealed partial class AdvancedCleanViewModel(
         RecomputeSelection();
         await RebuildViewAsync().ConfigureAwait(true);
         OnPropertyChanged(nameof(HasResults));
+        RaiseDisplayState();
         OnPropertyChanged(nameof(HasCustomFolders));
         OnPropertyChanged(nameof(TotalFileCount));
     }
@@ -690,6 +774,8 @@ public sealed partial class AdvancedCleanViewModel(
             LoggerBootstrap.Log.Error("高度なクリーンの削除に失敗しました", ex);
             ClearResults();
             SetStatus(() => CleanupText.Get("Cleanup.Advanced.Result.Failed"));
+            IsScopeExpanded = true;
+            SetResult(failed: true);
         }
         finally
         {
@@ -703,6 +789,8 @@ public sealed partial class AdvancedCleanViewModel(
         ClearResults();
         SetStatus(() => DescribeOutcome(outcome));
         SetNotices(() => BuildOutcomeNotices(outcome));
+        IsScopeExpanded = true;
+        SetResult(failed: false);
         if (outcome.Expired) return;
         Settings.RecordRun(outcome.DeletedFiles, outcome.FreedBytes, outcome.Blocked + outcome.Retained + outcome.Rejected.Count, outcome.IsPartial, DateTimeOffset.Now);
         try
@@ -766,6 +854,7 @@ public sealed partial class AdvancedCleanViewModel(
         OnPropertyChanged(nameof(CanScan));
         OnPropertyChanged(nameof(CanDelete));
         OnPropertyChanged(nameof(HasCurrentRow));
+        RaiseDisplayState();
     }
 
     private void ReportBusy() =>

@@ -853,7 +853,6 @@
   <x:String x:Key="Text.Cleanup.Registry.View.NoCandidates" xml:space="preserve">Aucun candidat.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.ValueName" xml:space="preserve">Nom de la valeur :</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Approval.Title" xml:space="preserve">Les éléments suivants nécessitent une approbation individuelle. Examinez-les et cochez ceux qui peuvent être supprimés.</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Title" xml:space="preserve">Sauvegardes et restauration</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Refresh" xml:space="preserve">Actualiser la liste</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Empty" xml:space="preserve">Il n'y a aucune sauvegarde.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Restore" xml:space="preserve">Restaurer</x:String>
@@ -861,7 +860,6 @@
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">Supprimer cette sauvegarde ?</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">Supprimer</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Confirm.Title" xml:space="preserve">Confirmer la suppression dans le Registre</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.View.CancelRun" xml:space="preserve">Arrêter la suppression</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Cancel" xml:space="preserve">Annuler</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.ValueDefault" xml:space="preserve">(Par défaut)</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonLine.One" xml:space="preserve">{0} : {1} ({2} élément)</x:String>
@@ -896,5 +894,20 @@
   <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-rebuild" xml:space="preserve">Données Safe Browsing et de modèles de Google Chrome Beta</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-rebuild" xml:space="preserve">Données Safe Browsing et de modèles de Google Chrome Dev</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.browser-comet-rebuild" xml:space="preserve">Données Safe Browsing et de modèles de Comet</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.SelectMenu" xml:space="preserve">Sélectionner</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.MoreActions" xml:space="preserve">Autres actions</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.RowActions" xml:space="preserve">Actions pour cet élément</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.NotScanned.Title" xml:space="preserve">Pas encore analysé</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.NotScanned.Body" xml:space="preserve">L’analyse seule ne supprime rien.</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.Sort" xml:space="preserve">Trier</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.SelectedCount" xml:space="preserve">{0} éléments sélectionnés</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.SelectedCount.One" xml:space="preserve">{0} élément sélectionné</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.RescanAfterRun" xml:space="preserve">Les résultats de l'analyse ne sont plus utilisables, car l'opération a été exécutée. Relancez une analyse pour continuer.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.ScanScope" xml:space="preserve">Où et selon quels critères analyser</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Section.Clean" xml:space="preserve">Supprimer les entrées inutiles</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Section.Backups" xml:space="preserve">Restaurer depuis une sauvegarde</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.RestoreConfirm.Title" xml:space="preserve">Restaurer depuis cette sauvegarde ?</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.RestoreRun" xml:space="preserve">Restaurer</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.RestoreConfirm" xml:space="preserve">Le contenu de la sauvegarde créée le {0} sera réécrit dans le registre.</x:String>
   <!-- ===== /Cleanup ===== -->
 </ResourceDictionary>

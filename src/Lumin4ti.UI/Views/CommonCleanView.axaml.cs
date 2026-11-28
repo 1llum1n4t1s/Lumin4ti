@@ -11,7 +11,6 @@ public partial class CommonCleanView : UserControl
     public CommonCleanView()
     {
         InitializeComponent();
-        ExportButton.Click += OnExportClick;
     }
 
     /// <summary>保存先は利用者がダイアログで選ぶ。書き出しの中身と保存は ViewModel が担う。</summary>

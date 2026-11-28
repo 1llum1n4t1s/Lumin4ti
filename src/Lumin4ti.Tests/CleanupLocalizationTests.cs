@@ -125,6 +125,21 @@ public sealed partial class CleanupLocalizationTests
     ];
 
     [TestMethod]
+    public void EveryNonJapaneseLocaleHasTheSameCleanupKeysAsEnglish()
+    {
+        var english = LoadDictionary("en_US").Keys.Where(k => k.StartsWith(Prefix, StringComparison.Ordinal)).ToHashSet(StringComparer.Ordinal);
+        var problems = new List<string>();
+        foreach (var locale in AllLocales.Where(l => l is not ("en_US" or "ja_JP")))
+        {
+            var keys = LoadDictionary(locale).Keys.Where(k => k.StartsWith(Prefix, StringComparison.Ordinal)).ToHashSet(StringComparer.Ordinal);
+            problems.AddRange(english.Except(keys).Select(k => $"{locale}: 欠落 {k}"));
+            problems.AddRange(keys.Except(english).Select(k => $"{locale}: 余分 {k}"));
+        }
+
+        Assert.IsEmpty(problems, "en_US と一致しないキー: " + string.Join(", ", problems));
+    }
+
+    [TestMethod]
     public void RuleDisplayNamesAreUniqueWithinACategoryInEveryLocale()
     {
         var ja = LoadDictionary("ja_JP");

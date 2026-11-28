@@ -817,7 +817,6 @@
   <x:String x:Key="Text.Cleanup.Registry.View.NoCandidates" xml:space="preserve">தகுந்தவை எதுவும் இல்லை.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.ValueName" xml:space="preserve">மதிப்புப் பெயர்:</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Approval.Title" xml:space="preserve">பின்வரும் உருப்படிகளுக்குத் தனித்தனி ஒப்புதல் தேவை. அவற்றைப் பார்த்து, நீக்கலாம் என்பவற்றைத் தேர்வுசெய்யவும்.</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Title" xml:space="preserve">காப்புப் பிரதிகள், மீட்டெடுப்பு</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Refresh" xml:space="preserve">புதுப்பி</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Empty" xml:space="preserve">காப்புப் பிரதிகள் இல்லை.</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Restore" xml:space="preserve">மீட்டெடு</x:String>
@@ -825,7 +824,6 @@
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">இந்தக் காப்புப் பிரதியை நீக்கலாமா?</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">நீக்கு</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Confirm.Title" xml:space="preserve">Registry நீக்கத்தை உறுதிப்படுத்து</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.View.CancelRun" xml:space="preserve">நீக்குவதை நிறுத்து</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Cancel" xml:space="preserve">ரத்துசெய்</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.ValueDefault" xml:space="preserve">(இயல்புநிலை)</x:String>
   <x:String x:Key="Text.Cleanup.Registry.Ui.ReasonLine.One" xml:space="preserve">{0}: {1} ({2} உருப்படி)</x:String>
@@ -860,4 +858,19 @@
   <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-beta-rebuild" xml:space="preserve">Google Chrome Beta Safe Browsing மற்றும் மாதிரித் தரவு</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.browser-chrome-dev-rebuild" xml:space="preserve">Google Chrome Dev Safe Browsing மற்றும் மாதிரித் தரவு</x:String>
   <x:String x:Key="Text.Cleanup.Rule.legacy.browser-comet-rebuild" xml:space="preserve">Comet Safe Browsing மற்றும் மாதிரித் தரவு</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.SelectMenu" xml:space="preserve">தேர்ந்தெடு</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.MoreActions" xml:space="preserve">மேலும் செயல்கள்</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.RowActions" xml:space="preserve">இந்த உருப்படிக்கான செயல்கள்</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.NotScanned.Title" xml:space="preserve">இன்னும் ஸ்கேன் செய்யப்படவில்லை</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.NotScanned.Body" xml:space="preserve">ஸ்கேன் செய்வதால் மட்டும் எதுவும் நீக்கப்படாது.</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.Sort" xml:space="preserve">வரிசைப்படுத்து</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.SelectedCount" xml:space="preserve">{0} உருப்படிகள் தேர்ந்தெடுக்கப்பட்டன</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.SelectedCount.One" xml:space="preserve">{0} உருப்படி தேர்ந்தெடுக்கப்பட்டது</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.RescanAfterRun" xml:space="preserve">இயக்கப்பட்டதால் ஸ்கேன் முடிவுகளை இனி பயன்படுத்த முடியாது. தொடர, மீண்டும் ஸ்கேன் செய்யுங்கள்.</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.ScanScope" xml:space="preserve">எங்கு, எந்த நிபந்தனைகளில் ஸ்கேன் செய்வது</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Section.Clean" xml:space="preserve">தேவையற்ற பதிவுகளை நீக்கு</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Section.Backups" xml:space="preserve">காப்புப் பிரதியிலிருந்து மீட்டெடு</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.RestoreConfirm.Title" xml:space="preserve">இந்தக் காப்புப் பிரதியிலிருந்து மீட்டெடுக்கவா?</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.RestoreRun" xml:space="preserve">மீட்டெடு</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.Ui.Backup.RestoreConfirm" xml:space="preserve">{0} அன்று உருவாக்கிய காப்புப் பிரதியின் உள்ளடக்கம் registry-யில் மீண்டும் எழுதப்படும்.</x:String>
 </ResourceDictionary>

@@ -1,44 +1,78 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Lumin4ti.UI.ViewModels"
+             xmlns:controls="using:Lumin4ti.UI.Controls"
              x:Class="Lumin4ti.UI.Views.SlimView"
              x:DataType="vm:SlimViewModel">
 
-  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-    <StackPanel Margin="8,0" Spacing="8">
-      <TextBlock Classes="h1" Text="{DynamicResource Text.Cleanup.Slim.Ui.Title}" />
-      <TextBlock Classes="caption" TextWrapping="Wrap"
-                 Text="{DynamicResource Text.Cleanup.Slim.Ui.Description}" />
+  <!--  スリム化: 走査 → 選択 → 確認シート → 実行 → 結果。項目は走査前から並べ、自動では走査も実行もしない。  -->
+  <controls:CleanupPage AutomationProperties.Name="{DynamicResource Text.Cleanup.Slim.Ui.Title}"
+                        Description="{DynamicResource Text.Cleanup.Slim.Ui.Description}"
+                        DescriptionMaxLines="1"
+                        IsBusy="{Binding IsRunning}"
+                        ProgressText="{Binding ProgressDisplayText}"
+                        IsResultVisible="{Binding HasResult}"
+                        IsFooterVisible="{Binding HasScan}"
+                        IsSheetOpen="{Binding IsConfirming}"
+                        SheetCancelCommand="{Binding CancelConfirmCommand}">
 
-      <!--  操作: 走査 (走査中は中断) と、選択の解除。実行は選択後に確認を経て行う。  -->
-      <WrapPanel Orientation="Horizontal">
-        <Button Margin="0,0,8,0" Content="{Binding ScanButtonText}"
-                Command="{Binding ScanCommand}" IsEnabled="{Binding CanScan}" />
-        <Button Margin="0,0,8,0" Content="{DynamicResource Text.Cleanup.Action.CancelScan}"
-                Command="{Binding CancelCommand}"
-                IsVisible="{Binding IsRunning}" IsEnabled="{Binding CanCancel}" />
-        <Button Margin="0,0,8,0" Content="{DynamicResource Text.Cleanup.Select.None}"
-                Command="{Binding ClearSelectionCommand}" IsEnabled="{Binding CanEditSelection}" />
-        <CheckBox Margin="0,0,8,0" Content="{DynamicResource Text.Cleanup.Slim.Ui.CreateRestorePoint}"
-                  IsChecked="{Binding CreateRestorePoint}" IsEnabled="{Binding !IsRunning}" />
-      </WrapPanel>
-
-      <StackPanel Spacing="4" IsVisible="{Binding IsRunning}">
-        <ProgressBar IsIndeterminate="True" Height="4" />
-        <TextBlock Text="{Binding Label}" TextWrapping="Wrap" />
-        <TextBlock Classes="caption" Text="{Binding ProgressText}" TextWrapping="Wrap"
-                   IsVisible="{Binding ProgressText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+    <controls:CleanupPage.Toolbar>
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <!--  走査 (走査前は強調)。走査中・実行中は同じ場所が「中止」になる。  -->
+        <Button Content="{Binding ScanButtonText}" Classes.accent="{Binding !HasScan}"
+                Command="{Binding ScanCommand}" IsEnabled="{Binding CanScan}"
+                IsVisible="{Binding !IsRunning}" />
+        <Button Content="{DynamicResource Text.Cleanup.Action.CancelScan}"
+                Command="{Binding CancelCommand}" IsEnabled="{Binding CanCancel}"
+                IsVisible="{Binding IsRunning}" />
+        <Button IsEnabled="{Binding CanEditSelection}">
+          <StackPanel Orientation="Horizontal" Spacing="4">
+            <TextBlock Text="{DynamicResource Text.Cleanup.Ui.SelectMenu}" />
+            <TextBlock Text="▾" />
+          </StackPanel>
+          <Button.Flyout>
+            <MenuFlyout Placement="BottomEdgeAlignedLeft">
+              <MenuItem Header="{DynamicResource Text.Cleanup.Select.None}" Command="{Binding ClearSelectionCommand}" />
+            </MenuFlyout>
+          </Button.Flyout>
+        </Button>
       </StackPanel>
+    </controls:CleanupPage.Toolbar>
 
-      <TextBlock Text="{Binding StatusText}" TextWrapping="Wrap"
-                 IsVisible="{Binding StatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+    <controls:CleanupPage.Notices>
+      <StackPanel Spacing="8">
+        <!--  走査前の案内は 1 行の文だけ (一覧をそのまま見せる)。  -->
+        <TextBlock Classes="caption" TextWrapping="Wrap" Text="{Binding StatusText}"
+                   IsVisible="{Binding ShowNotScannedNotice}" />
+        <Border Classes="notice warning" IsVisible="{Binding ShowStatusWarning}">
+          <TextBlock TextWrapping="Wrap" Text="{Binding StatusText}" />
+        </Border>
+        <TextBlock TextWrapping="Wrap" Text="{Binding StatusText}" IsVisible="{Binding ShowStatusPlain}" />
+      </StackPanel>
+    </controls:CleanupPage.Notices>
 
-      <!--  項目一覧: 名前・説明・警告・状態・空きの見込み (実行後は結果)。  -->
-      <ItemsControl ItemsSource="{Binding Items}" IsEnabled="{Binding !IsRunning}">
-        <ItemsControl.ItemTemplate>
+    <!--  実行後: 全体の結果・復元ポイント・再起動の要否。成功色は完全な成功のときだけ。  -->
+    <controls:CleanupPage.Result>
+      <Border Classes="result" Classes.success="{Binding IsResultSuccess}" Classes.warning="{Binding IsResultWarning}">
+        <StackPanel Spacing="4">
+          <TextBlock Text="{Binding ResultSummary}" FontWeight="SemiBold" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding RestorePointResultText}" TextWrapping="Wrap"
+                     IsVisible="{Binding RestorePointResultText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          <TextBlock Text="{Binding RebootText}" TextWrapping="Wrap" FontWeight="SemiBold"
+                     IsVisible="{Binding RebootText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          <!--  実行後の再走査の案内は結果の下の注記として出す (警告の帯にしない)。  -->
+          <TextBlock Classes="caption" TextWrapping="Wrap" Text="{Binding RescanNoticeText}"
+                     IsVisible="{Binding ShowRescanNotice}" />
+        </StackPanel>
+      </Border>
+    </controls:CleanupPage.Result>
+
+    <!--  項目一覧: 走査前から並ぶ。名前・説明・警告・状態・空きの見込み (実行後は結果)。  -->
+    <controls:CleanupPage.Body>
+      <ListBox Classes="cleanup-list" ItemsSource="{Binding Items}" IsEnabled="{Binding !IsRunning}">
+        <ListBox.ItemTemplate>
           <DataTemplate x:DataType="vm:SlimItemRowViewModel">
-            <Border Padding="8,6" Margin="0,0,0,4" CornerRadius="8"
-                    BorderBrush="{DynamicResource Brush.Border}" BorderThickness="1">
+            <Border Classes="list-row">
               <Grid ColumnDefinitions="Auto,*,Auto">
                 <CheckBox Grid.Column="0" Margin="0,0,8,0" VerticalAlignment="Top"
                           IsChecked="{Binding IsSelected}" IsEnabled="{Binding IsCheckEnabled}"
@@ -46,7 +80,7 @@
                 <StackPanel Grid.Column="1" Spacing="2">
                   <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
                   <TextBlock Classes="caption" Text="{Binding Description}" TextWrapping="Wrap" />
-                  <TextBlock Foreground="#FFB020" TextWrapping="Wrap" IsVisible="{Binding HasWarning}">
+                  <TextBlock Classes="warning" TextWrapping="Wrap" IsVisible="{Binding HasWarning}">
                     <Run Text="{Binding LevelText}" FontWeight="SemiBold" />
                     <Run Text="{Binding WarningText}" />
                   </TextBlock>
@@ -64,45 +98,49 @@
               </Grid>
             </Border>
           </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </controls:CleanupPage.Body>
 
-      <Button HorizontalAlignment="Left" Classes="danger"
-              Content="{DynamicResource Text.Cleanup.Slim.Ui.Run}"
-              Command="{Binding RequestRunCommand}" IsEnabled="{Binding CanRequestRun}" />
+    <controls:CleanupPage.Footer>
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding SelectionText}" />
+        <Button Grid.Column="1" Classes="danger"
+                Content="{DynamicResource Text.Cleanup.Slim.Ui.Run}"
+                Command="{Binding RequestRunCommand}" IsEnabled="{Binding CanRequestRun}" />
+      </Grid>
+    </controls:CleanupPage.Footer>
 
-      <!--  確認 (警告・二段階確認・復元ポイントの方針)。処理中オーバーレイの前に出すため、実行前の確認はここで行う。  -->
-      <Border Padding="12,10" CornerRadius="10" IsVisible="{Binding IsConfirming}"
-              Background="#18FF3B30" BorderBrush="#66FF3B30" BorderThickness="1">
-        <StackPanel Spacing="8">
-          <TextBlock Text="{DynamicResource Text.Cleanup.Slim.Ui.Confirm.Title}" FontWeight="SemiBold" />
-          <TextBlock Text="{Binding ConfirmText}" TextWrapping="Wrap" />
-          <TextBlock Text="{Binding ConfirmWarnings}" TextWrapping="Wrap"
-                     IsVisible="{Binding ConfirmWarnings, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-          <TextBlock Text="{Binding RestorePointNote}" TextWrapping="Wrap"
-                     IsVisible="{Binding RestorePointNote, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-          <StackPanel Spacing="6" IsVisible="{Binding RequiresAcknowledgement}">
-            <TextBlock Text="{DynamicResource Text.Cleanup.Slim.Ui.Confirm.Irreversible.Title}" FontWeight="SemiBold" />
-            <TextBlock Text="{Binding IrreversibleText}" TextWrapping="Wrap" />
-            <CheckBox Content="{DynamicResource Text.Cleanup.Slim.Ui.Confirm.Irreversible.Check}"
-                      IsChecked="{Binding Acknowledged}" />
-          </StackPanel>
-          <WrapPanel Orientation="Horizontal">
-            <Button Classes="danger" Margin="0,0,8,0" Content="{DynamicResource Text.Button.Run}"
+    <!--  確認シート (警告・復元ポイントの方針・取り消せない操作への同意)。  -->
+    <controls:CleanupPage.Sheet>
+      <Border Classes="sheet">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="8" Margin="0,10,0,0" HorizontalAlignment="Right">
+            <Button Content="{DynamicResource Text.Cleanup.Registry.View.Cancel}" Command="{Binding CancelConfirmCommand}" />
+            <Button Classes="danger" Content="{DynamicResource Text.Button.Run}"
                     Command="{Binding ConfirmRunCommand}" IsEnabled="{Binding CanConfirm}" />
-            <Button Content="{DynamicResource Text.Button.Cancel}" Command="{Binding CancelConfirmCommand}" />
-          </WrapPanel>
-        </StackPanel>
+          </StackPanel>
+          <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="10">
+              <TextBlock Text="{DynamicResource Text.Cleanup.Slim.Ui.Confirm.Title}" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding ConfirmText}" TextWrapping="Wrap" />
+              <TextBlock Classes="warning" Text="{Binding ConfirmWarnings}" TextWrapping="Wrap"
+                         IsVisible="{Binding ConfirmWarnings, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+              <CheckBox Content="{DynamicResource Text.Cleanup.Slim.Ui.CreateRestorePoint}"
+                        IsChecked="{Binding CreateRestorePoint}" IsEnabled="{Binding !IsRunning}" />
+              <TextBlock Classes="caption" Text="{Binding RestorePointNote}" TextWrapping="Wrap"
+                         IsVisible="{Binding RestorePointNote, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+              <StackPanel Spacing="6" IsVisible="{Binding RequiresAcknowledgement}">
+                <TextBlock Classes="error" Text="{DynamicResource Text.Cleanup.Slim.Ui.Confirm.Irreversible.Title}"
+                           FontWeight="SemiBold" />
+                <TextBlock Text="{Binding IrreversibleText}" TextWrapping="Wrap" />
+                <CheckBox Content="{DynamicResource Text.Cleanup.Slim.Ui.Confirm.Irreversible.Check}"
+                          IsChecked="{Binding Acknowledged}" />
+              </StackPanel>
+            </StackPanel>
+          </ScrollViewer>
+        </DockPanel>
       </Border>
-
-      <!--  実行後: 全体の結果・復元ポイント・再起動の要否。  -->
-      <StackPanel Spacing="4" IsVisible="{Binding ResultSummary, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-        <TextBlock Text="{Binding ResultSummary}" FontWeight="SemiBold" TextWrapping="Wrap" />
-        <TextBlock Text="{Binding RestorePointResultText}" TextWrapping="Wrap"
-                   IsVisible="{Binding RestorePointResultText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-        <TextBlock Text="{Binding RebootText}" TextWrapping="Wrap" FontWeight="SemiBold"
-                   IsVisible="{Binding RebootText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-      </StackPanel>
-    </StackPanel>
-  </ScrollViewer>
+    </controls:CleanupPage.Sheet>
+  </controls:CleanupPage>
 </UserControl>

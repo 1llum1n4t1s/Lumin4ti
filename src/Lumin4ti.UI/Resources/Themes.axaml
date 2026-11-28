@@ -19,6 +19,20 @@
             <Color x:Key="Color.SidebarHover">#12000000</Color>
             <Color x:Key="Color.SidebarSelected">#20000000</Color>
 
+            <!-- 意味色 (危険・警告・成功)。警告は白地で読める濃い琥珀色にする -->
+            <Color x:Key="Color.Danger">#FFFF3B30</Color>
+            <Color x:Key="Color.DangerHover">#FFE6352B</Color>
+            <Color x:Key="Color.DangerSurface">#18FF3B30</Color>
+            <Color x:Key="Color.DangerBorder">#66FF3B30</Color>
+            <Color x:Key="Color.Warning">#FFB45309</Color>
+            <Color x:Key="Color.WarningSurface">#1AD97706</Color>
+            <Color x:Key="Color.WarningBorder">#66D97706</Color>
+            <Color x:Key="Color.Success">#FF1E7E34</Color>
+            <Color x:Key="Color.SuccessSurface">#1A34C759</Color>
+            <Color x:Key="Color.SuccessBorder">#6634C759</Color>
+            <!-- 確認シートの背面を覆う幕 -->
+            <Color x:Key="Color.Scrim">#40000000</Color>
+
             <!-- Fluent テーマ上書き -->
             <Color x:Key="SystemAccentColor">#FF007AFF</Color>
             <Color x:Key="SystemAccentColorDark1">#FF0066D6</Color>
@@ -44,6 +58,20 @@
             <Color x:Key="Color.Accent">#FF0A84FF</Color>
             <Color x:Key="Color.SidebarHover">#12FFFFFF</Color>
             <Color x:Key="Color.SidebarSelected">#20FFFFFF</Color>
+
+            <!-- 意味色 (危険・警告・成功) -->
+            <Color x:Key="Color.Danger">#FFFF3B30</Color>
+            <Color x:Key="Color.DangerHover">#FFE6352B</Color>
+            <Color x:Key="Color.DangerSurface">#26FF3B30</Color>
+            <Color x:Key="Color.DangerBorder">#66FF3B30</Color>
+            <Color x:Key="Color.Warning">#FFFFB020</Color>
+            <Color x:Key="Color.WarningSurface">#26FFB020</Color>
+            <Color x:Key="Color.WarningBorder">#66FFB020</Color>
+            <Color x:Key="Color.Success">#FF30D158</Color>
+            <Color x:Key="Color.SuccessSurface">#2630D158</Color>
+            <Color x:Key="Color.SuccessBorder">#6630D158</Color>
+            <!-- 確認シートの背面を覆う幕 -->
+            <Color x:Key="Color.Scrim">#99000000</Color>
 
             <!-- Fluent テーマ上書き -->
 
@@ -118,5 +146,16 @@
     <SolidColorBrush x:Key="Brush.SidebarHover" Color="{DynamicResource Color.SidebarHover}" />
     <SolidColorBrush x:Key="Brush.SidebarSelected" Color="{DynamicResource Color.SidebarSelected}" />
     <SolidColorBrush x:Key="Brush.Accent" Color="{DynamicResource Color.Accent}" />
+    <SolidColorBrush x:Key="Brush.Danger" Color="{DynamicResource Color.Danger}" />
+    <SolidColorBrush x:Key="Brush.DangerHover" Color="{DynamicResource Color.DangerHover}" />
+    <SolidColorBrush x:Key="Brush.DangerSurface" Color="{DynamicResource Color.DangerSurface}" />
+    <SolidColorBrush x:Key="Brush.DangerBorder" Color="{DynamicResource Color.DangerBorder}" />
+    <SolidColorBrush x:Key="Brush.Warning" Color="{DynamicResource Color.Warning}" />
+    <SolidColorBrush x:Key="Brush.WarningSurface" Color="{DynamicResource Color.WarningSurface}" />
+    <SolidColorBrush x:Key="Brush.WarningBorder" Color="{DynamicResource Color.WarningBorder}" />
+    <SolidColorBrush x:Key="Brush.Success" Color="{DynamicResource Color.Success}" />
+    <SolidColorBrush x:Key="Brush.SuccessSurface" Color="{DynamicResource Color.SuccessSurface}" />
+    <SolidColorBrush x:Key="Brush.SuccessBorder" Color="{DynamicResource Color.SuccessBorder}" />
+    <SolidColorBrush x:Key="Brush.Scrim" Color="{DynamicResource Color.Scrim}" />
 
 </ResourceDictionary>

@@ -74,13 +74,71 @@ internal sealed partial class RegistryRestoreViewModel : RegistryOperationViewMo
     [ObservableProperty]
     private string deleteConfirmText = string.Empty;
 
+    /// <summary>戻す前の確認の対象 (確認を開いている間だけ設定される)。</summary>
+    [ObservableProperty]
+    private RegistryBackupRowViewModel? pendingRestore;
+
+    [ObservableProperty]
+    private string restoreConfirmText = string.Empty;
+
     public bool IsConfirmingDelete => PendingDelete is not null;
+
+    public bool IsConfirmingRestore => PendingRestore is not null;
+
+    /// <summary>確認シートを開くか (削除の確認と戻す確認のどちらか。同時には開かない)。</summary>
+    public bool IsSheetOpen => IsConfirmingDelete || IsConfirmingRestore;
 
     public bool HasBackups => Backups.Count > 0;
 
+    public bool HasResult => ResultSummary.Length > 0;
+
+    /// <summary>完全な成功のときだけ成功色にする。</summary>
+    public bool IsResultSuccess => _lastResult?.Overall == RegistryOverallState.Success;
+
+    /// <summary>一部だけ戻せた・取消は警告色。</summary>
+    public bool IsResultWarning => _lastResult?.Overall is RegistryOverallState.Partial or RegistryOverallState.Canceled;
+
+    public bool IsResultError => _lastResult?.Overall == RegistryOverallState.Failed;
+
+    public bool IsStatusVisible => StatusText.Length > 0;
+
     public bool CanOperate => !IsRunning && !_clean.IsRunning && Coordinator.ActiveCount == 0;
 
-    partial void OnPendingDeleteChanged(RegistryBackupRowViewModel? value) => OnPropertyChanged(nameof(IsConfirmingDelete));
+    /// <summary><see cref="CanOperate"/> の変更を各行のボタンへも伝える (行が自分の ViewModel の値だけを見るため)。</summary>
+    protected override void OnPropertyChanged(System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        base.OnPropertyChanged(e);
+        if (e.PropertyName == nameof(CanOperate))
+        {
+            foreach (var row in Backups)
+            {
+                row.RefreshOperate();
+            }
+        }
+    }
+
+    partial void OnPendingDeleteChanged(RegistryBackupRowViewModel? value)
+    {
+        OnPropertyChanged(nameof(IsConfirmingDelete));
+        OnPropertyChanged(nameof(IsSheetOpen));
+    }
+
+    partial void OnPendingRestoreChanged(RegistryBackupRowViewModel? value)
+    {
+        OnPropertyChanged(nameof(IsConfirmingRestore));
+        OnPropertyChanged(nameof(IsSheetOpen));
+    }
+
+    partial void OnResultSummaryChanged(string value) => OnPropertyChanged(nameof(HasResult));
+
+    partial void OnStatusTextChanged(string value) => OnPropertyChanged(nameof(IsStatusVisible));
+
+    private void RefreshResultTone()
+    {
+        OnPropertyChanged(nameof(IsResultSuccess));
+        OnPropertyChanged(nameof(IsResultWarning));
+        OnPropertyChanged(nameof(IsResultError));
+    }
 
     /// <summary>一覧を引き直す (読み取りだけ)。取得に失敗しても何も削除・変更しない。</summary>
     [RelayCommand]
@@ -92,7 +150,7 @@ internal sealed partial class RegistryRestoreViewModel : RegistryOperationViewMo
             Backups.Clear();
             foreach (var summary in summaries.OrderByDescending(s => s.Id, StringComparer.Ordinal))
             {
-                Backups.Add(new RegistryBackupRowViewModel(summary));
+                Backups.Add(new RegistryBackupRowViewModel(summary, this));
             }
 
             SetStatus(() => CleanupText.GetCounted("Cleanup.Registry.Ui.Backup.Loaded", Backups.Count, Backups.Count));
@@ -106,6 +164,44 @@ internal sealed partial class RegistryRestoreViewModel : RegistryOperationViewMo
         OnPropertyChanged(nameof(HasBackups));
     }
 
+    /// <summary>[戻す…]: 確認シートを開くだけで、何も書き戻さない。実行中・他の確認が開いているときは受け付けない。</summary>
+    [RelayCommand]
+    private void RequestRestore(RegistryBackupRowViewModel? backup)
+    {
+        if (backup is null || !CanOperate || IsConfirmingDelete || IsConfirmingRestore)
+        {
+            return;
+        }
+
+        RestoreConfirmText = CleanupText.Get("Cleanup.Registry.Ui.Backup.RestoreConfirm", backup.CreatedText);
+        PendingRestore = backup;
+    }
+
+    [RelayCommand]
+    private void CancelRestore() => PendingRestore = null;
+
+    /// <summary>確認の[戻す]: 確認を閉じ、直ちに戻す既存の経路 (<see cref="RestoreAsync"/>) を 1 回だけ呼ぶ。</summary>
+    [RelayCommand]
+    private async Task ConfirmRestoreAsync()
+    {
+        if (PendingRestore is not { } backup || !CanOperate)
+        {
+            return;
+        }
+
+        PendingRestore = null;
+        await RestoreAsync(backup);
+    }
+
+    /// <summary>Esc で確認シートを閉じる (削除・戻すのどちらの確認でも)。</summary>
+    [RelayCommand]
+    private void CancelSheet()
+    {
+        PendingDelete = null;
+        PendingRestore = null;
+    }
+
+    /// <summary>直ちに戻す。確認を経る画面の操作は <see cref="ConfirmRestoreCommand"/> から呼ばれる。</summary>
     [RelayCommand]
     private async Task RestoreAsync(RegistryBackupRowViewModel? backup)
     {
@@ -115,6 +211,7 @@ internal sealed partial class RegistryRestoreViewModel : RegistryOperationViewMo
         }
 
         PendingDelete = null;
+        PendingRestore = null;
         ClearOutcome();
         var id = backup.Id;
         var (ended, result) = await RunLeasedAsync(
@@ -156,6 +253,7 @@ internal sealed partial class RegistryRestoreViewModel : RegistryOperationViewMo
             return;
         }
 
+        RefreshResultTone();
         int Count(RegistryItemState state) => result.Items.Count(item => item.State == state);
         ResultSummary = result.Items.Count == 0
             ? RegistryResultFormat.OverallText(result.Overall, 0, 0)
@@ -180,7 +278,7 @@ internal sealed partial class RegistryRestoreViewModel : RegistryOperationViewMo
     [RelayCommand]
     private void RequestDelete(RegistryBackupRowViewModel? backup)
     {
-        if (backup is null || !CanOperate)
+        if (backup is null || !CanOperate || IsConfirmingRestore)
         {
             return;
         }
@@ -230,6 +328,7 @@ internal sealed partial class RegistryRestoreViewModel : RegistryOperationViewMo
     private void ClearOutcome()
     {
         _lastResult = null;
+        RefreshResultTone();
         ResultSummary = string.Empty;
         ResultMoreText = string.Empty;
         ResultMessageText = string.Empty;
@@ -251,5 +350,9 @@ internal sealed partial class RegistryRestoreViewModel : RegistryOperationViewMo
 
         RefreshResultTexts();
         StatusText = _status();
+        if (PendingRestore is { } restore)
+        {
+            RestoreConfirmText = CleanupText.Get("Cleanup.Registry.Ui.Backup.RestoreConfirm", restore.CreatedText);
+        }
     }
 }

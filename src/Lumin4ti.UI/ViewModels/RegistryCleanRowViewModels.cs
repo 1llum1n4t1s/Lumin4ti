@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Lumin4ti.Core.Services.Windows.Cleanup.RegistryClean;
@@ -97,12 +99,66 @@ internal sealed class RegistryCleanRowViewModel : ObservableObject
     }
 }
 
+/// <summary>
+/// 範囲の追加・削除・差し替えを 1 回の通知で行うコレクション。数百行のカテゴリーの開閉でも、一覧の再構築を 1 回に抑える。
+/// </summary>
+internal sealed class RangeObservableCollection<T> : ObservableCollection<T>
+{
+    /// <summary>全体を差し替える (Reset を 1 回だけ通知する)。</summary>
+    internal void Replace(IEnumerable<T> items)
+    {
+        CheckReentrancy();
+        Items.Clear();
+        foreach (var item in items)
+        {
+            Items.Add(item);
+        }
+
+        RaiseChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+    }
+
+    internal void InsertRange(int index, IReadOnlyCollection<T> items)
+    {
+        if (items.Count == 0)
+        {
+            return;
+        }
+
+        CheckReentrancy();
+        var added = items.ToList();
+        ((List<T>)Items).InsertRange(index, added);
+        RaiseChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, added, index));
+    }
+
+    internal void RemoveRange(int index, int count)
+    {
+        if (count <= 0)
+        {
+            return;
+        }
+
+        CheckReentrancy();
+        var list = (List<T>)Items;
+        var removed = list.GetRange(index, count);
+        list.RemoveRange(index, count);
+        RaiseChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, removed, index));
+    }
+
+    private void RaiseChanged(NotifyCollectionChangedEventArgs args)
+    {
+        OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
+        OnPropertyChanged(new PropertyChangedEventArgs("Item[]"));
+        OnCollectionChanged(args);
+    }
+}
+
 /// <summary>カテゴリー 1 つ分の行の集まり。保持した件数と理由の要約は選択肢に出さず、文言だけ持つ。</summary>
 internal sealed class RegistryCleanGroupViewModel : ObservableObject
 {
     private const int MaxRetainedReasons = 3;
 
     private IReadOnlyList<RegistryRetainedEntry> _retained = [];
+    private bool _isExpanded = true;
 
     internal RegistryCleanGroupViewModel(RegistryCleanCategoryDefinition definition)
     {
@@ -110,6 +166,22 @@ internal sealed class RegistryCleanGroupViewModel : ObservableObject
     }
 
     internal RegistryCleanCategoryDefinition Definition { get; }
+
+    /// <summary>開閉が変わったときに、表示用の一覧を直してもらうための通知先 (削除側の ViewModel が設定する)。</summary>
+    internal Action<RegistryCleanGroupViewModel>? ExpandedChanged { get; set; }
+
+    /// <summary>項目行を一覧に出しているか。既定は開く。走査し直すたびに開いた状態へ戻る。</summary>
+    public bool IsExpanded
+    {
+        get => _isExpanded;
+        set
+        {
+            if (SetProperty(ref _isExpanded, value))
+            {
+                ExpandedChanged?.Invoke(this);
+            }
+        }
+    }
 
     public ObservableCollection<RegistryCleanRowViewModel> Rows { get; } = [];
 
@@ -151,6 +223,9 @@ internal sealed class RegistryCleanGroupViewModel : ObservableObject
 
     internal void Apply(IEnumerable<RegistryCleanRowViewModel> rows, IEnumerable<RegistryRetainedEntry> retained)
     {
+        // 通知を出さずに開いた状態へ戻す (呼び出し側が一覧全体を組み直す)。
+        _isExpanded = true;
+        OnPropertyChanged(nameof(IsExpanded));
         Rows.Clear();
         foreach (var row in rows)
         {
@@ -185,9 +260,19 @@ internal sealed class RegistryCleanGroupViewModel : ObservableObject
 }
 
 /// <summary>復元の一覧の 1 行 (バックアップ 1 件)。</summary>
-internal sealed class RegistryBackupRowViewModel(RegistryBackupSummary summary) : ObservableObject
+internal sealed class RegistryBackupRowViewModel(RegistryBackupSummary summary, RegistryRestoreViewModel? owner = null) : ObservableObject
 {
     internal RegistryBackupSummary Summary { get; } = summary;
+
+    /// <summary>表示用: 行のボタンのコマンド。画面側が親の画面を探さずに済むよう、行が持つ (行の引数は行自身を渡す)。</summary>
+    public System.Windows.Input.ICommand? RequestRestoreCommand => owner?.RequestRestoreCommand;
+
+    public System.Windows.Input.ICommand? RequestDeleteCommand => owner?.RequestDeleteCommand;
+
+    /// <summary>表示用: 行のボタンを操作できるか (親の画面の <c>CanOperate</c> と同じ)。</summary>
+    public bool CanOperate => owner?.CanOperate ?? false;
+
+    internal void RefreshOperate() => OnPropertyChanged(nameof(CanOperate));
 
     public string Id => Summary.Id;
 

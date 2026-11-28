@@ -141,10 +141,10 @@
     <!--  危険な操作用ボタン (Lhamiel には無いが同じ角丸・余白規則を継承)  -->
     <Style Selector="Button.danger">
       <Setter Property="Foreground" Value="White" />
-      <Setter Property="Background" Value="#FF3B30" />
+      <Setter Property="Background" Value="{DynamicResource Brush.Danger}" />
     </Style>
     <Style Selector="Button.danger:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="#E6352B" />
+      <Setter Property="Background" Value="{DynamicResource Brush.DangerHover}" />
     </Style>
 
     <!--  推奨・強調操作用ボタン (「おまかせ高速化設定」等、初心者に一番目立ってほしい操作)  -->
@@ -287,6 +287,9 @@
       <Setter Property="Padding" Value="16" />
       <Setter Property="Margin" Value="0,0,0,12" />
     </Style>
+
+    <!--  クリーンアップ画面の共通スタイル。後に宣言したスタイルが勝つため、上の caption / badge / card を .warning・.error・.compact で上書きできるよう必ず末尾に置く。  -->
+    <StyleInclude Source="/Styles/CleanupStyles.axaml" />
   </Application.Styles>
 
 </Application>

@@ -50,12 +50,14 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
     private RegistryScanResult? _scan;
     private Func<string> _status;
     private RegistryCleanRunResult? _lastResult;
+    private bool _statusIsPlaceholder = true;
+    private Func<string>? _userScopeNote;
 
     public RegistryCleanViewModel(IRegistryCleanBackend backend, MaintenanceOperationCoordinator coordinator)
         : base(coordinator)
     {
         _backend = backend;
-        Groups = [.. RegistryCleanCategories.All.Select(definition => new RegistryCleanGroupViewModel(definition))];
+        Groups = [.. RegistryCleanCategories.All.Select(definition => new RegistryCleanGroupViewModel(definition) { ExpandedChanged = OnGroupExpandedChanged })];
         _status = () => CleanupText.Get("Cleanup.Registry.Ui.NotScanned");
         statusText = _status();
         App.LocaleChanged += () => PostToUi(OnLocaleChanged);
@@ -75,6 +77,12 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
     internal ISlimRestorePointPrompt? RestorePointPrompt { get; set; }
 
     public ObservableCollection<RegistryCleanGroupViewModel> Groups { get; }
+
+    /// <summary>
+    /// 一覧に出す行。各カテゴリーの見出し (<see cref="RegistryCleanGroupViewModel"/>) と、開いているカテゴリーの項目行
+    /// (<see cref="RegistryCleanRowViewModel"/>) をカテゴリー順に並べる。走査前・再走査で結果を捨てたときは空。
+    /// </summary>
+    public RangeObservableCollection<object> DisplayItems { get; } = [];
 
     /// <summary>確認画面で承認を求める行 (確認を始めた時点の、承認が要るカテゴリーの選択行)。</summary>
     public ObservableCollection<RegistryCleanRowViewModel> ApprovalRows { get; } = [];
@@ -127,6 +135,37 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
 
     public bool HasScan => _scan is not null;
 
+    /// <summary>走査結果が無い (走査ボタンを強調する)。</summary>
+    public bool IsNotScanned => !HasScan;
+
+    /// <summary>実行バーの選択の要約 (言語切り替えで引き直す)。</summary>
+    public string SelectionText => CleanupText.GetCounted("Cleanup.Ui.SelectedCount", SelectedCount, SelectedCount);
+
+    public bool HasResult => ResultSummary.Length > 0;
+
+    /// <summary>完全な成功のときだけ成功色にする。</summary>
+    public bool IsResultSuccess => _lastResult?.Overall == RegistryOverallState.Success;
+
+    /// <summary>部分失敗・取消は警告色。</summary>
+    public bool IsResultWarning => _lastResult?.Overall is RegistryOverallState.Partial or RegistryOverallState.Canceled;
+
+    public bool IsResultError => _lastResult?.Overall == RegistryOverallState.Failed;
+
+    /// <summary>状態文を通知として出すか。初期の「まだ走査していません」は空状態が示すので出さず、再走査の警告帯が出ている間は帯に出す。</summary>
+    public bool IsStatusVisible => !_statusIsPlaceholder && StatusText.Length > 0 && !NeedsRescan;
+
+    /// <summary>再走査の警告帯の文。状態文が空 (実行後) のときは「走査結果が無い」旨を出す (実行後は帯を出さず <see cref="RescanAfterRunText"/> を結果カードに出す)。</summary>
+    public string RescanNoticeText => StatusText.Length > 0 ? StatusText : CleanupText.Get("Cleanup.Registry.Ui.NotScanned");
+
+    /// <summary>表示用: 再走査の警告帯を出すか。状態文 (失効・中止・失敗・復元後) があるときだけで、通常の実行後は結果カードの案内に任せる。</summary>
+    public bool ShowRescanBand => NeedsRescan && StatusText.Length > 0;
+
+    /// <summary>表示用: 空状態「まだ走査していません」を出すか。走査結果も結果カードも無いときだけ。</summary>
+    public bool ShowEmptyState => !HasScan && !HasResult;
+
+    /// <summary>表示用: 実行したため走査結果が使えなくなった旨 (結果カードの下に出す)。</summary>
+    public string RescanAfterRunText => CleanupText.Get("Cleanup.Ui.RescanAfterRun");
+
     public bool HasUserScopeNote => UserScopeNote.Length > 0;
 
     public int SelectedCount => Groups.Sum(group => group.SelectedCount);
@@ -169,6 +208,68 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
     partial void OnIsConfirmingChanged(bool value) => RefreshState();
 
     partial void OnUserScopeNoteChanged(string value) => OnPropertyChanged(nameof(HasUserScopeNote));
+
+    partial void OnResultSummaryChanged(string value)
+    {
+        OnPropertyChanged(nameof(HasResult));
+        OnPropertyChanged(nameof(ShowEmptyState));
+    }
+
+    partial void OnStatusTextChanged(string value)
+    {
+        OnPropertyChanged(nameof(IsStatusVisible));
+        OnPropertyChanged(nameof(RescanNoticeText));
+        OnPropertyChanged(nameof(ShowRescanBand));
+    }
+
+    partial void OnNeedsRescanChanged(bool value)
+    {
+        OnPropertyChanged(nameof(IsStatusVisible));
+        OnPropertyChanged(nameof(ShowRescanBand));
+    }
+
+    private void RefreshResultTone()
+    {
+        OnPropertyChanged(nameof(IsResultSuccess));
+        OnPropertyChanged(nameof(IsResultWarning));
+        OnPropertyChanged(nameof(IsResultError));
+    }
+
+    /// <summary>表示用の一覧を組み直す (走査結果の適用・破棄のとき)。開閉だけの変更は <see cref="OnGroupExpandedChanged"/> が差分で直す。</summary>
+    private void RebuildDisplayItems() =>
+        DisplayItems.Replace(_scan is null ? Enumerable.Empty<object>() : Groups.SelectMany(VisibleItems));
+
+    private static IEnumerable<object> VisibleItems(RegistryCleanGroupViewModel group)
+    {
+        yield return group;
+        if (!group.IsExpanded)
+        {
+            yield break;
+        }
+
+        foreach (var row in group.Rows)
+        {
+            yield return row;
+        }
+    }
+
+    private void OnGroupExpandedChanged(RegistryCleanGroupViewModel group)
+    {
+        var index = DisplayItems.IndexOf(group);
+        if (index < 0)
+        {
+            return;
+        }
+
+        if (group.IsExpanded)
+        {
+            DisplayItems.InsertRange(index + 1, group.Rows);
+        }
+        else
+        {
+            DisplayItems.RemoveRange(index + 1, group.Rows.Count);
+        }
+    }
 
     [RelayCommand]
     private async Task ScanAsync()
@@ -218,9 +319,11 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
             group.Apply(rows, scan.Retained.Where(entry => entry.Category == group.Definition.Category));
         }
 
-        UserScopeNote = scan.UserScope.Available ? string.Empty : CleanupText.Detail(scan.UserScope.ReasonMessage);
+        _userScopeNote = scan.UserScope.Available ? null : () => DescribeUserScope(scan.UserScope);
+        UserScopeNote = _userScopeNote?.Invoke() ?? string.Empty;
         var candidates = scan.Items.Count;
         SetStatus(() => CleanupText.Get("Cleanup.Registry.Ui.ScanDone", candidates, scan.Retained.Count));
+        RebuildDisplayItems();
     }
 
     /// <summary>「すべて選択」。含めないカテゴリー (アンインストール・共有 DLL) の行は触らない。</summary>
@@ -368,6 +471,7 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
             return;
         }
 
+        RefreshResultTone();
         var deleted = result.Items.Count(item => item.State == RegistryItemState.Deleted);
         ResultSummary = RegistryResultFormat.OverallText(result.Overall, deleted, result.Items.Count - deleted);
         var (lines, more) = RegistryResultFormat.Reasons(result.Items.Select(item => (item.State, item.Reason)));
@@ -428,18 +532,39 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
         RefreshState();
     }
 
+    /// <summary>
+    /// HKCU を走査できなかった注記。Core の符号の引数は列挙値の名前 (DifferentUser など) なので、そのまま出さず、
+    /// 既存の理由の文言 (Cleanup.Reason.UserScope*) に置き換える。
+    /// </summary>
+    private static string DescribeUserScope(RegistryUserScopeStatus scope)
+    {
+        var reasonKey = scope.Reason switch
+        {
+            InteractiveScopeReason.DifferentUser => "Cleanup.Reason.UserScopeDifferentUser",
+            InteractiveScopeReason.UserUnknown => "Cleanup.Reason.UserScopeUnknown",
+            _ => null,
+        };
+        return reasonKey is null
+            ? CleanupText.Detail(scope.ReasonMessage)
+            : CleanupText.Get("Cleanup.Msg.RegistryScanUserScopeUnavailable", CleanupText.Get(reasonKey));
+    }
+
     private void ClearScan()
     {
         _scan = null;
+        _userScopeNote = null;
         UserScopeNote = string.Empty;
         foreach (var group in Groups)
         {
             group.Clear();
         }
+
+        RebuildDisplayItems();
     }
 
     private void SetStatus(Func<string> text)
     {
+        _statusIsPlaceholder = false;
         _status = text;
         StatusText = text();
     }
@@ -458,6 +583,14 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
         }
 
         StatusText = _status();
+        if (_userScopeNote is { } userScopeNote)
+        {
+            UserScopeNote = userScopeNote();
+        }
+
+        OnPropertyChanged(nameof(RescanNoticeText));
+        OnPropertyChanged(nameof(RescanAfterRunText));
+        OnPropertyChanged(nameof(SelectionText));
         OnPropertyChanged(nameof(PurposeText));
         OnPropertyChanged(nameof(ScanButtonText));
     }
@@ -468,6 +601,7 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
     private void ClearOutcome()
     {
         _lastResult = null;
+        RefreshResultTone();
         ResultSummary = string.Empty;
         ResultMoreText = string.Empty;
         ResultMessageText = string.Empty;
@@ -485,6 +619,7 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
         }
 
         OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(SelectionText));
         OnPropertyChanged(nameof(CanRequestRun));
         OnPropertyChanged(nameof(CanConfirm));
         OnPropertyChanged(nameof(IsApprovalComplete));
@@ -502,6 +637,9 @@ internal sealed partial class RegistryCleanViewModel : RegistryOperationViewMode
         }
 
         OnPropertyChanged(nameof(SelectedCount));
+        OnPropertyChanged(nameof(SelectionText));
+        OnPropertyChanged(nameof(IsNotScanned));
+        OnPropertyChanged(nameof(ShowEmptyState));
         RefreshRunKind();
         OnPropertyChanged(nameof(CanScan));
         OnPropertyChanged(nameof(CanRequestRun));

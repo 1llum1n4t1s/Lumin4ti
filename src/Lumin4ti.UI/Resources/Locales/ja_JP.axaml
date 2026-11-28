@@ -109,7 +109,6 @@
   <x:String x:Key="Text.Cleanup.Registry.View.NoCandidates" xml:space="preserve">候補はありません。</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.ValueName" xml:space="preserve">値名:</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Approval.Title" xml:space="preserve">次の項目は個別の承認が必要です。内容を確認し、削除してよい項目にチェックしてください。</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.View.Backups.Title" xml:space="preserve">バックアップと復元</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Refresh" xml:space="preserve">一覧を更新</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Empty" xml:space="preserve">バックアップはありません。</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.Restore" xml:space="preserve">復元</x:String>
@@ -117,7 +116,6 @@
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteConfirm.Title" xml:space="preserve">バックアップを削除しますか</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Backups.DeleteRun" xml:space="preserve">削除</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Confirm.Title" xml:space="preserve">レジストリの削除の確認</x:String>
-  <x:String x:Key="Text.Cleanup.Registry.View.CancelRun" xml:space="preserve">削除を中断</x:String>
   <x:String x:Key="Text.Cleanup.Registry.View.Cancel" xml:space="preserve">キャンセル</x:String>
 
   <!-- 共通の操作・列見出し -->
@@ -225,5 +223,16 @@
   <x:String x:Key="Text.Cleanup.Settings.Rules.Description" xml:space="preserve">通常のクリーンアップで、おすすめに従う既定の選択を項目ごとに上書きします。</x:String>
   <x:String x:Key="Text.Cleanup.Settings.Rules.Reset" xml:space="preserve">既定に戻す</x:String>
   <x:String x:Key="Text.Cleanup.Settings.Totals" xml:space="preserve">実績</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.SelectMenu" xml:space="preserve">選択</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.MoreActions" xml:space="preserve">その他の操作</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.RowActions" xml:space="preserve">この項目の操作</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.NotScanned.Title" xml:space="preserve">まだ走査していません</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.NotScanned.Body" xml:space="preserve">走査だけでは何も削除されません</x:String>
+  <x:String x:Key="Text.Cleanup.Ui.Sort" xml:space="preserve">並べ替え</x:String>
+  <x:String x:Key="Text.Cleanup.Advanced.ScanScope" xml:space="preserve">走査する場所と条件</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Section.Clean" xml:space="preserve">不要な登録を削除</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Section.Backups" xml:space="preserve">バックアップから戻す</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.RestoreConfirm.Title" xml:space="preserve">このバックアップから戻しますか？</x:String>
+  <x:String x:Key="Text.Cleanup.Registry.View.Backups.RestoreRun" xml:space="preserve">戻す</x:String>
   <!-- ===== /Cleanup ===== -->
 </ResourceDictionary>

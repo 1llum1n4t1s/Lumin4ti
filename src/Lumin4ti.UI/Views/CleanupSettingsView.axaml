@@ -2,38 +2,30 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Lumin4ti.UI.ViewModels"
              xmlns:views="using:Lumin4ti.UI.Views"
+             xmlns:controls="using:Lumin4ti.UI.Controls"
              x:Class="Lumin4ti.UI.Views.CleanupSettingsView"
              x:DataType="vm:CleanupSettingsViewModel">
 
-  <UserControl.Styles>
-    <Style Selector="Border.card">
-      <Setter Property="Background" Value="{DynamicResource Brush.Container}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
-      <Setter Property="BorderThickness" Value="1" />
-      <Setter Property="CornerRadius" Value="10" />
-      <Setter Property="Padding" Value="14,10" />
-      <Setter Property="Margin" Value="0,0,0,8" />
-    </Style>
-  </UserControl.Styles>
+  <controls:CleanupPage AutomationProperties.Name="{DynamicResource Text.Cleanup.Settings.Title}">
 
-  <ScrollViewer VerticalScrollBarVisibility="Auto">
-    <StackPanel Margin="8,0" Spacing="4">
-      <TextBlock Classes="h1" Text="{DynamicResource Text.Cleanup.Settings.Title}" />
-
-      <!--  操作の実行中は変更できない。保存の結果・保存抑止はここに常に表示する。  -->
-      <TextBlock Classes="caption" TextWrapping="Wrap" Foreground="#FF9500"
+  <!--  操作の実行中は変更できない。保存の結果・保存抑止はここに常に表示する。  -->
+  <controls:CleanupPage.Notices>
+    <StackPanel Spacing="8">
+      <TextBlock Classes="caption warning" TextWrapping="Wrap"
                  Text="{DynamicResource Text.Status.Busy}" IsVisible="{Binding IsBusy}" />
-      <TextBlock TextWrapping="Wrap" Foreground="#FF3B30" Text="{Binding SaveSuppressedText}"
-                 IsVisible="{Binding IsSaveSuppressed}" />
-      <TextBlock TextWrapping="Wrap" Classes="caption" Text="{Binding StatusText}"
+      <Border Classes="notice error" IsVisible="{Binding IsSaveSuppressed}">
+        <TextBlock Classes="error" TextWrapping="Wrap" Text="{Binding SaveSuppressedText}" />
+      </Border>
+      <TextBlock TextWrapping="Wrap" Classes="caption"
+                 Text="{Binding StatusText}"
                  Classes.error="{Binding IsStatusError}"
-                 IsVisible="{Binding StatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-        <TextBlock.Styles>
-          <Style Selector="TextBlock.error">
-            <Setter Property="Foreground" Value="#FF3B30" />
-          </Style>
-        </TextBlock.Styles>
-      </TextBlock>
+                 IsVisible="{Binding StatusText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+    </StackPanel>
+  </controls:CleanupPage.Notices>
+
+  <controls:CleanupPage.Body>
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel Spacing="4">
 
       <StackPanel Spacing="4" IsEnabled="{Binding IsEditable}">
 
@@ -44,7 +36,7 @@
         <ItemsControl ItemsSource="{Binding ExclusionGroups}">
           <ItemsControl.ItemTemplate>
             <DataTemplate x:DataType="vm:CleanupSettingsExclusionGroupViewModel">
-              <Border Classes="card">
+              <Border Classes="card compact">
                 <StackPanel Spacing="6">
                   <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
                   <ItemsControl ItemsSource="{Binding Entries}">
@@ -78,7 +70,7 @@
 
         <!--  削除の方法  -->
         <TextBlock FontWeight="SemiBold" Margin="0,12,0,0" Text="{DynamicResource Text.Cleanup.Settings.Options}" />
-        <Border Classes="card">
+        <Border Classes="card compact">
           <StackPanel Spacing="6">
             <CheckBox IsChecked="{Binding SecureDelete}" Content="{DynamicResource Text.Cleanup.Settings.SecureDelete}" />
             <TextBlock Classes="caption" TextWrapping="Wrap"
@@ -94,7 +86,7 @@
         <TextBlock FontWeight="SemiBold" Margin="0,12,0,0" Text="{DynamicResource Text.Cleanup.Settings.CustomFolders}" />
         <TextBlock Classes="caption" TextWrapping="Wrap"
                    Text="{DynamicResource Text.Cleanup.Settings.CustomFolders.Description}" />
-        <Border Classes="card">
+        <Border Classes="card compact">
           <StackPanel Spacing="6">
             <ItemsControl ItemsSource="{Binding CustomFolders}">
               <ItemsControl.ItemTemplate>
@@ -103,7 +95,7 @@
                     <StackPanel>
                       <SelectableTextBlock Text="{Binding Value}" TextWrapping="Wrap"
                                            FontFamily="Cascadia Mono, Consolas, monospace" FontSize="12" />
-                      <TextBlock Text="{Binding Rejection}" Foreground="#FF3B30" FontSize="12" TextWrapping="Wrap"
+                      <TextBlock Classes="error" Text="{Binding Rejection}" FontSize="12" TextWrapping="Wrap"
                                  IsVisible="{Binding IsRejected}" />
                     </StackPanel>
                     <Button Grid.Column="1" Content="{DynamicResource Text.Cleanup.Exclusion.Remove}"
@@ -127,7 +119,7 @@
         <TextBlock FontWeight="SemiBold" Margin="0,12,0,0" Text="{DynamicResource Text.Cleanup.Settings.Patterns}" />
         <TextBlock Classes="caption" TextWrapping="Wrap"
                    Text="{DynamicResource Text.Cleanup.Settings.Patterns.Description}" />
-        <Border Classes="card">
+        <Border Classes="card compact">
           <StackPanel Spacing="6">
             <ItemsControl ItemsSource="{Binding Patterns}">
               <ItemsControl.ItemTemplate>
@@ -159,7 +151,7 @@
         <TextBlock FontWeight="SemiBold" Margin="0,12,0,0" Text="{DynamicResource Text.Cleanup.Settings.Rules}" />
         <TextBlock Classes="caption" TextWrapping="Wrap"
                    Text="{DynamicResource Text.Cleanup.Settings.Rules.Description}" />
-        <Border Classes="card">
+        <Border Classes="card compact">
           <StackPanel Spacing="6">
             <ItemsControl ItemsSource="{Binding Rules}">
               <ItemsControl.ItemTemplate>
@@ -188,4 +180,6 @@
                  IsVisible="{Binding LastRunText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
     </StackPanel>
   </ScrollViewer>
+  </controls:CleanupPage.Body>
+  </controls:CleanupPage>
 </UserControl>
