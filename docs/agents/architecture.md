@@ -24,4 +24,4 @@
 
 ## クリーンアップは専用の流れ
 
-左の「クリーンアップ」タブは `CleanupView` で、内側に 通常／高度／スリム化／設定／その他 の 5 タブを持つ。「その他」だけが `CommandCategoryView` で、上の 4 型のカードを表示する。通常・高度・スリム化は規則データ・拡張子パターン・固定項目表を走査して選ぶ専用フローで、`MaintenanceActionCatalog` の単一項目モデルへ載せない。`MainWindowViewModel` は `CommandItemViewModel` 固定にせず `IProcessingOperation` を見る。走査・削除は起動時や再アクティブ時に自動で走らせない。規則データの契約は [cleanup-rules-and-deletion.md](cleanup-rules-and-deletion.md) を参照する。
+左の「クリーンアップ」タブは `CleanupView` で、内側に 通常／高度／スリム化／レジストリ／設定／その他 の 6 タブを持つ。通常・高度・スリム化・レジストリ・設定の各画面は共通の入れ物 `CleanupPage`（`Controls/CleanupPage.cs`）に載せる（型は [cleanup-design.md](../design/cleanup-design.md#共通の画面の型)）。「その他」だけが `CommandCategoryView` で、上の 4 型のカードを表示する。通常・高度・スリム化は規則データ・拡張子パターン・固定項目表を走査して選ぶ専用フローで、`MaintenanceActionCatalog` の単一項目モデルへ載せない。`MainWindowViewModel` は `CommandItemViewModel` 固定にせず `IProcessingOperation` を見る。走査・削除は起動時や再アクティブ時に自動で走らせない。規則データの契約は [cleanup-rules-and-deletion.md](cleanup-rules-and-deletion.md) を参照する。

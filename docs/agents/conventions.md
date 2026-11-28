@@ -33,6 +33,12 @@
 - `App.SetLocale()` が辞書を差し替え、`App.LocaleChanged` を購読する VM プロパティが再評価される。既定言語は `App.DetectDefaultLocale()` が OS ロケールから判定、選択は settings.json の `Locale` に保存。
 - アクションの実行結果ログ行 (`  - ...しました`) は技術的詳細なので日本語のまま。
 
+## クリーンアップの画面
+
+- 色を直書きせず、`Themes.axaml` の `Brush.*`（`Brush.Danger*`・`Brush.Warning*`・`Brush.Success*` など）と `CleanupStyles.axaml` のクラス（`notice`・`result`・`warning`・`error`・`success` など）を使う。
+- 新しい画面・タブは共通の入れ物 `CleanupPage` に載せる（型は [cleanup-design.md](../design/cleanup-design.md#共通の画面の型)）。確認は確認シートで出し、確認を経ずに実行へ届く経路（既定ボタンなど）を作らない。
+- スタイルは後に宣言したものが勝つため、`CleanupStyles.axaml` の読み込みは `App.axaml` の `Application.Styles` の末尾に置く。
+
 ## コードレビュー時の注意点 (このコードベース特有)
 
 トグルの操作可否、状態表示と診断、部分失敗、NTP・MMAgent、配布契約テストの注意点は [code-review-pitfalls.md](code-review-pitfalls.md) にある。該当箇所の変更時とコードレビュー前に必ず読む。

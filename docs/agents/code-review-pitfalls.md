@@ -8,4 +8,6 @@
 - 部分失敗を成功と偽らない: マルチステップ (powercfg 等) は重要ステップの失敗で `Fail` を返す。使用中ファイルのスキップのように「想定内の一部未処理」は `Partial` と結果行で伝える。
 - NTP と MMAgent の変更では [DESIGN.md の設定変更の範囲](../design/configuration.md#設定変更の範囲) を維持する。同期モードの強制変更や `EnablePrefetcher` 全体の旧バックアップ復元を再導入しない。
 - MMAgent の一括再読込・切替時は [DESIGN.md](../design/configuration.md#設定変更の範囲) のキャッシュ更新と並行照会の集約を維持し、取得失敗や不正 JSON の診断を共有照会境界で記録する。外部コマンドの診断には `CommandFailureDiagnostic` を使い、秘密値・制御文字・出力量を制限する。
+- クリーンアップのスタイルの宣言順: `caption`・`badge`・`card` など基底のスタイルより後に `.warning`・`.error`・`.compact` を宣言しないと、警告色が基底の色に打ち消されて見えなくなる。`App.axaml` の `CleanupStyles.axaml` は `Application.Styles` の末尾から動かさず、色の変更は実画面（プレビューの書き出し）で確かめる。
+- 検証用プレビューから実データへ届く経路: `--preview-state-diagnostics` のクリーンアップ画面は偽データだけで動かし、実ファイル・実レジストリ・復元ポイント・サービスへ届かせない。高度の削除は `%TEMP%\lumin4ti-preview-*` の合成フォルダーの中に閉じ込め、カスタムフォルダーの外のパスは設定の読み取り時に除く。偽でない実装を差し込んだり、読み取り時の除外を外したりしていないか、`LUMIN4TI_PREVIEW_SELFCHECK=1` で確かめる。
 - 配布契約は [DistributionContractTests](../../src/Lumin4ti.Tests/DistributionContractTests.cs) が横断で固定している。`Lumin4ti.UI.csproj` / `scripts/release-local.ps1` / `scripts/set-msi-program-files-location.ps1` / `README.md` / `AppSettings.cs` を編集すると、意図せずここで落ちることがある。落ちたら文字列だけ直さず、配布方式を変えていないかを先に確認する。

@@ -4,7 +4,7 @@
 
 ## 復元
 
-lease 内で走査結果を失効させて行う。版・SID・パスの許可表（各カテゴリーの根の配下）・件数とサイズの上限を検証し、違反と HKCU の SID 不一致は拒否する。対象が無ければ書き戻して `Restored`、同値なら `AlreadyPresent`、別の値なら上書きせず `Conflict`（全体 `Partial`）。
+画面の操作は、確認シート（`RequestRestoreCommand` → `ConfirmRestoreCommand`）を 1 回経てから戻す。`RestoreCommand` は確認なしで直ちに戻すため、画面の操作から直接呼ばない。戻す処理は、lease 内で走査結果を失効させて行う。版・SID・パスの許可表（各カテゴリーの根の配下）・件数とサイズの上限を検証し、違反と HKCU の SID 不一致は拒否する。対象が無ければ書き戻して `Restored`、同値なら `AlreadyPresent`、別の値なら上書きせず `Conflict`（全体 `Partial`）。
 
 ## テスト
 
